@@ -1,0 +1,150 @@
+The Solarian Society
+Founders’ Guide
+This document is not the founding essay. The founding essay is addressed to the public. This document is addressed to the people building the Society — current and future. Its purpose is to establish, precisely and honestly, what the Society is, how it works, and what it asks of those who carry it.
+I. Name & Etymology
+The Society is named Solarian.
+The word derives from Sol — Latin for Sun, the star at the centre of our solar system. In speculative literature and futurist writing, Solarian has appeared as a collective descriptor for humanity as inhabitants of the solar system, rather than as citizens of any particular nation, practitioners of any particular discipline, or members of any particular institution.
+The choice of this name is not decorative. It makes an argument before anything else about the Society is said. The argument is this: the primary shared identity of the Society’s members is not their nationality, their profession, or their field of study. It is their address. They live in the same solar system. They share the same star. Everything else — where they were born, what they studied, what they do for work — is secondary to that fact when they are in this community.
+The full name is the Solarian Society. “Society” is chosen deliberately over club, association, organisation, or collective. A society has breadth and continuity. It contains multitudes. It is not defined by its activities but by its members and what they hold in common.
+The Society’s motto is ultra hic et nunc — Latin for beyond here and now. It names the disposition from which the Society is built: not content with the present location or the present moment, but always facing what lies further.
+II. Origin & Context
+The Solarian Society was founded in Kampala, Uganda, in 2026.
+Uganda has an active and growing space community. The Uganda Astronomical Society has several hundred members. Ugandan individuals hold affiliations with the East African Astronomical Society, the African Astronomical Society, and the Space Generation Advisory Council. Private and institutional actors engage with the sector across various contexts. The community is real.
+What was missing was not activity. What was missing was a single open commons for the full breadth of people who care about space — not only those who fit within existing organisations, not only those who hold relevant credentials, not only those who are already affiliated. A commons open to everyone: the astronomer, the engineer, the writer, the dreamer, the student who is not sure yet what they want to do but knows that space is where they want to be — regardless of what else they belong to.
+The Solarian Society exists to fill that gap. It does not replace what exists. It adds something that was not there: an open layer, shared by everyone who cares about space, sitting beneath all existing affiliations and welcoming alongside them.
+Within the regional context: East Africa has growing space engagement. Kenya has a space agency. Ethiopia has developing capabilities. The African Union has adopted a continental space policy. The Society is aware of this context and positions itself as part of it — a civic complement to the institutional development, a community layer beneath the formal sector, cultivating the people who will eventually enter, influence, and shape it.
+III. Purpose
+The Solarian Society is an open platform for space industry enthusiasts. Each word in that description is chosen with precision.
+Open platform
+Not a closed organisation, not a members-only club. Anyone with genuine interest in the space sector is welcome, regardless of credentials, career stage, or other affiliations. The Society is a commons — an open layer that sits alongside whatever else its members belong to. It does not compete with existing organisations. It complements them by existing where they do not.
+Space industry
+Not space science, not astronomy, not spaceflight exclusively. The space industry encompasses the full commercial, technical, policy, cultural, and human endeavour of humanity’s presence and activities in space. It is broader than science and broader than engineering. It includes communications, navigation, earth observation, launch services, space medicine, space law, space architecture, space tourism, science communication, policy advocacy, and the cultural production — fiction, art, philosophy — that gives meaning to all of the above.
+Enthusiasts
+Not professionals, not experts, not students only. Enthusiasts are people whose curiosity about a subject exceeds what their formal role requires of them. Enthusiasm is not a lesser form of engagement than expertise. It is the energy from which expertise eventually grows, and the culture from which practitioners emerge. The Dreamer — the person who wants, above almost anything, to see the Earth from outside it — is not the least important member of this community. They are, in many ways, its most essential one.
+What the Society is not
+Not an astronomy club. Not a professionals’ collective. Not an advocacy organisation. Not a startup, a company, or a programme. The Society builds the human infrastructure — the community, the culture, the connections — from which those things might eventually emerge.
+IV. Philosophy
+Six ideas govern everything the Society does. They are not aspirations. They are design constraints.
+Direction, not destination.
+The Society does not know where its members will end up. It faces a direction — outward, toward what is not yet — and invites anyone facing the same direction to join it. Ultra hic et nunc: beyond here and now. This is the Society’s disposition, not its destination.
+Curiosity as the entry point.
+Not expertise, not credentials, not professional relevance. The space-sector curiosity that asks: how would a lunar habitat sustain life for years? What does international law say about mining an asteroid? What would it change about biology if microbial life were confirmed on Enceladus? These questions belong to anyone curious enough to ask them.
+The Society is soil, not centre.
+Most organisations sit at the top of their own structure, defining what members do and directing their energy. The Society sits beneath. It provides what growth requires — community, knowledge, visibility, memory — without directing what grows. When the Society is working well, it is invisible. What is visible is the activity of its members.
+Advice and accountability are inseparable.
+When the Society convenes trusted members to reach a decision, those same members become responsible for seeing it realised. The Society does not maintain an advisory class that counsels without consequence.
+The commons belongs to everyone; the community belongs to members.
+The Society’s public knowledge resources are public goods. Anyone can access them. The Society’s internal life belongs to members. The distinction is not about secrecy — it is about the difference between a public commons and a private community.
+The archive is governance.
+Every decision, mandate, deliberation, and change is recorded. The record is the primary mechanism of institutional accountability. A Society that does not remember what it has decided cannot be held responsible for those decisions.
+The Society is not united by a destination.
+It is united by a direction.
+Ultra hic et nunc.
+V. Governance
+This section condenses the full governance document. When the two conflict, the governance document takes precedence.
+Three layers
+Members participate freely — proposing, initiating, contributing, building. Membership is open to anyone with genuine interest in the space sector. Members have no governance authority by default, but they have the right to be heard and the freedom to act.
+Stewards are members recognised by the Society as trusted authorities in one or more domains. When a matter arises touching their domain, they are convened, they deliberate, they decide, and they carry responsibility for the outcome. Stewardship is not a seat. It is a recognition, a convening, and an accountability.
+Trustees hold the institutional body of the Society — legal registration, financial accounts, founding documents. They do not govern operations. They do not originate decisions. They activate exclusively in protection of the institution.
+Stewardship
+Administrative stewardships are standing — Policy, Commons, Projects, Communications. Representational stewardships are time-bound — a conference delegation, a project mandate, a specific task — and expire when their purpose is concluded.
+Stewardship is not positional authority. A steward is trusted to know, to advise, and to execute. The mandate that emerges from deliberation is theirs to carry. Multiple stewardships may hold mandate over the same domain — shared mandate requires them to work together, not in silos.
+Domains emerge through three mechanisms: a steward creates one deliberately; a classification engine suggests one based on recurring activity; or members tag one into existence through consistent use of the hash convention (#domain-name). The taxonomy is maintained by Commons and Governance stewardships.
+Decisions are made through an audited weighted vote, inheriting principles from the PAAS framework. Technical specification maintained in a separate operational document.
+Trusteeship
+The founding members are the initial trustees. New trustees are affirmed by governance stewardships and accepted by current trustees. Trustees ultimately govern their own composition.
+This is the acknowledged tension at the centre of the model. A trustee body acting in bad faith cannot be removed by ordinary process. The character of the trustees is the foundation on which everything else rests.
+When a new stewardship touches Governance, Vision, Identity, or Constitutional domains, it enters a seven-day trustee review window. Trustees may raise concerns; this is not approval, it is the right to be heard.
+Founding stewardships
+Trustees establish the first stewardships at founding, covering at minimum: Governance, Commons & Knowledge, Member Relations, and Communications. All subsequent stewardships are proposed by existing stewards and affirmed by governance stewardships.
+VI. The Emblem
+The Society’s emblem is a modified form of the Voyager Golden Record pulsar map, anchored to a date that belongs to the whole species: 2 November 2000.
+That morning, Expedition 1 — Commander William Shepherd and cosmonauts Yuri Gidzenko and Sergei Krikalev — docked at the International Space Station, beginning the first permanent human occupation of a structure beyond Earth. Since that day, not one has passed without humans living in space. The chain has not broken.
+The emblem marks that moment. Not the Society’s founding date — a date belonging to the founders — but the date that belongs to the species: the first morning humanity chose not to come home.
+The reference
+The Voyager Golden Record pulsar map was designed by Carl Sagan and Frank Drake and attached to Voyager 1 and 2 in 1977. It depicts 14 pulsars radiating from a central point — our Sun — with binary notation indicating each pulsar’s frequency. Its purpose: to locate our Sun for any intelligence that might recover the spacecraft.
+Where the Voyager map says here is where we are relative to the universe, the Society’s emblem says here is what we are part of, on the morning we stopped leaving.
+The map
+The emblem replaces the 14 pulsars with 14 objects: the 8 planets, 5 IAU-recognised dwarf planets (Ceres, Pluto, Haumea, Makemake, Eris), and Voyager 1 itself.
+Voyager 1 is the 14th line. It is the only human-made object on the map. Its line is the only one that crosses the heliopause ring — the boundary of the solar system — and extends beyond. It is the only line on the map still moving, with no destination and no plan to return.
+The emblem was modelled on the pulsar map carried aboard Voyager. Voyager itself now appears on it. The reference and its subject are the same object.
+Technical specifics
+Anchor date: 2 November 2000 — first day of continuous human presence in space
+Positions: Heliocentric ecliptic longitudes from DE430 ephemeris (planets); approximate orbital elements (dwarf planets); approximate trajectory for Voyager 1 at ~77 AU, ~259° ecliptic longitude
+Radii: Log??(AU) compressed, mapping [0.31 AU, 77 AU] to display radius [14, 102]
+Notation: Light travel time in minutes (hours for distant bodies) from Sol on 2 November 2000
+Rings: Asteroid belt (two dashed rings bracketing Ceres) and heliopause outer ring
+Markers: Natural bodies: solid dots. Voyager 1: open circle — the only hollow marker on the map
+Notable alignments on 2 November 2000
+Earth, Mercury, Saturn, and Jupiter fell within 25° of each other. On the day the first crew arrived at the ISS, Earth and three other major bodies clustered on the same side of Sol. Mars and Ceres were within 2.5°. Venus, Neptune, and Uranus within 15°. Haumea and Eris within 5.5°.
+None of this was designed. It is what the solar system looked like on the morning humanity chose to stay.
+The circular wordmark
+The mark is enclosed in a circular wordmark. SOLARIAN arcs across the top — heavy weight, primary, the identity. ULTRA HIC ET NUNC arcs across the bottom — lighter weight, smaller, the disposition. Two small diamond marks at 3 o’clock and 9 o’clock separate the two arcs.
+Ultra hic et nunc is Latin for beyond here and now. It is the Society’s motto. It names what the map shows: not a destination, but a direction. Outward, past where we are, past this moment, toward what is not yet.
+VII. Visual Identity
+Palette
+Background: #F8F9FB — warm near-white
+Surface: #FFFFFF — cards and content areas
+Primary text: #0E1E34 — deep navy
+Gold accent: #C8880A — solar gold. The Society’s signature colour.
+Blue: #1A5296 — measured, for links and representational elements
+Muted: #526070
+Border: #DDE3EC
+The gold is used with restraint. Its impact depends on not being everywhere. It appears in the Sol mark, section labels, the horizon rule, and primary calls to action. Dark navy backgrounds are reserved for high-contrast moments, not the default register.
+Typography
+Display: Playfair Display — headings, Society name, pull quotes, founding essay, circular wordmark
+Body & UI: Inter — navigation, body text, labels, metadata
+The contrast between the two typefaces carries the Society’s dual nature — literary and precise, philosophical and functional.
+The horizon rule
+A thin gold horizontal line (2px, 35% opacity) appears beneath the navigation bar on every page. This is the emblem’s Sol motif applied to the page structure — a single warm line, like a horizon at sunrise. It is not optional.
+Mark usage
+The mark scales honestly — at 14px it reads as a dense geometric form; at 300px the individual bodies, light-time notation, Voyager line, and ring structures are legible. The density at small sizes is a feature, not a limitation. The circular wordmark (SOLARIAN / ULTRA HIC ET NUNC) is used at emblem sizes of 120px and above. Below that, the mark stands alone.
+What the identity avoids
+Dark backgrounds as default. Cyan, teal, or purple accents. Rocket or planet emoji. Stock space photography. Excessive animation or visual complexity. Any aesthetic that reads as generic “tech startup” or generic “space club.”
+VIII. Voice & Language
+The Society speaks with precision, warmth, and direction. It addresses people as intelligent adults who have found something worth caring about — not as potential members who need to be convinced.
+Key terms and what they signal
+Curiosity: Not passion, not enthusiasm. Curiosity implies a question that demands pursuit. It is active.
+Champion: Not build, not achieve. The Society champions Uganda’s participation in the space sector. It does not promise to deliver it.
+Steward: Not officer, not executive. Steward implies custodianship of something that belongs to others.
+Commons: Not resources, not content. Commons implies shared ownership and open access.
+Platform: Not organisation, not club. Platform implies open infrastructure that others build on.
+Direction: Not destination. The Society points outward without naming where outward leads.
+Ultra hic et nunc: The Society’s motto. Latin for beyond here and now. Used sparingly — it is a disposition, not a slogan. It appears in the circular wordmark, in the founding essay’s closing, and in contexts where the Society’s fundamental orientation needs to be named.
+What the Society does not say
+“We are building a community.” — The Society is a community. It does not need to build one.
+“We will change Uganda’s space sector.” — Too definitive. The Society creates conditions.
+“Join us in our mission.” — Mission implies a target the Society does not have.
+The founding essay is the primary voice reference. New public writing should be able to sit beside it without jarring.
+IX. Ecosystem
+The Solarian Society is one of several organisations engaging with space and astronomy in Uganda, East Africa, and the continent. Founders should understand the landscape, the Society’s position within it, and how to speak about it accurately.
+Uganda
+The Uganda Astronomical Society is the primary community for astronomers, with several hundred members. Many Solarian members will also be UAS members. The two organisations are complementary — UAS is discipline-specific, the Society is broad. Ugandan individuals hold affiliations with the East African Astronomical Society, the African Astronomical Society, and the Space Generation Advisory Council, as well as private and institutional actors in the sector. All of these affiliations are respected and welcomed within the Society. The Society is additive to them, not competitive.
+East Africa and the continent
+Kenya established a national space agency in 2017. Ethiopia has developing space capabilities. The African Union has adopted a continental space policy and is working toward an African Space Agency. The African Astronomical Society and continental platforms connect researchers and practitioners across the continent.
+The Society’s position
+The Solarian Society is not a subsidiary, chapter, or affiliate of any of these organisations. It is a peer and a collaborator. It does not represent the astronomy community, the professional space sector, or any government interest. It represents its members. When speaking about the ecosystem: name organisations accurately, speak warmly about their work, and do not imply hierarchy or merger.
+X. What Founders Hold
+This section is not aspirational. It describes specific obligations that the founding members carry.
+Build what this document describes, not what is convenient.
+The open platform identity described here will face pressure. Events will be easier to restrict to the already-qualified. Governance will be easier if one person decides. The commons will be easier to neglect. Founders are responsible for resisting this pressure, consistently and visibly.
+Keep it open.
+The Society’s openness — to anyone, regardless of other affiliations, credentials, or background — is its most distinctive and most fragile quality. Founders must defend it actively. Any move toward credential-gating, affiliation-checking, or discipline-restricting is a move away from what the Society is.
+Document from day one.
+The archive is governance. Founders must begin it immediately, before there is anything that seems worth archiving. The discipline of documentation established at founding will determine whether the archive becomes institutional memory or an afterthought.
+Design for succession, not for legacy.
+The Society should be designed so that when the founders step back — and they will — the transition is unremarkable. Not celebrated, not mourned. Simply continuous. This means training stewards, documenting reasoning, and making no decision that can only be reversed by the founders.
+Hold the trustee role with the seriousness it deserves.
+The governance document acknowledges openly that trustees are simultaneously the Society’s greatest protection and its single greatest structural risk. There is no mechanism that guarantees good trustee behaviour. The Society trusts that the founders understand this and accept it fully.
+Maintain the distinction between the Society and yourselves.
+The Society is not the founders. Founders who conflate the two will build an institution that cannot survive their departure. The founding essay, this document, and the governance document are the Society’s identity. Founders are custodians of that identity, not authors of it in perpetuity.
+When in doubt, return to the philosophy.
+Section IV contains six ideas that govern everything. When a decision is unclear, those ideas are the reference — not what is efficient, not what is popular, not what the founders prefer. Ultra hic et nunc: the Society faces forward. So must the people who carry it.
+
+The Society is not governed by the powerful.
+It is governed by the trusted.
+And trust, here, is not assumed.
+It is witnessed, recorded, and renewed.
+The Solarian Society · Founders’ Guide · Kampala, Uganda · 2026
+This document is subject to revision as the Society matures. All revisions are recorded in the archive.
+The founding essay is not subject to revision through the same process.

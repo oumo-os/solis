@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About · Solis</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link active">About</a>
+        <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="../platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
+
+  <div class="container">
+    <div style="padding:var(--space-7) 0 var(--space-8);max-width:660px">
+      <p class="text-label mb-2" style="color:var(--gold)">About</p>
+      <h1 class="text-xl serif mb-2">What is Solis?</h1>
+      <p class="text-quote mb-6">The digital infrastructure of the Solarian Commons</p>
+      <blockquote>
+        <p class="text-quote">On 2 November 2000, Expedition 1 docked at the International Space Station. Since that morning, not one day has passed without at least one human living beyond Earth. The chain has not broken.</p>
+      </blockquote>
+      <p class="text-sm mb-4" style="color:var(--text-secondary)">Solis is the digital infrastructure of the Solarian Commons — an open community for people interested in humanity's future beyond Earth. Not an organisation. Not a typical platform. A commons: a shared environment where people naturally gather, where organisations affiliate without subordinating, where identity precedes membership.</p>
+      <p class="text-sm mb-4" style="color:var(--text-secondary)">The Commons is open to anyone — astronomers, engineers, policy researchers, educators, entrepreneurs, artists, students, dreamers — regardless of credentials, career stage, or other affiliations. You do not apply to the Commons. You participate in it.</p>
+      <p class="text-sm mb-6" style="color:var(--text-secondary)">Organisations affiliate with the Commons without losing their independence. University clubs, astronomy societies, startups, research groups — all retain their own governance and identity while participating in a shared environment where they can discover one another and collaborate.</p>
+      <div class="card mb-6" style="background:var(--surface-raised)">
+        <p class="text-quote" style="text-align:center;color:var(--navy)">"The Commons is not united by a destination. It is united by a direction."</p>
+      </div>
+      <div class="mb-6" style="padding-top:var(--space-6);border-top:1px solid var(--border)">
+        <span class="text-label mb-4" style="display:block">Part of a wider ecosystem</span>
+        <p class="text-sm mb-4" style="color:var(--text-secondary)">The Solarian Commons operates alongside organisations engaged with space across Uganda, East Africa, and the continent.</p>
+        <div class="flex gap-2" style="flex-wrap:wrap">
+          <span class="tag tag-default" style="font-size:11px;padding:5px 12px">Uganda Astronomical Society</span>
+          <span class="tag tag-default" style="font-size:11px;padding:5px 12px">East African Astronomical Society</span>
+          <span class="tag tag-default" style="font-size:11px;padding:5px 12px">African Astronomical Society</span>
+          <span class="tag tag-default" style="font-size:11px;padding:5px 12px">Space Generation Advisory Council</span>
+          <span class="tag tag-default" style="font-size:11px;padding:5px 12px">Private & institutional actors</span>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <a href="#" class="btn btn-primary">Read the Solis document</a>
+        <a href="participate.html" class="btn btn-secondary">Participate in the Commons</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span id="footer-mark"></span>
+        <span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span>
+      </div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="../shared/colors.js"></script>
+  <script src="../shared/solmark.js"></script>
+  <script>
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+  </script>
+</body>
+</html>

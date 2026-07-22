@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solis · Solarian Commons</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" id="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="../platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
+
+  <div class="container">
+    <div class="mb-8" style="padding:var(--space-8) 0 var(--space-7);border-bottom:1px solid var(--border)">
+      <div class="flex items-center justify-between gap-6">
+        <div style="max-width:540px">
+          <p class="text-label mb-4" style="color:var(--gold)">Kampala, Uganda · Open to all</p>
+          <h1 class="text-display serif mb-4" style="color:var(--navy)">The Commons for a<br><span style="color:var(--gold)">Solarian civilisation.</span></h1>
+          <p class="text-md mb-3" style="color:var(--text-secondary);max-width:440px">An open community for anyone interested in humanity's future beyond Earth — regardless of discipline, institution, or other affiliations.</p>
+          <p class="text-sm mb-5" style="color:var(--text-tertiary);max-width:420px">You're already Solarian. This is where you find the others.</p>
+          <div class="flex gap-3">
+            <a href="participate.html" class="btn btn-primary">Participate in the Commons</a>
+            <a href="about.html" class="btn btn-secondary">What is Solis?</a>
+          </div>
+        </div>
+        <div style="flex-shrink:0;width:220px">
+          <div class="card" style="padding:0;overflow:hidden">
+            <div style="padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--border-subtle);background:var(--surface-raised)">
+              <span class="text-label" style="font-size:9px">The Commons today</span>
+            </div>
+            <div id="stats"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-bottom:var(--space-7)">
+      <div>
+        <span class="text-label mb-4" style="display:block">From the sector</span>
+        <div id="sector-news" class="flex-col gap-3" style="display:flex"></div>
+        <a href="observatory.html" class="btn btn-secondary btn-sm mt-4">Full Observatory →</a>
+      </div>
+      <div>
+        <span class="text-label mb-4" style="display:block">From the Commons</span>
+        <div id="commons-activity" class="flex-col gap-3" style="display:flex"></div>
+        <a href="../platform/" class="btn btn-secondary btn-sm mt-4">Participant area →</a>
+      </div>
+    </div>
+
+    <div style="margin-bottom:var(--space-7)">
+      <span class="text-label mb-4" style="display:block">Open opportunities</span>
+      <div id="opportunities" style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-3)"></div>
+    </div>
+
+    <div class="card" style="background:var(--navy);border:none;padding:var(--space-6);margin-bottom:var(--space-8);display:grid;grid-template-columns:1fr auto;gap:var(--space-6);align-items:center">
+      <div>
+        <h2 class="text-lg serif mb-3" style="color:#fff;line-height:1.4">Not united by a destination.<br><span style="color:var(--gold)">United by a direction.</span></h2>
+        <p class="text-sm" style="color:rgba(255,255,255,.45);max-width:400px;line-height:1.7">The Commons is open to anyone with genuine curiosity about humanity's future beyond Earth. No credentials. No approval. You participate, and the Commons grows around you.</p>
+      </div>
+      <div class="flex-col gap-3 items-center">
+        <a href="participate.html" class="btn btn-gold">Participate in the Commons</a>
+        <a href="about.html" class="btn btn-secondary btn-sm" style="border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.5)">Read about Solis</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span id="footer-mark"></span>
+        <span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span>
+      </div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="../shared/colors.js"></script>
+  <script src="../shared/solmark.js"></script>
+  <script>
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+
+    var stats = [["12","Open opportunities"],["38","Upcoming events"],["5","Active stewards"],["4","Active expeditions"],["6","Affiliated organisations"]];
+    document.getElementById('stats').innerHTML = stats.map(function(s,i) {
+      return '<div style="padding:var(--space-2) var(--space-4);display:flex;justify-content:space-between;align-items:center;'+(i<stats.length-1?'border-bottom:1px solid var(--border-subtle)':'')+'">' +
+        '<span class="text-xs" style="color:var(--text-secondary)">'+s[1]+'</span>' +
+        '<span class="serif" style="font-size:20px;font-weight:700;color:var(--navy)">'+s[0]+'</span></div>';
+    }).join('');
+
+    var sectorNews = [
+      {tag:'tag-launch',label:'Launch',title:"ISRO's PSLV-C60 successfully deploys SpaDeX docking demonstration in LEO",source:'Space News',time:'2 hr ago'},
+      {tag:'tag-policy',label:'Policy',title:'African Union Space Agency framework advances at Addis Ababa summit',source:'SpaceAfrica',time:'Yesterday'},
+      {tag:'tag-industry',label:'Industry',title:'Rocket Lab expands Neutron manufacturing capacity for constellation operators',source:'NASASpaceFlight',time:'2 days ago'}
+    ];
+    document.getElementById('sector-news').innerHTML = sectorNews.map(function(n) {
+      return '<div class="card card-interactive">' +
+        '<div class="flex items-center gap-2 mb-3">' +
+          '<span class="tag '+n.tag+'">'+n.label+'</span>' +
+          '<span class="text-xs" style="color:var(--text-tertiary)">'+n.source+' · '+n.time+'</span>' +
+        '</div>' +
+        '<p class="text-sm" style="font-weight:500">'+n.title+'</p>' +
+      '</div>';
+    }).join('');
+
+    var commonsActivity = [
+      {tag:'tag-event',label:'Event',title:'Space Policy 101 — Open Discussion Session',note:'Fri Jul 18 · Steward: Policy & Advocacy'},
+      {tag:'tag-project',label:'Expedition',title:'Uganda Space Sector Map — Collaborative Initiative',note:'Open for contributors · 4 participants active'},
+      {tag:'tag-pub',label:'Publication',title:'Why East Africa Needs a Space Economy Strategy',note:'Essay by Okello M. · Jul 9, 2026'}
+    ];
+    document.getElementById('commons-activity').innerHTML = commonsActivity.map(function(a) {
+      return '<div class="card">' +
+        '<div class="mb-2"><span class="tag '+a.tag+'">'+a.label+'</span></div>' +
+        '<p class="text-sm mb-1" style="font-weight:500">'+a.title+'</p>' +
+        '<p class="text-xs" style="color:var(--text-tertiary)">'+a.note+'</p>' +
+      '</div>';
+    }).join('');
+
+    var opportunities = [
+      {type:'Fellowship',org:'SGAC',title:'Space Generation Congress 2026',deadline:'Aug 1',location:'Milan'},
+      {type:'Scholarship',org:'AfricaSpace',title:'Young Professional Award',deadline:'Aug 15',location:'Remote'},
+      {type:'Competition',org:'ESA',title:'Moon Camp Challenge — Open Category',deadline:'Sep 30',location:'Remote'},
+      {type:'Call',org:'IAC 2026',title:'Abstract Submissions Now Open',deadline:'Oct 1',location:'Brisbane'}
+    ];
+    document.getElementById('opportunities').innerHTML = opportunities.map(function(o) {
+      return '<div class="card card-interactive">' +
+        '<div class="text-label mb-2" style="color:var(--gold)">'+o.type+'</div>' +
+        '<p class="text-xs mb-3" style="font-weight:500">'+o.title+'</p>' +
+        '<div class="text-xs" style="color:var(--text-tertiary)">'+o.org+' · '+o.location+'</div>' +
+        '<div class="text-xs" style="color:var(--text-tertiary)">Due '+o.deadline+'</div>' +
+      '</div>';
+    }).join('');
+  </script>
+</body>
+</html>

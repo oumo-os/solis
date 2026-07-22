@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solarian Emblem · Solis</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="css/emblem.css">
+</head>
+<body>
+  <div style="margin-bottom:24px">
+    <div style="font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#C8880A;margin-bottom:6px">Solarian Society · Full Emblem</div>
+    <h1 class="serif" style="font-size:24px;font-weight:700;color:#0E1E34;margin-bottom:4px">Planetary Map with Wordmark</h1>
+    <p style="font-size:12px;color:rgba(14,30,52,.5);line-height:1.65">
+      02 November 2000 — first day of continuous human presence in space.<br>
+      14 bodies including Voyager 1, the only line that crosses the heliopause.
+    </p>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button id="btn-wordmark" class="ctrl-btn active" onclick="toggle('wordmark')">Wordmark</button>
+    <button id="btn-labels" class="ctrl-btn" onclick="toggle('labels')">Labels</button>
+    <button id="btn-times" class="ctrl-btn" onclick="toggle('times')">Times</button>
+    <button id="btn-dark" class="ctrl-btn" onclick="toggle('dark')">Dark</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div id="main-emblem" style="background:#fff;border:1px solid rgba(14,30,52,.09);border-radius:8px;padding:16px;display:flex;align-items:center;justify-content:center;transition:background .3s"></div>
+      <div class="panel">
+        <div class="panel-label">Scale — mark only</div>
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap" id="scale-strip"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Stamp variants</div>
+        <div style="display:flex;gap:10px" id="stamps"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="panel">
+        <div class="panel-label">Map key · 02 November 2000</div>
+        <div id="map-key"></div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(14,30,52,.06);display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-family:monospace;color:#C8880A;width:40px;flex-shrink:0">○</span><span style="font-size:11px;color:rgba(14,30,52,.45);line-height:1.5">Voyager 1 — human-made, open circle</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-family:monospace;color:#C8880A;width:40px;flex-shrink:0">— —</span><span style="font-size:11px;color:rgba(14,30,52,.45);line-height:1.5">Asteroid belt (2.2–3.2 AU)</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-family:monospace;color:#C8880A;width:40px;flex-shrink:0">- - -</span><span style="font-size:11px;color:rgba(14,30,52,.45);line-height:1.5">Kuiper belt (~30–50 AU)</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-family:monospace;color:#C8880A;width:40px;flex-shrink:0">·  ·  ·</span><span style="font-size:11px;color:rgba(14,30,52,.45);line-height:1.5">Heliopause (~90 AU); Voyager crosses it</span></div>
+          <div style="display:flex;align-items:center;gap:10px"><span style="font-size:11px;font-family:monospace;color:#C8880A;width:40px;flex-shrink:0">10.7h</span><span style="font-size:11px;color:rgba(14,30,52,.45);line-height:1.5">Light travel time in hours for distant bodies</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-label">Alignments · 02 November 2000</div>
+        <div id="alignments"></div>
+      </div>
+      <div class="panel">
+        <p style="font-size:12px;color:rgba(14,30,52,.48);line-height:1.75">The Voyager 1 line is the only one that crosses the heliopause ring — the only human-made object on the map, still moving outward with no plan to return. The emblem was modelled on the pulsar map carried aboard Voyager. Voyager itself now appears on it.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../shared/colors.js"></script>
+  <script>
+    var NAVY="#0E1E34",GOLD="#C8880A",GOLDB="#E8A820",BG="#F8F9FB";
+    var ROT=52.54;
+    var BODIES=[
+      {name:"Mercury",short:"Mer",angle:51.81+ROT,dist:0.3117,light:2.6,r:14.00,inner:true,human:false},
+      {name:"Venus",short:"Ven",angle:314.66+ROT,dist:0.7282,light:6.1,r:27.55,inner:true,human:false},
+      {name:"Earth",short:"Ear",angle:37.46+ROT,dist:0.9922,light:8.3,r:32.49,inner:true,human:false,color:"#1A5296",moon:true},
+      {name:"Mars",short:"Mar",angle:158.10+ROT,dist:1.6660,light:13.9,r:40.77,inner:true,human:false,color:"#8B2500"},
+      {name:"Ceres",short:"Cer",angle:160.62+ROT,dist:2.7691,light:23.0,r:48.89,inner:true,human:false},
+      {name:"Jupiter",short:"Jup",angle:61.97+ROT,dist:5.0288,light:41.8,r:58.42,inner:false,human:false},
+      {name:"Saturn",short:"Sat",angle:55.06+ROT,dist:9.1229,light:75.9,r:67.93,inner:false,human:false},
+      {name:"Uranus",short:"Ura",angle:322.38+ROT,dist:19.9532,light:165.9,r:80.43,inner:false,human:false},
+      {name:"Neptune",short:"Nep",angle:308.07+ROT,dist:30.1100,light:250.4,r:87.00,inner:false,human:false},
+      {name:"Pluto",short:"Plu",angle:239.22+ROT,dist:39.4820,light:328.4,r:91.33,inner:false,human:false},
+      {name:"Haumea",short:"Hau",angle:199.07+ROT,dist:43.1340,light:358.7,r:92.74,inner:false,human:false},
+      {name:"Makemake",short:"Mak",angle:172.99+ROT,dist:45.7910,light:380.8,r:93.70,inner:false,human:false},
+      {name:"Eris",short:"Eri",angle:204.54+ROT,dist:67.6680,light:562.8,r:99.94,inner:false,human:false},
+      {name:"Voyager 1",short:"V1",angle:259.00+ROT,dist:77.0000,light:640.0,r:118.00,inner:false,human:true},
+      {name:"Harley's Comet",short:"HC",angle:180.61,dist:26.07,light:0,r:75.00,inner:false,human:false},
+      {name:"'Oumuamua",short:"'Ou",angle:326.19,dist:38.00,light:0,r:89.00,inner:false,human:true,noline:true},
+      {name:"Hale-Bopp",short:"HB",angle:321.0,dist:3.30,light:0,r:50.00,inner:false,human:false}
+    ];
+    var VB=340,CX=170,CY=170;
+    var rad=function(d){return d*Math.PI/180;};
+    var pt=function(a,r){return{x:CX+r*Math.cos(rad(a)),y:CY+r*Math.sin(rad(a))};};
+    var flags={wordmark:true,labels:false,times:false,dark:false};
+    function toggle(k){flags[k]=!flags[k];document.getElementById('btn-'+k).className='ctrl-btn'+(flags[k]?' active':'');render();}
+    function renderMark(size,dark,labels,times,circular){
+      var fg=dark?"rgba(255,255,255,0.88)":NAVY;
+      var fgFaint=dark?"rgba(255,255,255,0.13)":"rgba(14,30,52,0.13)";
+      var lblCol=dark?"rgba(255,255,255,0.46)":"rgba(14,30,52,0.40)";
+      var numCol=dark?"rgba(255,255,255,0.36)":"rgba(14,30,52,0.34)";
+      var textCol=dark?"rgba(255,255,255,0.82)":NAVY;
+      var dimCol=dark?"rgba(255,255,255,0.38)":"rgba(14,30,52,0.42)";
+      var goldCol=dark?GOLDB:GOLD;
+      var svg='<svg viewBox="0 0 '+VB+' '+VB+'" width="'+size+'" height="'+size+'" xmlns="http://www.w3.org/2000/svg">';
+      if(circular){
+        var word="SOLARIAN",wSpan=88,wStart=270-wSpan/2;
+        for(var i=0;i<word.length;i++){var a=wStart+(i+0.5)*(wSpan/word.length);var p=pt(a,138);svg+='<text x="'+p.x+'" y="'+p.y+'" text-anchor="middle" dominant-baseline="middle" transform="rotate('+(a+90)+','+p.x+','+p.y+')" font-family="Playfair Display,Georgia,serif" font-size="12" font-weight="700" fill="'+textCol+'" letter-spacing="2">'+word[i]+'</text>';}
+        var motto="ULTRA HIC ET NUNC",mSpan=114,mStart=90-mSpan/2;
+        for(var i=0;i<motto.length;i++){var a=mStart+(i+0.5)*(mSpan/motto.length);var p=pt(a,131);svg+='<text x="'+p.x+'" y="'+p.y+'" text-anchor="middle" dominant-baseline="middle" transform="rotate('+(a-90)+','+p.x+','+p.y+')" font-family="Playfair Display,Georgia,serif" font-size="7" font-weight="400" fill="'+dimCol+'" letter-spacing="1.2">'+motto[i]+'</text>';}
+        [0,180].forEach(function(angle){var p=pt(angle,135);svg+='<rect x="'+(p.x-2.2)+'" y="'+(p.y-2.2)+'" width="4.4" height="4.4" transform="rotate(45,'+p.x+','+p.y+')" fill="'+goldCol+'" opacity="0.7"/>';});
+      }
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="112" fill="none" stroke="'+fgFaint+'" stroke-width="0.6" stroke-dasharray="1.5 5"/>';
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="95" fill="none" stroke="'+fgFaint+'" stroke-width="0.5" stroke-dasharray="3 5"/>';
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="44" fill="none" stroke="'+fgFaint+'" stroke-width="0.5" stroke-dasharray="2 5.5"/>';
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="55" fill="none" stroke="'+fgFaint+'" stroke-width="0.5" stroke-dasharray="2 5.5"/>';
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="7.5" fill="none" stroke="'+fgFaint+'" stroke-width="0.5"/>';
+      for(var i=0;i<BODIES.length;i++){
+        var b=BODIES[i],end=pt(b.angle,b.r),num=pt(b.angle,b.r*0.60);
+        var flip=b.angle>90&&b.angle<270,tRot=flip?b.angle+180:b.angle;
+        var lblR=b.r+(b.inner?10:11),lbl=pt(b.angle,lblR);
+        var dotR=b.human?2.0:(b.inner?1.8:2.4);
+        if(!b.noline){svg+='<line x1="'+CX+'" y1="'+CY+'" x2="'+end.x+'" y2="'+end.y+'" stroke="'+fg+'" stroke-width="'+(b.human?0.6:0.75)+'"/>';}
+        if(times){var tl=b.light<600?b.light+"'":(b.light/60).toFixed(1)+"h";svg+='<text x="'+num.x+'" y="'+num.y+'" font-size="5.2" text-anchor="middle" dominant-baseline="middle" fill="'+numCol+'" font-family="Courier New,monospace" transform="rotate('+tRot+','+num.x+','+num.y+')">'+tl+'</text>';}
+        if(b.human){svg+='<circle cx="'+end.x+'" cy="'+end.y+'" r="'+dotR+'" fill="none" stroke="'+fg+'" stroke-width="0.8"/>';}else{var bodyFill=b.color||fg;svg+='<circle cx="'+end.x+'" cy="'+end.y+'" r="'+dotR+'" fill="'+bodyFill+'"/>';}
+        if(b.moon){svg+='<circle cx="'+end.x+'" cy="'+end.y+'" r="'+(dotR+1.6)+'" fill="none" stroke="silver" stroke-width="0.5"/>';}
+        if(labels){svg+='<text x="'+lbl.x+'" y="'+lbl.y+'" font-size="5.5" text-anchor="middle" dominant-baseline="middle" fill="'+lblCol+'" font-family="Inter,system-ui,sans-serif" font-weight="500">'+b.short+'</text>';}
+      }
+      svg+='<circle cx="'+CX+'" cy="'+CY+'" r="4" fill="'+goldCol+'"/>';
+      svg+='<circle cx="'+(CX-1)+'" cy="'+(CY-1)+'" r="1.4" fill="'+GOLDB+'" opacity="0.5"/>';
+      svg+='</svg>';return svg;
+    }
+    function render(){
+      var isDark=flags.dark;
+      document.getElementById('main-emblem').style.background=isDark?NAVY:'#fff';
+      document.getElementById('main-emblem').style.border='1px solid '+(isDark?'transparent':'rgba(14,30,52,.09)');
+      document.getElementById('main-emblem').innerHTML=renderMark(300,isDark,flags.labels,flags.times,flags.wordmark);
+      var sh='';[120,80,48,32,20].forEach(function(s){sh+='<div style="display:flex;flex-direction:column;align-items:center;gap:5px">'+renderMark(s,false,false,false,false)+'<span style="font-size:9px;color:rgba(14,30,52,.3)">'+s+'px</span></div>';});
+      document.getElementById('scale-strip').innerHTML=sh;
+      var stamps=[{bg:"#fff",border:"1px solid rgba(14,30,52,.1)"},{bg:BG,border:"none"},{bg:NAVY,border:"none"},{bg:GOLD,border:"none"}];
+      var sH='';stamps.forEach(function(s){var dk=s.bg===NAVY||s.bg===GOLD;sH+='<div style="background:'+s.bg+';border:'+s.border+';border-radius:6px;padding:10px;flex:1;display:flex;align-items:center;justify-content:center">'+renderMark(72,dk,false,false,flags.wordmark)+'</div>';});
+      document.getElementById('stamps').innerHTML=sH;
+      var mk='<div style="display:flex;flex-direction:column">';BODIES.forEach(function(b,i){mk+='<div style="display:grid;grid-template-columns:10px 86px 1fr 52px 52px;gap:8px;align-items:center;padding:4px 0;border-bottom:'+(i<BODIES.length-1?'1px solid rgba(14,30,52,.05)':'none')+'">';if(b.human){mk+='<div style="width:8px;height:8px;border-radius:50%;border:1.5px solid '+NAVY+';background:transparent"></div>';}else{mk+='<div style="width:'+(b.inner?5:7)+'px;height:'+(b.inner?5:7)+'px;border-radius:50%;background:'+(b.color||NAVY)+'"></div>';}mk+='<span style="font-size:12px;color:'+NAVY+';font-weight:'+(b.human?600:500)+'">'+b.name+'</span>';mk+='<div style="height:1px;background:linear-gradient(90deg,rgba(14,30,52,.18),transparent)"></div>';mk+='<span style="font-size:11px;color:rgba(14,30,52,.4);text-align:right">'+(b.dist<10?b.dist.toFixed(2):b.dist.toFixed(1))+' AU</span>';mk+='<span style="font-size:11px;color:'+GOLD+';text-align:right;font-weight:500">'+(b.light<600?b.light+"'":(b.light/60).toFixed(1)+'h')+'</span>';mk+='</div>';});
+      mk+='<div style="display:grid;grid-template-columns:10px 86px 1fr 52px 52px;gap:8px;align-items:center;padding-top:7px;margin-top:4px;border-top:1px solid rgba(14,30,52,.1)"><div style="width:8px;height:8px;border-radius:50%;background:'+GOLD+'"></div><span style="font-size:12px;color:'+NAVY+';font-weight:600">Sol</span><div></div><span style="font-size:11px;color:rgba(14,30,52,.4);text-align:right">origin</span><span style="font-size:11px;color:'+GOLD+';text-align:right">0\'</span></div></div>';
+      document.getElementById('map-key').innerHTML=mk;
+      var alignData=[
+        {b:"Earth \u00B7 Mercury \u00B7 Saturn \u00B7 Jupiter",n:"All within 25\u00B0 (37\u00B0\u201362\u00B0). On the day the first ISS crew arrived, Earth and three major bodies clustered on the same side of Sol."},
+        {b:"Mars \u00B7 Ceres",n:"Within 2.5\u00B0 of each other (158\u00B0\u2013161\u00B0). The fourth planet and the largest asteroid belt body, nearly co-longitudinal."},
+        {b:"Venus \u00B7 Neptune \u00B7 Uranus",n:"Within 15\u00B0 (308\u00B0\u2013322\u00B0). An inner planet and two ice giants pointing the same direction from Sol."},
+        {b:"Haumea \u00B7 Eris",n:"Within 5.5\u00B0 (199\u00B0\u2013205\u00B0). Two trans-Neptunian dwarf planets in near-alignment."}
+      ];
+      var aH='';alignData.forEach(function(a,i){aH+='<div style="padding:10px 0;border-bottom:'+(i<alignData.length-1?'1px solid rgba(14,30,52,.07)':'none')+'"><div style="font-size:12px;font-weight:600;color:#0E1E34;margin-bottom:3px">'+a.b+'</div><div style="font-size:12px;color:rgba(14,30,52,.48);line-height:1.6">'+a.n+'</div></div>';});
+      document.getElementById('alignments').innerHTML=aH;
+    }
+    render();
+  </script>
+</body>
+</html>

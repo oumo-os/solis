@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solis Commons</title>
+  <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="css/platform.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <div class="logo">
+      <a href="index.html" class="logo-mark" id="brand"></a>
+    </div>
+    <div class="member-card" onclick="nav('personal')">
+      <div class="member-avatar" id="member-avatar">OS</div>
+      <div class="member-name">Oumo Samuel</div>
+      <div class="member-meta">Standing 847 · Kampala</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Personal</div>
+      <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon">⌂</span> Personal</div>
+      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon">◫</span> Inbox <span class="nav-badge">3</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Organisation</div>
+      <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">◎</span> Commons</div>
+      <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon">◈</span> Undertakings</div>
+      <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon">◉</span> Observatory</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Spaces</div>
+      <div class="nav-item" data-v="circles" onclick="nav('circles')"><span class="nav-icon">⬡</span> Circles</div>
+      <div class="nav-item" data-v="cells" onclick="nav('cells')"><span class="nav-icon">◇</span> Cells</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Oversight</div>
+      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon">◆</span> STF Dash <span class="nav-badge">1</span></div>
+      <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon">◷</span> Participants</div>
+      <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon">◌</span> Profile</div>
+    </div>
+  </nav>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-path" id="topbar-path"><span>Personal</span></div>
+      <div class="topbar-actions">
+        <span class="motto">Ultra hic et nunc</span>
+        <button class="btn btn-primary">+ Propose</button>
+      </div>
+    </div>
+    <div class="content">
+
+  <!-- ═══ PERSONAL ═══ -->
+  <div class="view active" id="view-personal">
+    <div class="page-title">Oumo Samuel</div>
+    <div class="page-sub">Participant · Kampala, Uganda · Member since Jul 2026 · Active</div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong but your Policy curiosity has grown 18% this cycle. You're eligible for 2 open xSTF slots in that domain — participating would accelerate your pathway.</div></div>
+    <div class="g3">
+      <div class="card"><div class="text-label mb-2">Soft Competence W<sub>s</sub></div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">847</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">↑ 42 this cycle</div></div>
+      <div class="card"><div class="text-label mb-2">Hard Competence W<sub>h</sub></div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">1,200</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">MSc Space Studies · 1 cert verified</div></div>
+      <div class="card"><div class="text-label mb-2">Active Roles</div><div style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--text);line-height:1;">3</div><div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">1 Circle · 2 Undertakings</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec">Domain Metrics</div>
+        <div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Curiosity</span></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Space Law</span><span class="v">1800 / ◆ 72%</span></div><div class="bar-trk"><div class="bar-fill" style="width:72%"></div><div class="bar-mark" style="left:72%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Remote Sensing</span><span class="v">1200 / ◆ 58%</span></div><div class="bar-trk"><div class="bar-fill" style="width:58%"></div><div class="bar-mark" style="left:58%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Policy</span><span class="v">640 / ◆ 48%</span></div><div class="bar-trk"><div class="bar-fill" style="width:20%;background:var(--gold)"></div><div class="bar-mark" style="left:48%"></div></div></div>
+        <div class="bar-row"><div class="bar-lbl"><span>Mars Habitability</span><span class="v">600 / ◆ 22%</span></div><div class="bar-trk"><div class="bar-fill" style="width:16%;background:var(--gold)"></div><div class="bar-mark" style="left:22%"></div></div></div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Bar = Competence. Gold line = Curiosity. Policy gap is Insight Engine trigger.</div>
+      </div>
+      <div class="card">
+        <div class="sec">Circle Membership</div>
+        <div class="hrow">
+          <div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Active · Since Jul 2026</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+        <div class="hrow">
+          <div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Active · Since Aug 2026</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INBOX ═══ -->
+  <div class="view" id="view-inbox">
+    <div class="page-title">Inbox</div>
+    <div class="page-sub">Your notifications and assignments</div>
+    <div class="inbox-item unread"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
+    <div class="inbox-item unread"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
+    <div class="inbox-item unread"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Undertaking · Remote Sensing match 87%</div></div></div>
+    <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
+    <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
+  </div>
+
+  <!-- ═══ COMMONS ═══ -->
+  <div class="view" id="view-commons">
+    <div class="page-title">Commons</div>
+    <div class="page-sub">Open discussion · Solis Commons</div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Showing 3 threads matching your Circle mandates (Space Law, Remote Sensing) and 2 matching your Curiosities (Policy, Mars Habitability). <span style="color:var(--text-tertiary)">847 total threads accessible.</span></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
+    <div class="feed-item"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
+    <div class="feed-item"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
+    <div class="feed-item"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
+    <div class="feed-item"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
+  </div>
+
+  <!-- ═══ UNDERTAKINGS ═══ -->
+  <div class="view" id="view-undertakings">
+    <div class="page-title">Undertakings</div>
+    <div class="page-sub">Active collaborative projects</div>
+    <table class="tbl">
+      <tr><th>Undertaking</th><th>Domains</th><th>Lead</th><th>Progress</th><th>Your Role</th><th></th></tr>
+      <tr class="click" onclick="nav('undertaking-detail')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+      <tr class="click"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+      <tr class="click"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ UNDERTAKING DETAIL ═══ -->
+  <div class="view" id="view-undertaking-detail">
+    <div class="back" onclick="nav('undertakings')">← Undertakings</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:22px">◈</div>
+      <div style="flex:1">
+        <div class="hero-title">East Africa Space Sector Mapping</div>
+        <div class="hero-desc">Produce a comprehensive mapping of the East African space sector — active organisations, initiatives, funding sources, academic programmes, and key individuals.</div>
+        <div class="hero-tags"><span class="tag tag-blue">Policy</span><span class="tag tag-green">Remote Sensing</span><span class="badge b-active" style="margin-left:4px">Contributor</span></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0"><div class="text-label mb-2">Progress</div><div style="font-family:var(--serif);font-size:28px;color:var(--green);font-weight:600">60<span style="font-size:14px;color:var(--text-tertiary)">%</span></div></div>
+    </div>
+    <div class="sec">Undertaking Cell</div>
+    <div class="card">
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+        <div class="avatar avatar-md">OR</div>
+        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div>
+      </div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+        <div class="avatar avatar-md">KA</div>
+        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today. Also — should we include private operators or focus on government and academic?</p></div>
+      </div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+        <div class="avatar avatar-md avatar-gold">OS</div>
+        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete. Let's flag gaps explicitly rather than exclude.</p></div>
+      </div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0">
+        <div class="avatar avatar-md">OR</div>
+        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema. Mwenda, can you review the Uganda section draft by Friday?</p></div>
+      </div>
+      <div class="divider" style="margin:var(--space-3) 0"></div>
+      <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
+    </div>
+  </div>
+
+  <!-- ═══ OBSERVATORY ═══ -->
+  <div class="view" id="view-observatory">
+    <div class="page-title">Observatory</div>
+    <div class="page-sub">The public knowledge space</div>
+    <div class="card" style="text-align:center;padding:var(--space-7)">
+      <div style="font-size:28px;margin-bottom:var(--space-4)">◉</div>
+      <h1 class="text-lg mb-2">Observatory</h1>
+      <p class="text-sm mb-5" style="color:var(--text-secondary)">View the public Observatory with curated articles, guides, and datasets.</p>
+      <a href="../public/observatory.html" class="btn btn-primary">View public Observatory →</a>
+    </div>
+  </div>
+
+  <!-- ═══ CIRCLES ═══ -->
+  <div class="view" id="view-circles">
+    <div class="page-title">Circles</div>
+    <div class="page-sub">Mandate-defined deliberation bodies</div>
+    <div style="margin-bottom:16px;display:flex;gap:8px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
+    <div class="g2">
+      <div class="card click">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--purple),#3a1860);font-size:14px">SL</div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 8 members</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
+      </div>
+      <div class="card click">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0d4040);font-size:14px">RS</div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 6 members</div></div>
+          <span class="badge b-active">Active</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
+      </div>
+      <div class="card click">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--amber),#5a3010);font-size:14px">MH</div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Mars Habitability Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 4 members</div></div>
+          <span class="badge b-pending">Suggested</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
+      </div>
+      <div class="card click">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--green),#0d3a20);font-size:14px">PL</div>
+          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Policy & Advocacy Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 5 members</div></div>
+          <span class="badge b-pending">Suggested</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
+        <div style="display:flex;gap:6px"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CELLS ═══ -->
+  <div class="view" id="view-cells">
+    <div class="page-title">Cells</div>
+    <div class="page-sub">Your active contextual workspaces</div>
+    <div class="g3">
+      <div class="card click" onclick="nav('cell-undertaking')">
+        <div class="flex justify-between mb-2"><span class="badge b-active">Undertaking Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">East Africa Space Sector Mapping</div>
+        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Collaborative research cell. 7 participants. Producing sector mapping report.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
+      </div>
+      <div class="card click" onclick="nav('cell-circle')">
+        <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Publications</div>
+        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Private circle cell. 8 members. Stewarding publications and endorsements.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Active</div>
+      </div>
+      <div class="card click" onclick="nav('cell-delib')">
+        <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris liability framework — who bears responsibility?</div>
+        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Open deliberation cell. Sponsored from Commons. Motion crystallising.</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 12 participants · 3d active</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CELL: UNDERTAKING ═══ -->
+  <div class="view" id="view-cell-undertaking">
+    <div class="back" onclick="nav('cells')">← Cells</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:18px">◈</div>
+      <div style="flex:1">
+        <div class="hero-title">East Africa Space Sector Mapping</div>
+        <div class="hero-desc">Collaborative research cell. 7 participants. Producing sector mapping report for Solis Commons.</div>
+        <div class="hero-tags"><span class="badge b-active">Undertaking Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-14 · Policy + Remote Sensing</span></div>
+      </div>
+    </div>
+    <div class="sec">Cell Messages</div>
+    <div class="card">
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">OR</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div></div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">KA</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today.</p></div></div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md avatar-gold">OS</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete.</p></div></div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">OR</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema.</p></div></div>
+      <div class="divider" style="margin:var(--space-3) 0"></div>
+      <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
+    </div>
+  </div>
+
+  <!-- ═══ CELL: CIRCLE ═══ -->
+  <div class="view" id="view-cell-circle">
+    <div class="back" onclick="nav('cells')">← Cells</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px">SL</div>
+      <div style="flex:1">
+        <div class="hero-title">Space Law Circle — Publications</div>
+        <div class="hero-desc">Private to circle members · aSTF has read access</div>
+        <div class="hero-tags"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-18 · 8 members</span></div>
+      </div>
+    </div>
+    <div class="sec">Cell Messages</div>
+    <div class="card">
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello J.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">The Ssempa discussion on debris liability has 22 replies and strong engagement. Proposing we elevate it to an Observatory article.</p></div></div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga C.</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Agreed. Quality is strong. I'd suggest requesting a summary section from Ssempa before we approve.</p></div></div>
+      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md avatar-system">◆</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--text-secondary)">System</span><span class="text-xs" style="color:var(--text-tertiary)">30m ago</span><span class="badge b-enacted" style="font-size:8px">System</span></div><p class="text-sm" style="color:var(--blue)">Decision logged: Elevation of thread #4 to Observatory article pending author revision. aSTF notified.</p></div></div>
+      <div class="divider" style="margin:var(--space-3) 0"></div>
+      <textarea class="msg-input" rows="2" placeholder="Add to circle cell..."></textarea>
+      <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded and readable by the aSTF.</div>
+    </div>
+  </div>
+
+  <!-- ═══ CELL: DELIBERATION ═══ -->
+  <div class="view" id="view-cell-delib">
+    <div class="back" onclick="nav('cells')">← Cells</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:var(--gold-soft);border:1px solid var(--gold-border);color:var(--gold);font-size:18px">◆</div>
+      <div style="flex:1">
+        <div class="hero-title">Debris liability framework — who bears responsibility?</div>
+        <div class="hero-desc">Open deliberation cell. Sponsored from Commons thread #Thread-042. Motion crystallising.</div>
+        <div class="hero-tags"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-21 · Space Law · 3d active</span></div>
+      </div>
+    </div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise motion.</span></div></div>
+    <div class="g2">
+      <div>
+        <div class="sec">Founding Mandate</div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px"><em style="color:var(--text-tertiary)">From Commons thread snapshot:</em> Thread argues that liability for debris-generating manoeuvres is currently undefined in international space law. When collision avoidance fails and debris is created, who bears responsibility?</div>
+        <div class="sec">Preliminary Vote</div>
+        <div class="vote-bar">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Weighted competence vote — Space Law Domain</div>
+          <div class="vote-row"><span class="vote-yea">YEA 1,847</span><div class="vote-track"><div class="vote-yea-fill" style="width:78%"></div></div><span class="vote-nay">NAY 312</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="sec">Participating Circles</div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
+        <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary btn-sm">Confirm & Crystallise Motion</button><button class="btn btn-sm">Request Redraft</button><button class="btn btn-danger btn-sm">Dissolve Cell</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ STF DASH ═══ -->
+  <div class="view" id="view-stf">
+    <div class="page-title">STF Dash</div>
+    <div class="page-sub">Your active Short-Term Facilitator assignments</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+      <div style="background:var(--surface);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-vstf')">
+        <div style="width:36px;height:36px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--gold)">◆</div>
+        <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">vSTF: Candidate Verification — Policy & Advocacy</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle · Due Jul 19</div></div>
+        <span class="badge b-pending">Invitation</span>
+      </div>
+    </div>
+    <div class="sec">Org-wide Active STFs</div>
+    <table class="tbl">
+      <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
+      <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
+      <tr class="click"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Governance audit: Circle health review</td><td>Commons</td><td class="m">Jul 25</td><td><span class="badge b-active">Active</span></td></tr>
+      <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ vSTF: Verification Office ═══ -->
+  <div class="view" id="view-stf-vstf">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="stf-vstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">◆ vSTF — Credential Verification Office</div>
+        <div class="room-title">W<sub>h</sub> Verification: 3 Candidates — Policy & Advocacy</div>
+        <div class="room-meta">Space Law Circle · Blind parallel assessment · Due Jul 19, 2026</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text">Forensic credential review. You have been assigned the submitted evidence packages for three candidates. Review each item independently. Provide your adjusted W<sub>h</sub> assessment with supporting rationale. Your assessment is sealed until all assessors have filed.</div></div>
+        <div class="sec">Evidence Package</div>
+        <div class="evidence-shelf">
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate A — Policy Analysis Certificate</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate B — Advocacy Workshop Certificate</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate C — Published Policy Brief</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
+        </div>
+        <div class="sec">Your W<sub>h</sub> Assessment</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="text-label mb-2">Current claimed W<sub>h</sub></div>
+          <div style="font-family:var(--serif);font-size:28px;color:var(--text);font-weight:600;margin-bottom:12px">1,200</div>
+          <div class="text-label mb-2">Your adjusted assessment</div>
+          <input type="number" value="1200" style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px 12px;font-family:var(--mono);font-size:14px;margin-bottom:10px">
+          <textarea placeholder="Rationale for your assessment..." style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius);padding:8px 12px;font-size:12px;height:70px;resize:none"></textarea>
+        </div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary">File Assessment</button><button class="btn">Save Draft</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ jSTF: Court ═══ -->
+  <div class="view" id="view-stf-jstf">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="stf-jstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label">■ jSTF — Judicial Investigation</div>
+        <div class="room-title">Investigation: Credential Misrepresentation Claim</div>
+        <div class="room-meta">Judicial Circle · Write-restricted · Due Aug 01, 2026 · 🔒 Closed to external parties</div>
+      </div>
+      <div class="room-body">
+        <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center">🔒 &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--red)">Room Environment</div><div class="room-env-text">Judicial investigation workspace. Investigation team has collaborative access. This Cell record is sealed from all non-team org members. The Judicial Circle has read access for oversight. Meta-aSTF will receive this Cell's report as read-only input.</div></div>
+        <div class="sec">Case Record</div>
+        <div class="accused-row">
+          <div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Daniel Jørgensen</div><div style="font-size:11px;color:var(--text-tertiary)">Former Space Law Circle member · Under Review status</div></div>
+          <span class="badge b-judicial">Under investigation</span>
+        </div>
+        <div class="court-record">
+          <div class="court-charge">Trigger: Integrity Engine anomaly flag</div>
+          <div class="court-text">Flag raised on Jul 10: statistical correlation detected between auditor assignment pattern and credential verification outcomes. Secondary flag: claimed W<sub>h</sub> credentials in Space Law domain appear inconsistent with demonstrated participation quality. Judicial Circle commissioned this investigation on Jul 12.</div>
+        </div>
+        <div class="g2">
+          <div>
+            <div class="sec">Investigation Team</div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">FO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Fatima Ouedraogo</div><div style="font-size:11px;color:var(--text-tertiary)">Lead investigator</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">BK</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Bongani Khumalo</div><div style="font-size:11px;color:var(--text-tertiary)">Evidence review</div></div><span class="badge b-active">Active</span></div>
+            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">LM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Lena Müller</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law expert</div></div><span class="badge b-active">Active</span></div>
+          </div>
+          <div>
+            <div class="sec">Report Status</div>
+            <div class="card" style="margin-bottom:0">
+              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Findings</span><span style="color:var(--green)">✓ Drafted</span></div>
+              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Evidence appendix</span><span style="color:var(--green)">✓ Complete</span></div>
+              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
+              <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
+              <div class="divider"></div>
+              <button class="btn btn-danger" style="width:100%">Finalise & Forward to Meta-aSTF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PARTICIPANTS ═══ -->
+  <div class="view" id="view-participants">
+    <div class="page-title">Participants</div>
+    <div class="page-sub">All registered participants in Solis Commons</div>
+    <div class="flex items-center justify-between mb-5">
+      <span class="text-label">8 participants visible</span>
+      <input placeholder="Search..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px">
+    </div>
+    <table class="tbl">
+      <tr><th>Participant</th><th>Domains</th><th>W<sub>s</sub></th><th>W<sub>h</sub></th><th>Location</th></tr>
+      <tr class="click"><td class="s">Akello J.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Astrophysics</span></td><td class="m">1,240</td><td class="m">1,800</td><td>Kampala</td></tr>
+      <tr class="click"><td class="s">Mwenda T.</td><td><span class="tag tag-green" style="font-size:8px">Remote Sensing</span> <span class="tag tag-blue" style="font-size:8px">Events</span></td><td class="m">890</td><td class="m">1,200</td><td>Kampala</td></tr>
+      <tr class="click"><td class="s">Namugga C.</td><td><span class="tag tag-purple" style="font-size:8px">Publications</span> <span class="tag tag-amber" style="font-size:8px">Space Medicine</span></td><td class="m">1,050</td><td class="m">1,400</td><td>Entebbe</td></tr>
+      <tr class="click"><td class="s">Ssempa D.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Policy</span></td><td class="m">760</td><td class="m">900</td><td>Kampala</td></tr>
+      <tr class="click"><td class="s">Kimani A.</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td class="m">980</td><td class="m">1,100</td><td>Nairobi</td></tr>
+      <tr class="click"><td class="s">Osei K.</td><td><span class="tag tag-default" style="font-size:8px">Propulsion</span> <span class="tag tag-default" style="font-size:8px">Launch Systems</span></td><td class="m">1,380</td><td class="m">2,000</td><td>Accra</td></tr>
+      <tr class="click"><td class="s">Diallo M.</td><td><span class="tag tag-amber" style="font-size:8px">Space Finance</span> <span class="tag tag-green" style="font-size:8px">Entrepreneurship</span></td><td class="m">720</td><td class="m">800</td><td>Dakar</td></tr>
+      <tr class="click"><td class="s">Oumo S.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td class="m">847</td><td class="m">1,200</td><td>Kampala</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══ PROFILE ═══ -->
+  <div class="view" id="view-profile">
+    <div class="page-title">Profile</div>
+    <div class="page-sub">Your competence declarations and standing</div>
+    <div class="flex items-center gap-4 mb-6">
+      <div class="avatar avatar-gold avatar-xl">OS</div>
+      <div style="flex:1">
+        <h1 class="text-xl serif">Oumo Samuel</h1>
+        <p class="text-xs mb-3" style="color:var(--text-secondary)">Kampala, Uganda · Participant since Jul 2026</p>
+        <div class="flex gap-1"><span class="tag tag-purple">Space Law</span> <span class="tag tag-amber">Mars Habitability</span> <span class="tag tag-green">Remote Sensing</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="text-label mb-2">Standing</div>
+        <div class="serif" style="font-size:32px;font-weight:700;color:var(--navy)">847</div>
+        <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
+      </div>
+    </div>
+    <div class="sec">Competence Declarations</div>
+    <table class="tbl" style="margin-bottom:20px">
+      <tr><th>Domain</th><th>Declared W<sub>s</sub></th><th>Verified W<sub>s</sub></th><th>Declared W<sub>h</sub></th><th>Verified W<sub>h</sub></th><th>Status</th></tr>
+      <tr><td class="s">Space Law</td><td class="m">1,800</td><td class="m">1,720</td><td class="m">1,200</td><td class="m">1,200</td><td><span class="badge b-active">Verified</span></td></tr>
+      <tr><td class="s">Remote Sensing</td><td class="m">1,200</td><td class="m">1,150</td><td class="m">800</td><td class="m">800</td><td><span class="badge b-active">Verified</span></td></tr>
+      <tr><td class="s">Policy</td><td class="m">640</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td><span class="badge b-pending">Pending</span></td></tr>
+      <tr><td class="s">Mars Habitability</td><td class="m">600</td><td class="m">—</td><td class="m">—</td><td class="m">—</td><td><span class="badge b-pending">Pending</span></td></tr>
+    </table>
+    <div class="sec">Domain Metrics</div>
+    <div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Curiosity</span></div>
+    <div class="bar-row"><div class="bar-lbl"><span>Space Law</span><span class="v">1800 / ◆ 72%</span></div><div class="bar-trk"><div class="bar-fill" style="width:72%"></div><div class="bar-mark" style="left:72%"></div></div></div>
+    <div class="bar-row"><div class="bar-lbl"><span>Remote Sensing</span><span class="v">1200 / ◆ 58%</span></div><div class="bar-trk"><div class="bar-fill" style="width:58%"></div><div class="bar-mark" style="left:58%"></div></div></div>
+    <div class="bar-row"><div class="bar-lbl"><span>Policy</span><span class="v">640 / ◆ 48%</span></div><div class="bar-trk"><div class="bar-fill" style="width:20%;background:var(--gold)"></div><div class="bar-mark" style="left:48%"></div></div></div>
+    <div class="bar-row"><div class="bar-lbl"><span>Mars Habitability</span><span class="v">600 / ◆ 22%</span></div><div class="bar-trk"><div class="bar-fill" style="width:16%;background:var(--gold)"></div><div class="bar-mark" style="left:22%"></div></div></div>
+  </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script src="../shared/colors.js"></script>
+<script src="../shared/solmark.js"></script>
+<script>
+document.getElementById('brand').innerHTML = SolMark(26, true) + '<div><div class="name">Solis</div><div class="sub">COMMONS</div></div>';
+
+function toggleSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebar-overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+}
+
+var views = {
+  personal:         ['Personal'],
+  inbox:            ['Personal', 'Inbox'],
+  commons:          ['Commons'],
+  undertakings:     ['Undertakings'],
+  'undertaking-detail': ['Undertakings', 'East Africa Mapping'],
+  observatory:      ['Observatory'],
+  circles:          ['Circles'],
+  cells:            ['Cells'],
+  'cell-undertaking': ['Cells', 'Undertaking Cell'],
+  'cell-circle':    ['Cells', 'Circle Cell'],
+  'cell-delib':     ['Cells', 'Deliberation Cell'],
+  stf:              ['STF Dash'],
+  'stf-vstf':       ['STF Dash', 'vSTF — Verification Office'],
+  'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
+  participants:     ['Participants'],
+  profile:          ['Profile']
+};
+var navMap = {
+  personal:'personal', inbox:'inbox',
+  commons:'commons', undertakings:'undertakings', 'undertaking-detail':'undertakings',
+  observatory:'observatory',
+  circles:'circles', cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
+  stf:'stf', 'stf-vstf':'stf', 'stf-jstf':'stf',
+  participants:'participants', profile:'profile'
+};
+
+function nav(key) {
+  if (!views[key]) return;
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active') });
+  var el = document.getElementById('view-' + key);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active') });
+  var navItems = document.querySelectorAll('.nav-item[data-v="' + navMap[key] + '"]');
+  navItems.forEach(function(n) { n.classList.add('active') });
+  var path = views[key];
+  document.getElementById('topbar-path').innerHTML = path.map(function(p, i) {
+    return i < path.length - 1
+      ? '<span>' + p + '</span><span class="sep">›</span>'
+      : '<span style="color:var(--text)">' + p + '</span>';
+  }).join('');
+  document.querySelector('.content').scrollTop = 0;
+  if (window.location.hash !== '#' + key) {
+    window.location.hash = key;
+  }
+  closeSidebar();
+}
+window.addEventListener('hashchange', function() {
+  var key = window.location.hash.replace('#', '') || 'personal';
+  if (views[key]) nav(key);
+});
+var initial = window.location.hash.replace('#', '') || 'personal';
+nav(views[initial] ? initial : 'personal');
+</script>
+</body>
+</html>
