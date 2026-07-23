@@ -964,37 +964,35 @@
   <!-- ═══ CIRCLE DETAIL ═══ -->
   <div class="view" id="view-circle-detail">
     <div class="detail-back" onclick="nav('circles')">← Back to Circles</div>
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-      <div>
-        <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--text)" id="cd-name">Space Law Circle</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px" id="cd-desc">Deliberative body for space law policy discussions and legal framework development across African space agencies.</div>
+    <div class="hero">
+      <div class="hero-icon" style="background:var(--purple-soft);border:1px solid var(--purple-border);color:var(--purple);font-size:18px">SL</div>
+      <div style="flex:1">
+        <div class="hero-title" id="cd-name">Space Law Circle</div>
+        <div class="hero-desc" id="cd-desc">Deliberative body for space law policy discussions and legal framework development across African space agencies.</div>
+        <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">14 members · 2 motions</span></div>
       </div>
       <button class="btn btn-primary" style="font-size:12px">Join Circle</button>
     </div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="detail-section-title">Active Motions</div>
-        <div class="detail-card">
-          <div style="font-size:13px;font-weight:500;color:var(--text)">Artemis Accords Ratification Framework</div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Proposed by Sarah R. · 3 days ago</div>
-          <div style="display:flex;gap:6px;margin-top:8px">
-            <span class="badge b-active">Open</span>
-            <span style="font-size:10px;color:var(--text-tertiary)">12 votes cast</span>
-          </div>
+        <div class="sec">Active Motions</div>
+        <div class="card click">
+          <div class="flex justify-between mb-2"><span class="badge b-active">Open</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3 days ago · 12 votes</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Artemis Accords Ratification Framework</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposed by Sarah R. Framework for East African ratification of the Artemis Accords.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Policy</div>
         </div>
-        <div class="detail-card">
-          <div style="font-size:13px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Proposed by Okello R. · 1 week ago</div>
-          <div style="display:flex;gap:6px;margin-top:8px">
-            <span class="badge b-pending">Voting</span>
-            <span style="font-size:10px;color:var(--text-tertiary)">8 votes cast</span>
-          </div>
+        <div class="card click">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">Voting</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">1 week ago · 8 votes</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Debris Liability Standards for LEO</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposed by Okello R. Standards for liability in low Earth orbit debris incidents.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability</div>
         </div>
-        <div class="detail-section-title" style="margin-top:16px">Recent Activity</div>
-        <div style="font-size:12px;color:var(--text-secondary)">
-          <div style="padding:6px 0;border-bottom:1px solid var(--border-subtle)">Kimani A. posted in "Artemis Accords" thread</div>
-          <div style="padding:6px 0;border-bottom:1px solid var(--border-subtle)">New member Mensah N. joined the circle</div>
-          <div style="padding:6px 0">Motion "LEO Liability" moved to voting phase</div>
+        <div class="sec" style="margin-top:16px">Recent Activity</div>
+        <div class="card">
+          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Kimani A. posted in "Artemis Accords" thread<div class="ai-when">2h ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>New member Mensah N. joined the circle<div class="ai-when">1d ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Motion "LEO Liability" moved to voting phase<div class="ai-when">3d ago</div></div>
         </div>
       </div>
       <div class="layout-aside">
