@@ -151,10 +151,32 @@
     <div class="layout-split">
       <div class="layout-main">
         <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
-        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
-        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
-        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
-        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
+        <div class="g3">
+          <div class="card click" onclick="nav('thread-detail')">
+            <div class="flex justify-between mb-2"><span class="badge b-active">Endorsed</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3h ago · 8 replies</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Liability frameworks for debris-generating manoeuvres</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Who bears responsibility when avoidance fails? Endorsed by Space Law Circle.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Akello J.</div>
+          </div>
+          <div class="card click" onclick="nav('thread-detail')">
+            <div class="flex justify-between mb-2"><span class="badge b-pending">New</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">7h ago · 14 replies</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Psychological design in confined habitats</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Lessons from Antarctic stations for Mars habitat design.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Mars Habitability · Namugga C.</div>
+          </div>
+          <div class="card click" onclick="nav('thread-detail')">
+            <div class="flex justify-between mb-2"><span class="badge b-review">Question</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">1d ago · 5 replies</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Sentinel-2 data access for East Africa</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Current limitations and workarounds for remote sensing data access.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Remote Sensing · Mwenda T.</div>
+          </div>
+          <div class="card click" onclick="nav('thread-detail')">
+            <div class="flex justify-between mb-2"><span class="badge b-active">Guide</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">2d ago · 22 replies</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">ITU coordination procedures — a plain language walkthrough</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Step-by-step guide to ITU frequency coordination for emerging space nations.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Akello J. · ↑ Observatory</div>
+          </div>
+        </div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -402,42 +424,30 @@
     <div class="layout-split">
       <div class="layout-main">
         <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
-        <div class="g2">
+        <div class="g3">
           <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--purple),#3a1860);font-size:14px">SL</div>
-              <div style="flex:1"><div class="text-sm" style="font-weight:600">Space Law Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Domain · 8 members</div></div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
-            <div class="flex gap-2"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
+            <div class="flex justify-between mb-2"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">8 members</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability · Policy</div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0d4040);font-size:14px">RS</div>
-              <div style="flex:1"><div class="text-sm" style="font-weight:600">Remote Sensing Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Domain · 6 members</div></div>
-              <span class="badge b-active">Active</span>
-            </div>
-            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
-            <div class="flex gap-2"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
+            <div class="flex justify-between mb-2"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">6 members</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Remote Sensing Circle</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Remote Sensing · Satellite · Data</div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--amber),#5a3010);font-size:14px">MH</div>
-              <div style="flex:1"><div class="text-sm" style="font-weight:600">Mars Habitability Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Suggested · 4 members</div></div>
-              <span class="badge b-pending">Suggested</span>
-            </div>
-            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
-            <div class="flex gap-2"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
+            <div class="flex justify-between mb-2"><span class="badge b-pending">Suggested</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">4 members</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Mars Habitability Circle</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Life support systems, habitat design, and Mars colonisation research.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Mars · Habitability</div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--green),#0d3a20);font-size:14px">PL</div>
-              <div style="flex:1"><div class="text-sm" style="font-weight:600">Policy & Advocacy Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Suggested · 5 members</div></div>
-              <span class="badge b-pending">Suggested</span>
-            </div>
-            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
-            <div class="flex gap-2"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
+            <div class="flex justify-between mb-2"><span class="badge b-pending">Suggested</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">5 members</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Policy & Advocacy Circle</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Policy analysis, advocacy strategies, and institutional partnerships.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy · Advocacy</div>
           </div>
         </div>
       </div>
