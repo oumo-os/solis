@@ -21,7 +21,7 @@
       <div class="nav-label">Personal</div>
       <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon">⌂</span> Personal</div>
       <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon">◫</span> Inbox <span class="nav-badge">3</span></div>
-      <div class="nav-item" data-v="registration" onclick="nav('registration')"><span class="nav-icon">✎</span> Edit Profile</div>
+      <div class="nav-item" data-v="registration" onclick="openRegModal(true)"><span class="nav-icon">✎</span> Edit Profile</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Commons</div>
@@ -236,26 +236,59 @@
       </div>
       <div style="text-align:right;flex-shrink:0"><div class="text-label mb-2">Progress</div><div style="font-family:var(--serif);font-size:28px;color:var(--green);font-weight:600">60<span style="font-size:14px;color:var(--text-tertiary)">%</span></div></div>
     </div>
-    <div class="sec">Project Cell</div>
-    <div class="card">
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-        <div class="avatar avatar-md">OR</div>
-        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="sec">Project Cell</div>
+        <div class="card">
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="avatar avatar-md">OR</div>
+            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div>
+          </div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="avatar avatar-md">KA</div>
+            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today. Also — should we include private operators or focus on government and academic?</p></div>
+          </div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="avatar avatar-md avatar-gold">OS</div>
+            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete. Let's flag gaps explicitly rather than exclude.</p></div>
+          </div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0">
+            <div class="avatar avatar-md">OR</div>
+            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema. Mwenda, can you review the Uganda section draft by Friday?</p></div>
+          </div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
+        </div>
       </div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-        <div class="avatar avatar-md">KA</div>
-        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today. Also — should we include private operators or focus on government and academic?</p></div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Project Info</div>
+          <div class="aside-row"><span class="aside-label">Lead</span><span style="font-size:12px;color:var(--text)">Okello R.</span></div>
+          <div class="aside-row"><span class="aside-label">Your Role</span><span class="badge b-active" style="font-size:8px">Contributor</span></div>
+          <div class="aside-row"><span class="aside-label">Created</span><span style="font-size:12px;color:var(--text)">Jun 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Status</span><span class="badge b-active" style="font-size:8px">Active</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Members (7)</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OR</div><div><div style="font-weight:500">Okello R. <span class="badge b-active" style="font-size:7px">Lead</span></div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">OS</div><div><div style="font-weight:500">You</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--blue-soft);color:var(--blue)">MT</div><div><div style="font-weight:500">Mwenda T.</div></div></div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 3 more</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-blue" style="font-size:9px">Policy</span>
+            <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Related Discussions</div>
+          <div class="aside-link" onclick="nav('thread-detail')">East Africa space sector gaps</div>
+          <div class="aside-link" onclick="nav('thread-detail')">Kenya satellite programme data</div>
+        </div>
       </div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-        <div class="avatar avatar-md avatar-gold">OS</div>
-        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete. Let's flag gaps explicitly rather than exclude.</p></div>
-      </div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0">
-        <div class="avatar avatar-md">OR</div>
-        <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema. Mwenda, can you review the Uganda section draft by Friday?</p></div>
-      </div>
-      <div class="divider" style="margin:var(--space-3) 0"></div>
-      <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
     </div>
   </div>
 
@@ -264,58 +297,97 @@
     <div class="page-title">Observatory</div>
     <div class="page-sub">The public knowledge space · Open to all</div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Observatory:</strong> Curated knowledge for the curious. No participation required — entirely open.</div></div>
-    <div class="g3" style="margin-bottom:20px">
-      <div class="card click" style="border-left:3px solid var(--gold)" onclick="nav('observatory-news')">
-        <div class="text-label mb-2" style="color:var(--gold)">News</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
-        <div style="font-size:11px;color:var(--text-tertiary)">Filtered for signal · Updated daily</div>
-      </div>
-      <div class="card click" style="border-left:3px solid var(--teal)" onclick="nav('observatory-calendar')">
-        <div class="text-label mb-2" style="color:var(--teal)">Calendar</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Global launches & milestones</div>
-        <div style="font-size:11px;color:var(--text-tertiary)">38 upcoming events</div>
-      </div>
-      <div class="card click" style="border-left:3px solid var(--green)" onclick="nav('observatory-opportunities')">
-        <div class="text-label mb-2" style="color:var(--green)">Opportunities</div>
-        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
-        <div style="font-size:11px;color:var(--text-tertiary)">12 currently open</div>
-      </div>
-    </div>
-    <div class="g2">
-      <div class="card">
-        <div class="sec">Library</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Books, courses, podcasts, career guides, and tools</div>
-        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Law Fundamentals</div><span class="tag tag-purple" style="font-size:8px">Guide</span></div>
-        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Orbital Mechanics 101</div><span class="tag tag-blue" style="font-size:8px">Course</span></div>
-        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Remote Sensing Data Handbook</div><span class="tag tag-green" style="font-size:8px">Reference</span></div>
-        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Economy Report 2026</div><span class="tag tag-amber" style="font-size:8px">Report</span></div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">200+ resources across all domains</div>
-      </div>
-      <div class="card">
-        <div class="sec">Publications</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Essays, reports, and analysis from participants</div>
-        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-          <div style="flex:1">
-            <div style="font-size:13px;color:var(--text);font-weight:500">Why East Africa Needs a Space Economy Strategy</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">Okello M. · Jul 9, 2026</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="g3" style="margin-bottom:20px">
+          <div class="card click" style="border-left:3px solid var(--gold)" onclick="nav('observatory-news')">
+            <div class="text-label mb-2" style="color:var(--gold)">News</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Filtered for signal · Updated daily</div>
           </div>
-          <span class="tag tag-pub" style="font-size:8px">Essay</span>
-        </div>
-        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-          <div style="flex:1">
-            <div style="font-size:13px;color:var(--text);font-weight:500">Understanding the Outer Space Treaty — A Plain Language Guide</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">Ssempa D. · Jun 22, 2026</div>
+          <div class="card click" style="border-left:3px solid var(--teal)" onclick="nav('observatory-calendar')">
+            <div class="text-label mb-2" style="color:var(--teal)">Calendar</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Global launches & milestones</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">38 upcoming events</div>
           </div>
-          <span class="tag tag-pub" style="font-size:8px">Guide</span>
-        </div>
-        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-          <div style="flex:1">
-            <div style="font-size:13px;color:var(--text);font-weight:500">AfricaSpace 2026 — What the Summit Means for East Africa</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">Nakabugo B. · Jun 15, 2026</div>
+          <div class="card click" style="border-left:3px solid var(--green)" onclick="nav('observatory-opportunities')">
+            <div class="text-label mb-2" style="color:var(--green)">Opportunities</div>
+            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">12 currently open</div>
           </div>
-          <span class="tag tag-pub" style="font-size:8px">Report</span>
         </div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">14 published pieces · <span style="color:var(--gold);cursor:pointer">Submit a publication →</span></div>
+        <div class="g2">
+          <div class="card">
+            <div class="sec">Library</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Books, courses, podcasts, career guides, and tools</div>
+            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Law Fundamentals</div><span class="tag tag-purple" style="font-size:8px">Guide</span></div>
+            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Orbital Mechanics 101</div><span class="tag tag-blue" style="font-size:8px">Course</span></div>
+            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Remote Sensing Data Handbook</div><span class="tag tag-green" style="font-size:8px">Reference</span></div>
+            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Economy Report 2026</div><span class="tag tag-amber" style="font-size:8px">Report</span></div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">200+ resources across all domains</div>
+          </div>
+          <div class="card">
+            <div class="sec">Publications</div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Essays, reports, and analysis from participants</div>
+            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+              <div style="flex:1">
+                <div style="font-size:13px;color:var(--text);font-weight:500">Why East Africa Needs a Space Economy Strategy</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">Okello M. · Jul 9, 2026</div>
+              </div>
+              <span class="tag tag-pub" style="font-size:8px">Essay</span>
+            </div>
+            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+              <div style="flex:1">
+                <div style="font-size:13px;color:var(--text);font-weight:500">Understanding the Outer Space Treaty — A Plain Language Guide</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">Ssempa D. · Jun 22, 2026</div>
+              </div>
+              <span class="tag tag-pub" style="font-size:8px">Guide</span>
+            </div>
+            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+              <div style="flex:1">
+                <div style="font-size:13px;color:var(--text);font-weight:500">AfricaSpace 2026 — What the Summit Means for East Africa</div>
+                <div style="font-size:11px;color:var(--text-tertiary)">Nakabugo B. · Jun 15, 2026</div>
+              </div>
+              <span class="tag tag-pub" style="font-size:8px">Report</span>
+            </div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">14 published pieces · <span style="color:var(--gold);cursor:pointer">Submit a publication →</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">About Observatory</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">The public knowledge space. Curated content for the curious. No login required.</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Trending Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-purple" style="font-size:9px">Space Law</span>
+            <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
+            <span class="tag tag-amber" style="font-size:9px">Mars</span>
+            <span class="tag tag-blue" style="font-size:9px">Policy</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Stats</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">200+</div><div class="aside-stat-lbl">Resources</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">14</div><div class="aside-stat-lbl">Publications</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">38</div><div class="aside-stat-lbl">Events</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Recent Publications</div>
+          <div class="aside-link" onclick="nav('publication-detail')">Why East Africa Needs a Space Economy Strategy</div>
+          <div class="aside-link" onclick="nav('publication-detail')">Understanding the Outer Space Treaty</div>
+          <div class="aside-link" onclick="nav('publication-detail')">AfricaSpace 2026 — Summit Analysis</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Upcoming Events</div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">African Space Policy Summit</span><span style="font-size:10px;color:var(--text-tertiary)">Aug 15</span></div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Artemis Accords Webinar</span><span style="font-size:10px;color:var(--text-tertiary)">Aug 22</span></div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Debris Workshop — Makerere</span><span style="font-size:10px;color:var(--text-tertiary)">Sep 5</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -389,24 +461,48 @@
   <div class="view" id="view-cells">
     <div class="page-title">Cells</div>
     <div class="page-sub">Your active contextual workspaces</div>
-    <div class="g3">
-      <div class="card click" onclick="nav('cell-undertaking')">
-        <div class="flex justify-between mb-2"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
-        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">East Africa Space Sector Mapping</div>
-        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Collaborative research cell. 7 participants. Producing sector mapping report.</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="g3">
+          <div class="card click" onclick="nav('cell-undertaking')">
+            <div class="flex justify-between mb-2"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">East Africa Space Sector Mapping</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Collaborative research cell. 7 participants. Producing sector mapping report.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
+          </div>
+          <div class="card click" onclick="nav('cell-circle')">
+            <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Publications</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Private circle cell. 8 members. Stewarding publications and endorsements.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Active</div>
+          </div>
+          <div class="card click" onclick="nav('cell-delib')">
+            <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris liability framework — who bears responsibility?</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Open deliberation cell. Sponsored from Commons. Motion crystallising.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 12 participants · 3d active</div>
+          </div>
+        </div>
       </div>
-      <div class="card click" onclick="nav('cell-circle')">
-        <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18</span></div>
-        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Publications</div>
-        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Private circle cell. 8 members. Stewarding publications and endorsements.</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Active</div>
-      </div>
-      <div class="card click" onclick="nav('cell-delib')">
-        <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
-        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris liability framework — who bears responsibility?</div>
-        <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Open deliberation cell. Sponsored from Commons. Motion crystallising.</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 12 participants · 3d active</div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Your Cells</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Active</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Lead</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Member</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Cell Types</div>
+          <div class="aside-row"><span class="aside-label">Project</span><span style="font-size:11px;color:var(--text)">Task-oriented work</span></div>
+          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Circle sub-work</span></div>
+          <div class="aside-row"><span class="aside-label">Deliberation</span><span style="font-size:11px;color:var(--text)">Open discussion</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">How Cells Work</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Cells are contextual workspaces formed around specific tasks. They can be spawned from projects, circles, or commons deliberation.</div>
+        </div>
       </div>
     </div>
   </div>
@@ -490,20 +586,44 @@
   <div class="view" id="view-stf">
     <div class="page-title">STF Dash</div>
     <div class="page-sub">Your active Short-Term Facilitator assignments</div>
-    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
-      <div style="background:var(--surface);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-vstf')">
-        <div style="width:36px;height:36px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--gold)">◆</div>
-        <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">vSTF: Candidate Verification — Policy & Advocacy</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle · Due Jul 19</div></div>
-        <span class="badge b-pending">Invitation</span>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+          <div style="background:var(--surface);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-vstf')">
+            <div style="width:36px;height:36px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--gold)">◆</div>
+            <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">vSTF: Candidate Verification — Policy & Advocacy</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle · Due Jul 19</div></div>
+            <span class="badge b-pending">Invitation</span>
+          </div>
+        </div>
+        <div class="sec">Org-wide Active STFs</div>
+        <table class="tbl">
+          <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
+          <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
+          <tr class="click"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Governance audit: Circle health review</td><td>Commons</td><td class="m">Jul 25</td><td><span class="badge b-active">Active</span></td></tr>
+          <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
+        </table>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Your STF Summary</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Pending</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Active</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Completed</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">STF Types</div>
+          <div class="aside-row"><span class="aside-label">vSTF</span><span style="font-size:11px;color:var(--text)">Credential verification</span></div>
+          <div class="aside-row"><span class="aside-label">aSTF</span><span style="font-size:11px;color:var(--text)">Governance audit</span></div>
+          <div class="aside-row"><span class="aside-label">jSTF</span><span style="font-size:11px;color:var(--text)">Judicial investigation</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">How STFs Work</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Short-Term Facilitators are assigned to handle specific verification, audit, or investigation tasks. Each STF room has its own rules and deadlines.</div>
+        </div>
       </div>
     </div>
-    <div class="sec">Org-wide Active STFs</div>
-    <table class="tbl">
-      <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
-      <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
-      <tr class="click"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Governance audit: Circle health review</td><td>Commons</td><td class="m">Jul 25</td><td><span class="badge b-active">Active</span></td></tr>
-      <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
-    </table>
   </div>
 
   <!-- ═══ vSTF: Verification Office ═══ -->
@@ -649,10 +769,10 @@
         <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
       </div>
     </div>
-    <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development. <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal()">Edit</span></div>
+    <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development. <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>
     <div class="g2" style="margin-bottom:20px">
       <div class="card">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal();setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <table class="tbl">
           <tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>
           <tr><td class="s">Space Law</td><td class="m">#1</td><td class="m">1,800</td><td class="m">1,200</td><td><span class="badge b-active">Verified</span></td></tr>
@@ -662,7 +782,7 @@
         </table>
       </div>
       <div class="card">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal();setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Your declared interests, ordered by priority. Drag to reorder.</div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">1</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Space Law</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:100%"></div></div></div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">2</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Remote Sensing</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:90%"></div></div></div>
@@ -974,25 +1094,53 @@
   <!-- ═══ PUBLICATION DETAIL ═══ -->
   <div class="view" id="view-publication-detail">
     <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
-    <div style="max-width:640px">
-      <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">Why East Africa Needs a Coordinated Space Debris Policy</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Okello R., Kimani A. · Journal of African Space Policy · June 2026</div>
-      <div style="display:flex;gap:6px;margin-bottom:16px">
-        <span class="tag tag-blue" style="font-size:10px">Space Law</span>
-        <span class="tag tag-green" style="font-size:10px">Policy</span>
-        <span class="tag tag-amber" style="font-size:10px">Debris</span>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">Why East Africa Needs a Coordinated Space Debris Policy</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Okello R., Kimani A. · Journal of African Space Policy · June 2026</div>
+        <div style="display:flex;gap:6px;margin-bottom:16px">
+          <span class="tag tag-blue" style="font-size:10px">Space Law</span>
+          <span class="tag tag-green" style="font-size:10px">Policy</span>
+          <span class="tag tag-amber" style="font-size:10px">Debris</span>
+        </div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px">
+          <strong>Abstract:</strong> East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context.
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <button class="btn btn-primary" style="font-size:12px">Download PDF</button>
+          <button class="btn btn-sm">Cite</button>
+          <button class="btn btn-sm">Share</button>
+        </div>
+        <div class="detail-section-title">Related Discussions</div>
+        <div class="detail-card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
+        <div class="detail-card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
       </div>
-      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px">
-        <strong>Abstract:</strong> East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context.
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Publication Info</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:12px;color:var(--text)">Essay</span></div>
+          <div class="aside-row"><span class="aside-label">Published</span><span style="font-size:12px;color:var(--text)">Jun 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Views</span><span style="font-size:12px;color:var(--text)">142</span></div>
+          <div class="aside-row"><span class="aside-label">Downloads</span><span style="font-size:12px;color:var(--text)">38</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Authors</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OR</div><div><div style="font-weight:500">Okello R.</div><div style="font-size:10px;color:var(--text-tertiary)">Space Law & Policy</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div><div style="font-size:10px;color:var(--text-tertiary)">Education & Policy</div></div></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-blue" style="font-size:9px">Space Law</span>
+            <span class="tag tag-green" style="font-size:9px">Policy</span>
+            <span class="tag tag-amber" style="font-size:9px">Debris</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Cite</div>
+          <div style="font-size:11px;color:var(--text-secondary);font-family:var(--mono);line-height:1.5;background:var(--surface-raised);padding:10px;border-radius:var(--radius);word-break:break-all">Okello R., Kimani A. (2026). "Why East Africa Needs a Coordinated Space Debris Policy." <em>J. African Space Policy</em>.</div>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:20px">
-        <button class="btn btn-primary" style="font-size:12px">Download PDF</button>
-        <button class="btn btn-sm">Cite</button>
-        <button class="btn btn-sm">Share</button>
-      </div>
-      <div class="detail-section-title">Related Discussions</div>
-      <div class="detail-card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
-      <div class="detail-card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
     </div>
   </div>
 
@@ -1331,13 +1479,42 @@ nav(views[initial] ? initial : 'personal');
 // ─────────────────────────────────────────────────────────────────────────────
 var regStep=1;
 var regStepLabels={1:'About You',2:'Your Background',3:'Your Domains'};
+var regIsEdit=false;
 
-function openRegModal(){
+// Mock profile data for prefill
+var MOCK_PROFILE={
+  name:'Oumo Samuel',
+  location:'Kampala, Uganda',
+  bio:'Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development.',
+  essay:'I came to Solis because I believe African nations need a stronger voice in international space governance. My background is in space law, and I want to help build the capacity of East African institutions to participate meaningfully in debates about lunar resource extraction, debris liability, and orbital spectrum management.'
+};
+
+function openRegModal(editMode){
+  regIsEdit=!!editMode;
   document.getElementById('reg-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  var titleEl=document.querySelector('.reg-modal-title');
+  if(regIsEdit){
+    titleEl.textContent='Edit Profile';
+    regPrefill();
+  }else{
+    titleEl.textContent='Join the Commons';
+  }
   regResetSteps();
 }
 function closeRegModal(){
   document.getElementById('reg-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+function regPrefill(){
+  var n=document.getElementById('reg-name');
+  var l=document.getElementById('reg-location');
+  var b=document.getElementById('reg-bio');
+  var e=document.getElementById('reg-essay');
+  if(n) n.value=MOCK_PROFILE.name;
+  if(l) l.value=MOCK_PROFILE.location;
+  if(b) b.value=MOCK_PROFILE.bio;
+  if(e) e.value=MOCK_PROFILE.essay;
 }
 document.getElementById('reg-modal').addEventListener('click',function(e){
   if(e.target===this) closeRegModal();
@@ -1391,7 +1568,11 @@ function regNext(step){
 
 function regSubmit(){
   closeRegModal();
-  alert('Profile submitted! Competences will go through vSTF verification. Welcome to the Commons.');
+  if(regIsEdit){
+    alert('Profile updated! Competences will go through vSTF verification.');
+  }else{
+    alert('Profile submitted! Competences will go through vSTF verification. Welcome to the Commons.');
+  }
   nav('personal');
 }
 

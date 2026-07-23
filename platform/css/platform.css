@@ -509,12 +509,13 @@ select.form-input{cursor:pointer}
 .modal-header{font-family:var(--display);font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;padding-right:24px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle)}
 @keyframes modalIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.reg-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
+.reg-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
 .reg-modal-overlay.active{display:flex}
-.reg-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;position:relative;animation:modalIn .2s ease}
+body.modal-open{overflow:hidden}
+.reg-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;height:80vh;max-height:80vh;display:flex;flex-direction:column;position:relative;animation:modalIn .2s ease}
 .reg-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;color:var(--text-tertiary);cursor:pointer;z-index:1}
 .reg-modal-close:hover{color:var(--text)}
-.reg-modal-body{padding:24px}
+.reg-modal-body{padding:24px;overflow-y:auto;flex:1;min-height:0}
 .reg-modal-title{font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px;padding-right:24px}
 .reg-modal-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
 .reg-modal-steps{display:flex;gap:4px;margin-bottom:20px}
