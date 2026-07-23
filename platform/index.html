@@ -63,7 +63,7 @@
     <div class="page-title">Oumo Samuel</div>
     <div class="page-sub">Participant · Kampala, Uganda · Member since Jul 2026 · Active</div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong but your Policy curiosity has grown 18% this cycle. You're eligible for 2 open xSTF slots in that domain — participating would accelerate your pathway.</div></div>
-    <div class="g4" style="margin-bottom:20px">
+    <div class="g4">
       <div class="card metric-card"><div class="mc-label">Standing W<sub>s</sub></div><div class="mc-val">847</div><div class="mc-sub">Perceived competence</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">1,200</div><div class="mc-sub">Declared + verified</div><div class="mc-drift mc-flat">MSc Space Studies</div></div>
       <div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">34</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift mc-up">↑ 6 from last cycle</div></div>
@@ -133,11 +133,14 @@
   <div class="view" id="view-inbox">
     <div class="page-title">Inbox</div>
     <div class="page-sub">Your notifications and assignments</div>
-    <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
-    <div class="inbox-item unread" onclick="modalVote()"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
-    <div class="inbox-item unread" onclick="modalCuriosityMatch()"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Project · Remote Sensing match 87%</div></div></div>
-    <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
-    <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
+    <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">Unread</button><button class="btn btn-sm">STF</button><button class="btn btn-sm">Circles</button></div>
+    <div class="card">
+      <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
+      <div class="inbox-item unread" onclick="modalVote()"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
+      <div class="inbox-item unread" onclick="modalCuriosityMatch()"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Project · Remote Sensing match 87%</div></div></div>
+      <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
+      <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
+    </div>
   </div>
 
   <!-- ═══ COMMONS ═══ -->
@@ -649,10 +652,10 @@
           <div class="text-label mb-2">Current claimed W<sub>h</sub></div>
           <div style="font-family:var(--serif);font-size:28px;color:var(--text);font-weight:600;margin-bottom:12px">1,200</div>
           <div class="text-label mb-2">Your adjusted assessment</div>
-          <input type="number" value="1200" style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px 12px;font-family:var(--mono);font-size:14px;margin-bottom:10px">
-          <textarea placeholder="Rationale for your assessment..." style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius);padding:8px 12px;font-size:12px;height:70px;resize:none"></textarea>
+          <input type="number" value="1200" class="form-input" style="font-family:var(--mono);font-size:14px;margin-bottom:10px">
+          <textarea placeholder="Rationale for your assessment..." class="form-input" style="height:70px;resize:none"></textarea>
         </div>
-        <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="confirmModal('File this assessment? It will be submitted to the Meta-aSTF for review.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this assessment? It will be submitted to the Meta-aSTF for review.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
     </div>
   </div>
@@ -839,41 +842,41 @@
         <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;max-width:500px;line-height:1.5" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="g2">
       <div class="detail-section">
         <div class="detail-section-title">Competences (Wh)</div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--gold)">2,400</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--gold)">2,400</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:80%;background:var(--gold)"></div></div>
         </div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--gold)">1,200</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--gold)">1,200</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:40%;background:var(--gold)"></div></div>
         </div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Remote Sensing</span><span style="font-family:var(--mono);color:var(--gold)">800</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Remote Sensing</span><span style="font-family:var(--mono);color:var(--gold)">800</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:27%;background:var(--gold)"></div></div>
         </div>
       </div>
       <div class="detail-section">
         <div class="detail-section-title">Interests</div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--teal)">2,600</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--teal)">2,600</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:87%;background:var(--teal)"></div></div>
         </div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Philosophy & Ethics</span><span style="font-family:var(--mono);color:var(--teal)">1,800</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Philosophy & Ethics</span><span style="font-family:var(--mono);color:var(--teal)">1,800</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:60%;background:var(--teal)"></div></div>
         </div>
         <div class="detail-card">
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--teal)">1,500</span></div>
+          <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--teal)">1,500</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:50%;background:var(--teal)"></div></div>
         </div>
       </div>
     </div>
     <div class="detail-section">
       <div class="detail-section-title">Roles & Affiliations</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="flex gap-2" style="flex-wrap:wrap">
         <span class="badge b-active">Member · UAS</span>
         <span class="badge b-active">Contributor · East Africa Mapping</span>
         <span class="badge b-pending">vSTF Assessor</span>
@@ -881,11 +884,9 @@
     </div>
     <div class="detail-section">
       <div class="detail-section-title">Recent Activity</div>
-      <div class="detail-card" style="font-size:12px;color:var(--text-secondary)">
-        <div style="margin-bottom:4px"><span style="color:var(--text-tertiary)">2h ago</span> · Submitted assessment for Space Law motion</div>
-        <div style="margin-bottom:4px"><span style="color:var(--text-tertiary)">1d ago</span> · Added "Outer Space Treaty analysis" to profile</div>
-        <div><span style="color:var(--text-tertiary)">3d ago</span> · Joined the Space Law Circle</div>
-      </div>
+      <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Submitted assessment for Space Law motion<div class="ai-when">2h ago</div></div>
+      <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>Added "Outer Space Treaty analysis" to profile<div class="ai-when">1d ago</div></div>
+      <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Joined the Space Law Circle<div class="ai-when">3d ago</div></div>
     </div>
   </div>
 
@@ -1146,7 +1147,7 @@
 
   <!-- ═══ DOMAIN MAP ═══ -->
   <div class="view" id="view-domain-map">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="flex justify-between items-center" style="margin-bottom:12px">
       <div>
         <div class="page-title">Domain Map</div>
         <div class="page-sub">Membership constellation across 16 knowledge domains</div>
