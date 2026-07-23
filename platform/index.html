@@ -133,7 +133,7 @@
   <div class="view" id="view-inbox">
     <div class="page-title">Inbox</div>
     <div class="page-sub">Your notifications and assignments</div>
-    <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">Unread</button><button class="btn btn-sm">STF</button><button class="btn btn-sm">Circles</button></div>
+    <div class="flex gap-2 mb-3"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">Unread</button><button class="btn btn-sm">STF</button><button class="btn btn-sm">Circles</button></div>
     <div class="card">
       <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
       <div class="inbox-item unread" onclick="modalVote()"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
@@ -325,20 +325,20 @@
     <div class="layout-split">
       <div class="layout-main">
         <div class="g3" style="margin-bottom:20px">
-          <div class="card click" style="border-left:3px solid var(--gold)" onclick="nav('observatory-news')">
-            <div class="text-label mb-2" style="color:var(--gold)">News</div>
-            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">Filtered for signal · Updated daily</div>
+          <div class="card click" onclick="nav('observatory-news')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--gold-soft);color:var(--gold);border-color:var(--gold-border)">News</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Updated daily</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Filtered for signal across all domains</div>
           </div>
-          <div class="card click" style="border-left:3px solid var(--teal)" onclick="nav('observatory-calendar')">
-            <div class="text-label mb-2" style="color:var(--teal)">Calendar</div>
-            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Global launches & milestones</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">38 upcoming events</div>
+          <div class="card click" onclick="nav('observatory-calendar')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--teal-soft);color:var(--teal);border-color:var(--teal-border)">Calendar</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">38 events</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Global launches & milestones</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Upcoming conferences, deadlines, launches</div>
           </div>
-          <div class="card click" style="border-left:3px solid var(--green)" onclick="nav('observatory-opportunities')">
-            <div class="text-label mb-2" style="color:var(--green)">Opportunities</div>
-            <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
-            <div style="font-size:11px;color:var(--text-tertiary)">12 currently open</div>
+          <div class="card click" onclick="nav('observatory-opportunities')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--green-soft);color:var(--green);border-color:var(--green-border)">Opportunities</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">12 open</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Grants, jobs, call for papers</div>
           </div>
         </div>
         <div class="g2">
@@ -590,7 +590,7 @@
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
-        <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion and move it to formal vote?',function(){})">Confirm & Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
+        <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion and move it to formal vote?',function(){})">Confirm & Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
       </div>
     </div>
   </div>
@@ -601,12 +601,12 @@
     <div class="page-sub">Your active Short-Term Facilitator assignments</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
-          <div style="background:var(--surface);border:1px solid var(--gold-border);border-radius:var(--radius-lg);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:16px" onclick="nav('stf-vstf')">
-            <div style="width:36px;height:36px;border-radius:8px;background:var(--gold-soft);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--gold)">◆</div>
-            <div style="flex:1"><div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:3px">vSTF: Candidate Verification — Policy & Advocacy</div><div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle · Due Jul 19</div></div>
-            <span class="badge b-pending">Invitation</span>
-          </div>
+        <div class="sec">Your Assignment</div>
+        <div class="card click" onclick="nav('stf-vstf')">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">Invitation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Jul 19</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">vSTF: Candidate Verification — Policy & Advocacy</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">Wh verification for 3 candidates in the Policy & Advocacy domain.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle</div>
         </div>
         <div class="sec">Org-wide Active STFs</div>
         <table class="tbl">
@@ -785,7 +785,7 @@
     <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development. <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>
     <div class="g2" style="margin-bottom:20px">
       <div class="card">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
+        <div class="sec flex justify-between items-center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <table class="tbl">
           <tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>
           <tr><td class="s">Space Law</td><td class="m">#1</td><td class="m">1,800</td><td class="m">1,200</td><td><span class="badge b-active">Verified</span></td></tr>
@@ -795,7 +795,7 @@
         </table>
       </div>
       <div class="card">
-        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
+        <div class="sec flex justify-between items-center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Your declared interests, ordered by priority. Drag to reorder.</div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">1</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Space Law</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:100%"></div></div></div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">2</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Remote Sensing</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:90%"></div></div></div>
@@ -843,57 +843,55 @@
 
   <!-- ═══ PARTICIPANT DETAIL ═══ -->
   <div class="view" id="view-participant-detail">
-    <div class="detail-back" onclick="nav('participants')">← Back to Participants</div>
-    <div class="detail-header">
-      <div class="detail-avatar" id="pd-avatar">OK</div>
-      <div>
-        <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--text)" id="pd-name">Okello Robert</div>
-        <div class="detail-meta" id="pd-meta">Kampala, Uganda · Joined March 2025</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;max-width:500px;line-height:1.5" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
+    <div class="back" onclick="nav('participants')">← Back to Participants</div>
+    <div class="hero">
+      <div class="hero-icon" id="pd-avatar" style="background:var(--teal-soft);border:1px solid var(--teal-border);color:var(--teal);font-size:18px">OK</div>
+      <div style="flex:1">
+        <div class="hero-title" id="pd-name">Okello Robert</div>
+        <div class="hero-desc" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
+        <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px" id="pd-meta">Kampala, Uganda · Joined Mar 2025</span></div>
       </div>
     </div>
     <div class="g2">
-      <div class="detail-section">
-        <div class="detail-section-title">Competences (Wh)</div>
-        <div class="detail-card">
+      <div>
+        <div class="sec">Competences (Wh)</div>
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--gold)">2,400</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:80%;background:var(--gold)"></div></div>
         </div>
-        <div class="detail-card">
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--gold)">1,200</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:40%;background:var(--gold)"></div></div>
         </div>
-        <div class="detail-card">
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Remote Sensing</span><span style="font-family:var(--mono);color:var(--gold)">800</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:27%;background:var(--gold)"></div></div>
         </div>
       </div>
-      <div class="detail-section">
-        <div class="detail-section-title">Interests</div>
-        <div class="detail-card">
+      <div>
+        <div class="sec">Interests</div>
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--teal)">2,600</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:87%;background:var(--teal)"></div></div>
         </div>
-        <div class="detail-card">
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Philosophy & Ethics</span><span style="font-family:var(--mono);color:var(--teal)">1,800</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:60%;background:var(--teal)"></div></div>
         </div>
-        <div class="detail-card">
+        <div class="card">
           <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--teal)">1,500</span></div>
           <div class="bar-trk"><div class="bar-fill" style="width:50%;background:var(--teal)"></div></div>
         </div>
       </div>
     </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Roles & Affiliations</div>
-      <div class="flex gap-2" style="flex-wrap:wrap">
-        <span class="badge b-active">Member · UAS</span>
-        <span class="badge b-active">Contributor · East Africa Mapping</span>
-        <span class="badge b-pending">vSTF Assessor</span>
-      </div>
+    <div class="sec">Roles & Affiliations</div>
+    <div class="flex gap-2" style="flex-wrap:wrap;margin-bottom:20px">
+      <span class="badge b-active">Member · UAS</span>
+      <span class="badge b-active">Contributor · East Africa Mapping</span>
+      <span class="badge b-pending">vSTF Assessor</span>
     </div>
-    <div class="detail-section">
-      <div class="detail-section-title">Recent Activity</div>
+    <div class="sec">Recent Activity</div>
+    <div class="card">
       <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Submitted assessment for Space Law motion<div class="ai-when">2h ago</div></div>
       <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>Added "Outer Space Treaty analysis" to profile<div class="ai-when">1d ago</div></div>
       <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Joined the Space Law Circle<div class="ai-when">3d ago</div></div>
@@ -902,7 +900,7 @@
 
   <!-- ═══ THREAD DETAIL ═══ -->
   <div class="view" id="view-thread-detail">
-    <div class="detail-back" onclick="nav('commons')">← Back to Discussions</div>
+    <div class="back" onclick="nav('commons')">← Back to Discussions</div>
     <div class="layout-split">
       <div class="layout-main">
         <div class="hero">
@@ -963,7 +961,7 @@
 
   <!-- ═══ CIRCLE DETAIL ═══ -->
   <div class="view" id="view-circle-detail">
-    <div class="detail-back" onclick="nav('circles')">← Back to Circles</div>
+    <div class="back" onclick="nav('circles')">← Back to Circles</div>
     <div class="hero">
       <div class="hero-icon" style="background:var(--purple-soft);border:1px solid var(--purple-border);color:var(--purple);font-size:18px">SL</div>
       <div style="flex:1">
@@ -1032,7 +1030,7 @@
 
   <!-- ═══ OBSERVATORY: NEWS ═══ -->
   <div class="view" id="view-observatory-news">
-    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="back" onclick="nav('observatory')">← Back to Observatory</div>
     <div class="page-title">News</div>
     <div class="page-sub">Latest from the space sector</div>
     <div class="obs-subgrid" style="margin-top:16px">
@@ -1045,38 +1043,38 @@
 
   <!-- ═══ OBSERVATORY: CALENDAR ═══ -->
   <div class="view" id="view-observatory-calendar">
-    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="back" onclick="nav('observatory')">← Back to Observatory</div>
     <div class="page-title">Calendar</div>
     <div class="page-sub">Upcoming events and deadlines</div>
     <div style="margin-top:16px">
-      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--gold-soft);color:var(--gold);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">15</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">African Space Policy Summit</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Addis Ababa, Ethiopia · Registration open</div></div></div></div>
-      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--blue-soft);color:var(--blue);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">22</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Artemis Accords — East African Webinar</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Online · Free</div></div></div></div>
-      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--teal-soft);color:var(--teal);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">5</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Space Debris Workshop — Makerere University</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Kampala, Uganda · 30 spots remaining</div></div></div></div>
-      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--purple-soft);color:var(--purple);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">20</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">IAF Congress — Milan</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Milan, Italy · Early bird deadline Aug 30</div></div></div></div>
+      <div class="card"><div class="flex gap-3 items-start"><div style="background:var(--gold-soft);color:var(--gold);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">15</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">African Space Policy Summit</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Addis Ababa, Ethiopia · Registration open</div></div></div></div>
+      <div class="card"><div class="flex gap-3 items-start"><div style="background:var(--blue-soft);color:var(--blue);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">22</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Artemis Accords — East African Webinar</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Online · Free</div></div></div></div>
+      <div class="card"><div class="flex gap-3 items-start"><div style="background:var(--teal-soft);color:var(--teal);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">5</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Space Debris Workshop — Makerere University</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Kampala, Uganda · 30 spots remaining</div></div></div></div>
+      <div class="card"><div class="flex gap-3 items-start"><div style="background:var(--purple-soft);color:var(--purple);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">20</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">IAF Congress — Milan</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Milan, Italy · Early bird deadline Aug 30</div></div></div></div>
     </div>
   </div>
 
   <!-- ═══ OBSERVATORY: OPPORTUNITIES ═══ -->
   <div class="view" id="view-observatory-opportunities">
-    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="back" onclick="nav('observatory')">← Back to Observatory</div>
     <div class="page-title">Opportunities</div>
     <div class="page-sub">Calls for papers, grants, and jobs</div>
     <div style="margin-top:16px">
-      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">ESA Young Engineer Trainee Programme</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Trainee position at ESTEC. Deadline: Sept 15, 2026. Open to EU and associated states.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
-      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">AU Space Research Grant — Phase 2</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">$50K grants for African-led space research. Deadline: Oct 1, 2026. Teams of 3+ welcome.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
-      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">Remote Sensing Analyst — RCMRD</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Full-time position at the Regional Centre for Mapping of Resources for Development, Nairobi.</div><div style="margin-top:8px"><span class="badge b-pending">Reviewing</span></div></div>
-      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">Call for Papers: African Space Law Journal</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Inaugural issue. Topics: national space legislation, resource governance, debris liability. Deadline: Nov 30, 2026.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">ESA Young Engineer Trainee Programme</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Trainee position at ESTEC. Deadline: Sept 15, 2026. Open to EU and associated states.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">AU Space Research Grant — Phase 2</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">$50K grants for African-led space research. Deadline: Oct 1, 2026. Teams of 3+ welcome.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">Remote Sensing Analyst — RCMRD</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Full-time position at the Regional Centre for Mapping of Resources for Development, Nairobi.</div><div style="margin-top:8px"><span class="badge b-pending">Reviewing</span></div></div>
+      <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">Call for Papers: African Space Law Journal</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Inaugural issue. Topics: national space legislation, resource governance, debris liability. Deadline: Nov 30, 2026.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
     </div>
   </div>
 
   <!-- ═══ PUBLICATION DETAIL ═══ -->
   <div class="view" id="view-publication-detail">
-    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="back" onclick="nav('observatory')">← Back to Observatory</div>
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">Why East Africa Needs a Coordinated Space Debris Policy</div>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Okello R., Kimani A. · Journal of African Space Policy · June 2026</div>
-        <div style="display:flex;gap:6px;margin-bottom:16px">
+        <div class="flex gap-1 mb-3">
           <span class="tag tag-blue" style="font-size:10px">Space Law</span>
           <span class="tag tag-green" style="font-size:10px">Policy</span>
           <span class="tag tag-amber" style="font-size:10px">Debris</span>
@@ -1084,14 +1082,14 @@
         <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px">
           <strong>Abstract:</strong> East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context.
         </div>
-        <div style="display:flex;gap:8px;margin-bottom:20px">
+        <div class="flex gap-2 mb-4">
           <button class="btn btn-primary" style="font-size:12px">Download PDF</button>
           <button class="btn btn-sm">Cite</button>
           <button class="btn btn-sm">Share</button>
         </div>
-        <div class="detail-section-title">Related Discussions</div>
-        <div class="detail-card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
-        <div class="detail-card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
+        <div class="sec">Related Discussions</div>
+        <div class="card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
+        <div class="card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1182,7 +1180,7 @@
             <textarea class="form-input" rows="5" placeholder="Tell us your story. What brought you to the Solarian Commons? What do you hope to contribute or learn?" id="reg-essay"></textarea>
           </div>
         </div>
-        <div style="display:flex;justify-content:flex-end">
+        <div class="flex justify-end">
           <button class="btn btn-primary" onclick="regNext(2)">Continue →</button>
         </div>
       </div>
@@ -1282,9 +1280,9 @@
           </div>
         </div>
 
-        <div style="display:flex;justify-content:space-between">
+        <div class="flex justify-between mb-3">
           <button class="btn btn-sm" onclick="regNext(1)">← Back</button>
-          <div style="display:flex;gap:8px">
+          <div class="flex gap-2">
             <button class="btn btn-sm" onclick="regSkipStep2()" style="color:var(--text-tertiary)">Skip for now</button>
             <button class="btn btn-primary" onclick="regNext(3)">Continue →</button>
           </div>
@@ -1350,7 +1348,7 @@
         </div>
 
         <div class="card" style="margin-bottom:16px;background:var(--surface-raised)">
-          <div style="display:flex;gap:12px;align-items:flex-start">
+          <div class="flex gap-3 items-start">
             <div style="font-size:20px;margin-top:2px">&#9670;</div>
             <div>
               <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Ready to submit</div>
@@ -1359,7 +1357,7 @@
           </div>
         </div>
 
-        <div style="display:flex;justify-content:space-between">
+        <div class="flex justify-between">
           <button class="btn btn-sm" onclick="regNext(2)">← Back</button>
           <button class="btn btn-primary" onclick="regSubmit()">Submit →</button>
         </div>
