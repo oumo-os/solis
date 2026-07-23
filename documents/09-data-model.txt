@@ -1,0 +1,285 @@
+# Solis Data Model — Mock Reference
+
+## Entities
+
+### Participant
+```
+id: string
+name: string
+location: string
+joined: date
+bio: string
+status: "active" | "inactive" | "probation"
+avatar: string (initials)
+
+// Declared by participant
+domains_declared: [
+  {
+    domain_id: string,
+    wh: number,          // Hard competence (0-3000), declared by participant
+    evidence: string,    // Optional evidence URL or text
+    verified: boolean,   // True if vSTF verified
+    declared_at: date
+  }
+]
+
+interests_ranked: [
+  {
+    domain_id: string,
+    rank: number         // 1 = highest priority, 10 = lowest
+  }
+]
+
+// Calculated by system
+ws: number               // Standing per domain (for now = wh, later drifts)
+standing_total: number   // Sum of all ws values
+interest_score: number   // Weighted sum of interest ranks (#1=10, #10=1)
+activity_count: number   // Total actions this cycle
+last_active: date
+```
+
+### Domain
+```
+id: string               // e.g., "space-law-policy"
+name: string             // e.g., "Space Law & Policy"
+type: "knowledge" | "affiliation" | "experiential"
+level: number            // 1 = structured profile, 2 = knowledge discipline, 3 = administrative
+parent: string|null      // Parent domain if nested
+active: boolean
+
+// Calculated from participant data
+member_count: number     // Participants with both competence AND interest
+competence_avg: number   // Average wh across participants
+interest_avg: number     // Average interest score
+```
+
+### Domain Entry (Registration)
+```
+id: string
+participant_id: string
+entry_name: string       // e.g., "Uganda Astronomical Society", "MSc Space Studies"
+entry_type: "affiliation" | "profession" | "academic" | "other"
+level: string            // Varies by type:
+                         //   Affiliation: Affiliate, Member, Representative, Leadership
+                         //   Knowledge: None, Elementary, Highschool, Self-taught, Bachelors, Masters, PhD, Professional, Expert
+                         //   Experiential: Explored, Familiar, Experienced, Fluent, Native, Professional
+years: number|null       // Optional duration
+year: number|null        // Optional year (for academic)
+domains: [
+  {
+    name: string,        // Domain name (can be new or existing)
+    type: string         // knowledge | affiliation | experiential
+  }
+]
+// Each entry can have multiple domains
+// Some entries ARE domains themselves (e.g., "Uganda Astronomical Society" is an affiliation domain)
+```
+
+### Discussion
+```
+id: string
+title: string
+body: string
+author_id: string        // Participant who posted
+domain_id: string        // Primary domain tag
+tags: string[]           // Additional domain tags
+tier: 1|2|3|4            // Content tier (1=free, 2=steward approval, 3=steward only, 4=system)
+created_at: date
+updated_at: date
+status: "open" | "resolved" | "archived"
+
+// Calculated
+reply_count: number
+last_reply_at: date
+endorsed_by: string[]    // Steward endorsements
+```
+
+### Undertaking
+```
+id: string
+title: string
+description: string
+proposer_id: string      // Any participant can propose
+domain_id: string
+status: "proposed" | "active" | "completed" | "cancelled"
+created_at: date
+completed_at: date|null
+deliverable: string      // What success looks like
+end_point: string        // When it's done
+
+// Participants
+participants: string[]   // Participant IDs
+steward_oversee: string|null  // Optional steward circle oversight
+
+// Calculated
+contribution_count: number
+```
+
+### Organisation
+```
+id: string
+name: string
+type: "astronomical-society" | "university-club" | "research-group" | "agency" | "other"
+location: string
+member_count: number
+affiliated_since: date
+description: string
+domains: string[]        // Related domains
+contact: string
+website: string
+status: "affiliated" | "pending"
+```
+
+### StewardCircle
+```
+id: string
+domain_id: string        // Mandated domain
+mandate: string          // What this circle is responsible for
+stewards: string[]       // Participant IDs (co-stewards)
+created_at: date
+status: "active" | "dissolved"
+
+// From governance doc
+// One role type, no hierarchy
+// Mandate is the boundary of authority
+// Collectively accountable
+```
+
+### Cell
+```
+id: string
+type: "circle" | "undertaking" | "stf"
+parent_id: string        // Circle/Undertaking/STF ID
+members: string[]        // Participant IDs
+created_at: date
+status: "active" | "archived"
+
+// Content
+messages: [
+  {
+    id: string,
+    author_id: string,
+    body: string,
+    created_at: date,
+    tier: 1|2|3|4
+  }
+]
+```
+
+### STF (Special Task Force)
+```
+id: string
+type: "vSTF" | "aSTF" | "xSTF" | "jSTF"
+domain_id: string
+commissioned_by: string  // Steward circle ID or participant (jSTF)
+reason: string
+status: "selecting" | "active" | "completed" | "failed"
+created_at: date
+completed_at: date|null
+
+// Selection
+eligible_pool: number    // How many were eligible
+selected_count: number   // How many were selected
+members: string[]        // Participant IDs (masked until confirmed)
+confirmed: boolean       // True when members know each other
+
+// Output
+verdict: string|null     // jSTF verdict or xSTF deliverable
+report: string|null      // Written report
+```
+
+### Activity (Audit Trail)
+```
+id: string
+participant_id: string
+action: string           // "declared_competence", "joined_undertaking", "posted_discussion", etc.
+domain_id: string
+details: object          // Action-specific data
+created_at: date
+
+// This is the raw data that drives:
+// - Ws drift (later)
+// - Interest drift (later)
+// - Standing calculation (later)
+// - Activity timeline (now)
+```
+
+---
+
+## Relationships
+
+```
+Participant --declares--> Domain (competence: wh)
+Participant --ranks--> Domain (interest: rank)
+Participant --joins--> Undertaking
+Participant --posts--> Discussion
+Participant --serves_in--> StewardCircle
+Participant --selected_for--> STF
+
+Organisation --affiliates_with--> Solarian Commons
+Organisation --related_to--> Domain
+
+StewardCircle --manages--> Domain
+StewardCircle --oversees--> Undertaking (optional)
+StewardCircle --creates--> Cell (circle cell)
+
+Undertaking --has--> Cell (undertaking cell)
+STF --has--> Cell (stf cell)
+
+Discussion --tagged_with--> Domain
+Undertaking --in_domain--> Domain
+
+Activity --feeds--> Standing (Ws)
+Activity --feeds--> Interest drift
+```
+
+---
+
+## Mock Data (Seed)
+
+### Domains (16 knowledge + 7 administrative)
+Knowledge:
+1. Astronomy & Astrophysics
+2. Aerospace Engineering
+3. Earth & Planetary Science
+4. Space Medicine & Biology
+5. Space Law & Policy
+6. Telecommunications & Signals
+7. Computer Science & Software
+8. Physics
+9. Materials Science
+10. Robotics & Automation
+11. Remote Sensing
+12. Space Architecture
+13. Space Finance & Economics
+14. Science Communication
+15. Philosophy & Ethics of Space
+16. Art & Culture of Space
+
+Administrative:
+17. Participation
+18. Publications
+19. Events
+20. Knowledge & Observatory
+21. Policy & Advocacy
+22. Undertakings
+23. Domain Governance
+
+### Participants (mock)
+```
+Oumo Samuel — Space Law (#1, wh:1800), Remote Sensing (#2, wh:1200), Policy (#3, wh:640), Mars Habitability (#4, wh:600)
+Akello J. — Space Law (#1, wh:1800), Astrophysics (#2, wh:1200)
+Mwenda T. — Remote Sensing (#1, wh:1200), Events (#2, wh:800)
+Namugga C. — Publications (#1, wh:1400), Space Medicine (#2, wh:1050)
+Ssempa D. — Space Law (#1, wh:900), Policy (#2, wh:760)
+Kimani A. — Education (#1, wh:1100), Communications (#2, wh:980)
+Osei K. — Propulsion (#1, wh:2000), Launch Systems (#2, wh:1380)
+Diallo M. — Space Finance (#1, wh:800), Entrepreneurship (#2, wh:720)
+```
+
+### Organisations (mock)
+```
+Uganda Astronomical Society — Kampala, affiliated since 2026
+East African Astronomical Society — Nairobi, affiliated since 2026
+Space Generation Advisory Council — Vienna, affiliated since 2026
+```

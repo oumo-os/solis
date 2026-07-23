@@ -1,0 +1,100 @@
+# Solis Project Timeline
+
+## Phase 0: Founding (2026 — now)
+- Founding documents written (7 docs complete)
+- Emblem designed and implemented
+- Solis platform prototype built
+- Solarian Society registered in Kampala
+- Founding trustees established
+
+## Phase 1: Core Identity Layer
+- Participant profiles with domain interests + competence declarations
+- 16-domain taxonomy (seeded, emerging from activity)
+- Interest ranking system (priority scoring)
+- Basic domain routing — content finds people by declared interest
+- Standing calculation per domain (Ws)
+
+## Phase 2: Discussions + Affiliation
+- Threaded, domain-tagged discussions
+- Organisation affiliation pages (self-service, no approval)
+- Tier 1 content freely posted, Tier 2 requires steward approval
+- Domain routing — discussions surface by declared interest, not group membership
+
+## Phase 3: Stewardship + STF Framework
+- Steward circles form organically from contribution
+- vSTF (verification) — competence declarations verified by randomly selected peers
+- aSTF (audit) — steward decisions quality-checked
+- Standing system matures — cumulative trust record builds
+- Cells (private deliberation spaces) for circles and undertakings
+
+## Phase 4: Undertakings + Expeditions
+- Any participant can propose an undertaking (no approval required)
+- Undertaking cells form automatically
+- xSTF (execution) commissioned by steward circles
+- Completed undertakings archive to the Observatory
+- Initiatives (ongoing efforts) run alongside undertakings
+
+## Phase 5: Observatory
+- Curated news, opportunities, library, publications
+- Tier 2 content (steward-approved) feeds the Observatory
+- No participation required to access — open front door
+- Domain taxonomy makes content discoverable
+
+## Phase 6: Scale + Succession
+- Regional expansion (East Africa → continent)
+- STF selection pool grows → governance reliability improves
+- Stewards train their successors
+- No decision that can only be reversed by founders
+- Founding generation steps back
+
+## Dependency Chain
+Identity → Domains → Discussions → Stewardship → Undertakings → Observatory → Scale
+    ↓                                                                      ↓
+Standing ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
+## Key Design Constraints
+- Archive is governance — every phase feeds the archive
+- STF selection improves with scale
+- Governance activates at threshold, not on a date
+- Heuristic-first, AI-later for domain routing
+- Ws is per-domain, not a unified score
+- MVP first, perfect later
+
+## MVP Strategy: Mock First, Plumb Later
+
+### Principle
+Build what the user sees and interacts with first. Fix the plumbing behind it after.
+Don't ask members to redeclare competences — change the formula to fit the data.
+
+### Ws (Soft Competence) — For Now
+- Ws = 1:1 reflection of Wh (declared and verified hard competence)
+- Drift calculation implemented later when real activity data exists
+- This means the domain bars show the same value for both
+- The visual structure is in place; the math catches up later
+
+### What Works Now (Real)
+- Profile creation and declaration
+- Domain interest ranking (priority scoring)
+- Competence declaration (Wh values)
+- Domain metrics display (Ws mirrors Wh)
+- Navigation between views
+- SolMark emblem
+- Personal dashboard
+- Profile view
+
+### What Shows "[Coming Soon]" (Visible, Not Functional)
+- Discussions (threaded, domain-tagged)
+- Undertakings (proposals, cells)
+- Cells (private deliberation)
+- STF Dash (vSTF, aSTF, xSTF, jSTF)
+- Observatory (public knowledge space)
+- Organisation affiliation
+- Inbox notifications
+
+### What's Hidden (Not Shown Yet)
+- Advanced standing calculation (Ws drift from activity)
+- AI-based domain routing
+- STF selection algorithm
+- jSTF justice mechanisms
+- Audit trails
+- Succession framework

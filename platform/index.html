@@ -21,12 +21,14 @@
       <div class="nav-label">Personal</div>
       <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon">⌂</span> Personal</div>
       <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon">◫</span> Inbox <span class="nav-badge">3</span></div>
+      <div class="nav-item" data-v="registration" onclick="nav('registration')"><span class="nav-icon">✎</span> Edit Profile</div>
     </div>
     <div class="nav-section">
-      <div class="nav-label">Organisation</div>
-      <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">◎</span> Commons</div>
-      <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon">◈</span> Undertakings</div>
+      <div class="nav-label">Commons</div>
+      <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">◎</span> Discussions</div>
+      <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon">◈</span> Projects</div>
       <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon">◉</span> Observatory</div>
+      <div class="nav-item" data-v="domain-map" onclick="nav('domain-map')"><span class="nav-icon">✦</span> Domain Map</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Spaces</div>
@@ -51,7 +53,7 @@
       <div class="topbar-path" id="topbar-path"><span>Personal</span></div>
       <div class="topbar-actions">
         <span class="motto">Ultra hic et nunc</span>
-        <button class="btn btn-primary">+ Propose</button>
+        <button class="btn btn-primary" onclick="openProposalModal()">+ Propose</button>
       </div>
     </div>
     <div class="content">
@@ -65,7 +67,7 @@
       <div class="card metric-card"><div class="mc-label">Standing W<sub>s</sub></div><div class="mc-val">847</div><div class="mc-sub">Perceived competence</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">1,200</div><div class="mc-sub">Declared + verified</div><div class="mc-drift mc-flat">MSc Space Studies</div></div>
       <div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">34</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift mc-up">↑ 6 from last cycle</div></div>
-      <div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">3</div><div class="mc-sub">1 Circle · 2 Undertakings</div><div class="mc-drift mc-flat">Since Jul 2026</div></div>
+      <div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">3</div><div class="mc-sub">1 Circle · 2 Projects</div><div class="mc-drift mc-flat">Since Jul 2026</div></div>
     </div>
     <div class="g2">
       <div class="card">
@@ -131,40 +133,100 @@
   <div class="view" id="view-inbox">
     <div class="page-title">Inbox</div>
     <div class="page-sub">Your notifications and assignments</div>
-    <div class="inbox-item unread"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
-    <div class="inbox-item unread"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
-    <div class="inbox-item unread"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Undertaking · Remote Sensing match 87%</div></div></div>
+    <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
+    <div class="inbox-item unread" onclick="modalVote()"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
+    <div class="inbox-item unread" onclick="modalCuriosityMatch()"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Project · Remote Sensing match 87%</div></div></div>
     <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
     <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
   </div>
 
   <!-- ═══ COMMONS ═══ -->
   <div class="view" id="view-commons">
-    <div class="page-title">Commons</div>
+    <div class="page-title">Discussions</div>
     <div class="page-sub">Open discussion · Solis Commons</div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Showing 3 threads matching your Circle mandates (Space Law, Remote Sensing) and 2 matching your Curiosities (Policy, Mars Habitability). <span style="color:var(--text-tertiary)">847 total threads accessible.</span></div></div>
-    <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
-    <div class="feed-item"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
-    <div class="feed-item"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
-    <div class="feed-item"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
-    <div class="feed-item"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
+        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
+        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
+        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
+        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Your Circles</div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law Circle</span><span class="badge b-active" style="font-size:8px">Active</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing Circle</span><span class="badge b-active" style="font-size:8px">Active</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Trending Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-purple" style="font-size:9px">Space Law</span>
+            <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
+            <span class="tag tag-amber" style="font-size:9px">Policy</span>
+            <span class="tag tag-blue" style="font-size:9px">Mars</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Recent Threads</div>
+          <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
+          <div class="aside-link" onclick="nav('thread-detail')">Sentinel-2 data workaround for Uganda</div>
+          <div class="aside-link" onclick="nav('thread-detail')">ITU frequency coordination basics</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Stats</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">4</div><div class="aside-stat-lbl">Threads</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">22</div><div class="aside-stat-lbl">Replies</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Endorsed</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ UNDERTAKINGS ═══ -->
   <div class="view" id="view-undertakings">
-    <div class="page-title">Undertakings</div>
+    <div class="page-title">Projects</div>
     <div class="page-sub">Active collaborative projects</div>
-    <table class="tbl">
-      <tr><th>Undertaking</th><th>Domains</th><th>Lead</th><th>Progress</th><th>Your Role</th><th></th></tr>
-      <tr class="click" onclick="nav('undertaking-detail')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-      <tr class="click"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-      <tr class="click"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-    </table>
+    <div class="layout-split">
+      <div class="layout-main">
+        <table class="tbl">
+          <tr><th>Project</th><th>Domains</th><th>Lead</th><th>Progress</th><th>Your Role</th><th></th></tr>
+          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+        </table>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Your Projects</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Active</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Lead</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Contributor</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Recent Activity</div>
+          <div class="aside-row"><span class="aside-label">East Africa Mapping</span><span style="font-size:11px;color:var(--green)">80% Kenya</span></div>
+          <div class="aside-row"><span class="aside-label">Debris Liability</span><span style="font-size:11px;color:var(--gold)">Draft v2</span></div>
+          <div class="aside-row"><span class="aside-label">Swahili Terms</span><span style="font-size:11px;color:var(--teal)">75% done</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Suggested Projects</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">Based on your domains:</div>
+          <div class="aside-link" onclick="nav('undertaking-detail')">Space Debris Tracking — East Africa</div>
+          <div class="aside-link" onclick="nav('undertaking-detail')">ITU Frequency Coordination Guide</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ UNDERTAKING DETAIL ═══ -->
   <div class="view" id="view-undertaking-detail">
-    <div class="back" onclick="nav('undertakings')">← Undertakings</div>
+    <div class="back" onclick="nav('undertakings')">← Projects</div>
     <div class="hero">
       <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:22px">◈</div>
       <div style="flex:1">
@@ -174,7 +236,7 @@
       </div>
       <div style="text-align:right;flex-shrink:0"><div class="text-label mb-2">Progress</div><div style="font-family:var(--serif);font-size:28px;color:var(--green);font-weight:600">60<span style="font-size:14px;color:var(--text-tertiary)">%</span></div></div>
     </div>
-    <div class="sec">Undertaking Cell</div>
+    <div class="sec">Project Cell</div>
     <div class="card">
       <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
         <div class="avatar avatar-md">OR</div>
@@ -200,12 +262,61 @@
   <!-- ═══ OBSERVATORY ═══ -->
   <div class="view" id="view-observatory">
     <div class="page-title">Observatory</div>
-    <div class="page-sub">The public knowledge space</div>
-    <div class="card" style="text-align:center;padding:var(--space-7)">
-      <div style="font-size:28px;margin-bottom:var(--space-4)">◉</div>
-      <h1 class="text-lg mb-2">Observatory</h1>
-      <p class="text-sm mb-5" style="color:var(--text-secondary)">View the public Observatory with curated articles, guides, and datasets.</p>
-      <a href="../public/observatory.html" class="btn btn-primary">View public Observatory →</a>
+    <div class="page-sub">The public knowledge space · Open to all</div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Observatory:</strong> Curated knowledge for the curious. No participation required — entirely open.</div></div>
+    <div class="g3" style="margin-bottom:20px">
+      <div class="card click" style="border-left:3px solid var(--gold)" onclick="nav('observatory-news')">
+        <div class="text-label mb-2" style="color:var(--gold)">News</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">Filtered for signal · Updated daily</div>
+      </div>
+      <div class="card click" style="border-left:3px solid var(--teal)" onclick="nav('observatory-calendar')">
+        <div class="text-label mb-2" style="color:var(--teal)">Calendar</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Global launches & milestones</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">38 upcoming events</div>
+      </div>
+      <div class="card click" style="border-left:3px solid var(--green)" onclick="nav('observatory-opportunities')">
+        <div class="text-label mb-2" style="color:var(--green)">Opportunities</div>
+        <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">12 currently open</div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="sec">Library</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Books, courses, podcasts, career guides, and tools</div>
+        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Law Fundamentals</div><span class="tag tag-purple" style="font-size:8px">Guide</span></div>
+        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Orbital Mechanics 101</div><span class="tag tag-blue" style="font-size:8px">Course</span></div>
+        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Remote Sensing Data Handbook</div><span class="tag tag-green" style="font-size:8px">Reference</span></div>
+        <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Economy Report 2026</div><span class="tag tag-amber" style="font-size:8px">Report</span></div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">200+ resources across all domains</div>
+      </div>
+      <div class="card">
+        <div class="sec">Publications</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Essays, reports, and analysis from participants</div>
+        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--text);font-weight:500">Why East Africa Needs a Space Economy Strategy</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Okello M. · Jul 9, 2026</div>
+          </div>
+          <span class="tag tag-pub" style="font-size:8px">Essay</span>
+        </div>
+        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--text);font-weight:500">Understanding the Outer Space Treaty — A Plain Language Guide</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Ssempa D. · Jun 22, 2026</div>
+          </div>
+          <span class="tag tag-pub" style="font-size:8px">Guide</span>
+        </div>
+        <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--text);font-weight:500">AfricaSpace 2026 — What the Summit Means for East Africa</div>
+            <div style="font-size:11px;color:var(--text-tertiary)">Nakabugo B. · Jun 15, 2026</div>
+          </div>
+          <span class="tag tag-pub" style="font-size:8px">Report</span>
+        </div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">14 published pieces · <span style="color:var(--gold);cursor:pointer">Submit a publication →</span></div>
+      </div>
     </div>
   </div>
 
@@ -213,43 +324,63 @@
   <div class="view" id="view-circles">
     <div class="page-title">Circles</div>
     <div class="page-sub">Mandate-defined deliberation bodies</div>
-    <div style="margin-bottom:16px;display:flex;gap:8px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
-    <div class="g2">
-      <div class="card click">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--purple),#3a1860);font-size:14px">SL</div>
-          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 8 members</div></div>
-          <span class="badge b-active">Active</span>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="margin-bottom:16px;display:flex;gap:8px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
+        <div class="g2">
+          <div class="card click" onclick="nav('circle-detail')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--purple),#3a1860);font-size:14px">SL</div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 8 members</div></div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
+            <div style="display:flex;gap:6px"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
+          </div>
+          <div class="card click" onclick="nav('circle-detail')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0d4040);font-size:14px">RS</div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 6 members</div></div>
+              <span class="badge b-active">Active</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
+            <div style="display:flex;gap:6px"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
+          </div>
+          <div class="card click" onclick="nav('circle-detail')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--amber),#5a3010);font-size:14px">MH</div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Mars Habitability Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 4 members</div></div>
+              <span class="badge b-pending">Suggested</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
+            <div style="display:flex;gap:6px"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
+          </div>
+          <div class="card click" onclick="nav('circle-detail')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--green),#0d3a20);font-size:14px">PL</div>
+              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Policy & Advocacy Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 5 members</div></div>
+              <span class="badge b-pending">Suggested</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
+            <div style="display:flex;gap:6px"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
+          </div>
         </div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
-        <div style="display:flex;gap:6px"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
       </div>
-      <div class="card click">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0d4040);font-size:14px">RS</div>
-          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 6 members</div></div>
-          <span class="badge b-active">Active</span>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Your Circles</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">SL</div><div><div style="font-weight:500">Space Law</div><div style="font-size:10px;color:var(--text-tertiary)">8 members · 2 motions</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">RS</div><div><div style="font-weight:500">Remote Sensing</div><div style="font-size:10px;color:var(--text-tertiary)">6 members · 1 motion</div></div></div>
         </div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
-        <div style="display:flex;gap:6px"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
-      </div>
-      <div class="card click">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--amber),#5a3010);font-size:14px">MH</div>
-          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Mars Habitability Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 4 members</div></div>
-          <span class="badge b-pending">Suggested</span>
+        <div class="aside-card">
+          <div class="aside-title">Active Motions</div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Artemis Accords Ratification</span><span class="badge b-active" style="font-size:8px">Vote</span></div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">LEO Debris Standards</span><span class="badge b-pending" style="font-size:8px">Open</span></div>
         </div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
-        <div style="display:flex;gap:6px"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
-      </div>
-      <div class="card click">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--green),#0d3a20);font-size:14px">PL</div>
-          <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Policy & Advocacy Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 5 members</div></div>
-          <span class="badge b-pending">Suggested</span>
+        <div class="aside-card">
+          <div class="aside-title">How Circles Work</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Circles are mandate-defined deliberation bodies. Each circle stewards specific domains and runs motions through a structured voting process.</div>
         </div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
-        <div style="display:flex;gap:6px"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
       </div>
     </div>
   </div>
@@ -260,7 +391,7 @@
     <div class="page-sub">Your active contextual workspaces</div>
     <div class="g3">
       <div class="card click" onclick="nav('cell-undertaking')">
-        <div class="flex justify-between mb-2"><span class="badge b-active">Undertaking Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
+        <div class="flex justify-between mb-2"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
         <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">East Africa Space Sector Mapping</div>
         <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Collaborative research cell. 7 participants. Producing sector mapping report.</div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
@@ -288,7 +419,7 @@
       <div style="flex:1">
         <div class="hero-title">East Africa Space Sector Mapping</div>
         <div class="hero-desc">Collaborative research cell. 7 participants. Producing sector mapping report for Solis Commons.</div>
-        <div class="hero-tags"><span class="badge b-active">Undertaking Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-14 · Policy + Remote Sensing</span></div>
+        <div class="hero-tags"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-14 · Policy + Remote Sensing</span></div>
       </div>
     </div>
     <div class="sec">Cell Messages</div>
@@ -350,7 +481,7 @@
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
-        <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary btn-sm">Confirm & Crystallise Motion</button><button class="btn btn-sm">Request Redraft</button><button class="btn btn-danger btn-sm">Dissolve Cell</button></div>
+        <div style="display:flex;gap:8px;margin-top:16px"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion and move it to formal vote?',function(){})">Confirm & Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
       </div>
     </div>
   </div>
@@ -401,7 +532,7 @@
           <input type="number" value="1200" style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:8px 12px;font-family:var(--mono);font-size:14px;margin-bottom:10px">
           <textarea placeholder="Rationale for your assessment..." style="width:100%;background:var(--surface-raised);border:1px solid var(--border);color:var(--text-secondary);border-radius:var(--radius);padding:8px 12px;font-size:12px;height:70px;resize:none"></textarea>
         </div>
-        <div style="display:flex;gap:8px"><button class="btn btn-primary">File Assessment</button><button class="btn">Save Draft</button></div>
+        <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="confirmModal('File this assessment? It will be submitted to the Meta-aSTF for review.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
     </div>
   </div>
@@ -443,7 +574,7 @@
               <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
               <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
               <div class="divider"></div>
-              <button class="btn btn-danger" style="width:100%">Finalise & Forward to Meta-aSTF</button>
+              <button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise & Forward to Meta-aSTF</button>
             </div>
           </div>
         </div>
@@ -455,21 +586,50 @@
   <div class="view" id="view-participants">
     <div class="page-title">Participants</div>
     <div class="page-sub">All registered participants in Solis Commons</div>
-    <div class="flex items-center justify-between mb-5">
-      <span class="text-label">8 participants visible</span>
-      <input placeholder="Search..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="flex items-center justify-between mb-5">
+          <span class="text-label">8 participants visible</span>
+          <input placeholder="Search..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px">
+        </div>
+        <table class="tbl">
+          <tr><th>Participant</th><th>Domains</th><th>W<sub>s</sub></th><th>W<sub>h</sub></th><th>Location</th></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Akello J.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Astrophysics</span></td><td class="m">1,240</td><td class="m">1,800</td><td>Kampala</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Mwenda T.</td><td><span class="tag tag-green" style="font-size:8px">Remote Sensing</span> <span class="tag tag-blue" style="font-size:8px">Events</span></td><td class="m">890</td><td class="m">1,200</td><td>Kampala</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Namugga C.</td><td><span class="tag tag-purple" style="font-size:8px">Publications</span> <span class="tag tag-amber" style="font-size:8px">Space Medicine</span></td><td class="m">1,050</td><td class="m">1,400</td><td>Entebbe</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Ssempa D.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Policy</span></td><td class="m">760</td><td class="m">900</td><td>Kampala</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Kimani A.</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td class="m">980</td><td class="m">1,100</td><td>Nairobi</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Osei K.</td><td><span class="tag tag-default" style="font-size:8px">Propulsion</span> <span class="tag tag-default" style="font-size:8px">Launch Systems</span></td><td class="m">1,380</td><td class="m">2,000</td><td>Accra</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Diallo M.</td><td><span class="tag tag-amber" style="font-size:8px">Space Finance</span> <span class="tag tag-green" style="font-size:8px">Entrepreneurship</span></td><td class="m">720</td><td class="m">800</td><td>Dakar</td></tr>
+          <tr class="click" onclick="nav('participant-detail')"><td class="s">Oumo S.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td class="m">847</td><td class="m">1,200</td><td>Kampala</td></tr>
+        </table>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Community Stats</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">8</div><div class="aside-stat-lbl">Participants</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">16</div><div class="aside-stat-lbl">Domains</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">6</div><div class="aside-stat-lbl">Circles</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Top Domains</div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">4 members</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">3 members</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">3 members</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Education</span><span class="aside-value">2 members</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Locations</div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Kampala</span><span class="aside-value">4</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Nairobi</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Entebbe</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Accra</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Dakar</span><span class="aside-value">1</span></div>
+        </div>
+      </div>
     </div>
-    <table class="tbl">
-      <tr><th>Participant</th><th>Domains</th><th>W<sub>s</sub></th><th>W<sub>h</sub></th><th>Location</th></tr>
-      <tr class="click"><td class="s">Akello J.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Astrophysics</span></td><td class="m">1,240</td><td class="m">1,800</td><td>Kampala</td></tr>
-      <tr class="click"><td class="s">Mwenda T.</td><td><span class="tag tag-green" style="font-size:8px">Remote Sensing</span> <span class="tag tag-blue" style="font-size:8px">Events</span></td><td class="m">890</td><td class="m">1,200</td><td>Kampala</td></tr>
-      <tr class="click"><td class="s">Namugga C.</td><td><span class="tag tag-purple" style="font-size:8px">Publications</span> <span class="tag tag-amber" style="font-size:8px">Space Medicine</span></td><td class="m">1,050</td><td class="m">1,400</td><td>Entebbe</td></tr>
-      <tr class="click"><td class="s">Ssempa D.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Policy</span></td><td class="m">760</td><td class="m">900</td><td>Kampala</td></tr>
-      <tr class="click"><td class="s">Kimani A.</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td class="m">980</td><td class="m">1,100</td><td>Nairobi</td></tr>
-      <tr class="click"><td class="s">Osei K.</td><td><span class="tag tag-default" style="font-size:8px">Propulsion</span> <span class="tag tag-default" style="font-size:8px">Launch Systems</span></td><td class="m">1,380</td><td class="m">2,000</td><td>Accra</td></tr>
-      <tr class="click"><td class="s">Diallo M.</td><td><span class="tag tag-amber" style="font-size:8px">Space Finance</span> <span class="tag tag-green" style="font-size:8px">Entrepreneurship</span></td><td class="m">720</td><td class="m">800</td><td>Dakar</td></tr>
-      <tr class="click"><td class="s">Oumo S.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td class="m">847</td><td class="m">1,200</td><td>Kampala</td></tr>
-    </table>
   </div>
 
   <!-- ═══ PROFILE ═══ -->
@@ -489,10 +649,10 @@
         <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
       </div>
     </div>
-    <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development.</div>
+    <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development. <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal()">Edit</span></div>
     <div class="g2" style="margin-bottom:20px">
       <div class="card">
-        <div class="sec">Competence Declarations</div>
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal();setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <table class="tbl">
           <tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>
           <tr><td class="s">Space Law</td><td class="m">#1</td><td class="m">1,800</td><td class="m">1,200</td><td><span class="badge b-active">Verified</span></td></tr>
@@ -502,7 +662,7 @@
         </table>
       </div>
       <div class="card">
-        <div class="sec">Interest Ranking</div>
+        <div class="sec" style="display:flex;justify-content:space-between;align-items:center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal();setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Your declared interests, ordered by priority. Drag to reorder.</div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">1</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Space Law</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:100%"></div></div></div>
         <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">2</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Remote Sensing</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:90%"></div></div></div>
@@ -546,11 +706,545 @@
     </div>
   </div>
 
+  <!-- ═══ REGISTRATION ═══ -->
+
+  <!-- ═══ PARTICIPANT DETAIL ═══ -->
+  <div class="view" id="view-participant-detail">
+    <div class="detail-back" onclick="nav('participants')">← Back to Participants</div>
+    <div class="detail-header">
+      <div class="detail-avatar" id="pd-avatar">OK</div>
+      <div>
+        <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--text)" id="pd-name">Okello Robert</div>
+        <div class="detail-meta" id="pd-meta">Kampala, Uganda · Joined March 2025</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;max-width:500px;line-height:1.5" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="detail-section">
+        <div class="detail-section-title">Competences (Wh)</div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--gold)">2,400</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:80%;background:var(--gold)"></div></div>
+        </div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--gold)">1,200</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:40%;background:var(--gold)"></div></div>
+        </div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Remote Sensing</span><span style="font-family:var(--mono);color:var(--gold)">800</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:27%;background:var(--gold)"></div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Interests</div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--teal)">2,600</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:87%;background:var(--teal)"></div></div>
+        </div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Philosophy & Ethics</span><span style="font-family:var(--mono);color:var(--teal)">1,800</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:60%;background:var(--teal)"></div></div>
+        </div>
+        <div class="detail-card">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--teal)">1,500</span></div>
+          <div class="bar-trk"><div class="bar-fill" style="width:50%;background:var(--teal)"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Roles & Affiliations</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <span class="badge b-active">Member · UAS</span>
+        <span class="badge b-active">Contributor · East Africa Mapping</span>
+        <span class="badge b-pending">vSTF Assessor</span>
+      </div>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">Recent Activity</div>
+      <div class="detail-card" style="font-size:12px;color:var(--text-secondary)">
+        <div style="margin-bottom:4px"><span style="color:var(--text-tertiary)">2h ago</span> · Submitted assessment for Space Law motion</div>
+        <div style="margin-bottom:4px"><span style="color:var(--text-tertiary)">1d ago</span> · Added "Outer Space Treaty analysis" to profile</div>
+        <div><span style="color:var(--text-tertiary)">3d ago</span> · Joined the Space Law Circle</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ THREAD DETAIL ═══ -->
+  <div class="view" id="view-thread-detail">
+    <div class="detail-back" onclick="nav('commons')">← Back to Discussions</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="detail-header">
+          <div class="detail-avatar" style="background:var(--blue-soft);color:var(--blue)">SR</div>
+          <div>
+            <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text)" id="td-title">Should Uganda ratify the Artemis Accords?</div>
+            <div class="detail-meta" id="td-meta">Sarah R. · 2 hours ago · Space Law & Policy</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px" id="td-body">
+          The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing.
+          <br><br>I've been researching the implications for East African nations and would love to hear perspectives from the community. What are the key considerations?
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:20px">
+          <span class="tag tag-blue" style="font-size:10px">Space Law</span>
+          <span class="tag tag-green" style="font-size:10px">Policy</span>
+          <span class="tag tag-amber" style="font-size:10px">Uganda</span>
+        </div>
+        <div class="detail-section-title">Replies (4)</div>
+        <div id="td-replies">
+          <div class="reply-row">
+            <div class="reply-avatar" style="background:var(--teal-soft);color:var(--teal)">OK</div>
+            <div class="reply-body">
+              <div class="reply-author">Okello Robert<span class="reply-time">1h ago</span></div>
+              <div class="reply-text">Great topic. The main concern is Article 10 on resource extraction — it could conflict with our existing mineral rights frameworks. But the cooperation benefits for capacity building are significant.</div>
+            </div>
+          </div>
+          <div class="reply-row">
+            <div class="reply-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div>
+            <div class="reply-body">
+              <div class="reply-author">Kimani A.<span class="reply-time">45m ago</span></div>
+              <div class="reply-text">I'd also consider the precedent set by Nigeria and Kenya. Neither has signed yet, and there may be strategic reasons to wait for an African consensus position.</div>
+            </div>
+          </div>
+          <div class="reply-row">
+            <div class="reply-avatar" style="background:var(--gold-soft);color:var(--gold)">MN</div>
+            <div class="reply-body">
+              <div class="reply-author">Mensah N.<span class="reply-time">30m ago</span></div>
+              <div class="reply-text">From a law student's perspective — the dispute resolution mechanism in Article 19 is actually quite favorable. It's binding arbitration, which gives smaller nations more leverage than the Outer Space Treaty's vague framework.</div>
+            </div>
+          </div>
+          <div class="reply-row">
+            <div class="reply-avatar" style="background:var(--green-soft);color:var(--green)">AO</div>
+            <div class="reply-body">
+              <div class="reply-author">Aisha O.<span class="reply-time">10m ago</span></div>
+              <div class="reply-text">Adding a science comm angle — the public perception in East Africa is largely positive. The "Artemis" brand resonates well. Could be a good opportunity for educational outreach tied to ratification.</div>
+            </div>
+          </div>
+        </div>
+        <div class="reply-composer">
+          <textarea placeholder="Write a reply..."></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px">
+            <button class="btn btn-primary" style="font-size:12px;padding:6px 14px">Reply</button>
+          </div>
+        </div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Thread Info</div>
+          <div class="aside-row"><span class="aside-label">Author</span><span style="font-size:12px;color:var(--text)">Sarah R.</span></div>
+          <div class="aside-row"><span class="aside-label">Created</span><span style="font-size:12px;color:var(--text)">2 hours ago</span></div>
+          <div class="aside-row"><span class="aside-label">Replies</span><span style="font-size:12px;color:var(--text)">4</span></div>
+          <div class="aside-row"><span class="aside-label">Views</span><span style="font-size:12px;color:var(--text)">23</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-blue" style="font-size:9px">Space Law</span>
+            <span class="tag tag-green" style="font-size:9px">Policy</span>
+            <span class="tag tag-amber" style="font-size:9px">Uganda</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Participants</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--blue-soft);color:var(--blue)">SR</div><div><div style="font-weight:500">Sarah R.</div><div style="font-size:10px;color:var(--text-tertiary)">Author</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OK</div><div><div style="font-weight:500">Okello R.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--green-soft);color:var(--green)">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Related Threads</div>
+          <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
+          <div class="aside-link" onclick="nav('thread-detail')">ITU frequency coordination basics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CIRCLE DETAIL ═══ -->
+  <div class="view" id="view-circle-detail">
+    <div class="detail-back" onclick="nav('circles')">← Back to Circles</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div>
+        <div style="font-family:var(--display);font-size:20px;font-weight:600;color:var(--text)" id="cd-name">Space Law Circle</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:4px" id="cd-desc">Deliberative body for space law policy discussions and legal framework development across African space agencies.</div>
+      </div>
+      <button class="btn btn-primary" style="font-size:12px">Join Circle</button>
+    </div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="detail-section-title">Active Motions</div>
+        <div class="detail-card">
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Artemis Accords Ratification Framework</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Proposed by Sarah R. · 3 days ago</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <span class="badge b-active">Open</span>
+            <span style="font-size:10px;color:var(--text-tertiary)">12 votes cast</span>
+          </div>
+        </div>
+        <div class="detail-card">
+          <div style="font-size:13px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Proposed by Okello R. · 1 week ago</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <span class="badge b-pending">Voting</span>
+            <span style="font-size:10px;color:var(--text-tertiary)">8 votes cast</span>
+          </div>
+        </div>
+        <div class="detail-section-title" style="margin-top:16px">Recent Activity</div>
+        <div style="font-size:12px;color:var(--text-secondary)">
+          <div style="padding:6px 0;border-bottom:1px solid var(--border-subtle)">Kimani A. posted in "Artemis Accords" thread</div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--border-subtle)">New member Mensah N. joined the circle</div>
+          <div style="padding:6px 0">Motion "LEO Liability" moved to voting phase</div>
+        </div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Circle Info</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:12px;color:var(--text)">Domain</span></div>
+          <div class="aside-row"><span class="aside-label">Members</span><span style="font-size:12px;color:var(--text)">14</span></div>
+          <div class="aside-row"><span class="aside-label">Status</span><span class="badge b-active" style="font-size:8px">Active</span></div>
+          <div class="aside-row"><span class="aside-label">Motions</span><span style="font-size:12px;color:var(--text)">2 active</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Members</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">SR</div><div><div style="font-weight:500">Sarah R. <span class="badge b-active" style="font-size:7px">Steward</span></div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OK</div><div><div style="font-weight:500">Okello R.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--green-soft);color:var(--green)">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 9 more</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-purple" style="font-size:9px">Space Law</span>
+            <span class="tag tag-blue" style="font-size:9px">Liability</span>
+            <span class="tag tag-green" style="font-size:9px">Policy</span>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Related Discussions</div>
+          <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
+          <div class="aside-link" onclick="nav('thread-detail')">LEO debris liability framework</div>
+          <div class="aside-link" onclick="nav('thread-detail')">ITU coordination procedures</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ OBSERVATORY: NEWS ═══ -->
+  <div class="view" id="view-observatory-news">
+    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="page-title">News</div>
+    <div class="page-sub">Latest from the space sector</div>
+    <div class="obs-subgrid" style="margin-top:16px">
+      <div class="obs-card"><div class="obs-card-title">ESA Announces Lunar Gateway Phase 2</div><div class="obs-card-desc">The European Space Agency has committed additional funding for the Lunar Gateway station, with African nations invited to participate in payload selection.</div><div class="obs-card-meta">SpaceNews · 2 days ago</div></div>
+      <div class="obs-card"><div class="obs-card-title">Kenya Space Agency Launches First CubeSat</div><div class="obs-card-desc">Kenya's first domestically built CubeSat was successfully launched from the San Marco platform, marking a milestone for East African space capabilities.</div><div class="obs-card-meta">AfricaNews · 4 days ago</div></div>
+      <div class="obs-card"><div class="obs-card-title">New Space Debris Tracking Protocol</div><div class="obs-card-desc">An international coalition has proposed a new debris tracking standard that could become mandatory for all LEO operators by 2028.</div><div class="obs-card-meta">Orbital Today · 1 week ago</div></div>
+      <div class="obs-card"><div class="obs-card-title">African Space Policy Summit 2026</div><div class="obs-card-desc">The African Union has announced a continental space policy summit to be held in Addis Ababa, focusing on harmonizing national space regulations.</div><div class="obs-card-meta">AU Space · 1 week ago</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ OBSERVATORY: CALENDAR ═══ -->
+  <div class="view" id="view-observatory-calendar">
+    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="page-title">Calendar</div>
+    <div class="page-sub">Upcoming events and deadlines</div>
+    <div style="margin-top:16px">
+      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--gold-soft);color:var(--gold);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">15</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">African Space Policy Summit</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Addis Ababa, Ethiopia · Registration open</div></div></div></div>
+      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--blue-soft);color:var(--blue);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">22</div><div>Aug</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Artemis Accords — East African Webinar</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Online · Free</div></div></div></div>
+      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--teal-soft);color:var(--teal);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">5</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Space Debris Workshop — Makerere University</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Kampala, Uganda · 30 spots remaining</div></div></div></div>
+      <div class="detail-card"><div style="display:flex;gap:12px;align-items:flex-start"><div style="background:var(--purple-soft);color:var(--purple);padding:6px 10px;border-radius:var(--radius);font-family:var(--mono);font-size:11px;text-align:center;min-width:48px"><div style="font-size:16px;font-weight:600">20</div><div>Sep</div></div><div><div style="font-size:13px;font-weight:500;color:var(--text)">IAF Congress — Milan</div><div style="font-size:11px;color:var(--text-secondary);margin-top:2px">Milan, Italy · Early bird deadline Aug 30</div></div></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ OBSERVATORY: OPPORTUNITIES ═══ -->
+  <div class="view" id="view-observatory-opportunities">
+    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div class="page-title">Opportunities</div>
+    <div class="page-sub">Calls for papers, grants, and jobs</div>
+    <div style="margin-top:16px">
+      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">ESA Young Engineer Trainee Programme</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Trainee position at ESTEC. Deadline: Sept 15, 2026. Open to EU and associated states.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">AU Space Research Grant — Phase 2</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">$50K grants for African-led space research. Deadline: Oct 1, 2026. Teams of 3+ welcome.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">Remote Sensing Analyst — RCMRD</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Full-time position at the Regional Centre for Mapping of Resources for Development, Nairobi.</div><div style="margin-top:8px"><span class="badge b-pending">Reviewing</span></div></div>
+      <div class="detail-card"><div style="font-size:13px;font-weight:500;color:var(--text)">Call for Papers: African Space Law Journal</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Inaugural issue. Topics: national space legislation, resource governance, debris liability. Deadline: Nov 30, 2026.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PUBLICATION DETAIL ═══ -->
+  <div class="view" id="view-publication-detail">
+    <div class="detail-back" onclick="nav('observatory')">← Back to Observatory</div>
+    <div style="max-width:640px">
+      <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">Why East Africa Needs a Coordinated Space Debris Policy</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Okello R., Kimani A. · Journal of African Space Policy · June 2026</div>
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <span class="tag tag-blue" style="font-size:10px">Space Law</span>
+        <span class="tag tag-green" style="font-size:10px">Policy</span>
+        <span class="tag tag-amber" style="font-size:10px">Debris</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px">
+        <strong>Abstract:</strong> East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context.
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:20px">
+        <button class="btn btn-primary" style="font-size:12px">Download PDF</button>
+        <button class="btn btn-sm">Cite</button>
+        <button class="btn btn-sm">Share</button>
+      </div>
+      <div class="detail-section-title">Related Discussions</div>
+      <div class="detail-card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
+      <div class="detail-card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ DOMAIN MAP ═══ -->
+  <div class="view" id="view-domain-map">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div>
+        <div class="page-title">Domain Map</div>
+        <div class="page-sub">Membership constellation across 16 knowledge domains</div>
+      </div>
+      <div class="dm-toggles" id="dm-toggles">
+        <button class="dm-toggle active" data-mode="membership" onclick="dmSetMode('membership')">Membership</button>
+        <button class="dm-toggle" data-mode="activity" onclick="dmSetMode('activity')">Activity</button>
+        <button class="dm-toggle" data-mode="undertakings" onclick="dmSetMode('undertakings')">Projects</button>
+      </div>
+    </div>
+    <div class="dm-canvas" id="dm-canvas">
+      <svg id="dm-svg"></svg>
+      <div class="dm-hud" id="dm-hud"></div>
+      <div class="dm-chip" id="dm-chip" style="display:none"></div>
+      <div class="dm-panel" id="dm-panel" style="display:none"></div>
+    </div>
+  </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
+<!-- ═══ REGISTRATION MODAL ═══ -->
+<div class="reg-modal-overlay" id="reg-modal">
+  <div class="reg-modal">
+    <button class="reg-modal-close" onclick="closeRegModal()">&times;</button>
+    <div class="reg-modal-body">
+      <div class="reg-modal-title">Join the Commons</div>
+      <div class="reg-modal-sub">Step <span id="reg-step-num">1</span> of 3 · <span id="reg-step-label">About You</span></div>
+      <div class="reg-modal-steps">
+        <div id="reg-p1" class="reg-pip active"></div>
+        <div id="reg-p2" class="reg-pip"></div>
+        <div id="reg-p3" class="reg-pip"></div>
+      </div>
+
+      <!-- STEP 1: About You -->
+      <div id="reg-s1">
+        <div class="card" style="margin-bottom:16px">
+          <div class="sec">About You</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input class="form-input" placeholder="e.g. Oumo Samuel" id="reg-name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location</label>
+              <input class="form-input" placeholder="e.g. Kampala, Uganda" id="reg-location">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Biography Summary <span style="color:var(--text-tertiary)">(1-2 lines · shown publicly if steward)</span></label>
+            <textarea class="form-input" rows="2" placeholder="Who are you? What do you do?" id="reg-bio"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personal Essay <span style="color:var(--text-tertiary)">(your story · why you're here)</span></label>
+            <textarea class="form-input" rows="5" placeholder="Tell us your story. What brought you to the Solarian Commons? What do you hope to contribute or learn?" id="reg-essay"></textarea>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="regNext(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Background -->
+      <div id="reg-s2" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div class="sec">Background</div>
+          <div class="form-hint">Add entries. Tag each with domains (comma-separated). Some entries ARE domains themselves.</div>
+
+          <div class="reg-type-section">
+            <div class="reg-type-label">Affiliations <span style="color:var(--text-tertiary)">(organisations, locations, groups)</span></div>
+            <div id="reg-affiliations">
+              <div class="reg-entry">
+                <div class="reg-entry-main">
+                  <input class="form-input" placeholder="e.g. Uganda Astronomical Society" style="flex:2">
+                  <select class="form-input" style="flex:1"><option>Affiliate</option><option>Member</option><option>Representative</option><option>Leadership</option></select>
+                  <input class="form-input" type="number" min="0" max="50" placeholder="Duration (years)" style="flex:0.5">
+                </div>
+                <div class="reg-entry-main">
+                  <input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px">
+                </div>
+                <div class="reg-entry-domains">
+                  <input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="affiliation">
+                  <div class="reg-domain-suggest" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="regAddEntry('reg-affiliations','affiliation')">+ Add affiliation</button>
+          </div>
+
+          <div class="reg-type-section">
+            <div class="reg-type-label">Professions & Expertise <span style="color:var(--text-tertiary)">(professional roles, skills)</span></div>
+            <div id="reg-professions">
+              <div class="reg-entry">
+                <div class="reg-entry-main">
+                  <input class="form-input" placeholder="e.g. Space Law Researcher" style="flex:2">
+                  <input class="form-input" type="number" min="0" max="50" placeholder="Duration (years)" style="flex:0.5">
+                </div>
+                <div class="reg-entry-main">
+                  <input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px">
+                </div>
+                <div class="reg-entry-domains">
+                  <input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="knowledge">
+                  <div class="reg-domain-suggest" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="regAddEntry('reg-professions','knowledge')">+ Add profession</button>
+          </div>
+
+          <div class="reg-type-section">
+            <div class="reg-type-label">Academic & Research <span style="color:var(--text-tertiary)">(degrees, qualifications, research)</span></div>
+            <div id="reg-academic">
+              <div class="reg-entry">
+                <div class="reg-entry-main">
+                  <input class="form-input" placeholder="e.g. MSc Space Studies" style="flex:2">
+                  <input class="form-input" type="number" min="0" max="50" placeholder="Duration (years)" style="flex:0.5">
+                  <select class="form-input" style="flex:1"><option>Enthusiast</option><option>Elementary</option><option>Highschool</option><option>Bachelors</option><option>Masters</option><option>PhD</option><option>Professional</option><option>Expert</option></select>
+                </div>
+                <div class="reg-entry-main">
+                  <input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px">
+                </div>
+                <div class="reg-entry-domains">
+                  <input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="knowledge">
+                  <div class="reg-domain-suggest" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="regAddEntry('reg-academic','knowledge')">+ Add qualification</button>
+          </div>
+
+          <div class="reg-type-section">
+            <div class="reg-type-label">Other <span style="color:var(--text-tertiary)">(publications, languages, certifications, activities)</span></div>
+            <div id="reg-other">
+              <div class="reg-entry">
+                <div class="reg-entry-main">
+                  <select class="form-input reg-other-type" style="flex:1" onchange="regFilterOtherLevels(this)"><option value="knowledge">Publication</option><option value="knowledge">Certification</option><option value="experiential">Language</option><option value="knowledge">Course</option><option value="experiential">Activity</option><option value="experiential">Other</option></select>
+                  <input class="form-input" placeholder="e.g. Outer Space Treaty analysis" style="flex:2">
+                  <select class="form-input reg-other-level" style="flex:1"><option>Explored</option><option>Familiar</option><option>Experienced</option><option>Fluent</option><option>Native</option><option>Professional</option></select>
+                </div>
+                <div class="reg-entry-main">
+                  <input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px">
+                </div>
+                <div class="reg-entry-domains">
+                  <input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="knowledge">
+                  <div class="reg-domain-suggest" style="display:none"></div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="regAddEntry('reg-other','experiential')">+ Add entry</button>
+          </div>
+
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:12px;padding-top:12px;border-top:1px solid var(--border-subtle)">
+            <strong>Domain types:</strong> Affiliation (orgs, locations) · Knowledge (academic, expertise) · Experiential (activities, languages, hobbies)<br>
+            Type to search existing domains or create new ones. Each entry can have multiple domains.
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between">
+          <button class="btn btn-sm" onclick="regNext(1)">← Back</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" onclick="regSkipStep2()" style="color:var(--text-tertiary)">Skip for now</button>
+            <button class="btn btn-primary" onclick="regNext(3)">Continue →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Domain Mapping -->
+      <div id="reg-s3" style="display:none">
+        <div class="card" style="margin-bottom:16px">
+          <div class="sec">Your Interests</div>
+          <div class="form-hint">Select domains you're curious about. Drag to rank by priority (#1 = most interested). Start with 5.</div>
+          <div id="reg-interests">
+            <div class="reg-interest-row" draggable="true" data-domain="astronomy-astrophysics"><input type="checkbox" checked> <span>Astronomy & Astrophysics</span><div class="reg-rank"><span class="reg-rank-num">1</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="space-law-policy"><input type="checkbox" checked> <span>Space Law & Policy</span><div class="reg-rank"><span class="reg-rank-num">2</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="remote-sensing"><input type="checkbox" checked> <span>Remote Sensing</span><div class="reg-rank"><span class="reg-rank-num">3</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="earth-planetary-science"><input type="checkbox" checked> <span>Earth & Planetary Science</span><div class="reg-rank"><span class="reg-rank-num">4</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="computer-science-software"><input type="checkbox" checked> <span>CS & Software</span><div class="reg-rank"><span class="reg-rank-num">5</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="space-finance-economics"><input type="checkbox"> <span>Space Finance & Economics</span><div class="reg-rank"><span class="reg-rank-num">6</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="philosophy-ethics-space"><input type="checkbox"> <span>Philosophy & Ethics</span><div class="reg-rank"><span class="reg-rank-num">7</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="science-communication"><input type="checkbox"> <span>Science Communication</span><div class="reg-rank"><span class="reg-rank-num">8</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="robotics-automation"><input type="checkbox"> <span>Robotics & Automation</span><div class="reg-rank"><span class="reg-rank-num">9</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="aerospace-engineering"><input type="checkbox"> <span>Aerospace Engineering</span><div class="reg-rank"><span class="reg-rank-num">10</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="physics"><input type="checkbox"> <span>Physics</span><div class="reg-rank"><span class="reg-rank-num">11</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="materials-science"><input type="checkbox"> <span>Materials Science</span><div class="reg-rank"><span class="reg-rank-num">12</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="space-medicine-biology"><input type="checkbox"> <span>Space Medicine & Biology</span><div class="reg-rank"><span class="reg-rank-num">13</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="telecommunications-signals"><input type="checkbox"> <span>Telecom & Signals</span><div class="reg-rank"><span class="reg-rank-num">14</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="space-architecture"><input type="checkbox"> <span>Space Architecture</span><div class="reg-rank"><span class="reg-rank-num">15</span></div></div>
+            <div class="reg-interest-row" draggable="true" data-domain="art-culture-space"><input type="checkbox"> <span>Art & Culture of Space</span><div class="reg-rank"><span class="reg-rank-num">16</span></div></div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center;position:relative">
+            <input class="form-input" id="reg-add-interest" placeholder="Add a custom domain..." style="font-size:12px;max-width:260px">
+            <div class="reg-domain-suggest" id="reg-add-interest-suggest" style="display:none"></div>
+            <button class="btn btn-sm" onclick="regAddInterest()">+ Add</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px">
+          <div class="sec">Your Competences</div>
+          <div class="form-hint">Suggested from your background. Adjust freely. vSTF verifies based on evidence you provide.</div>
+          <div class="bar-lgd" style="margin-bottom:12px"><span><span class="lgd-dot" style="background:var(--teal)"></span>Verified Wh</span><span style="color:var(--text-tertiary);font-size:10px">· Adjust below</span></div>
+          <div id="reg-competences">
+            <div class="reg-comp-row">
+              <div class="reg-comp-domain">Space Law & Policy</div>
+              <div class="reg-comp-input"><input type="range" min="0" max="3000" value="1800" class="reg-slider"> <span class="reg-comp-val">1,800</span></div>
+              <div><span class="badge b-pending">Pending vSTF</span></div>
+            </div>
+            <div class="reg-comp-row">
+              <div class="reg-comp-domain">Remote Sensing</div>
+              <div class="reg-comp-input"><input type="range" min="0" max="3000" value="1200" class="reg-slider"> <span class="reg-comp-val">1,200</span></div>
+              <div><span class="badge b-pending">Pending vSTF</span></div>
+            </div>
+            <div class="reg-comp-row">
+              <div class="reg-comp-domain">Earth & Planetary Science</div>
+              <div class="reg-comp-input"><input type="range" min="0" max="3000" value="640" class="reg-slider"> <span class="reg-comp-val">640</span></div>
+              <div><span class="badge b-pending">Pending vSTF</span></div>
+            </div>
+          </div>
+          <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+            <input class="form-input" id="reg-add-comp" placeholder="Add a domain competence..." style="font-size:12px;max-width:260px">
+            <button class="btn btn-sm" onclick="regAddCompetence()">+ Add</button>
+          </div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Wh values are suggested from your background. Adjust freely. vSTF will verify based on evidence.</div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;background:var(--surface-raised)">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:20px;margin-top:2px">&#9670;</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px">Ready to submit</div>
+              <div style="font-size:12px;color:var(--text-secondary)">Your profile will be created. Competences go through vSTF verification. Interests are used for domain routing and matching.</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between">
+          <button class="btn btn-sm" onclick="regNext(2)">← Back</button>
+          <button class="btn btn-primary" onclick="regSubmit()">Submit →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="../shared/colors.js"></script>
 <script src="../shared/solmark.js"></script>
+<script src="../shared/modal.js"></script>
 <script>
 document.getElementById('brand').innerHTML = SolMark(26, true) + '<div><div class="name">Solis</div><div class="sub">COMMONS</div></div>';
 
@@ -568,31 +1262,44 @@ function closeSidebar() {
 var views = {
   personal:         ['Personal'],
   inbox:            ['Personal', 'Inbox'],
-  commons:          ['Commons'],
-  undertakings:     ['Undertakings'],
-  'undertaking-detail': ['Undertakings', 'East Africa Mapping'],
+  commons:          ['Discussions'],
+  undertakings:     ['Projects'],
+  'undertaking-detail': ['Projects', 'East Africa Mapping'],
   observatory:      ['Observatory'],
+  'observatory-news': ['Observatory', 'News'],
+  'observatory-calendar': ['Observatory', 'Calendar'],
+  'observatory-opportunities': ['Observatory', 'Opportunities'],
+  'publication-detail': ['Observatory', 'Publication'],
   circles:          ['Circles'],
+  'circle-detail':  ['Circles', 'Space Law Circle'],
   cells:            ['Cells'],
-  'cell-undertaking': ['Cells', 'Undertaking Cell'],
+  'cell-undertaking': ['Cells', 'Project Cell'],
   'cell-circle':    ['Cells', 'Circle Cell'],
   'cell-delib':     ['Cells', 'Deliberation Cell'],
   stf:              ['STF Dash'],
   'stf-vstf':       ['STF Dash', 'vSTF — Verification Office'],
   'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
   participants:     ['Participants'],
-  profile:          ['Profile']
+  'participant-detail': ['Participants', 'Profile'],
+  profile:          ['Profile'],
+  'thread-detail':  ['Discussions', 'Thread'],
+  'domain-map':     ['Domain Map'],
+  'registration':   ['Registration']
 };
 var navMap = {
   personal:'personal', inbox:'inbox',
-  commons:'commons', undertakings:'undertakings', 'undertaking-detail':'undertakings',
-  observatory:'observatory',
-  circles:'circles', cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
+  commons:'commons', 'thread-detail':'commons',
+  undertakings:'undertakings', 'undertaking-detail':'undertakings',
+  observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'publication-detail':'observatory',
+  circles:'circles', 'circle-detail':'circles',
+  cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
   stf:'stf', 'stf-vstf':'stf', 'stf-jstf':'stf',
-  participants:'participants', profile:'profile'
+  participants:'participants', 'participant-detail':'participants', profile:'profile',
+  'domain-map':'domain-map'
 };
 
 function nav(key) {
+  if (key === 'registration') { openRegModal(); return; }
   if (!views[key]) return;
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active') });
   var el = document.getElementById('view-' + key);
@@ -618,6 +1325,871 @@ window.addEventListener('hashchange', function() {
 });
 var initial = window.location.hash.replace('#', '') || 'personal';
 nav(views[initial] ? initial : 'personal');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REGISTRATION
+// ─────────────────────────────────────────────────────────────────────────────
+var regStep=1;
+var regStepLabels={1:'About You',2:'Your Background',3:'Your Domains'};
+
+function openRegModal(){
+  document.getElementById('reg-modal').classList.add('active');
+  regResetSteps();
+}
+function closeRegModal(){
+  document.getElementById('reg-modal').classList.remove('active');
+}
+document.getElementById('reg-modal').addEventListener('click',function(e){
+  if(e.target===this) closeRegModal();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&document.getElementById('reg-modal').classList.contains('active')) closeRegModal();
+});
+function regResetSteps(){
+  regStep=1;
+  document.getElementById('reg-s1').style.display='block';
+  document.getElementById('reg-s2').style.display='none';
+  document.getElementById('reg-s3').style.display='none';
+  document.getElementById('reg-p1').className='reg-pip active';
+  document.getElementById('reg-p2').className='reg-pip';
+  document.getElementById('reg-p3').className='reg-pip';
+  document.getElementById('reg-step-num').textContent='1';
+  document.getElementById('reg-step-label').textContent=regStepLabels[1];
+}
+
+// Domain registry — existing domains with types
+var REG_DOMAINS=[
+  // Knowledge domains (from the 16)
+  {name:'Astronomy & Astrophysics',type:'knowledge'},{name:'Aerospace Engineering',type:'knowledge'},
+  {name:'Earth & Planetary Science',type:'knowledge'},{name:'Space Medicine & Biology',type:'knowledge'},
+  {name:'Space Law & Policy',type:'knowledge'},{name:'Telecom & Signals',type:'knowledge'},
+  {name:'CS & Software',type:'knowledge'},{name:'Physics',type:'knowledge'},
+  {name:'Materials Science',type:'knowledge'},{name:'Robotics & Automation',type:'knowledge'},
+  {name:'Remote Sensing',type:'knowledge'},{name:'Space Architecture',type:'knowledge'},
+  {name:'Space Finance & Economics',type:'knowledge'},{name:'Science Communication',type:'knowledge'},
+  {name:'Philosophy & Ethics',type:'knowledge'},{name:'Art & Culture of Space',type:'knowledge'},
+  // Affiliation domains (examples)
+  {name:'Uganda Astronomical Society',type:'affiliation'},{name:'East African Astronomical Society',type:'affiliation'},
+  {name:'African Astronomical Society',type:'affiliation'},{name:'Space Generation Advisory Council',type:'affiliation'},
+  // Experiential domains (examples)
+  {name:'Swahili',type:'experiential'},{name:'English',type:'experiential'},{name:'Luganda',type:'experiential'},
+  {name:'Python',type:'experiential'},{name:'GIS',type:'experiential'},{name:'Field Research',type:'experiential'},
+  {name:'Public Speaking',type:'experiential'},{name:'Technical Writing',type:'experiential'}
+];
+
+function regNext(step){
+  document.getElementById('reg-s'+regStep).style.display='none';
+  document.getElementById('reg-s'+step).style.display='block';
+  document.getElementById('reg-p'+regStep).classList.remove('active');
+  document.getElementById('reg-p'+regStep).classList.add('done');
+  document.getElementById('reg-p'+step).classList.add('active');
+  document.getElementById('reg-step-num').textContent=step;
+  document.getElementById('reg-step-label').textContent=regStepLabels[step];
+  regStep=step;
+  if(step===3) regAutofillCompetences();
+}
+
+function regSubmit(){
+  closeRegModal();
+  alert('Profile submitted! Competences will go through vSTF verification. Welcome to the Commons.');
+  nav('personal');
+}
+
+function regSkipStep2(){
+  if(!confirm('Skipping Step 2 means no competences will be auto-suggested in Step 3.\n\nYou can still add competences manually, but without background entries:\n- No proof references will be attached\n- Your Wh ratings will start at base levels\n- vSTF verification may take longer\n\nProceed anyway?')) return;
+  regNext(3);
+}
+
+function regAddEntry(containerId,type){
+  var templates={
+    affiliation:'<div class="reg-entry"><div class="reg-entry-main"><input class="form-input" placeholder="Organisation or group name" style="flex:2"><select class="form-input" style="flex:1"><option>Affiliate</option><option>Member</option><option>Representative</option><option>Leadership</option></select><input class="form-input" type="number" min="0" max="50" placeholder="Duration (years)" style="flex:0.5"></div><div class="reg-entry-main"><input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px"></div><div class="reg-entry-domains"><input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="'+type+'"><div class="reg-domain-suggest" style="display:none"></div></div></div>',
+    knowledge:'<div class="reg-entry"><div class="reg-entry-main"><input class="form-input" placeholder="Title or role" style="flex:2"><input class="form-input" type="number" min="0" max="50" placeholder="Duration (years)" style="flex:0.5"></div><div class="reg-entry-main"><input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px"></div><div class="reg-entry-domains"><input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="'+type+'"><div class="reg-domain-suggest" style="display:none"></div></div></div>',
+    experiential:'<div class="reg-entry"><div class="reg-entry-main"><select class="form-input reg-other-type" style="flex:1" onchange="regFilterOtherLevels(this)"><option value="knowledge">Publication</option><option value="knowledge">Certification</option><option value="experiential">Language</option><option value="knowledge">Course</option><option value="experiential">Activity</option><option value="experiential">Other</option></select><input class="form-input" placeholder="Name or title" style="flex:2"><select class="form-input reg-other-level" style="flex:1"><option>Explored</option><option>Familiar</option><option>Experienced</option><option>Fluent</option><option>Native</option><option>Professional</option></select></div><div class="reg-entry-main"><input class="form-input reg-proof-input" placeholder="Proof or link (optional)" style="flex:3;font-size:11px"></div><div class="reg-entry-domains"><input class="form-input reg-domain-input" placeholder="Domains of Knowledge (comma-separated)" data-type="'+type+'"><div class="reg-domain-suggest" style="display:none"></div></div></div>'
+  };
+  var div=document.createElement('div');
+  div.innerHTML=templates[type]||templates.knowledge;
+  document.getElementById(containerId).appendChild(div.firstElementChild);
+  regInitDomainInputs();
+}
+
+
+// Proposal modal
+function openProposalModal(){
+  var html='<div class="modal-header">New Proposal</div>'+
+    '<div style="margin-bottom:12px"><label class="form-label">Type</label>'+
+    '<select class="form-input" id="propose-type"><option>Discussion Thread</option><option>Project</option><option>Circle Formation</option></select></div>'+
+    '<div style="margin-bottom:12px"><label class="form-label">Title</label>'+
+    '<input class="form-input" id="propose-title" placeholder="What do you want to propose?"></div>'+
+    '<div style="margin-bottom:12px"><label class="form-label">Description</label>'+
+    '<textarea class="form-input" rows="4" id="propose-desc" placeholder="Describe your proposal..."></textarea></div>'+
+    '<div style="margin-bottom:12px"><label class="form-label">Domains</label>'+
+    '<input class="form-input" id="propose-domains" placeholder="Space Law, Remote Sensing..."></div>'+
+    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Cancel</button>'+
+    '<button class="btn btn-primary" onclick="submitProposal()">Submit Proposal</button></div>';
+  openModal(html,{size:'md'});
+}
+function submitProposal(){
+  var title=document.getElementById('propose-title').value;
+  if(!title){alert('Please enter a title.');return;}
+  closeModal();
+  alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
+}
+
+// Inbox modals
+function modalInvitation(){
+  openModal('<div class="modal-header">vSTF Invitation</div>'+
+    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">You have been invited to serve as a vSTF assessor for <strong>Candidate Verification — Policy &amp; Advocacy</strong>.</div>'+
+    '<div style="margin:12px 0;font-size:12px"><strong>Estimated time:</strong> 4–6 hours<br><strong>Expires:</strong> Jul 19, 2026<br><strong>Blind parallel:</strong> Each assessor sees the same evidence independently</div>'+
+    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Decline</button>'+
+    '<button class="btn btn-primary" onclick="closeModal();nav(\'stf-vstf\')">Accept</button></div>',{size:'sm'});
+}
+function modalVote(){
+  openModal('<div class="modal-header">Vote Requested</div>'+
+    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">A motion has been raised in the <strong>Space Law Circle</strong> and requires your vote.</div>'+
+    '<div style="margin:12px 0;font-size:12px"><strong>Motion:</strong> Debris liability framework standards<br><strong>Circle:</strong> Space Law Circle<br><strong>Closes in:</strong> 5 days</div>'+
+    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Later</button>'+
+    '<button class="btn btn-primary" onclick="closeModal();nav(\'circle-detail\')">View Motion</button></div>',{size:'sm'});
+}
+function modalCuriosityMatch(){
+  openModal('<div class="modal-header">Curiosity Match</div>'+
+    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">A new Cell is forming that matches your interest profile.</div>'+
+    '<div style="margin:12px 0;font-size:12px"><strong>Cell:</strong> #14 — East Africa space mapping<br><strong>Match:</strong> Remote Sensing 87%<br><strong>Type:</strong> Project Cell</div>'+
+    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Dismiss</button>'+
+    '<button class="btn btn-primary" onclick="closeModal();nav(\'cells\')">View Cells</button></div>',{size:'sm'});
+}
+
+// Domain autocomplete — filters to knowledge+experiential only
+function regInitDomainInputs(){
+  document.querySelectorAll('.reg-domain-input').forEach(function(input){
+    if(input._init) return; input._init=true;
+    var suggest=input.nextElementSibling;
+    var type=input.dataset.type||'knowledge';
+    var tags=[];
+
+    function renderTags(){
+      var existing=input.parentNode.querySelector('.reg-domain-tags');
+      if(existing) existing.remove();
+      if(tags.length===0) return;
+      var div=document.createElement('div');
+      div.className='reg-domain-tags';
+      tags.forEach(function(t,i){
+        var tag=document.createElement('span');
+        tag.className='reg-domain-tag '+t.type;
+        tag.innerHTML=t.name+' <span class="remove" data-i="'+i+'">x</span>';
+        div.appendChild(tag);
+      });
+      input.parentNode.insertBefore(div,input);
+    }
+
+    input.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&input.value.trim()){
+        e.preventDefault();
+        var val=input.value.trim();
+        var match=REG_DOMAINS.find(function(d){return d.name.toLowerCase()===val.toLowerCase();});
+        if(match){
+          if(!tags.find(function(t){return t.name===match.name;})) tags.push({name:match.name,type:match.type});
+        }else{
+          if(!tags.find(function(t){return t.name===val;})) tags.push({name:val,type:type});
+          if(!REG_DOMAINS.find(function(d){return d.name.toLowerCase()===val.toLowerCase();})){
+            REG_DOMAINS.push({name:val,type:type});
+          }
+        }
+        input.value='';suggest.style.display='none';
+        renderTags();
+      }
+      if(e.key==='Backspace'&&!input.value&&tags.length){
+        tags.pop();renderTags();
+      }
+    });
+
+    input.addEventListener('input',function(){
+      var val=input.value.trim().toLowerCase();
+      if(val.length<1){suggest.style.display='none';return;}
+      var matches=REG_DOMAINS.filter(function(d){
+        if(d.type!=='knowledge'&&d.type!=='experiential') return false;
+        return d.name.toLowerCase().indexOf(val)!==-1&&!tags.find(function(t){return t.name===d.name;});
+      }).slice(0,6);
+      if(matches.length===0){suggest.style.display='none';return;}
+      suggest.innerHTML=matches.map(function(d){
+        return '<div class="suggest-item" data-name="'+d.name+'" data-type="'+d.type+'">'+d.name+'<span class="type-badge">'+d.type+'</span></div>';
+      }).join('');
+      suggest.style.display='block';
+    });
+
+    suggest.addEventListener('click',function(e){
+      var item=e.target.closest('.suggest-item');
+      if(!item) return;
+      var name=item.dataset.name,type=item.dataset.type;
+      if(!tags.find(function(t){return t.name===name;})) tags.push({name:name,type:type});
+      input.value='';suggest.style.display='none';
+      renderTags();
+    });
+
+    input.addEventListener('blur',function(){setTimeout(function(){suggest.style.display='none';},150);});
+
+    input.parentNode.addEventListener('click',function(e){
+      if(e.target.classList.contains('remove')){
+        var i=parseInt(e.target.dataset.i);
+        tags.splice(i,1);renderTags();
+      }
+    });
+  });
+}
+
+// Affiliation name autocomplete
+function regInitAffiliationInputs(){
+  document.querySelectorAll('#reg-affiliations .reg-entry-main .form-input:first-child').forEach(function(input){
+    if(input._init) return; input._init=true;
+    var affSuggest=document.createElement('div');
+    affSuggest.className='reg-domain-suggest';
+    affSuggest.style.display='none';
+    input.parentNode.style.position='relative';
+    input.parentNode.appendChild(affSuggest);
+    input.addEventListener('input',function(){
+      var val=input.value.trim().toLowerCase();
+      if(val.length<1){affSuggest.style.display='none';return;}
+      var affDomains=REG_DOMAINS.filter(function(d){return d.type==='affiliation'&&d.name.toLowerCase().indexOf(val)!==-1;}).slice(0,5);
+      if(affDomains.length===0){affSuggest.style.display='none';return;}
+      affSuggest.innerHTML=affDomains.map(function(d){
+        return '<div class="suggest-item" data-name="'+d.name+'">'+d.name+'</div>';
+      }).join('');
+      affSuggest.style.display='block';
+    });
+    affSuggest.addEventListener('click',function(e){
+      var item=e.target.closest('.suggest-item');
+      if(!item) return;
+      input.value=item.dataset.name;
+      affSuggest.style.display='none';
+    });
+    input.addEventListener('blur',function(){setTimeout(function(){affSuggest.style.display='none';},150);});
+  });
+}
+
+// ELO mapping for experience levels
+var REG_ELO_MAP={
+  affiliation:{Affiliate:500,Member:1000,Representative:1500,Leadership:2000},
+  knowledge:{Enthusiast:200,Elementary:400,Highschool:600,Bachelors:1000,Masters:1500,PhD:2000,Professional:2500,Expert:3000},
+  experiential:{Explored:300,Familiar:600,Experienced:1000,Fluent:1500,Native:2000,Professional:2500}
+};
+
+// Knowledge levels for Other types that are academic (Publication, Certification, Course)
+var REG_KNOWLEDGE_LEVELS=['Enthusiast','Elementary','Highschool','Bachelors','Masters','PhD','Professional','Expert'];
+var REG_EXPERIENTIAL_LEVELS=['Explored','Familiar','Experienced','Fluent','Native','Professional'];
+
+// Filter Other level dropdown based on type selection
+function regFilterOtherLevels(typeSelect){
+  var entry=typeSelect.closest('.reg-entry');
+  var levelSelect=entry.querySelector('.reg-other-level');
+  var domainInput=entry.querySelector('.reg-domain-input');
+  var isKnowledge=typeSelect.value==='knowledge';
+  var levels=isKnowledge?REG_KNOWLEDGE_LEVELS:REG_EXPERIENTIAL_LEVELS;
+  if(domainInput) domainInput.dataset.type=isKnowledge?'knowledge':'experiential';
+  var prev=levelSelect.value;
+  levelSelect.innerHTML=levels.map(function(l){return '<option'+(l===prev?' selected':'')+'>'+l+'</option>';}).join('');
+}
+
+// Gather proof references from all Step 2 entries
+function regGatherProofs(){
+  var proofs=[];
+  document.querySelectorAll('.reg-entry').forEach(function(entry){
+    var proofInput=entry.querySelector('.reg-proof-input');
+    var proof=proofInput?proofInput.value.trim():'';
+    var nameInput=entry.querySelector('.form-input:first-child');
+    var name=nameInput?nameInput.value.trim():'';
+    entry.querySelectorAll('.reg-domain-tag').forEach(function(tag){
+      var tName=tag.textContent.replace(/x$/g,'').trim();
+      if(proof) proofs.push({domain:tName,proof:proof,source:name||'Custom entry'});
+    });
+  });
+  return proofs;
+}
+
+// Autofill competences from Step 2 data — ELO-mapped, affiliation names excluded
+function regAutofillCompetences(){
+  var compEl=document.getElementById('reg-competences');
+  var domains={};
+  var proofs={};
+
+  // Affiliations: only domain tags contribute (NOT the org name itself)
+  document.querySelectorAll('#reg-affiliations .reg-entry').forEach(function(entry){
+    var levelSelect=entry.querySelector('select');
+    var level=levelSelect?levelSelect.value:'';
+    var base=REG_ELO_MAP.affiliation[level]||500;
+    var yearInput=entry.querySelector('input[type="number"]');
+    var years=yearInput?parseInt(yearInput.value)||0:0;
+    var wh=Math.min(3000,base+years*100);
+    var proofInput=entry.querySelector('.reg-proof-input');
+    var proof=proofInput?proofInput.value.trim():'';
+    entry.querySelectorAll('.reg-domain-tag').forEach(function(tag){
+      var tName=tag.textContent.replace(/x$/g,'').trim();
+      if(!domains[tName]) domains[tName]={wh:0,count:0};
+      domains[tName].wh+=wh; domains[tName].count++;
+      if(proof&&!proofs[tName]) proofs[tName]=proof;
+    });
+  });
+
+  // Professions: domain tags contribute (NOT the role name as own row)
+  document.querySelectorAll('#reg-professions .reg-entry').forEach(function(entry){
+    var yearInput=entry.querySelector('input[type="number"]');
+    var years=yearInput?parseInt(yearInput.value)||0:0;
+    var wh=Math.min(3000,500+years*100);
+    var proofInput=entry.querySelector('.reg-proof-input');
+    var proof=proofInput?proofInput.value.trim():'';
+    entry.querySelectorAll('.reg-domain-tag').forEach(function(tag){
+      var tName=tag.textContent.replace(/x$/g,'').trim();
+      if(!domains[tName]) domains[tName]={wh:0,count:0};
+      domains[tName].wh+=wh; domains[tName].count++;
+      if(proof&&!proofs[tName]) proofs[tName]=proof;
+    });
+  });
+
+  // Academic: domain tags contribute with knowledge-level ELO (NOT the degree name)
+  document.querySelectorAll('#reg-academic .reg-entry').forEach(function(entry){
+    var selects=entry.querySelectorAll('select');
+    var level=selects.length>0?selects[selects.length-1].value:'';
+    var base=REG_ELO_MAP.knowledge[level]||500;
+    var yearInput=entry.querySelector('input[type="number"]');
+    var years=yearInput?parseInt(yearInput.value)||0:0;
+    var wh=Math.min(3000,base+years*100);
+    var proofInput=entry.querySelector('.reg-proof-input');
+    var proof=proofInput?proofInput.value.trim():'';
+    entry.querySelectorAll('.reg-domain-tag').forEach(function(tag){
+      var tName=tag.textContent.replace(/x$/g,'').trim();
+      if(!domains[tName]) domains[tName]={wh:0,count:0};
+      domains[tName].wh+=wh; domains[tName].count++;
+      if(proof&&!proofs[tName]) proofs[tName]=proof;
+    });
+  });
+
+  // Other: determine level set from type select
+  document.querySelectorAll('#reg-other .reg-entry').forEach(function(entry){
+    var typeSelect=entry.querySelector('.reg-other-type');
+    var levelSelect=entry.querySelector('.reg-other-level');
+    var isKnowledge=typeSelect?typeSelect.value==='knowledge':false;
+    var level=levelSelect?levelSelect.value:'';
+    var map=isKnowledge?REG_ELO_MAP.knowledge:REG_ELO_MAP.experiential;
+    var base=map[level]||300;
+    var proofInput=entry.querySelector('.reg-proof-input');
+    var proof=proofInput?proofInput.value.trim():'';
+    entry.querySelectorAll('.reg-domain-tag').forEach(function(tag){
+      var tName=tag.textContent.replace(/x$/g,'').trim();
+      if(!domains[tName]) domains[tName]={wh:0,count:0};
+      domains[tName].wh+=base; domains[tName].count++;
+      if(proof&&!proofs[tName]) proofs[tName]=proof;
+    });
+  });
+
+  // Build competence rows — auto-generated, no proof input (proofs come from Step 2)
+  var html='';
+  Object.keys(domains).forEach(function(name){
+    var d=domains[name];
+    var wh=Math.round(d.wh/d.count);
+    var proofRef=proofs[name]?'<span class="ref-link" title="'+proofs[name]+'">&#128279;</span>':'';
+    html+='<div class="reg-comp-row"><div class="reg-comp-domain">'+name+'</div><div class="reg-comp-input"><input type="range" min="0" max="3000" value="'+wh+'" class="reg-slider"> <span class="reg-comp-val">'+wh.toLocaleString()+'</span></div><div>'+proofRef+' <span class="badge b-pending">Pending vSTF</span></div></div>';
+  });
+  if(!html) html='<div style="font-size:12px;color:var(--text-tertiary);padding:12px 0">No domains tagged yet. Add domains in Step 2 to auto-suggest competences.</div>';
+  compEl.innerHTML=html;
+  compEl.querySelectorAll('.reg-slider').forEach(function(slider){
+    slider.addEventListener('input',function(){
+      var val=parseInt(slider.value);
+      slider.nextElementSibling.textContent=val.toLocaleString();
+    });
+  });
+}
+
+// Add custom interest
+function regAddInterest(){
+  var input=document.getElementById('reg-add-interest');
+  var val=input.value.trim();
+  if(!val) return;
+  var container=document.getElementById('reg-interests');
+  var slug=val.toLowerCase().replace(/\s+/g,'-');
+  var existing=container.querySelector('[data-domain="'+slug+'"]');
+  if(existing){existing.querySelector('input').checked=true;input.value='';return;}
+  var count=container.querySelectorAll('.reg-interest-row').length+1;
+  var row=document.createElement('div');
+  row.className='reg-interest-row';
+  row.dataset.domain=slug;
+  row.innerHTML='<input type="checkbox" checked> <span>'+val+'</span><div class="reg-rank"><span class="reg-rank-num">'+count+'</span></div>';
+  row.setAttribute('draggable','true');
+  container.appendChild(row);
+  input.value='';
+}
+
+// Add custom competence (with proof input for ad-hoc domains)
+function regAddCompetence(){
+  var input=document.getElementById('reg-add-comp');
+  var val=input.value.trim();
+  if(!val) return;
+  var container=document.getElementById('reg-competences');
+  var rows=container.querySelectorAll('.reg-comp-domain');
+  for(var i=0;i<rows.length;i++){if(rows[i].textContent===val) return;}
+  var row=document.createElement('div');
+  row.className='reg-comp-row has-proof';
+  row.innerHTML='<div class="reg-comp-domain">'+val+'</div><div class="reg-comp-input"><input type="range" min="0" max="3000" value="500" class="reg-slider"> <span class="reg-comp-val">500</span></div><div class="reg-comp-proof"><input class="form-input" placeholder="Proof (optional)" style="font-size:11px;width:120px"></div><div><span class="badge b-pending">Pending vSTF</span></div>';
+  container.appendChild(row);
+  row.querySelector('.reg-slider').addEventListener('input',function(){
+    var val2=parseInt(this.value);
+    this.nextElementSibling.textContent=val2.toLocaleString();
+  });
+  input.value='';
+}
+
+// Interest drag reorder — HTML5 drag API
+function regInitInterestDrag(){
+  var container=document.getElementById('reg-interests');
+  var dragItem=null;
+  container.addEventListener('dragstart',function(e){
+    var row=e.target.closest('.reg-interest-row');
+    if(!row||e.target.tagName==='INPUT') return;
+    dragItem=row;
+    row.style.opacity='0.4';
+    e.dataTransfer.effectAllowed='move';
+  });
+  container.addEventListener('dragover',function(e){
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    var target=e.target.closest('.reg-interest-row');
+    if(target&&target!==dragItem) target.style.borderTop='2px solid var(--gold)';
+  });
+  container.addEventListener('dragleave',function(e){
+    var target=e.target.closest('.reg-interest-row');
+    if(target) target.style.borderTop='';
+  });
+  container.addEventListener('drop',function(e){
+    e.preventDefault();
+    var target=e.target.closest('.reg-interest-row');
+    if(target) target.style.borderTop='';
+    if(!dragItem||!target||target===dragItem) return;
+    var items=Array.from(container.querySelectorAll('.reg-interest-row'));
+    var fromIdx=items.indexOf(dragItem),toIdx=items.indexOf(target);
+    if(fromIdx<toIdx) container.insertBefore(dragItem,target.nextSibling);
+    else container.insertBefore(dragItem,target);
+    regRenumberInterests();
+  });
+  container.addEventListener('dragend',function(){
+    if(dragItem) dragItem.style.opacity='';
+    dragItem=null;
+    container.querySelectorAll('.reg-interest-row').forEach(function(r){r.style.borderTop='';});
+  });
+  container.addEventListener('change',function(){regRenumberInterests();});
+}
+
+function regRenumberInterests(){
+  var rows=document.querySelectorAll('#reg-interests .reg-interest-row');
+  var n=1;
+  rows.forEach(function(row){
+    if(row.querySelector('input').checked){
+      row.querySelector('.reg-rank-num').textContent=n;n++;
+    }else{
+      row.querySelector('.reg-rank-num').textContent='';
+    }
+  });
+}
+
+// Init on load
+document.addEventListener('DOMContentLoaded',function(){
+  regInitDomainInputs();
+  regInitAffiliationInputs();
+  regInitInterestDrag();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DOMAIN MAP
+// ─────────────────────────────────────────────────────────────────────────────
+var DM_IDS=[
+  "astronomy-astrophysics","aerospace-engineering","earth-planetary-science",
+  "space-medicine-biology","space-law-policy","telecommunications-signals",
+  "computer-science-software","physics","materials-science",
+  "robotics-automation","remote-sensing","space-architecture",
+  "space-finance-economics","science-communication",
+  "philosophy-ethics-space","art-culture-space"
+];
+var DM_META={
+  "astronomy-astrophysics":{label:"Astronomy & Astrophysics",short:"ASTRO",color:"#6EB8FF",steward:true},
+  "aerospace-engineering":{label:"Aerospace Engineering",short:"AERO",color:"#4ACCA8",steward:false},
+  "earth-planetary-science":{label:"Earth & Planetary Science",short:"EARTH",color:"#7AACDA",steward:true},
+  "space-medicine-biology":{label:"Space Medicine & Biology",short:"MED",color:"#FF8080",steward:false},
+  "space-law-policy":{label:"Space Law & Policy",short:"LAW",color:"#FFB84D",steward:true},
+  "telecommunications-signals":{label:"Telecom & Signals",short:"COMMS",color:"#B088F0",steward:false},
+  "computer-science-software":{label:"CS & Software",short:"CODE",color:"#50E0C0",steward:true},
+  "physics":{label:"Physics",short:"PHYS",color:"#AACCEE",steward:false},
+  "materials-science":{label:"Materials Science",short:"MAT",color:"#E0A060",steward:false},
+  "robotics-automation":{label:"Robotics & Automation",short:"ROBO",color:"#80D0FF",steward:false},
+  "remote-sensing":{label:"Remote Sensing",short:"RS",color:"#40C090",steward:true},
+  "space-architecture":{label:"Space Architecture",short:"ARCH",color:"#C0A0E0",steward:false},
+  "space-finance-economics":{label:"Space Finance & Economics",short:"FIN",color:"#FFD060",steward:false},
+  "science-communication":{label:"Science Communication",short:"SCICOMM",color:"#FF90B0",steward:false},
+  "philosophy-ethics-space":{label:"Philosophy & Ethics",short:"PHIL",color:"#D0C0A0",steward:true},
+  "art-culture-space":{label:"Art & Culture of Space",short:"ART",color:"#E0B0C0",steward:false}
+};
+
+function dmMkRng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/0xffffffff;};}
+function dmGenMembers(){
+  var rng=dmMkRng(42);
+  var pick=function(arr,n){var a=arr.slice(),out=[];for(var i=0;i<n&&a.length;i++){var idx=Math.floor(rng()*a.length);out.push(a.splice(idx,1)[0]);}return out;};
+  var clusters=[
+    {core:["astronomy-astrophysics","earth-planetary-science","physics","remote-sensing"],size:8},
+    {core:["space-law-policy","philosophy-ethics-space","space-finance-economics","science-communication"],size:7},
+    {core:["aerospace-engineering","robotics-automation","materials-science","space-architecture"],size:6},
+    {core:["computer-science-software","telecommunications-signals","physics","robotics-automation"],size:6},
+    {core:["space-medicine-biology","earth-planetary-science","philosophy-ethics-space"],size:4},
+    {core:["art-culture-space","science-communication","philosophy-ethics-space"],size:4}
+  ];
+  var members=[];
+  clusters.forEach(function(cl,ci){
+    for(var i=0;i<cl.size;i++){
+      var strong=pick(cl.core,Math.floor(rng()*2)+1);
+      var weak=pick(DM_IDS.filter(function(d){return cl.core.indexOf(d)===-1;}),Math.floor(rng()*2));
+      var competence={};
+      strong.forEach(function(d){competence[d]=Math.floor(rng()*1400)+1200;});
+      weak.forEach(function(d){competence[d]=Math.floor(rng()*600)+200;});
+      var interested=pick(cl.core.concat(DM_IDS.filter(function(d){return cl.core.indexOf(d)===-1;}).slice(0,4)),Math.floor(rng()*3)+2);
+      members.push({id:"m"+ci+"_"+i,competence:competence,interested:interested});
+    }
+  });
+  return members;
+}
+var DM_MEMBERS=dmGenMembers();
+
+function dmStats(){
+  var stats={};
+  DM_IDS.forEach(function(d){
+    var scores=DM_MEMBERS.map(function(m){return m.competence[d];}).filter(Boolean);
+    var interested=DM_MEMBERS.filter(function(m){return m.interested.indexOf(d)!==-1;}).length;
+    stats[d]={peakW:scores.length?Math.max.apply(null,scores):0,avgW:scores.length?Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length):0,members:scores.length,interest:interested};
+  });
+  return stats;
+}
+var DM_STATS=dmStats();
+
+function dmEdges(type){
+  var edges=[];
+  for(var i=0;i<DM_IDS.length;i++){
+    for(var j=i+1;j<DM_IDS.length;j++){
+      var a=DM_IDS[i],b=DM_IDS[j];
+      var count=0;
+      if(type==='membership'){
+        count=DM_MEMBERS.filter(function(m){return (m.competence[a]||m.interested.indexOf(a)!==-1)&&(m.competence[b]||m.interested.indexOf(b)!==-1);}).length;
+      }else if(type==='activity'){
+        count=DM_MEMBERS.filter(function(m){return m.competence[a]&&m.competence[b];}).length;
+      }else{
+        count=DM_MEMBERS.filter(function(m){return m.interested.indexOf(a)!==-1&&m.interested.indexOf(b)!==-1;}).length;
+      }
+      if(count>=2) edges.push({a:a,b:b,count:count});
+    }
+  }
+  return edges;
+}
+
+// Layout
+var DM_WORLD=1800;
+function dmLayout(){
+  var rng=dmMkRng(99);
+  var seeds={
+    "astronomy-astrophysics":[280,280],"earth-planetary-science":[360,230],"remote-sensing":[320,360],
+    "physics":[240,340],"computer-science-software":[680,380],"telecommunications-signals":[760,300],
+    "robotics-automation":[640,460],"space-law-policy":[1080,380],"philosophy-ethics-space":[1180,460],
+    "space-finance-economics":[1060,520],"science-communication":[1180,320],"art-culture-space":[880,680],
+    "space-medicine-biology":[830,700],"materials-science":[730,640],"space-architecture":[980,180],
+    "aerospace-engineering":[900,280]
+  };
+  var pos={};
+  DM_IDS.forEach(function(d){
+    var s=seeds[d]||[rng()*DM_WORLD,rng()*DM_WORLD];
+    pos[d]={x:s[0]+(rng()-0.5)*40,y:s[1]+(rng()-0.5)*40,vx:0,vy:0};
+  });
+  var K=0.04,REP=14000,LEN=220,DAMP=0.85;
+  for(var iter=0;iter<250;iter++){
+    for(var i=0;i<DM_IDS.length;i++){
+      for(var j=i+1;j<DM_IDS.length;j++){
+        var a=pos[DM_IDS[i]],b=pos[DM_IDS[j]];
+        var dx=b.x-a.x,dy=b.y-a.y,dist=Math.sqrt(dx*dx+dy*dy)||1;
+        var f=REP/(dist*dist),fx=(dx/dist)*f,fy=(dy/dist)*f;
+        a.vx-=fx;a.vy-=fy;b.vx+=fx;b.vy+=fy;
+      }
+    }
+    DM_IDS.forEach(function(d){
+      pos[d].vx*=DAMP;pos[d].vy*=DAMP;
+      pos[d].x+=pos[d].vx;pos[d].y+=pos[d].vy;
+    });
+  }
+  var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  DM_IDS.forEach(function(d){minX=Math.min(minX,pos[d].x);maxX=Math.max(maxX,pos[d].x);minY=Math.min(minY,pos[d].y);maxY=Math.max(maxY,pos[d].y);});
+  var sc=Math.min((DM_WORLD-400)/(maxX-minX||1),(DM_WORLD-400)/(maxY-minY||1));
+  DM_IDS.forEach(function(d){pos[d].x=200+(pos[d].x-minX)*sc;pos[d].y=200+(pos[d].y-minY)*sc;});
+  return pos;
+}
+var DM_LAYOUT=dmLayout();
+var DM_drift={};
+DM_IDS.forEach(function(id){DM_drift[id]={x:DM_LAYOUT[id].x,y:DM_LAYOUT[id].y};});
+var DM_vel={};
+(function(){var rng=dmMkRng(7);DM_IDS.forEach(function(id){DM_vel[id]={vx:(rng()-0.5)*0.02,vy:(rng()-0.5)*0.02};});})();
+
+// State
+var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null};
+
+function dmSpikeLen(pw){return 4+(pw/3000)*18;}
+function dmStarR(pw){return 0.8+(pw/3000)*1.4;}
+
+// Render
+function dmRender(){
+  var c=DM.cam,fid=DM.locked||DM.active;
+  var conn=null;
+  if(fid){conn=new Set();DM_EDGES.forEach(function(e){if(e.a===fid)conn.add(e.b);if(e.b===fid)conn.add(e.a);});}
+
+  var svg='<defs>';
+  svg+='<radialGradient id="dmBG" cx="50%" cy="50%" r="60%"><stop offset="0%" stop-color="#142840"/><stop offset="100%" stop-color="#0E1E34"/></radialGradient>';
+  svg+='<filter id="dmHalo" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg+='<filter id="dmHaloSm" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg+='<filter id="dmSpike" x="-400%" y="-400%" width="900%" height="900%"><feGaussianBlur stdDeviation="1" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg+='<filter id="dmLabel" x="-60%" y="-200%" width="220%" height="500%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>';
+  svg+='</defs>';
+  svg+='<rect width="'+DM_dims.w+'" height="'+DM_dims.h+'" fill="url(#dmBG)"/>';
+
+  function ws(wx,wy){return {sx:(wx-c.x)*c.scale+DM_dims.w/2,sy:(wy-c.y)*c.scale+DM_dims.h/2};}
+
+  // Edges — curved with organic offset
+  DM_EDGES.forEach(function(e,idx){
+    var pa=DM_drift[e.a],pb=DM_drift[e.b];
+    var isConn=fid&&(e.a===fid||e.b===fid);
+    if(fid&&!isConn) return;
+    var sA=ws(pa.x,pa.y),sB=ws(pb.x,pb.y);
+    if((sA.sx<-50&&sB.sx<-50)||(sA.sx>DM_dims.w+50&&sB.sx>DM_dims.w+50)||
+       (sA.sy<-50&&sB.sy<-50)||(sA.sy>DM_dims.h+50&&sB.sy>DM_dims.h+50)) return;
+    // Organic curve: midpoint offset perpendicular to line
+    var mx=(sA.sx+sB.sx)/2,my=(sA.sy+sB.sy)/2;
+    var dx=sB.sx-sA.sx,dy=sB.sy-sA.sy;
+    var len=Math.sqrt(dx*dx+dy*dy)||1;
+    var nx=-dy/len,ny=dx/len;
+    var offset=Math.sin(idx*1.7+DM.time*0.3)*len*0.12+Math.cos(idx*2.3)*len*0.05;
+    var cx=mx+nx*offset,cy=my+ny*offset;
+    var op=isConn?0.6:(0.04+Math.min(e.count/10,1)*0.12);
+    var sw=isConn?(0.4+Math.min(e.count/10,1)*0.8):0.2;
+    var col=isConn?"#E8B450":"#1A3050";
+    svg+='<path d="M'+sA.sx+','+sA.sy+'Q'+cx+','+cy+' '+sB.sx+','+sB.sy+'" stroke="'+col+'" stroke-width="'+(sw*c.scale)+'" fill="none" opacity="'+op+'"'+(isConn?'':' stroke-dasharray="'+(3*c.scale)+' '+(6*c.scale)+'"')+'/>';
+  });
+
+  // Nodes
+  DM_IDS.forEach(function(id){
+    var pos=DM_drift[id],stats=DM_STATS[id],meta=DM_META[id];
+    var isF=fid===id,isN=conn&&conn.has(id),hasF=!!fid;
+    var sr=dmStarR(stats.peakW)*c.scale;
+    var sl=dmSpikeLen(stats.peakW)*c.scale;
+    var pulse=Math.sin(DM.time*1.1+id.charCodeAt(0)*0.8)*0.5+0.5;
+    var op;
+    if(isF)op=1;else if(isN)op=0.8;else if(hasF)op=0.04;else op=0.5+Math.sin(DM.time*0.7+id.charCodeAt(2))*0.15;
+
+    var sx=(pos.x-c.x)*c.scale+DM_dims.w/2;
+    var sy=(pos.y-c.y)*c.scale+DM_dims.h/2;
+    if(sx<-80||sx>DM_dims.w+80||sy<-80||sy>DM_dims.h+80) return;
+
+    // Steward ring
+    if(meta.steward&&(isF||(!hasF&&c.scale>0.4))){
+      var sR=sr+(isF?16:10)*c.scale;
+      svg+='<circle cx="'+sx+'" cy="'+sy+'" r="'+sR+'" fill="none" stroke="'+meta.color+'" stroke-width="'+(isF?1.5:0.6)*c.scale+'" opacity="'+(isF?0.6:0.2)+'" stroke-dasharray="'+(2*c.scale)+' '+(3*c.scale)+'"/>';
+    }
+
+    svg+='<g opacity="'+op+'">';
+
+    // Halo
+    if(isF||(isN&&c.scale>0.4)||(!hasF&&c.scale>0.3)){
+      [8,14].forEach(function(base,ri){
+        var r=(base+stats.interest*0.3)*c.scale*(isF?1.3:1)*(1+pulse*0.06);
+        var sw=(isF?1:0.5-ri*0.12)*c.scale;
+        var rop=(0.15-ri*0.04)*(isF?2:1)*(0.7+pulse*0.3);
+        svg+='<circle cx="'+sx+'" cy="'+sy+'" r="'+r+'" fill="none" stroke="'+meta.color+'" stroke-width="'+sw+'" opacity="'+rop+'" filter="'+(ri===0?'url(#dmHalo)':'url(#dmHaloSm)')+'"/>';
+      });
+    }
+
+    // Spikes
+    if(isF||(!hasF&&c.scale>0.4)){
+      [0,90,45,135].forEach(function(ang,ai){
+        var rad=ang*Math.PI/180;
+        var len=(isF?sl:sl*0.4)*(1+(ai>1?0.5:1));
+        var sop=isF?(ai>1?0.3:0.5):(ai>1?0.06:0.12);
+        var sw=(isF?0.5:0.25)*c.scale;
+        svg+='<line x1="'+(sx-Math.cos(rad)*len*0.15)+'" y1="'+(sy-Math.sin(rad)*len*0.15)+'" x2="'+(sx+Math.cos(rad)*len)+'" y2="'+(sy+Math.sin(rad)*len)+'" stroke="'+meta.color+'" stroke-width="'+sw+'" opacity="'+sop+'"'+(isF?' filter="url(#dmSpike)"':'')+'/>';
+        svg+='<line x1="'+(sx+Math.cos(rad)*len*0.15)+'" y1="'+(sy+Math.sin(rad)*len*0.15)+'" x2="'+(sx-Math.cos(rad)*len)+'" y2="'+(sy-Math.sin(rad)*len)+'" stroke="'+meta.color+'" stroke-width="'+sw+'" opacity="'+sop+'"'+(isF?' filter="url(#dmSpike)"':'')+'/>';
+      });
+    }
+
+    // Core
+    svg+='<circle cx="'+sx+'" cy="'+sy+'" r="'+sr*(isF?1.7:isN?1.2:1)+'" fill="'+meta.color+'"'+(isF?' filter="url(#dmHaloSm)"':'')+'/>';
+
+    // Label
+    if(isF||(hasF&&isN)){
+      var ly=sy-sr-(isF?sl*0.5+6:8);
+      var ls=isF?7*c.scale:5.5*c.scale;
+      svg+='<text x="'+sx+'" y="'+ly+'" text-anchor="middle" font-size="'+ls+'" letter-spacing="1.5" fill="'+(isF?'#fff':'rgba(200,150,14,0.5)')+'" font-family="inherit" font-weight="'+(isF?600:400)+'" style="text-transform:uppercase;pointer-events:none"'+(isF?' filter="url(#dmLabel)"':'')+' opacity="'+(isF?1:0.7)+'">'+meta.label+'</text>';
+    }
+
+    svg+='</g>';
+  });
+
+  document.getElementById('dm-svg').innerHTML=svg;
+}
+
+function dmHud(){
+  document.getElementById('dm-hud').textContent=Math.round(DM.cam.scale*100)+'% · drag · scroll';
+}
+
+function dmMiniStat(label,val,max,color){
+  var pct=Math.min(val/max,1)*100;
+  return '<div class="dm-mstat"><div class="row"><span class="lbl">'+label+'</span><span class="val" style="color:'+color+'">'+val.toLocaleString()+'</span></div><div class="bar"><div class="fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';
+}
+
+function dmChip(){
+  var el=document.getElementById('dm-chip');
+  if(!DM.active||DM.locked){el.style.display='none';return;}
+  var m=DM_META[DM.active],s=DM_STATS[DM.active];
+  el.style.display='block';
+  el.innerHTML='<div class="tag" style="color:'+m.color+'">'+m.short+(m.steward?' ◎':'')+'</div><div class="name">'+m.label+'</div>'
+    +dmMiniStat('peak Ws',s.peakW,3000,m.color)
+    +dmMiniStat('interest',s.interest,20,'#C8960E')
+    +dmMiniStat('members',s.members,15,'#4ACCA8')
+    +'<div style="margin-top:7px;font-family:var(--mono);font-size:7px;color:rgba(200,150,14,0.35);letter-spacing:1.5px">CLICK TO LOCK</div>';
+}
+
+function dmPanel(){
+  var el=document.getElementById('dm-panel');
+  if(!DM.locked){el.style.display='none';return;}
+  var m=DM_META[DM.locked],s=DM_STATS[DM.locked];
+  var ce=DM_EDGES.filter(function(e){return e.a===DM.locked||e.b===DM.locked;}).map(function(e){return {other:e.a===DM.locked?e.b:e.a,count:e.count};}).sort(function(x,y){return y.count-x.count;});
+  var cs=new Set();DM_EDGES.forEach(function(e){if(e.a===DM.locked)cs.add(e.b);if(e.b===DM.locked)cs.add(e.a);});
+  var h='<button class="close" onclick="DM.locked=null;dmPanel();dmRender();">✕</button>';
+  h+='<div class="tag" style="color:'+m.color+'">'+m.short+(m.steward?' ◎ STEWARD':'')+'</div><div class="name">'+m.label+'</div>';
+  h+=dmMiniStat('PEAK WS',s.peakW,3000,m.color);
+  h+=dmMiniStat('AVG WS',s.avgW,3000,'rgba(200,150,14,0.5)');
+  h+=dmMiniStat('INTEREST',s.interest,20,'#C8960E');
+  h+=dmMiniStat('MEMBERS',s.members,15,'#4ACCA8');
+  if(ce.length>0){
+    h+='<div class="dm-links"><div class="lbl">Strongest Links</div>';
+    ce.slice(0,5).forEach(function(e){
+      var om=DM_META[e.other];
+      h+='<button class="dm-link-btn" onclick="dmNav(\''+e.other+'\')"><span style="color:rgba(200,150,14,0.5)">'+om.short+'</span><span style="color:rgba(200,150,14,0.6);font-weight:600">'+e.count+'</span></button>';
+    });
+    h+='</div>';
+  }
+  h+='<div class="dm-footer">'+cs.size+' CONNECTED · '+DM_MEMBERS.length+' MEMBERS</div>';
+  el.innerHTML=h;el.style.display='block';
+}
+
+function dmNav(id){
+  DM.locked=id;
+  var p=DM_drift[id]||DM_LAYOUT[id];
+  DM.flyRef={sx:DM.cam.x,sy:DM.cam.y,ss:DM.cam.scale,ex:p.x,ey:p.y,es:1.6,t:0,dur:0.8};
+  dmPanel();
+}
+
+var DM_EDGES=dmEdges('membership');
+var DM_dims={w:800,h:500};
+
+function dmSetMode(mode){
+  DM.mode=mode;
+  DM_EDGES=dmEdges(mode);
+  document.querySelectorAll('.dm-toggle').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode);});
+  dmRender();
+}
+window.dmSetMode=dmSetMode;
+
+function dmInit(){
+  var cvs=document.getElementById('dm-canvas');
+  if(!cvs) return;
+  var svg=document.getElementById('dm-svg');
+  function measure(){
+    var r=cvs.getBoundingClientRect();
+    DM_dims={w:r.width||800,h:r.height||500};
+    svg.setAttribute('width',DM_dims.w);svg.setAttribute('height',DM_dims.h);
+    svg.style.width=DM_dims.w+'px';svg.style.height=DM_dims.h+'px';
+  }
+  measure();
+  var ro=new ResizeObserver(measure);ro.observe(cvs);
+
+  // Pan
+  cvs.addEventListener('pointerdown',function(e){
+    if(e.button!==0)return;
+    DM.flyRef=null;if(DM.inertiaId){cancelAnimationFrame(DM.inertiaId);DM.inertiaId=null;}
+    DM.pan=true;DM.panLast={x:e.clientX,y:e.clientY};DM.vel={vx:0,vy:0};
+    cvs.setPointerCapture(e.pointerId);
+  });
+  cvs.addEventListener('pointermove',function(e){
+    if(DM.pan){
+      var dx=e.clientX-DM.panLast.x,dy=e.clientY-DM.panLast.y;
+      DM.panLast={x:e.clientX,y:e.clientY};
+      DM.vel={vx:dx,vy:dy};
+      DM.cam.x-=dx/DM.cam.scale;DM.cam.y-=dy/DM.cam.scale;
+    }else{
+      var rect=cvs.getBoundingClientRect();
+      var wx=DM.cam.x+(e.clientX-rect.left-DM_dims.w/2)/DM.cam.scale;
+      var wy=DM.cam.y+(e.clientY-rect.top-DM_dims.h/2)/DM.cam.scale;
+      var hit=null,best=20/DM.cam.scale;
+      DM_IDS.forEach(function(id){
+        var p=DM_drift[id],d=Math.sqrt(Math.pow(p.x-wx,2)+Math.pow(p.y-wy,2));
+        if(d<best){best=d;hit=id;}
+      });
+      DM.active=hit;
+    }
+  });
+  cvs.addEventListener('pointerup',function(){
+    DM.pan=false;
+    var vx=DM.vel.vx,vy=DM.vel.vy;
+    function step(){vx*=0.9;vy*=0.9;if(Math.abs(vx)<0.3&&Math.abs(vy)<0.3)return;DM.cam.x-=vx/DM.cam.scale;DM.cam.y-=vy/DM.cam.scale;DM.inertiaId=requestAnimationFrame(step);}
+    DM.inertiaId=requestAnimationFrame(step);
+  });
+  cvs.addEventListener('click',function(e){
+    var rect=cvs.getBoundingClientRect();
+    var wx=DM.cam.x+(e.clientX-rect.left-DM_dims.w/2)/DM.cam.scale;
+    var wy=DM.cam.y+(e.clientY-rect.top-DM_dims.h/2)/DM.cam.scale;
+    var hit=null,best=20/DM.cam.scale;
+    DM_IDS.forEach(function(id){
+      var p=DM_drift[id],d=Math.sqrt(Math.pow(p.x-wx,2)+Math.pow(p.y-wy,2));
+      if(d<best){best=d;hit=id;}
+    });
+    DM.locked=DM.locked===hit?null:hit;
+    dmPanel();
+  });
+  cvs.addEventListener('mouseleave',function(){DM.active=null;});
+
+  // Zoom
+  cvs.addEventListener('wheel',function(e){
+    e.preventDefault();DM.flyRef=null;
+    var f=e.deltaY>0?0.91:1.1;
+    var rect=cvs.getBoundingClientRect();
+    var mx=e.clientX-rect.left,my=e.clientY-rect.top;
+    var wx=DM.cam.x+(mx-DM_dims.w/2)/DM.cam.scale;
+    var wy=DM.cam.y+(my-DM_dims.h/2)/DM.cam.scale;
+    var ns=Math.max(0.15,Math.min(4,DM.cam.scale*f));
+    DM.cam.scale=ns;DM.cam.x=wx-(mx-DM_dims.w/2)/ns;DM.cam.y=wy-(my-DM_dims.h/2)/ns;
+  },{passive:false});
+
+  // Anim
+  function frame(){
+    DM.time+=0.016;
+    DM_IDS.forEach(function(id){
+      DM_drift[id].x+=DM_vel[id].vx;DM_drift[id].y+=DM_vel[id].vy;
+      DM_drift[id].x+=(DM_LAYOUT[id].x-DM_drift[id].x)*0.0005;
+      DM_drift[id].y+=(DM_LAYOUT[id].y-DM_drift[id].y)*0.0005;
+    });
+    if(DM.flyRef){
+      var f=DM.flyRef;f.t=Math.min(f.t+0.016/f.dur,1);
+      var ease=f.t<0.5?2*f.t*f.t:(1-Math.pow(-2*f.t+2,2)/2);
+      DM.cam.x=f.sx+(f.ex-f.sx)*ease;DM.cam.y=f.sy+(f.ey-f.sy)*ease;DM.cam.scale=f.ss+(f.es-f.ss)*ease;
+      if(f.t>=1)DM.flyRef=null;
+    }
+    dmRender();dmHud();dmChip();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+// Init domain map when view is shown
+var _dmInited=false;
+var _origNav=nav;
+nav=function(key){
+  _origNav(key);
+  if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
+};
 </script>
 </body>
 </html>
