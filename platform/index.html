@@ -150,11 +150,11 @@
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Showing 3 threads matching your Circle mandates (Space Law, Remote Sensing) and 2 matching your Curiosities (Policy, Mars Habitability). <span style="color:var(--text-tertiary)">847 total threads accessible.</span></div></div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
-        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
-        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
-        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
-        <div class="feed-item" style="cursor:pointer" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
+        <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
+        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law Circle</strong> endorsed a thread</div><div class="fwhat">Liability frameworks for debris-generating manoeuvres — who bears responsibility when avoidance fails?</div><div class="fmeta">Endorsed by Akello J. · Space Law steward · 3h ago · 8 replies</div></div></div>
+        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--amber)"></div><div style="flex:1"><div class="fwho"><strong>Mars Habitability</strong> · New discussion</div><div class="fwhat">Psychological design in confined habitats — lessons from Antarctic stations</div><div class="fmeta">Namugga C. · 7h ago · 14 replies</div></div></div>
+        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--green)"></div><div style="flex:1"><div class="fwho"><strong>Remote Sensing</strong> · Question</div><div class="fwhat">Sentinel-2 data access for East Africa — current limitations and workarounds</div><div class="fmeta">Mwenda T. · 1d ago · 5 replies</div></div></div>
+        <div class="feed-item click" onclick="nav('thread-detail')"><div class="fdot" style="background:var(--purple)"></div><div style="flex:1"><div class="fwho"><strong>Space Law</strong> · Guide</div><div class="fwhat">ITU coordination procedures — a plain language walkthrough</div><div class="fmeta">Akello J. · 2d ago · 22 replies · ↑ Observatory</div></div></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -401,43 +401,43 @@
     <div class="page-sub">Mandate-defined deliberation bodies</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="margin-bottom:16px;display:flex;gap:8px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
+        <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
         <div class="g2">
           <div class="card click" onclick="nav('circle-detail')">
             <div class="flex items-center gap-3 mb-3">
               <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--purple),#3a1860);font-size:14px">SL</div>
-              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 8 members</div></div>
+              <div style="flex:1"><div class="text-sm" style="font-weight:600">Space Law Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Domain · 8 members</div></div>
               <span class="badge b-active">Active</span>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
-            <div style="display:flex;gap:6px"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
+            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
+            <div class="flex gap-2"><span class="tag">Space Law</span><span class="tag">Liability</span><span class="tag">Policy</span></div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
             <div class="flex items-center gap-3 mb-3">
               <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--teal),#0d4040);font-size:14px">RS</div>
-              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Domain · 6 members</div></div>
+              <div style="flex:1"><div class="text-sm" style="font-weight:600">Remote Sensing Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Domain · 6 members</div></div>
               <span class="badge b-active">Active</span>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
-            <div style="display:flex;gap:6px"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
+            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
+            <div class="flex gap-2"><span class="tag">Remote Sensing</span><span class="tag">Satellite</span><span class="tag">Data</span></div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
             <div class="flex items-center gap-3 mb-3">
               <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--amber),#5a3010);font-size:14px">MH</div>
-              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Mars Habitability Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 4 members</div></div>
+              <div style="flex:1"><div class="text-sm" style="font-weight:600">Mars Habitability Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Suggested · 4 members</div></div>
               <span class="badge b-pending">Suggested</span>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
-            <div style="display:flex;gap:6px"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
+            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Life support systems, habitat design, and Mars colonisation research.</div>
+            <div class="flex gap-2"><span class="tag">Mars</span><span class="tag">Habitability</span></div>
           </div>
           <div class="card click" onclick="nav('circle-detail')">
             <div class="flex items-center gap-3 mb-3">
               <div class="hav" style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--green),#0d3a20);font-size:14px">PL</div>
-              <div style="flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">Policy & Advocacy Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Suggested · 5 members</div></div>
+              <div style="flex:1"><div class="text-sm" style="font-weight:600">Policy & Advocacy Circle</div><div class="text-xs" style="color:var(--text-tertiary)">Suggested · 5 members</div></div>
               <span class="badge b-pending">Suggested</span>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
-            <div style="display:flex;gap:6px"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
+            <div class="text-sm" style="color:var(--text-secondary);margin-bottom:12px;line-height:1.5">Policy analysis, advocacy strategies, and institutional partnerships.</div>
+            <div class="flex gap-2"><span class="tag">Policy</span><span class="tag">Advocacy</span></div>
           </div>
         </div>
       </div>
