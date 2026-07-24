@@ -1082,8 +1082,7 @@
     </div>
     <div class="dm-canvas" id="dm-canvas">
       <svg id="dm-svg"></svg>
-      <div class="dm-hud" id="dm-hud"></div>
-      <div class="dm-hint" id="dm-hint">Click a star to explore · Scroll to zoom · Drag to pan</div>
+      <div class="dm-hud" id="dm-hud"><span id="dm-hud-text"></span><span class="dm-hint" id="dm-hint"> · Click a star to explore</span></div>
       <div class="dm-chip" id="dm-chip" style="display:none"></div>
       <div class="dm-panel" id="dm-panel" style="display:none"></div>
     </div>
@@ -2106,14 +2105,14 @@ var DM_vel={};
 (function(){var rng=dmMkRng(7);DM_IDS.forEach(function(id){DM_vel[id]={vx:(rng()-0.5)*0.02,vy:(rng()-0.5)*0.02};});})();
 
 // State
-var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null};
+var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2};
 
 function dmSpikeLen(pw){return 4+(pw/3000)*18;}
 function dmStarR(pw){return 0.8+(pw/3000)*1.4;}
 
 // Render
 function dmRender(){
-  var c=DM.cam,fid=DM.locked||DM.active;
+  var c=DM.cam,fid=DM.locked||DM.active||DM.tour;
   var conn=null;
   if(fid){conn=new Set();DM_EDGES.forEach(function(e){if(e.a===fid)conn.add(e.b);if(e.b===fid)conn.add(e.a);});}
 
@@ -2213,7 +2212,7 @@ function dmRender(){
 }
 
 function dmHud(){
-  document.getElementById('dm-hud').textContent=Math.round(DM.cam.scale*100)+'% · drag · scroll';
+  document.getElementById('dm-hud-text').textContent=Math.round(DM.cam.scale*100)+'% · drag · scroll';
 }
 
 function dmMiniStat(label,val,max,color){
@@ -2362,6 +2361,17 @@ function dmInit(){
       var ease=f.t<0.5?2*f.t*f.t:(1-Math.pow(-2*f.t+2,2)/2);
       DM.cam.x=f.sx+(f.ex-f.sx)*ease;DM.cam.y=f.sy+(f.ey-f.sy)*ease;DM.cam.scale=f.ss+(f.es-f.ss)*ease;
       if(f.t>=1)DM.flyRef=null;
+    }
+    if(!DM.locked&&!DM.active&&!DM.pan){
+      DM.tourNext-=0.016;
+      if(DM.tourNext<=0){
+        var pick=DM_IDS[Math.floor(Math.random()*DM_IDS.length)];
+        DM.tour=pick;
+        DM.tourNext=2.5+Math.random()*1.5;
+        if(hintEl&&!hintEl.classList.contains('hidden'))hintEl.classList.add('hidden');
+      }
+    }else{
+      DM.tour=null;DM.tourNext=2;
     }
     dmRender();dmHud();dmChip();
     requestAnimationFrame(frame);
