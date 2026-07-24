@@ -153,36 +153,29 @@
   <div class="view" id="view-commons">
     <div class="page-title">Discussions</div>
     <div class="page-sub">Open discussion · Solis Commons</div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Showing 3 threads matching your Circle mandates (Space Law, Remote Sensing) and 2 matching your Curiosities (Policy, Mars Habitability). <span style="color:var(--text-tertiary)">847 total threads accessible.</span></div></div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">My Feed</button><button class="btn btn-sm">Space Law</button><button class="btn btn-sm">Remote Sensing</button><button class="btn btn-sm">All</button></div>
-        <div class="g3">
-          <div class="card click" onclick="nav('thread-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-active">Endorsed</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3h ago · 8 replies</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Liability frameworks for debris-generating manoeuvres</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Who bears responsibility when avoidance fails? Endorsed by Space Law Circle.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Akello J.</div>
-          </div>
-          <div class="card click" onclick="nav('thread-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-pending">New</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">7h ago · 14 replies</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Psychological design in confined habitats</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Lessons from Antarctic stations for Mars habitat design.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Mars Habitability · Namugga C.</div>
-          </div>
-          <div class="card click" onclick="nav('thread-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-review">Question</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">1d ago · 5 replies</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Sentinel-2 data access for East Africa</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Current limitations and workarounds for remote sensing data access.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Remote Sensing · Mwenda T.</div>
-          </div>
-          <div class="card click" onclick="nav('thread-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-active">Guide</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">2d ago · 22 replies</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">ITU coordination procedures — a plain language walkthrough</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Step-by-step guide to ITU frequency coordination for emerging space nations.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Akello J. · ↑ Observatory</div>
+        <div class="feed-filters">
+          <button class="feed-filter active">My Feed</button>
+          <button class="feed-filter">Circle Mentions</button>
+          <button class="feed-filter">Endorsed</button>
+          <button class="feed-filter">All</button>
+        </div>
+        <div class="post-compose">
+          <div class="post-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px">OS</div>
+          <div style="flex:1">
+            <textarea rows="2" placeholder="Start a discussion..."></textarea>
+            <div class="post-compose-actions">
+              <div class="post-compose-tools">
+                <button title="Attach file">&#128206;</button>
+                <button title="Add domain tag">&#9881;</button>
+                <button title="Add link">&#128279;</button>
+              </div>
+              <button class="btn btn-primary btn-sm">Post</button>
+            </div>
           </div>
         </div>
+        <div id="threads-feed"></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -195,34 +188,28 @@
           <div class="aside-tags">
             <span class="tag tag-purple" style="font-size:9px">Space Law</span>
             <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
-            <span class="tag tag-amber" style="font-size:9px">Policy</span>
-            <span class="tag tag-blue" style="font-size:9px">Mars</span>
+            <span class="tag tag-amber" style="font-size:9px">Mars Habitability</span>
+            <span class="tag tag-blue" style="font-size:9px">Physics</span>
           </div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Recent Threads</div>
-          <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
-          <div class="aside-link" onclick="nav('thread-detail')">Sentinel-2 data workaround for Uganda</div>
-          <div class="aside-link" onclick="nav('thread-detail')">ITU frequency coordination basics</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">From Discussion to Action</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
-            <div style="margin-bottom:4px"><span style="color:var(--teal)">●</span> Discussion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ steward sponsors</div>
-            <div style="margin-bottom:4px"><span style="color:var(--gold)">●</span> Proposal</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ circle deliberates</div>
-            <div style="margin-bottom:4px"><span style="color:var(--purple)">●</span> Motion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ aSTF adjudicates (blind)</div>
-            <div><span style="color:var(--green)">●</span> Resolution → xSTF → Deliverable</div>
+            <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
+            <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
+            <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
+            <div><span style="color:var(--green)">&#9679;</span> Resolution &#8594; xSTF &#8594; Deliverable</div>
           </div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Stats</div>
           <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val">4</div><div class="aside-stat-lbl">Threads</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">22</div><div class="aside-stat-lbl">Replies</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Endorsed</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">8</div><div class="aside-stat-lbl">Threads</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">86</div><div class="aside-stat-lbl">Replies</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">279</div><div class="aside-stat-lbl">Likes</div></div>
           </div>
         </div>
       </div>
@@ -615,10 +602,38 @@
       </div>
     </div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise motion → then spawn aSTF for blind adjudication.</span></div></div>
+
+    <!-- Proposal Origin -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="sec">Proposal Origin</div>
+      <div class="flex gap-3" style="align-items:flex-start">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:5px;flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Source: Commons Discussion Thread</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">A user created a discussion thread in the Commons. Participants discussed the topic. A steward (Akello J.) created a proposal from that thread and sponsored it for deliberation.</div>
+          <div class="flex gap-2" style="align-items:center">
+            <span class="tag tag-purple" style="font-size:8px">Space Law</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Thread #Thread-042 · 8 replies · 24 likes</span>
+            <button class="btn btn-sm" onclick="nav('thread-detail')" style="margin-left:auto">View Source Thread</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="g2">
       <div>
-        <div class="sec">Founding Mandate</div>
-        <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px"><em style="color:var(--text-tertiary)">From Commons thread snapshot:</em> Thread argues that liability for debris-generating manoeuvres is currently undefined in international space law. When collision avoidance fails and debris is created, who bears responsibility?</div>
+        <div class="sec">Deliberation</div>
+        <div class="card" style="margin-bottom:16px;padding:12px">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello Jane</span><span class="text-xs" style="color:var(--text-tertiary)">3d ago</span></div><p class="text-sm">The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.</p></div></div>
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Osei Kwame</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?</p></div></div>
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:var(--navy-light)">MT</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Mwenda Thomas</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.</p></div></div>
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga Claire</span><span class="text-xs" style="color:var(--text-tertiary)">1d ago</span></div><p class="text-sm">I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.</p></div></div>
+          </div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
+        </div>
+
         <div class="sec">Preliminary Vote</div>
         <div class="vote-bar">
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Weighted competence vote — Space Law Domain</div>
@@ -638,7 +653,15 @@
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
-        <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Motion Type</div>
+
+        <div class="sec" style="margin-top:16px">Proposal Types</div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
+          <div style="margin-bottom:6px"><strong style="color:var(--teal)">Discussion thread</strong> — A user creates a discussion, participants discuss, steward creates a proposal from the thread.</div>
+          <div style="margin-bottom:6px"><strong style="color:var(--gold)">Direct proposal</strong> — A steward directly creates a proposal without a preceding discussion.</div>
+          <div><strong style="color:var(--purple)">System-bound</strong> — A steward changes a system setting, submits as a proposal. Auto-executed on resolution.</div>
+        </div>
+
+        <div class="sec">Motion Type</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Select how this motion will be implemented:</div>
         <div class="flex gap-2 mb-3">
           <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="non_system" checked> <span><strong>Directive</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Circle(s) implement</span></span></label>
@@ -865,6 +888,37 @@
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">■ jSTF — Judicial Investigation</div>
         <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center">🔒 &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
+
+        <!-- Anonymous Report -->
+        <div class="card" style="margin-bottom:16px;border-left:3px solid var(--red)">
+          <div class="sec">Anonymous Report</div>
+          <div class="flex gap-3" style="align-items:flex-start">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--border-subtle);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-tertiary);flex-shrink:0">?</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Anonymous member report — Credential misrepresentation</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">A member reported that Daniel J. appeared to misrepresent space law credentials during steward candidacy evaluation. The report was posted anonymously to the Commons, visible to stewards. Any steward could sponsor it — Akello J. took responsibility for sponsoring this claim.</div>
+              <div class="flex gap-2" style="align-items:center">
+                <span class="tag tag-red" style="font-size:8px">Anonymous</span>
+                <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Reported Jul 10 · Sponsored Jul 12</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Steward Sponsorship -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="sec">Steward Sponsorship</div>
+          <div class="flex gap-3" style="align-items:center">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:500;color:var(--text)">Akello Jane</div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Space Law steward · Sponsored this investigation</div>
+            </div>
+            <span class="badge b-active">Sponsor</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle)">As sponsor, Akello J. takes responsibility for the claim. The investigation team now has authority to examine the evidence. The anonymous reporter's identity is permanently sealed.</div>
+        </div>
+
         <div class="sec">Case Record</div>
         <div class="accused-row">
           <div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
@@ -875,10 +929,26 @@
           <div class="court-charge">Trigger: Integrity Engine anomaly flag</div>
           <div class="court-text">Flag raised on Jul 10: statistical correlation detected between auditor assignment pattern and credential verification outcomes. Secondary flag: claimed W<sub>h</sub> credentials in Space Law domain appear inconsistent with demonstrated participation quality. Judicial Circle commissioned this investigation on Jul 12.</div>
         </div>
+
+        <!-- Activity Restriction -->
+        <div class="card" style="margin-bottom:16px;border-left:3px solid var(--amber)">
+          <div class="sec">Activity Restriction During Investigation</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">The jSTF can restrict the reported member's activity during deliberation to prevent potential harm or interference.</div>
+          <div class="flex gap-3 mb-3" style="align-items:center;padding:8px 12px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius)">
+            <span style="font-size:14px">⚠</span>
+            <div style="flex:1">
+              <div style="font-size:12px;font-weight:500;color:var(--amber)">Steward privileges suspended</div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Daniel J. cannot participate in Circle deliberations or vote on motions during this investigation.</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Restriction is temporary and proportionate. Applied as a system-bound action by the Integrity Engine.</div>
+        </div>
+
         <div class="sec">Investigation Team</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">FO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Fatima Ouedraogo</div><div style="font-size:11px;color:var(--text-tertiary)">Lead investigator</div></div><span class="badge b-active">Active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">BK</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Bongani Khumalo</div><div style="font-size:11px;color:var(--text-tertiary)">Evidence review</div></div><span class="badge b-active">Active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">LM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Lena Müller</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law expert</div></div><span class="badge b-active">Active</span></div>
+
         <div class="sec" style="margin-top:16px">Report Status</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Findings</span><span style="color:var(--green)">✓ Drafted</span></div>
@@ -886,6 +956,19 @@
           <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
           <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
         </div>
+
+        <!-- Policy Citation for Punishment -->
+        <div class="card" style="margin-bottom:16px;border-left:3px solid var(--purple)">
+          <div class="sec">Policy Citation for Punishment</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">jSTF cannot invent punishment — it must cite existing policy resolutions passed by the Commons. Punishment is applied as per the policy, not ad hoc.</div>
+          <div style="font-family:var(--mono);font-size:11px;color:var(--text-secondary);line-height:1.8;padding:10px 14px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius)">
+            <div style="margin-bottom:4px"><strong style="color:var(--purple)">Policy Resolution #PR-014</strong> — Credential integrity standards</div>
+            <div style="margin-bottom:4px;color:var(--text-tertiary)">"Members found to have misrepresented competence credentials shall face sanctions proportionate to the severity and impact of the misrepresentation."</div>
+            <div><strong style="color:var(--purple)">Policy Resolution #PR-021</strong> — Steward accountability</div>
+            <div style="color:var(--text-tertiary)">"Stewards found to have violated integrity standards shall have steward privileges suspended pending review, and may face removal from Circle membership."</div>
+          </div>
+        </div>
+
         <div class="sec">Investigation Deliberations</div>
         <div class="card">
           <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">FO</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Fatima O.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Evidence appendix is complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.</p></div></div>
@@ -895,6 +978,27 @@
           <textarea class="msg-input" rows="2" placeholder="Add to investigation..."></textarea>
           <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded. This cell is sealed — only investigation team and Judicial Circle have access.</div>
         </div>
+
+        <!-- Disciplinary Motion -->
+        <div class="sec" style="margin-top:16px">Disciplinary Motion</div>
+        <div class="card" style="margin-bottom:16px">
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">When the investigation concludes, the jSTF pushes a disciplinary motion. This motion goes to aSTF for audit — aSTF reviews the <strong>decision</strong>, not the jSTF members (complete separation).</div>
+          <div class="flex gap-2 mb-3">
+            <div style="flex:1;padding:10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);text-align:center">
+              <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:4px">If motion passes aSTF audit</div>
+              <div style="font-size:12px;font-weight:500;color:var(--text)">Resolution applied</div>
+            </div>
+            <div style="flex:1;padding:10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);text-align:center">
+              <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:4px">Resolution types</div>
+              <div style="font-size:12px;font-weight:500;color:var(--text)">System-bound or Policy-cited</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-tertiary);line-height:1.5">
+            <strong>System-bound:</strong> Remove from circle, trigger fresh vSTF, freeze Ws for a set time.<br>
+            <strong>Non-system:</strong> Applied as per policy resolutions cited above.
+          </div>
+        </div>
+
         <div style="margin-top:16px"><button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise &amp; Forward to Meta-aSTF</button></div>
       </div>
       <div class="layout-aside">
@@ -920,6 +1024,17 @@
           </div>
         </div>
         <div class="aside-card">
+          <div class="aside-title">How jSTF Works</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2"><strong>1. Anonymous report</strong> — Any member can report any member. Report is posted anonymously to Commons, visible to stewards.</div>
+            <div class="mb-2"><strong>2. Steward sponsorship</strong> — Any steward can sponsor the report, taking responsibility for the claim.</div>
+            <div class="mb-2"><strong>3. Activity restriction</strong> — jSTF can restrict reported member's activity during investigation.</div>
+            <div class="mb-2"><strong>4. Policy citation</strong> — Punishment must cite existing policy resolutions, not ad hoc.</div>
+            <div class="mb-2"><strong>5. Disciplinary motion</strong> — Goes to aSTF for audit. aSTF sees the decision, never the jSTF members.</div>
+            <div><strong>6. Resolution</strong> — System-bound (circle removal, vSTF trigger, Ws freeze) or non-system (policy citation).</div>
+          </div>
+        </div>
+        <div class="aside-card">
           <div class="aside-title">Evidence</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
             <div class="flex justify-between"><span>Assignment logs</span><span style="color:var(--green)">✓ Collected</span></div>
@@ -927,10 +1042,6 @@
             <div class="flex justify-between"><span>Verification outcomes</span><span style="color:var(--green)">✓ Collected</span></div>
             <div class="flex justify-between"><span>External contacts</span><span style="color:var(--amber)">△ In progress</span></div>
           </div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">How jSTF Works</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Judicial investigations are <strong>sealed cells</strong>. The team collaborates with full access. The Judicial Circle has read access for oversight. Meta-aSTF receives the report as read-only input. Findings go to the ledger; reviewer attribution is sealed.</div>
         </div>
       </div>
     </div>
@@ -1984,6 +2095,15 @@ function layoutParticipantCards(){
 }
 requestAnimationFrame(layoutParticipantCards);
 
+// Feed filter tabs
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('feed-filter')) {
+    var tabs = e.target.parentElement.querySelectorAll('.feed-filter');
+    tabs.forEach(function(t) { t.classList.remove('active'); });
+    e.target.classList.add('active');
+  }
+});
+
 window.addEventListener('hashchange', function() {
   var key = window.location.hash.replace('#', '') || 'personal';
   if (views[key]) nav(key);
@@ -1993,8 +2113,8 @@ loadMockData().then(function() {
   if (participantsGrid) participantsGrid.innerHTML = renderParticipantCards();
   var inboxList = document.getElementById('inbox-list');
   if (inboxList) inboxList.innerHTML = renderInboxItems();
-  var threadsList = document.getElementById('threads-list');
-  if (threadsList) threadsList.innerHTML = renderDiscussionThreads();
+  var threadsFeed = document.getElementById('threads-feed');
+  if (threadsFeed) threadsFeed.innerHTML = renderDiscussionThreads();
   var circlesGrid = document.getElementById('circles-grid');
   if (circlesGrid) circlesGrid.innerHTML = renderCircleCards();
   var projectsBody = document.getElementById('projects-body');

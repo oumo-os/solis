@@ -75,11 +75,37 @@ function renderInboxItems() {
 function renderDiscussionThreads() {
   if (!MOCK) return '';
   return MOCK.threads.map(function(t) {
-    return '<div class="card click">'
-      + '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + t.title + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">' + t.author + ' · ' + t.domain + '</div>'
-      + '<div class="flex items-center gap-2"><span class="tag tag-default" style="font-size:7px">' + t.replies + ' replies</span>'
-      + '<span style="font-size:9px;color:var(--text-tertiary)">' + t.time + '</span></div></div>';
+    var avatarBg = 'background:var(--navy-light)';
+    if (t.avatar && t.avatar.gradient) avatarBg = 'background:' + t.avatar.gradient;
+    var badgeHtml = t.badge ? '<span class="badge ' + t.badgeClass + '" style="font-size:8px">' + t.badge + '</span>' : '';
+    var pinnedClass = t.pinned ? ' pinned' : '';
+    var pinnedIcon = t.pinned ? '<span class="post-pin-icon" title="Pinned">&#9733;</span>' : '';
+    var domainTagBg = 'background:var(--surface-raised);color:var(--text-secondary);border:1px solid var(--border)';
+    if (t.domainColor === 'tag-purple') domainTagBg = 'background:var(--purple-soft);color:var(--purple);border:1px solid var(--purple-border)';
+    else if (t.domainColor === 'tag-green') domainTagBg = 'background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)';
+    else if (t.domainColor === 'tag-amber') domainTagBg = 'background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)';
+    else if (t.domainColor === 'tag-blue') domainTagBg = 'background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border)';
+    else if (t.domainColor === 'tag-red') domainTagBg = 'background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)';
+
+    return '<div class="post-card' + pinnedClass + '" onclick="nav(\'thread-detail\')">'
+      + '<div class="post-header">'
+      + '<div class="post-avatar" style="' + avatarBg + '">' + t.initials + '</div>'
+      + '<div class="post-meta">'
+      + '<div class="post-author">' + t.author + '</div>'
+      + '<div class="post-author-line">'
+      + '<span class="post-domain-tag" style="' + domainTagBg + '">' + t.domain + '</span>'
+      + '<span>' + t.time + '</span>'
+      + pinnedIcon
+      + '</div></div>'
+      + '<div class="post-footer">' + badgeHtml + '</div>'
+      + '</div>'
+      + '<div class="post-title">' + t.title + '</div>'
+      + '<div class="post-body">' + t.body + '</div>'
+      + '<div class="post-actions">'
+      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#9825;</span><span class="count">' + t.likes + '</span></button>'
+      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
+      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>'
+      + '</div></div>';
   }).join('');
 }
 
