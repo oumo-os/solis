@@ -243,9 +243,8 @@ A deliberation cell is the core governance mechanism. Each deliberation cell use
 **Main content:**
 1. **Proposal Origin** — the trigger source (discussion thread, direct proposal, system-bound edit)
 2. **Deliberation** — a chat thread where participants discuss the proposal
-3. **Accept checkbox** — "I confirm this discussion record accurately reflects the deliberation" — must be checked to enable vote
-4. **Vote** — Yea / Nay / Abstain buttons, per-domain Ws-weighted vote table
-5. **Decision Status Bar** — quorum status, vote result, Submit Resolution or Close Debate button
+3. **Accept checkbox** — "I confirm this discussion record accurately reflects the deliberation" — must be checked to enable vote (vote happens in modal)
+4. **Decision Status Bar** — quorum status, vote result, Submit Resolution or Close Debate button
 
 **Sidebar:**
 1. **Participating Circles** — active circles with member counts, ghost/scar for self-disqualified
@@ -272,8 +271,10 @@ Full overlay modal with:
 - Resolution type selector
 - System settings section (shown for System/Hybrid)
 - Non-system actions section (shown for Directive/Hybrid) with implementing circle(s)
-- Current vote summary
+- Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
 - Save button (nullifies all existing votes on save)
+
+Vote buttons in the modal are enabled/disabled by the accept checkbox in the main view.
 
 ### Accept Record Checkbox
 
