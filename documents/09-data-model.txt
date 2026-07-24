@@ -419,11 +419,24 @@ A Cell is a **deliberation/discussion/activity space** — think of it as a chat
 - Members: circle stewards + mandated domain participants
 - Purpose: discuss governance, policies, domain direction
 
-**2. Discussion / Commons Cell**
-- Discussions in the Commons or within Projects can sprout a **proposal**
-- A proposal must be **sponsored by a steward** to proceed
-- Sponsored proposal → spawns a **Circle Cell** for deliberation
-- Circle Cell deliberation (stewards + domain members) → produces a **motion**
+**2. Deliberation Cell**
+The core governance mechanism. A deliberation cell has four components:
+
+1. **Deliberation** — a chat thread where participants discuss
+2. **Proposal** — the formal proposal being deliberated, with a link to the source discussion thread if any (or report message(s) for jSTF, or complaint for jSTF)
+3. **Deliverable** — the motion, action, or outcome produced by deliberation
+4. **Competence-weighted vote** — when all vote and the motion passes, the cell creates/opens an aSTF
+
+**Proposal Origins (how a proposal enters a deliberation cell):**
+1. **Discussion thread → steward proposal**: A user creates a discussion thread, participants discuss, and a steward creates a proposal from that thread. The proposal links back to the source thread.
+2. **Direct steward proposal**: A steward directly creates a proposal without a preceding discussion thread.
+3. **System-bound proposal**: A steward makes changes to a system setting or circle profile, submits the changes as a proposal. When the resolution passes, the approved system settings are activated automatically.
+
+**Multi-circle participation:**
+Deliberation cells can have multiple circles participating, not just the originating circle.
+
+**Vote and aSTF:**
+When all participants have voted and the motion passes, the cell creates or opens an aSTF for blind adjudication.
 
 **3. Project Cell**
 - Projects can have their own cells for deliberation
@@ -438,7 +451,7 @@ A Cell is a **deliberation/discussion/activity space** — think of it as a chat
 **5. vSTF / jSTF / Periodic Review aSTF**
 - All operate in **isolated blind cells**
 - **vSTF**: Verification STF — evaluates competence claims, evidence
-- **jSTF**: Investigation STF — investigates specific issues
+- **jSTF**: Investigation STF — investigates specific issues (see jSTF section below)
 - **Periodic Review aSTF**: Reviews overall health of a circle and its stewards
 - All produce **evaluations** (not resolution/rejection)
 
@@ -446,20 +459,50 @@ A Cell is a **deliberation/discussion/activity space** — think of it as a chat
 - xSTF spawns to **execute** a resolved motion
 - Produces a **deliverable** per requirements from the **commissioning circle** (the stewards' cell that requested it)
 
+### jSTF — Judicial Investigation Cell
+
+**Trigger:**
+Any member can report any member. The report is surfaced as an **anonymous post to the Commons**, visible to stewards. Any steward can sponsor the report, which activates a jSTF.
+
+**jSTF Deliberation:**
+The jSTF deliberates on the report in a blind cell. During deliberation, the jSTF can:
+
+1. **Restrict reported user activity** — e.g., suspend steward privileges, limit participation in certain cells, during the investigation period
+2. **Select punitive action** if warranted — based on policy resolutions previously passed by the Commons (cited as precedent)
+3. **Push a disciplinary motion** — which goes to aSTF for audit
+
+**aSTF Audit of jSTF Disciplinary Motion:**
+- aSTF audits the **decision**, not the members
+- aSTF **never sees jSTF members** — complete separation
+- aSTF reviews whether the disciplinary action is proportionate and consistent with Commons policy
+
+**Resolution:**
+When the disciplinary motion passes aSTF audit, the resolution can be:
+
+1. **System-bound**: Remove from circle, trigger fresh vSTF, freeze Ws for a set time, among others
+2. **Non-system disciplinary**: Applied as per policy resolutions passed before, cited as precedent
+
 ### Flow Summary
 
 ```
-Discussion/Project → Proposal (steward-sponsored) → Circle Cell Deliberation → Motion
-                                                                                    ↓
-                                                                              aSTF (blind cell)
-                                                                                    ↓
-                                                                          Resolution / Rejection
+Discussion → Proposal (steward-sponsored) → Deliberation Cell → Motion → aSTF → Resolution
+      ↑                                                        ↓
+      └──── Link to source thread ────────────────────────── Vote (competence-weighted)
+                                                                      ↓
+                                                              Resolution passes → opens aSTF
 
-Resolution → xSTF (blind cell) → Deliverable (per commissioning circle specs)
+jSTF: Report → Anonymous post → Steward sponsors → jSTF Cell (blind)
+                                                          ↓
+                                                   Activity restriction (if needed)
+                                                          ↓
+                                                   Disciplinary motion → aSTF audit
+                                                          ↓
+                                                   System-bound resolution (circle removal, vSTF trigger, Ws freeze)
+                                                   OR non-system resolution (policy citation)
 
 Periodic Review aSTF → Evaluates circle health + steward performance
 vSTF → Evaluates competence claims
-jSTF → Investigates issues
+xSTF → Executes resolved motions → Deliverable
 ```
 
 ### Key Principles
@@ -467,3 +510,6 @@ jSTF → Investigates issues
 - **Steward sponsorship required**: Not just anyone can propose — a steward must sponsor it
 - **Domain mandate boundaries**: Cells only operate within the domains the responsible circle has mandate over
 - **Each cell is unique**: Different membership, different purpose, different rules
+- **Anonymous reporting**: jSTF reports are anonymous to protect reporters; sponsors are stewards who take responsibility
+- **Proportionate discipline**: jSTF can restrict activity during investigation but must cite policy precedent for punitive action
+- **aSTF independence**: aSTF never sees jSTF members — audits the decision, not the people
