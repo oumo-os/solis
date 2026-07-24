@@ -2064,16 +2064,20 @@ function nav(key) {
 }
 
 function layoutParticipantCards(){
-  document.querySelectorAll('.participant-card').forEach(function(c){
+  var cards=document.querySelectorAll('.participant-card');
+  var maxH=0;
+  cards.forEach(function(c){c.style.height='';if(c.offsetHeight>maxH)maxH=c.offsetHeight;});
+  cards.forEach(function(c){
     var av=c.querySelector('.avatar-square');
-    if(c.offsetWidth < c.offsetHeight * 0.5){
+    if(c.offsetWidth < maxH * 0.5){
       c.classList.add('flex-col');
       av.style.width='100%';
       av.style.height='48px';
     } else {
       c.classList.remove('flex-col');
+      c.style.height=maxH+'px';
       av.style.height='';
-      av.style.width=c.offsetHeight+'px';
+      av.style.width=maxH+'px';
     }
   });
 }
