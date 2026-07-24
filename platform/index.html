@@ -715,9 +715,6 @@
       <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
     </div>
 
-    <!-- Accept Record Checkbox -->
-    <label class="accept-checkbox" style="margin-bottom:12px"><input type="checkbox" id="accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this discussion record accurately reflects the deliberation.</span></label>
-
     <!-- Decision Status Bar -->
     <div class="decision-bar" id="decision-bar">
       <div class="db-info"><span id="db-quorum">Quorum: 4/7</span> · <span id="db-result">Yea 4,960 · Nay 932 <span class="db-pass">(passes)</span></span></div>
@@ -2185,9 +2182,10 @@
           <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
         </div>
       </div>
+      <label class="accept-checkbox" style="margin-bottom:12px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this discussion record accurately reflects the deliberation.</span></label>
       <div class="card" style="margin-bottom:16px">
         <div class="sec">Vote Control</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Vote buttons are enabled once you accept the discussion record from the main view.</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Confirm the record above to enable voting.</div>
         <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none">
           <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green)">Yea</div><div class="vb-desc">I support this resolution</div></div>
           <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red)">Nay</div><div class="vb-desc">I oppose this resolution</div></div>
@@ -2412,6 +2410,8 @@ function openResolutionModal(idx) {
   document.getElementById('res-modal-title').textContent = 'Resolution #' + (idx + 1);
   document.getElementById('res-modal-text').value = res.text;
   document.getElementById('res-modal-action').value = res.action || '';
+  document.getElementById('modal-accept-record').checked = false;
+  toggleAcceptRecord(false);
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
 }

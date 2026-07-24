@@ -478,7 +478,7 @@ Resolution type is implicit — set at the deliberation cell level by the trigge
 
 ### Accept Record Checkbox
 
-Before voting, participants must check "I confirm this discussion record accurately reflects the deliberation." This activates the vote buttons. The checkbox ensures participants agree the deliberation record is complete and accurate before voting.
+Before voting, participants must check "I confirm this discussion record accurately reflects the deliberation." This checkbox is inside the resolution modal (not in the main view). Each time the modal is opened, the checkbox starts unchecked and vote buttons are disabled. The checkbox ensures participants agree the deliberation record is complete and accurate before voting on that specific resolution.
 
 ### Deliberation Cell Voting Mechanics
 

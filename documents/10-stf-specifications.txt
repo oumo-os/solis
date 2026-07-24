@@ -243,8 +243,7 @@ A deliberation cell is the core governance mechanism. Each deliberation cell use
 **Main content:**
 1. **Proposal Origin** — the trigger source (discussion thread, direct proposal, system-bound edit)
 2. **Deliberation** — a chat thread where participants discuss the proposal
-3. **Accept checkbox** — "I confirm this discussion record accurately reflects the deliberation" — must be checked to enable vote (vote happens in modal)
-4. **Decision Status Bar** — quorum status, vote result, Submit Resolution or Close Debate button
+3. **Decision Status Bar** — quorum status, vote result, Submit Resolution or Close Debate button
 
 **Sidebar:**
 1. **Participating Circles** — active circles with member counts, ghost/scar for self-disqualified
@@ -267,15 +266,15 @@ Multiple resolutions can exist in one deliberation cell. Each spawns its own aST
 Full overlay modal with:
 - Resolution text (editable textarea, pre-filled with proposal)
 - Action field (free text with autofill presets: Community Policy, Declaration, Deliverable Document, Service Contract, Agreement, Letter/Communication) + implementing circle(s) selector
-- Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
+- **Accept checkbox** — "I confirm this discussion record accurately reflects the deliberation" — must be checked to enable voting. Resets unchecked each time modal opens.
+- Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table (enabled by accept checkbox)
 - Save button (nullifies all existing votes on save)
-- Vote buttons enabled/disabled by accept checkbox in main view
 
 No type selector exposed to users. Resolution type is implicit — determined by the deliberation trigger context. Circle/Settings edits → system-bound. Direct proposals → directive.
 
 ### Accept Record Checkbox
 
-Before voting, participants must confirm the discussion record is accurate. This activates the vote buttons. Ensures deliberation record is complete before voting.
+Before voting, participants must confirm the discussion record is accurate. The checkbox is inside the resolution modal (not the main view). Resets to unchecked each time the modal opens. Ensures deliberation record is complete before voting.
 
 ### Multi-Circle Participation
 
