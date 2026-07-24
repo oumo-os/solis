@@ -148,11 +148,19 @@ status: "active" | "dissolved"
 ### Cell
 ```
 id: string
-type: "circle" | "undertaking" | "stf"
-parent_id: string        // Circle/Undertaking/STF ID
-members: string[]        // Participant IDs
+type: "circle" | "project" | "astf" | "vstf" | "jstf" | "xstf"
+parent_id: string        // Circle/Project/STF ID
+members: string[]        // Participant IDs (blind for STF types)
 created_at: date
 status: "active" | "archived"
+
+// Purpose
+purpose: string          // Why this cell exists
+domains: string[]        // Domain mandates this cell operates within
+
+// Origin
+spawned_by: string       // What triggered this cell (proposal_id, motion_id, etc.)
+commissioned_by: string  // Circle ID that commissioned (for xSTF)
 
 // Content
 messages: [
@@ -164,6 +172,11 @@ messages: [
     tier: 1|2|3|4
   }
 ]
+
+// Output (STF cells only)
+verdict: string|null     // Resolution/rejection (aSTF), evaluation (vSTF/jSTF)
+deliverable: string|null // xSTF deliverable
+report: string|null      // Written report
 ```
 
 ### STF (Special Task Force)
@@ -283,3 +296,66 @@ Uganda Astronomical Society — Kampala, affiliated since 2026
 East African Astronomical Society — Nairobi, affiliated since 2026
 Space Generation Advisory Council — Vienna, affiliated since 2026
 ```
+
+---
+
+## Cells — Deep Clarification (2026-07-24)
+
+### What is a Cell?
+A Cell is a **deliberation/discussion/activity space** — think of it as a chatroom, but each one is unique in its purpose and membership. Cells are where work actually happens.
+
+### Cell Types and Their Lifecycle
+
+**1. Circle Cell**
+- Created by a Steward Circle for internal deliberation
+- Members: circle stewards + mandated domain participants
+- Purpose: discuss governance, policies, domain direction
+
+**2. Discussion / Commons Cell**
+- Discussions in the Commons or within Projects can sprout a **proposal**
+- A proposal must be **sponsored by a steward** to proceed
+- Sponsored proposal → spawns a **Circle Cell** for deliberation
+- Circle Cell deliberation (stewards + domain members) → produces a **motion**
+
+**3. Project Cell**
+- Projects can have their own cells for deliberation
+- Project cells may have different membership rules than circle cells
+
+**4. Motion → aSTF (Adjudication STF)**
+- A motion from deliberation spawns an **aSTF** (Adjudication Special Task Force)
+- aSTF operates in an **isolated blind cell** — members don't know each other
+- aSTF audits the motion in isolation
+- aSTF verdict: **Resolution** (motion approved) or **Rejection** (motion denied)
+
+**5. vSTF / jSTF / Periodic Review aSTF**
+- All operate in **isolated blind cells**
+- **vSTF**: Verification STF — evaluates competence claims, evidence
+- **jSTF**: Investigation STF — investigates specific issues
+- **Periodic Review aSTF**: Reviews overall health of a circle and its stewards
+- All produce **evaluations** (not resolution/rejection)
+
+**6. xSTF → Deliverable**
+- xSTF spawns to **execute** a resolved motion
+- Produces a **deliverable** per requirements from the **commissioning circle** (the stewards' cell that requested it)
+
+### Flow Summary
+
+```
+Discussion/Project → Proposal (steward-sponsored) → Circle Cell Deliberation → Motion
+                                                                                    ↓
+                                                                              aSTF (blind cell)
+                                                                                    ↓
+                                                                          Resolution / Rejection
+
+Resolution → xSTF (blind cell) → Deliverable (per commissioning circle specs)
+
+Periodic Review aSTF → Evaluates circle health + steward performance
+vSTF → Evaluates competence claims
+jSTF → Investigates issues
+```
+
+### Key Principles
+- **Blind isolation**: STF cells (aSTF, vSTF, jSTF, xSTF) operate blind — members don't know each other's identities during deliberation
+- **Steward sponsorship required**: Not just anyone can propose — a steward must sponsor it
+- **Domain mandate boundaries**: Cells only operate within the domains the responsible circle has mandate over
+- **Each cell is unique**: Different membership, different purpose, different rules
