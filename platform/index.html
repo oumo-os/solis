@@ -66,7 +66,7 @@
   <div class="view active" id="view-personal">
     <div class="page-title">Oumo Samuel</div>
     <div class="page-sub">Participant · Kampala, Uganda · Member since Jul 2026 · Active</div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong but your Policy curiosity has grown 18% this cycle. You're eligible for 2 open xSTF slots in that domain — participating would accelerate your pathway.</div></div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong. A deliberation cell you're watching has crystallised a motion — it's now heading to aSTF for blind adjudication. <span style="color:var(--gold)">Cell #Cell-21 → aSTF #Cell-23</span></div></div>
     <div class="g4">
       <div class="card metric-card"><div class="mc-label">Standing W<sub>s</sub></div><div class="mc-val">847</div><div class="mc-sub">Perceived competence</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">1,200</div><div class="mc-sub">Declared + verified</div><div class="mc-drift mc-flat">MSc Space Studies</div></div>
@@ -140,8 +140,10 @@
     <div class="flex gap-2 mb-3"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">Unread</button><button class="btn btn-sm">STF</button><button class="btn btn-sm">Circles</button></div>
     <div class="card">
       <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
-      <div class="inbox-item unread" onclick="modalVote()"><div class="idot" style="background:var(--purple)"></div><div class="ibody"><div class="ititle">Vote requested: Motion on debris liability framework</div><div class="imeta">Space Law Circle · Closes in 5 days</div></div></div>
-      <div class="inbox-item unread" onclick="modalCuriosityMatch()"><div class="idot" style="background:var(--teal)"></div><div class="ibody"><div class="ititle">Curiosity match: Cell #14 forming — East Africa space mapping</div><div class="imeta">Project · Remote Sensing match 87%</div></div></div>
+
+      <div class="inbox-item unread" onclick="nav('cell-delib')"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">Deliberation Cell: Motion crystallising — Debris liability framework</div><div class="imeta">Cells · Space Law · Sponsored by Akello J.</div></div></div>
+      <div class="inbox-item unread" onclick="nav('stf-astf')"><div class="idot" style="background:var(--blue)"></div><div class="ibody"><div class="ititle">aSTFCell #Cell-23: Motion adjudication ready — Debris liability</div><div class="imeta">STF Dash · Blind cell · 3 adjudicators · Due Jul 28</div></div></div>
+      <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">xSTFCell #Cell-19: ITU guide — 45% complete</div><div class="imeta">Cells · Blind execution · Due Aug 15</div></div></div>
       <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
       <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
     </div>
@@ -202,6 +204,18 @@
           <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
           <div class="aside-link" onclick="nav('thread-detail')">Sentinel-2 data workaround for Uganda</div>
           <div class="aside-link" onclick="nav('thread-detail')">ITU frequency coordination basics</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">From Discussion to Action</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
+            <div style="margin-bottom:4px"><span style="color:var(--teal)">●</span> Discussion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ steward sponsors</div>
+            <div style="margin-bottom:4px"><span style="color:var(--gold)">●</span> Proposal</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ circle deliberates</div>
+            <div style="margin-bottom:4px"><span style="color:var(--purple)">●</span> Motion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ aSTF adjudicates (blind)</div>
+            <div><span style="color:var(--green)">●</span> Resolution → xSTF → Deliverable</div>
+          </div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Stats</div>
@@ -465,10 +479,11 @@
           <div class="aside-title">Active Motions</div>
           <div class="aside-row"><span style="font-size:11px;color:var(--text)">Artemis Accords Ratification</span><span class="badge b-active" style="font-size:8px">Vote</span></div>
           <div class="aside-row"><span style="font-size:11px;color:var(--text)">LEO Debris Standards</span><span class="badge b-pending" style="font-size:8px">Open</span></div>
+          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Debris Liability Framework</span><span class="badge" style="background:var(--blue-soft);color:var(--blue);font-size:8px">aSTF</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">How Circles Work</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Circles are mandate-defined deliberation bodies. Each circle stewards specific domains and runs motions through a structured voting process.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Circles are mandate-defined deliberation bodies. Each circle stewards specific domains. Discussions can be sponsored into proposals, which circle cells deliberate into motions. Motions go to aSTF for blind adjudication.</div>
         </div>
       </div>
     </div>
@@ -496,8 +511,20 @@
           <div class="card click" onclick="nav('cell-delib')">
             <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
             <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris liability framework — who bears responsibility?</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Open deliberation cell. Sponsored from Commons. Motion crystallising.</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Sponsored by Akello J. (Space Law steward). Motion crystallising.</div>
             <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 12 participants · 3d active</div>
+          </div>
+          <div class="card click" onclick="nav('stf-astf')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--red-soft);color:var(--red)">aSTF Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-23</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Motion: Debris liability framework</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Blind adjudication. 3 assessors. Verdict pending.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Blind · Due Jul 28</div>
+          </div>
+          <div class="card click" onclick="nav('stf-xstf')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--blue-soft);color:var(--blue)">xSTF Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-19</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Resolution: ITU coordination guide</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Blind execution. Deliverable due Aug 15. Commissioned by Space Law Circle.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Blind · 45% complete</div>
           </div>
         </div>
       </div>
@@ -505,20 +532,28 @@
         <div class="aside-card">
           <div class="aside-title">Your Cells</div>
           <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Active</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">5</div><div class="aside-stat-lbl">Active</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Lead</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Member</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">4</div><div class="aside-stat-lbl">Member</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Cell Lifecycle</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--mono)">
+            <div style="margin-bottom:6px"><span style="color:var(--teal)">Discussion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">(steward-sponsored)</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--purple)">Circle Cell</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--text)">Motion</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--text)">Motion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">aSTF</span> <span style="color:var(--text-tertiary)">(blind) → Verdict</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--green)">Resolution</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--blue)">xSTF</span> <span style="color:var(--text-tertiary)">(blind) → Deliverable</span></div>
+            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Projects have their own cells. Periodic review aSTFs audit circle health.</div>
           </div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Cell Types</div>
-          <div class="aside-row"><span class="aside-label">Project</span><span style="font-size:11px;color:var(--text)">Task-oriented work</span></div>
-          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Circle sub-work</span></div>
-          <div class="aside-row"><span class="aside-label">Deliberation</span><span style="font-size:11px;color:var(--text)">Open discussion</span></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">How Cells Work</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Cells are contextual workspaces formed around specific tasks. They can be spawned from projects, circles, or commons deliberation.</div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--green-soft);color:var(--green)">Project</span><span style="font-size:11px;color:var(--text)">Task-oriented work</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--purple-soft);color:var(--purple)">Circle</span><span style="font-size:11px;color:var(--text)">Steward deliberation</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--gold-soft);color:var(--gold)">Deliberation</span><span style="font-size:11px;color:var(--text)">Motion crystallisation</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--red-soft);color:var(--red)">aSTF</span><span style="font-size:11px;color:var(--text)">Blind adjudication</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">xSTF</span><span style="font-size:11px;color:var(--text)">Blind execution</span></div>
         </div>
       </div>
     </div>
@@ -575,11 +610,11 @@
       <div class="hero-icon" style="background:var(--gold-soft);border:1px solid var(--gold-border);color:var(--gold);font-size:18px">◆</div>
       <div style="flex:1">
         <div class="hero-title">Debris liability framework — who bears responsibility?</div>
-        <div class="hero-desc">Open deliberation cell. Sponsored from Commons thread #Thread-042. Motion crystallising.</div>
+        <div class="hero-desc">Sponsored by Akello J. (Space Law steward). From Commons thread #Thread-042.</div>
         <div class="hero-tags"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-21 · Space Law · 3d active</span></div>
       </div>
     </div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise motion.</span></div></div>
+    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise motion → then spawn aSTF for blind adjudication.</span></div></div>
     <div class="g2">
       <div>
         <div class="sec">Founding Mandate</div>
@@ -589,12 +624,21 @@
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Weighted competence vote — Space Law Domain</div>
           <div class="vote-row"><span class="vote-yea">YEA 1,847</span><div class="vote-track"><div class="vote-yea-fill" style="width:78%"></div></div><span class="vote-nay">NAY 312</span></div>
         </div>
+        <div class="sec" style="margin-top:16px">Motion Flow</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-secondary);line-height:2">
+          <div><span style="color:var(--teal)">●</span> Commons discussion <span style="color:var(--text-tertiary)">— Thread #Thread-042</span></div>
+          <div><span style="color:var(--gold)">●</span> Steward sponsorship <span style="color:var(--text-tertiary)">— Akello J. sponsored</span></div>
+          <div><span style="color:var(--gold)">●</span> Deliberation <span style="color:var(--text-tertiary)">— This cell · 3d active</span></div>
+          <div><span style="color:var(--text)">○</span> Motion crystallisation <span style="color:var(--text-tertiary)">— Pending confirmation</span></div>
+          <div><span style="color:var(--text-tertiary)">○</span> aSTF blind adjudication <span style="color:var(--text-tertiary)">— Spawns after crystallisation</span></div>
+          <div><span style="color:var(--text-tertiary)">○</span> Verdict <span style="color:var(--text-tertiary)">— Resolution or Rejection</span></div>
+        </div>
       </div>
       <div>
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
-        <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion and move it to formal vote?',function(){})">Confirm & Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
+        <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion? It will be sent to aSTF for blind adjudication.',function(){})">Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
       </div>
     </div>
   </div>
@@ -602,7 +646,7 @@
   <!-- ═══ STF DASH ═══ -->
   <div class="view" id="view-stf">
     <div class="page-title">STF Dash</div>
-    <div class="page-sub">Your active Short-Term Facilitator assignments</div>
+    <div class="page-sub">Short-Term Facilitator assignments — blind isolated cells</div>
     <div class="layout-split">
       <div class="layout-main">
         <div class="sec">Your Assignment</div>
@@ -616,8 +660,10 @@
         <table class="tbl">
           <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
           <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
-          <tr class="click"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Governance audit: Circle health review</td><td>Commons</td><td class="m">Jul 25</td><td><span class="badge b-active">Active</span></td></tr>
+          <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Motion adjudication: Debris liability framework</td><td>Space Law</td><td class="m">Jul 28</td><td><span class="badge b-active">Active</span></td></tr>
+          <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Periodic review: Space Law Circle health</td><td>Commons</td><td class="m">Aug 05</td><td><span class="badge b-pending">Selecting</span></td></tr>
           <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
+          <tr class="click" onclick="nav('stf-xstf')"><td><span class="tag tag-green" style="font-size:8px">xSTF</span></td><td class="s">Execution: ITU coordination guide deliverable</td><td>Space Law</td><td class="m">Aug 15</td><td><span class="badge b-active">Active</span></td></tr>
         </table>
       </div>
       <div class="layout-aside">
@@ -631,13 +677,14 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">STF Types</div>
-          <div class="aside-row"><span class="aside-label">vSTF</span><span style="font-size:11px;color:var(--text)">Credential verification</span></div>
-          <div class="aside-row"><span class="aside-label">aSTF</span><span style="font-size:11px;color:var(--text)">Governance audit</span></div>
-          <div class="aside-row"><span class="aside-label">jSTF</span><span style="font-size:11px;color:var(--text)">Judicial investigation</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--purple-soft);color:var(--purple)">vSTF</span><span style="font-size:11px;color:var(--text)">Credential verification</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">aSTF</span><span style="font-size:11px;color:var(--text)">Motion adjudication / Periodic review</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--red-soft);color:var(--red)">jSTF</span><span style="font-size:11px;color:var(--text)">Judicial investigation</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--green-soft);color:var(--green)">xSTF</span><span style="font-size:11px;color:var(--text)">Execution / Deliverable production</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">How STFs Work</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Short-Term Facilitators are assigned to handle specific verification, audit, or investigation tasks. Each STF room has its own rules and deadlines.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">STFs operate in <strong>blind isolated cells</strong> — members don't know each other's identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body.</div>
         </div>
       </div>
     </div>
@@ -714,6 +761,89 @@
               <button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise & Forward to Meta-aSTF</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ aSTF: Adjudication ═══ -->
+  <div class="view" id="view-stf-astf">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="stf-astf-wrap">
+      <div class="room-header">
+        <div class="room-type-label" style="color:var(--blue)">◆ aSTF — Motion Adjudication</div>
+        <div class="room-title">Motion: Debris Liability Framework</div>
+        <div class="room-meta">Space Law Circle · Blind parallel adjudication · Due Jul 28, 2026</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--blue)">Room Environment</div><div class="room-env-text">Motion adjudication cell. The crystallised motion from Deliberation Cell #Cell-21 has been submitted for blind review. You are one of 3 adjudicators. Each adjudicator reviews the motion record independently. The motion must achieve unanimous or majority approval to pass as Resolution. If rejected, the motion returns to the commissioning circle with a rejection explanation.</div></div>
+        <div class="sec">Motion Record</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">From Cell #Cell-21 · Crystallised Jul 21</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris Liability Framework — Allocation of Responsibility</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Proposes that liability for debris-generating manoeuvres be assigned to the operator of the spacecraft that created the debris, with a secondary liability pathway for manufacturers when hardware failure is the proximate cause. Establishes a mandatory debris reporting window of 24 hours.</div>
+        </div>
+        <div class="sec">Commissioning Circle</div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Mandated domain: Space Law & Policy</div></div><span class="badge b-review">Sponsor</span></div>
+        <div class="sec" style="margin-top:16px">Your Adjudication</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="text-label mb-2">Decision</div>
+          <div class="flex gap-2 mb-3">
+            <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Approve (Resolution)</button>
+            <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm')">Reject</button>
+          </div>
+          <div class="text-label mb-2">Rationale</div>
+          <textarea placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none"></textarea>
+        </div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ xSTF: Execution ═══ -->
+  <div class="view" id="view-stf-xstf">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="stf-xstf-wrap">
+      <div class="room-header">
+        <div class="room-type-label" style="color:var(--green)">◆ xSTF — Execution Cell</div>
+        <div class="room-title">Deliverable: ITU Coordination Guide</div>
+        <div class="room-meta">Space Law Circle · Blind execution · Due Aug 15, 2026 · 45% complete</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall">🔒 &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; 🔒</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--green)">Room Environment</div><div class="room-env-text">Execution cell. This xSTF was commissioned by the Space Law Circle following Resolution approval. The team is producing the ITU Frequency Coordination Guide for emerging space nations. The commissioning circle provides requirements; the team executes blind. Deliverable will be submitted to the commissioning circle for review and publication.</div></div>
+        <div class="sec">Commissioning Requirements</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex justify-between mb-2"><span class="badge b-active">Resolution</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Approved Jul 25 · Space Law Circle</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">ITU Frequency Coordination Guide — Deliverable Specs</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Commissioned by Space Law Circle. Deliverable: A plain-language guide covering ITU frequency coordination procedures for emerging space nations. Target audience: policy makers and technical leads in East African space agencies.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">
+            <div class="flex justify-between mb-1"><span>Sections required:</span><span style="color:var(--text)">4</span></div>
+            <div class="flex justify-between mb-1"><span>Length target:</span><span style="color:var(--text)">8,000–12,000 words</span></div>
+            <div class="flex justify-between mb-1"><span>Language:</span><span style="color:var(--text)">Plain English, no jargon</span></div>
+            <div class="flex justify-between"><span>Review cycle:</span><span style="color:var(--text)">Draft → Circle review → Final</span></div>
+          </div>
+        </div>
+        <div class="sec">Execution Progress</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Overall progress</span><span style="font-family:var(--mono);font-size:12px;color:var(--green)">45%</span></div>
+          <div class="htk" style="margin-bottom:12px"><div class="hfill" style="width:45%;background:var(--green)"></div></div>
+          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 1 — Introduction</span><span style="color:var(--green)">✓ Complete</span></div>
+          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 2 — ITU Process Overview</span><span style="color:var(--green)">✓ Complete</span></div>
+          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 3 — Frequency Assignment</span><span style="color:var(--gold)">△ In progress</span></div>
+          <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Section 4 — Coordination Procedures</span><span style="color:var(--text-tertiary)">— Pending</span></div>
+        </div>
+        <div class="sec">Team</div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member A</div><div style="font-size:11px;color:var(--text-tertiary)">Section 1–2 author</div></div><span class="badge b-active">Active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member B</div><div style="font-size:11px;color:var(--text-tertiary)">Section 3–4 author</div></div><span class="badge b-active">Active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member C</div><div style="font-size:11px;color:var(--text-tertiary)">Review & formatting</div></div><span class="badge b-active">Active</span></div>
+        <div class="sec" style="margin-top:16px">Cell Messages</div>
+        <div class="card">
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member A</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?</p></div></div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member B</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">On it. Also started Section 3 — frequency assignment tables need a template from the circle.</p></div></div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
         </div>
       </div>
     </div>
@@ -1413,7 +1543,9 @@ var views = {
   'cell-delib':     ['Cells', 'Deliberation Cell'],
   stf:              ['STF Dash'],
   'stf-vstf':       ['STF Dash', 'vSTF — Verification Office'],
+  'stf-astf':       ['STF Dash', 'aSTF — Adjudication'],
   'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
+  'stf-xstf':       ['STF Dash', 'xSTF — Execution'],
   participants:     ['Participants'],
   profile:          ['Profile'],
   'thread-detail':  ['Discussions', 'Thread'],
@@ -1427,7 +1559,7 @@ var navMap = {
   observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'publication-detail':'observatory',
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
-  stf:'stf', 'stf-vstf':'stf', 'stf-jstf':'stf',
+  stf:'stf', 'stf-vstf':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf',
   participants:'participants', profile:'profile',
   'domain-map':'domain-map'
 };
