@@ -1744,19 +1744,18 @@
           <div class="aside-row"><span class="aside-label">Resolutions</span><span style="font-size:12px;color:var(--text)">1 enacted</span></div>
         </div>
         <div class="aside-card">
-          <div class="aside-title">Membership <span class="tag tag-default" style="font-size:7px">8 total</span></div>
+          <div class="aside-title">Co-Stewards <span class="tag tag-default" style="font-size:7px">8</span></div>
           <div style="display:flex;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle)">
-            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">3</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Stewards</div></div>
-            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">5</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Members</div></div>
-            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--gold)">8</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Total Ws</div></div>
+            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">8</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Stewards</div></div>
+            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--gold)">5,560</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Total Ws</div></div>
+            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">5</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Domains</div></div>
           </div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">AJ</div><div><div style="font-weight:500">Akello J.</div><div style="display:flex;gap:4px;align-items:center;font-size:9px;color:var(--text-tertiary)"><span class="tag tag-green" style="font-size:6px;padding:1px 4px">Steward</span>Ws 1,800 · 3h ago</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div><div style="font-weight:500">Osei K.</div><div style="display:flex;gap:4px;align-items:center;font-size:9px;color:var(--text-tertiary)"><span class="tag tag-green" style="font-size:6px;padding:1px 4px">Steward</span>Ws 1,040 · 1d ago</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">AJ</div><div><div style="font-weight:500">Akello J.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 1,800 · 3h ago</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div><div style="font-weight:500">Osei K.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 1,040 · 1d ago</div></div></div>
           <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040);color:#fff">NC</div><div><div style="font-weight:500">Namugga C.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 620 · 2d ago</div></div></div>
           <div class="aside-member"><div class="aside-member-avatar" style="background:var(--navy-light);color:#fff">MN</div><div><div style="font-weight:500">Mensah N.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 480 · 4d ago</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--green),#0d3a20);color:#fff">AO</div><div><div style="font-weight:500">Aisha O.</div><div style="font-size:9px;color:var(--text-tertiary)">Member</div></div></div>
-          <div class="aside-member" style="opacity:0.6"><div class="aside-member-avatar" style="background:var(--border)">DM</div><div><div style="font-weight:500">Diallo M.</div><div style="font-size:9px;color:var(--text-tertiary)">Invited</div></div></div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;padding-top:6px;border-top:1px solid var(--border-subtle)">+ 2 more · <span style="cursor:pointer;color:var(--gold)">View all</span></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--green),#0d3a20);color:#fff">AO</div><div><div style="font-weight:500">Aisha O.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 390 · 5d ago</div></div></div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;padding-top:6px;border-top:1px solid var(--border-subtle)"><span style="cursor:pointer;color:var(--gold)" onclick="openMembersModal()">View all stewards →</span></div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
           <div class="aside-tags">
@@ -2570,6 +2569,123 @@ function openSettingsModal() {
 function closeSettingsModal() {
   document.getElementById('settings-modal').classList.remove('active');
   document.body.classList.remove('modal-open');
+}
+
+// ─── Member Roster Modal ───
+var membersData = [
+  {id:'aj',name:'Akello Jane',initials:'AJ',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:1800,domains:['Space Law','Astrophysics'],joined:'Feb 2025',lastActive:'3h ago',status:'active',topDomain:'Space Law'},
+  {id:'ok',name:'Osei Kwame',initials:'OK',color:'linear-gradient(135deg,var(--amber),#5a3a00)',ws:2000,domains:['Propulsion','Launch Sys'],joined:'Jun 2025',lastActive:'1d ago',status:'active',topDomain:'Propulsion'},
+  {id:'nc',name:'Namugga Claire',initials:'NC',color:'linear-gradient(135deg,var(--amber),#5a3a00)',ws:1400,domains:['Publications','Space Med'],joined:'Jan 2025',lastActive:'2d ago',status:'active',topDomain:'Publications'},
+  {id:'mt',name:'Mwenda Thomas',initials:'MT',color:'linear-gradient(135deg,var(--teal),#0d4040)',ws:1200,domains:['Remote Sensing','Events'],joined:'May 2025',lastActive:'4d ago',status:'active',topDomain:'Remote Sensing'},
+  {id:'mn',name:'Mensah Naa',initials:'MN',color:'var(--navy-light)',ws:1040,domains:['Astronomy','Education'],joined:'Apr 2025',lastActive:'4d ago',status:'active',topDomain:'Astronomy'},
+  {id:'ao',name:'Aisha Omondi',initials:'AO',color:'linear-gradient(135deg,var(--green),#0d3a20)',ws:980,domains:['Comms','Education'],joined:'Mar 2025',lastActive:'5d ago',status:'active',topDomain:'Comms'},
+  {id:'sd',name:'Ssempa David',initials:'SD',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:900,domains:['Space Law','Policy'],joined:'Apr 2025',lastActive:'6d ago',status:'active',topDomain:'Space Law'},
+  {id:'dm',name:'Diallo Mamadou',initials:'DM',color:'var(--border)',ws:800,domains:['Space Finance','Entrepreneurship'],joined:'Jul 2025',lastActive:'2w ago',status:'invited',topDomain:'Space Finance'}
+];
+
+var membersHistory = {
+  aj:[
+    {type:'join',text:'Joined Space Law Circle',date:'Mar 2026'},
+    {type:'activity',text:'Voted on Debris Liability motion',date:'3h ago'},
+    {type:'activity',text:'Drafted resolution ITU coordination guide',date:'Jul 10'},
+    {type:'activity',text:'Posted Space Law analysis thread',date:'Jul 8'}
+  ],
+  ok:[
+    {type:'join',text:'Joined Space Law Circle',date:'Jun 2026'},
+    {type:'activity',text:'Contributed Propulsion domain competence review',date:'1d ago'},
+    {type:'activity',text:'Endorsed Artemis Accords discussion',date:'Jul 15'}
+  ],
+  nc:[
+    {type:'join',text:'Joined Space Law Circle',date:'Feb 2026'},
+    {type:'activity',text:'Submitted Publications domain report',date:'2d ago'},
+    {type:'activity',text:'Participated in liability framework deliberation',date:'Jul 12'}
+  ],
+  mt:[
+    {type:'join',text:'Joined Space Law Circle',date:'May 2026'},
+    {type:'activity',text:'Shared Remote Sensing data for policy review',date:'4d ago'},
+    {type:'activity',text:'Attended ITU coordination planning',date:'Jul 5'}
+  ],
+  mn:[
+    {type:'join',text:'Joined Space Law Circle',date:'Apr 2026'},
+    {type:'activity',text:'Contributed Astronomy education content',date:'4d ago'},
+    {type:'activity',text:'Co-authored observatory calendar',date:'Jul 3'}
+  ],
+  ao:[
+    {type:'join',text:'Joined Space Law Circle',date:'Apr 2026'},
+    {type:'activity',text:'Published Communications domain update',date:'5d ago'},
+    {type:'activity',text:'Moderated policy discussion thread',date:'Jun 28'}
+  ],
+  sd:[
+    {type:'join',text:'Joined Space Law Circle',date:'May 2026'},
+    {type:'activity',text:'Contributed Policy domain analysis',date:'6d ago'},
+    {type:'activity',text:'Reviewed national space legislation',date:'Jun 25'}
+  ],
+  dm:[
+    {type:'join',text:'Invited to Space Law Circle',date:'Jul 2026'},
+    {type:'activity',text:'Pending acceptance',date:'2w ago'}
+  ]
+};
+
+function openMembersModal() {
+  var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+    '<div><span class="page-title" style="font-size:16px">Space Law Circle · Stewards</span>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">8 stewards · 5 domains · 5,560 total Ws</div></div>' +
+    '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Mandate: Space Law, Liability, Policy</span></div>' +
+    '<div class="mm-layout">' +
+      '<div class="mm-list" id="mm-list"></div>' +
+      '<div class="mm-detail" id="mm-detail"></div>' +
+    '</div>';
+
+  openModal(html, { size: 'full', closeBtn: true, onOpen: function() {
+    renderMemberList(0);
+    renderMemberDetail(0);
+  }});
+}
+
+function renderMemberList(selectedIdx) {
+  var list = document.getElementById('mm-list');
+  if (!list) return;
+  list.innerHTML = '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;padding:0 4px">Select a steward to view details</div>' +
+    membersData.map(function(m, i) {
+      var statusDot = m.status === 'invited' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
+      var statusLabel = m.status === 'invited' ? 'Invited' : '';
+      return '<div class="mm-card' + (i === selectedIdx ? ' active' : '') + '" onclick="renderMemberDetail(' + i + ');document.querySelectorAll(\'.mm-card\').forEach(function(c){c.classList.remove(\'active\')});this.classList.add(\'active\')">' +
+        '<div class="mm-avatar" style="background:' + m.color + '">' + m.initials + '</div>' +
+        '<div class="mm-info"><div class="mm-name">' + m.name + '</div>' +
+        '<div class="mm-meta">' + m.topDomain + ' · ' + m.lastActive + ' ' + statusLabel + '</div></div>' +
+        '<div class="mm-ws">' + m.ws.toLocaleString() + '</div>' +
+      '</div>';
+    }).join('');
+}
+
+function renderMemberDetail(idx) {
+  var detail = document.getElementById('mm-detail');
+  if (!detail) return;
+  var m = membersData[idx];
+  var history = membersHistory[m.id] || [];
+  detail.innerHTML =
+    // Stats row
+    '<div class="mm-stat-row">' +
+      '<div class="mm-stat"><div class="mm-stat-val">' + m.ws.toLocaleString() + '</div><div class="mm-stat-label">Standing (Ws)</div></div>' +
+      '<div class="mm-stat"><div class="mm-stat-val">' + m.domains.length + '</div><div class="mm-stat-label">Domains</div></div>' +
+      '<div class="mm-stat"><div class="mm-stat-val">' + m.joined + '</div><div class="mm-stat-label">Joined</div></div>' +
+      '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>' +
+    '</div>' +
+    // Domain chips
+    '<div class="mm-section-title">Domains</div>' +
+    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' +
+      m.domains.map(function(d) {
+        return '<span style="background:var(--gold-soft);color:var(--gold);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
+      }).join('') +
+    '</div>' +
+    // Activity History
+    '<div class="mm-section-title">Activity History</div>' +
+    '<div class="mm-timeline">' +
+      history.map(function(h) {
+        var cls = h.type === 'join' ? ' mm-event-join' : (h.type === 'leave' ? ' mm-event-leave' : '');
+        return '<div class="mm-event' + cls + '"><div>' + h.text + '</div><div class="mm-event-date">' + h.date + '</div></div>';
+      }).join('') +
+    '</div>';
 }
 
 function switchSettingsTab(idx, el) {
