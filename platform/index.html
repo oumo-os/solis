@@ -907,56 +907,77 @@
   <!-- ═══ aSTF: Adjudication ═══ -->
   <div class="view" id="view-stf-astf">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="stf-astf-wrap">
-      <div class="room-header">
-        <div class="room-type-label" style="color:var(--blue)">◆ aSTF — Motion Adjudication</div>
-        <div class="room-title">Motion: Debris Liability Framework</div>
-        <div class="room-meta">Space Law Circle · Blind parallel adjudication · Due Jul 28, 2026</div>
-      </div>
-      <div class="room-body">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
         <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--blue)">Room Environment</div><div class="room-env-text">Motion adjudication cell. The crystallised motion from Deliberation Cell #Cell-21 has been submitted for blind review. You are one of 3 adjudicators. Each adjudicator reviews the motion record independently. The motion must achieve unanimous or majority approval to pass as Resolution. If rejected, the motion returns to the commissioning circle with a rejection explanation.</div></div>
         <div class="sec">Motion Record</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">From Cell #Cell-21 · Crystallised Jul 21</span></div>
           <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris Liability Framework — Allocation of Responsibility</div>
           <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Proposes that liability for debris-generating manoeuvres be assigned to the operator of the spacecraft that created the debris, with a secondary liability pathway for manufacturers when hardware failure is the proximate cause. Establishes a mandatory debris reporting window of 24 hours.</div>
         </div>
-        <div class="sec">Commissioning Circle</div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Mandated domain: Space Law & Policy</div></div><span class="badge b-review">Sponsor</span></div>
-        <div class="sec" style="margin-top:16px">Your Adjudication</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">4-Dimension Rubric (30 pts max)</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
-          <table class="tbl" style="margin-bottom:12px">
-            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-            <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
-            <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
-            <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
-            <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
-          </table>
-          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
-            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">25 / 30</span>
-          </div>
-
-          <div class="divider" style="margin:12px 0"></div>
-          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Verdict</div>
-          <div class="flex gap-2 mb-3">
-            <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
-            <button class="btn btn-sm" id="astf-revision" onclick="document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
-            <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
-          </div>
-          <div class="text-label mb-2">Rationale</div>
-          <textarea placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none"></textarea>
-
-          <div class="divider" style="margin:12px 0"></div>
-          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Malpractice Flagging (optional)</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
+        <div class="sec">4-Dimension Rubric (30 pts max)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
+        <table class="tbl" style="margin-bottom:12px">
+          <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
+          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
+          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
+          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
+          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
+        </table>
+        <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">25 / 30</span>
         </div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="divider" style="margin:12px 0"></div>
+        <div class="sec">Verdict</div>
+        <div class="flex gap-2 mb-3">
+          <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
+          <button class="btn btn-sm" id="astf-revision" onclick="document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
+          <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
+        </div>
+        <div class="text-label mb-2">Rationale</div>
+        <textarea placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <div class="divider" style="margin:12px 0"></div>
+        <div class="sec">Malpractice Flagging (optional)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
+        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Assignment</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">aSTF — Motion Adjudication</span></div>
+          <div class="aside-row"><span class="aside-label">Motion</span><span style="font-size:11px;color:var(--text)">Debris Liability</span></div>
+          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 28, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Adjudicators</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
+          <div class="aside-row"><span class="aside-label">Required</span><span style="font-size:11px;color:var(--text)">Majority verdict</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Commissioning Circle</div>
+          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Mandated: Space Law &amp; Policy</div></div></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Motion Type</div>
+          <div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)">non_system (Directive)</span></div>
+          <div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)">Space Law Circle</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Rubric Weights</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between"><span>Alignment/Conflict</span><span style="color:var(--text);font-weight:500">10 pts</span></div>
+            <div class="flex justify-between"><span>Jurisdiction</span><span style="color:var(--text);font-weight:500">9 pts</span></div>
+            <div class="flex justify-between"><span>Competence</span><span style="color:var(--text);font-weight:500">6 pts</span></div>
+            <div class="flex justify-between"><span>Depth/Effort</span><span style="color:var(--text);font-weight:500">5 pts</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">How aSTF Works</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The rubric <strong>guides, it does not decide</strong>. Scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.</div>
+        </div>
       </div>
     </div>
   </div>
