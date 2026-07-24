@@ -839,35 +839,38 @@
       </tr>
     </table>
 
-    <!-- Participating Circles + Motion Type in g2 -->
-    <div class="g2" style="margin-top:16px">
-      <div>
-        <div class="sec">Participating Circles</div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law domain match · Lead circle</div></div><span class="badge b-active">5 active</span></div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap · Contributing</div></div><span class="badge b-active">3 active</span></div>
-        <!-- Self-disqualified circle — ghost/scar -->
-        <div class="circle-scar">
-          <div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px;position:relative">MH<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:1px solid var(--text-tertiary);font-size:6px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)">✕</span></div>
-          <div style="flex:1"><div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle — withdrew from deliberation by: Osei Kwame</div><div style="font-size:9px;color:var(--text-tertiary);font-family:var(--mono)">Self-disqualified Jul 22 · Auditable decision</div></div>
-        </div>
+    <!-- Participating Circles -->
+    <div style="margin-top:16px">
+      <div class="sec">Participating Circles</div>
+      <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law domain match · Lead circle</div></div><span class="badge b-active">5 active</span></div>
+      <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap · Contributing</div></div><span class="badge b-active">3 active</span></div>
+      <!-- Self-disqualified circle — ghost/scar -->
+      <div class="circle-scar">
+        <div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px;position:relative">MH<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:1px solid var(--text-tertiary);font-size:6px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)">✕</span></div>
+        <div style="flex:1"><div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle — withdrew from deliberation by: Osei Kwame</div><div style="font-size:9px;color:var(--text-tertiary);font-family:var(--mono)">Self-disqualified Jul 22 · Auditable decision</div></div>
       </div>
-      <div>
-        <div class="sec">Proposal Types</div>
-        <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">
-          <div style="margin-bottom:6px"><strong style="color:var(--teal)">Discussion thread</strong> — A user creates a discussion, participants discuss, steward creates a proposal from the thread.</div>
-          <div style="margin-bottom:6px"><strong style="color:var(--gold)">Direct proposal</strong> — A steward directly creates a proposal without a preceding discussion.</div>
-          <div><strong style="color:var(--purple)">System-bound</strong> — A steward changes a system setting, submits as a proposal. Auto-executed on resolution.</div>
-        </div>
+    </div>
 
-        <div class="sec">Motion Type</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Select how this motion will be implemented:</div>
-        <div class="flex gap-2 mb-3">
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="non_system" checked> <span><strong>Directive</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Circle(s) implement</span></span></label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="sys_bound"> <span><strong>System</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Auto-executed</span></span></label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="hybrid"> <span><strong>Hybrid</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Both</span></span></label>
-        </div>
-        <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion? It will be sent to aSTF for blind adjudication.',function(){})">Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
+    <!-- Proposal Types -->
+    <div style="margin-top:16px">
+      <div class="sec">Proposal Types</div>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">
+        <div style="margin-bottom:6px"><strong style="color:var(--teal)">Discussion thread</strong> — A user creates a discussion, participants discuss, steward creates a proposal from the thread.</div>
+        <div style="margin-bottom:6px"><strong style="color:var(--gold)">Direct proposal</strong> — A steward directly creates a proposal without a preceding discussion.</div>
+        <div><strong style="color:var(--purple)">System-bound</strong> — A steward changes a system setting, submits as a proposal. Auto-executed on resolution.</div>
       </div>
+    </div>
+
+    <!-- Motion Type -->
+    <div style="margin-top:16px">
+      <div class="sec">Motion Type</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Select how this motion will be implemented:</div>
+      <div class="flex gap-2 mb-3">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="non_system" checked> <span><strong>Directive</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Circle(s) implement</span></span></label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="sys_bound"> <span><strong>System</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Auto-executed</span></span></label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="hybrid"> <span><strong>Hybrid</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Both</span></span></label>
+      </div>
+      <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion? It will be sent to aSTF for blind adjudication.',function(){})">Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
     </div>
 
     <!-- Motion Flow -->
