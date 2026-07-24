@@ -2596,6 +2596,7 @@ var reasonLabels = {
   'circle-dissolved': 'Circle disbanded',
   'competence-drift': 'Competence drift'
 };
+var activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
 var formerMembers = membersData.filter(function(m){return m.status==='former'});
 
 function openMembersModal() {
