@@ -2583,12 +2583,19 @@ var membersData = [
   {id:'sd',name:'Ssempa David',initials:'SD',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:900,domains:['Space Law','Policy'],joined:'Apr 2025',lastActive:'6d ago',status:'active',topDomain:'Space Law'},
   {id:'dm',name:'Diallo Mamadou',initials:'DM',color:'var(--border)',ws:800,domains:['Space Finance','Entrepreneurship'],joined:'Jul 2025',lastActive:'2w ago',status:'invited',topDomain:'Space Finance'},
   // Former
-  {id:'ek',name:'Esi Kojo',initials:'EK',color:'var(--text-tertiary)',ws:0,domains:['Policy','Astronomy'],joined:'Jan 2025',left:'May 2026',status:'former',topDomain:'Policy'},
-  {id:'nl',name:'Nadia Lubega',initials:'NL',color:'var(--text-tertiary)',ws:0,domains:['Space Med','Education'],joined:'Mar 2025',left:'Apr 2026',status:'former',topDomain:'Space Med'},
-  {id:'tb',name:'Thabo Banda',initials:'TB',color:'var(--text-tertiary)',ws:0,domains:['Space Law'],joined:'Feb 2026',left:'Jun 2026',status:'former',topDomain:'Space Law'}
+  {id:'ek',name:'Esi Kojo',initials:'EK',color:'var(--text-tertiary)',ws:0,domains:['Policy','Astronomy'],joined:'Jan 2025',left:'May 2026',status:'former',topDomain:'Policy',leftReason:'term-expiry'},
+  {id:'nl',name:'Nadia Lubega',initials:'NL',color:'var(--text-tertiary)',ws:0,domains:['Space Med','Education'],joined:'Mar 2025',left:'Apr 2026',status:'former',topDomain:'Space Med',leftReason:'resignation'},
+  {id:'tb',name:'Thabo Banda',initials:'TB',color:'var(--text-tertiary)',ws:0,domains:['Space Law'],joined:'Feb 2026',left:'Jun 2026',status:'former',topDomain:'Space Law',leftReason:'competence-drift'}
 ];
 
-var activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
+var reasonLabels = {
+  'term-expiry': 'Term expired',
+  'resignation': 'Resigned',
+  'jstf-removal': 'jSTF forced removal',
+  'jstf-flush': 'jSTF full circle flush',
+  'circle-dissolved': 'Circle disbanded',
+  'competence-drift': 'Competence drift'
+};
 var formerMembers = membersData.filter(function(m){return m.status==='former'});
 
 function openMembersModal() {
@@ -2626,7 +2633,8 @@ function renderMemberList() {
     return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '" style="opacity:0.55">' +
       '<div class="mm-avatar" style="background:' + m.color + ';font-size:10px">' + m.initials + '</div>' +
       '<div class="mm-info"><div class="mm-name" style="text-decoration:line-through">' + m.name + '</div>' +
-      '<div class="mm-meta">Left ' + m.left + '</div></div>' +
+      '<div class="mm-meta">' + (reasonLabels[m.leftReason] || 'Left') + ' · ' + m.left + '</div></div>' +
+    '</div>';
     '</div>';
   }).join('') : '';
 
@@ -2653,7 +2661,7 @@ function renderMemberDetail(id) {
   var isFormer = m.status === 'former';
   var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
     (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
-  var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + '</div>') : '';
+  var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + (m.leftReason ? ' · <span style="color:var(--amber)">' + (reasonLabels[m.leftReason] || m.leftReason) + '</span>' : '') + '</div>') : '';
 
   var domainChips = m.domains.map(function(d) {
     return '<span style="background:var(--gold-soft);color:var(--gold);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
@@ -2671,7 +2679,10 @@ function renderMemberDetail(id) {
     '</div>' +
     '<div class="mm-section-title">Domains</div>' +
     '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' + domainChips + '</div>' +
-    (isFormer ? '' :
+    (isFormer ? '<div class="mm-section-title">Departure</div><div class="mm-timeline">' +
+        '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
+        '<div class="mm-event mm-event-leave"><div>' + (reasonLabels[m.leftReason] || 'Left') + '</div><div class="mm-event-date">' + m.left + '</div></div>' +
+      '</div>' :
       '<div class="mm-section-title">History</div>' +
       '<div class="mm-timeline">' +
         '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
