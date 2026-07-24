@@ -308,8 +308,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .avatar-square{border-radius:0}
 .participant-card{display:flex;align-items:stretch}
 .participant-card .avatar-square{flex-shrink:0}
+.participant-card .pc-body{flex:1;padding:6px 8px;min-width:0;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.participant-card .pc-row{display:flex;gap:4px;align-items:center;min-height:0;flex-wrap:wrap}
+.participant-card .pc-row:first-child{flex-wrap:nowrap}
+.participant-card .pc-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.participant-card .pc-sub{font-size:8px;color:var(--text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .participant-card.flex-col{flex-direction:column;align-items:stretch}
 .participant-card.flex-col .avatar-square{width:100%;height:48px;align-self:auto}
+.participant-card.flex-col .pc-body{padding:6px 8px}
 
 /* ── Progress ── */
 .progress{height:3px;background:var(--border-subtle);border-radius:2px;overflow:hidden}
