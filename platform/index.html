@@ -2158,7 +2158,7 @@
         <div class="sec">Title</div>
         <input class="msg-input" id="res-modal-title-field" placeholder="Resolution title…" style="font-size:13px;font-weight:500">
       </div>
-      <div class="card" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:10px">
         <div class="sec">Resolution Text</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">This text will be sent to aSTF for blind adjudication. Every edit nullifies existing votes.</div>
         <textarea class="msg-input" rows="20" id="res-modal-text" style="font-size:12px;font-family:inherit;line-height:1.5">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
@@ -2169,13 +2169,11 @@
 4. Framework applies to all orbital operators within Commons jurisdiction
 5. Enforcement through existing policy resolution mechanisms</textarea>
       </div>
-      <!-- Collapsible Details: Action + Version History -->
-      <details class="card" style="margin-bottom:12px;padding:10px 14px">
-        <summary style="font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer">Details <span style="font-weight:400;color:var(--text-tertiary)">— Action, implementing circles, version history</span></summary>
-        <div style="margin-top:10px">
-          <div class="sec" style="font-size:11px">Action</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Describe the action this resolution authorises.</div>
-          <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="e.g. Community Policy, Declaration, Deliverable Document…" style="margin-bottom:8px">
+      <!-- Drafting metadata — compact row -->
+      <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Action</div>
+          <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="Community Policy, Declaration…" style="font-size:11px;padding:5px 8px">
           <datalist id="action-presets">
             <option value="Community Policy">
             <option value="Declaration">
@@ -2184,27 +2182,32 @@
             <option value="Agreement">
             <option value="Letter/Communication">
           </datalist>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px" id="res-modal-circles">
-            <span class="tag tag-purple" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Space Law Circle ✓</span>
-            <span class="tag tag-teal" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Remote Sensing Circle ✓</span>
-            <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Circle(s)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:3px" id="res-modal-circles">
+            <span class="tag tag-purple" style="font-size:8px;cursor:pointer;padding:2px 6px" onclick="toggleImplementingCircle(this)">SL ✓</span>
+            <span class="tag tag-teal" style="font-size:8px;cursor:pointer;padding:2px 6px" onclick="toggleImplementingCircle(this)">RS ✓</span>
+            <span style="font-size:8px;color:var(--text-tertiary);font-style:italic">click</span>
           </div>
-          <div class="sec" style="font-size:11px">Version History (<span id="version-count">1</span>)</div>
-          <div style="display:flex;flex-direction:column;gap:6px" id="version-list"></div>
         </div>
-      </details>
-      <label class="accept-checkbox" style="margin-bottom:12px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
-      <div class="card" style="margin-bottom:16px">
-        <div class="sec">Vote Control</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Confirm the record above to enable voting.</div>
-        <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none">
-          <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green)">Yea</div><div class="vb-desc">I support this resolution</div></div>
-          <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red)">Nay</div><div class="vb-desc">I oppose this resolution</div></div>
-          <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary)">Abstain</div><div class="vb-desc">I withhold my vote</div></div>
-        </div>
-        <div style="margin-top:12px">
-          <div class="sec" style="font-size:11px">Per-Domain Vote Breakdown</div>
+      </div>
+      <!-- Version History — single line -->
+      <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:10px;padding:4px 0;border-top:1px solid var(--border-subtle)">
+        <span id="version-count">1</span> version<span id="version-more" style="display:none">s</span>
+        <span style="cursor:pointer;color:var(--gold);margin-left:6px" onclick="toggleVersionList()">show</span>
+      </div>
+      <div id="version-list" style="display:none;margin-bottom:10px"></div>
+      <!-- Accept + Vote — compact like email To/CC -->
+      <label class="accept-checkbox" style="margin-bottom:8px;padding:6px 10px;font-size:11px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
+      <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;margin-bottom:6px">
+        <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green);font-size:11px">Yea</div></div>
+        <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red);font-size:11px">Nay</div></div>
+        <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <span style="font-size:10px;color:var(--text-tertiary);cursor:pointer" onclick="toggleBreakdown()">▸ Show per-domain vote breakdown</span>
+        <div id="vote-breakdown" style="display:none;margin-top:8px">
           <table class="vote-table">
             <tr><th>Domain</th><th>Yea Ws</th><th>Nay Ws</th><th>Total</th><th>Voters</th></tr>
             <tr><td class="domain-name"><span class="tag tag-purple" style="font-size:7px;margin-right:4px">LAW</span>Space Law</td><td class="vote-yea-cell">2,840</td><td class="vote-nay-cell">620</td><td class="vote-total-cell">3,460</td><td><div class="voter-scroll"><span class="voter-chip yea"><span class="voter-ini">AJ</span><span class="voter-ws">1,800</span></span><span class="voter-chip yea"><span class="voter-ini">OK</span><span class="voter-ws">1,040</span></span><span class="voter-chip nay"><span class="voter-ini">NC</span><span class="voter-ws">620</span></span></div></td></tr>
@@ -2398,6 +2401,18 @@ function selectVote(btn, type) {
   btn.classList.add('selected-' + type);
 }
 
+function toggleBreakdown() {
+  var el = document.getElementById('vote-breakdown');
+  var toggler = el.previousElementSibling;
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+  toggler.textContent = el.style.display === 'none' ? '▸ Show per-domain vote breakdown' : '▾ Hide per-domain vote breakdown';
+}
+
+function toggleVersionList() {
+  var el = document.getElementById('version-list');
+  el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
 // ─── Deliberation Cell ───
 var delibResolutions = [{
   id: 1,
@@ -2427,8 +2442,10 @@ function openResolutionModal(idx) {
   toggleAcceptRecord(false);
   // populate version history
   var vCount = document.getElementById('version-count');
+  var vMore = document.getElementById('version-more');
   var vList = document.getElementById('version-list');
   vCount.textContent = res.versions.length;
+  vMore.style.display = res.versions.length > 1 ? 'inline' : 'none';
   vList.innerHTML = res.versions.slice().reverse().map(function(v) {
     var preview = v.text.length > 120 ? v.text.substring(0, 120) + '…' : v.text;
     return '<div style="font-size:10px;color:var(--text-secondary);padding:6px 8px;background:var(--surface-raised);border-radius:var(--radius);border-left:2px solid var(--gold-border)">' +
@@ -2436,6 +2453,7 @@ function openResolutionModal(idx) {
       (v.title ? '<div style="font-size:10px;font-weight:500;color:var(--text);margin-bottom:2px">' + escapeHtml(v.title) + '</div>' : '') +
       '<div style="color:var(--text-tertiary);font-size:9px;line-height:1.3">' + escapeHtml(preview) + '</div></div>';
   }).join('');
+  vList.style.display = 'none';
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
 }
@@ -2443,6 +2461,9 @@ function openResolutionModal(idx) {
 function closeResolutionModal() {
   document.getElementById('resolution-modal').classList.remove('active');
   document.body.classList.remove('modal-open');
+  document.getElementById('vote-breakdown').style.display = 'none';
+  var toggler = document.getElementById('vote-breakdown').previousElementSibling;
+  toggler.textContent = '▸ Show per-domain vote breakdown';
 }
 
 function saveResolution() {
