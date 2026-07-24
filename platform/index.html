@@ -1153,31 +1153,215 @@
   <!-- ═══ PARTICIPANTS ═══ -->
   <div class="view" id="view-participants">
     <div class="page-title">Participants</div>
-    <div class="page-sub">All registered participants in Solis Commons</div>
+    <div class="page-sub">All registered participants in Solis Commons · Stewards first</div>
     <div class="layout-split">
       <div class="layout-main">
         <div class="flex items-center justify-between mb-5">
           <span class="text-label">8 participants visible</span>
           <input placeholder="Search..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px">
         </div>
-        <table class="tbl">
-          <tr><th>Participant</th><th>Domains</th><th>W<sub>s</sub></th><th>W<sub>h</sub></th><th>Location</th></tr>
-          <tr class="click" onclick="openParticipantModal('Akello Jane','Astrophysics researcher specialising in exoplanet detection.','Kampala','Feb 2025','AJ')"><td class="s">Akello J.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Astrophysics</span></td><td class="m">1,240</td><td class="m">1,800</td><td>Kampala</td></tr>
-          <tr class="click" onclick="openParticipantModal('Mwenda Thomas','Remote sensing specialist with focus on East African agricultural monitoring.','Kampala','May 2025','MT')"><td class="s">Mwenda T.</td><td><span class="tag tag-green" style="font-size:8px">Remote Sensing</span> <span class="tag tag-blue" style="font-size:8px">Events</span></td><td class="m">890</td><td class="m">1,200</td><td>Kampala</td></tr>
-          <tr class="click" onclick="openParticipantModal('Namugga Claire','Space medicine researcher exploring bioastronautics for long-duration missions.','Entebbe','Jan 2025','NC')"><td class="s">Namugga C.</td><td><span class="tag tag-purple" style="font-size:8px">Publications</span> <span class="tag tag-amber" style="font-size:8px">Space Medicine</span></td><td class="m">1,050</td><td class="m">1,400</td><td>Entebbe</td></tr>
-          <tr class="click" onclick="openParticipantModal('Ssempa David','Policy analyst working on national space legislation for Uganda.','Kampala','Apr 2025','SD')"><td class="s">Ssempa D.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-blue" style="font-size:8px">Policy</span></td><td class="m">760</td><td class="m">900</td><td>Kampala</td></tr>
-          <tr class="click" onclick="openParticipantModal('Kimani Aisha','Science communicator bridging space research and public understanding across East Africa.','Nairobi','Mar 2025','KA')"><td class="s">Kimani A.</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td class="m">980</td><td class="m">1,100</td><td>Nairobi</td></tr>
-          <tr class="click" onclick="openParticipantModal('Osei Kwame','Propulsion engineer developing next-generation launch systems for small satellites.','Accra','Jun 2025','OK')"><td class="s">Osei K.</td><td><span class="tag tag-default" style="font-size:8px">Propulsion</span> <span class="tag tag-default" style="font-size:8px">Launch Systems</span></td><td class="m">1,380</td><td class="m">2,000</td><td>Accra</td></tr>
-          <tr class="click" onclick="openParticipantModal('Diallo Mamadou','Space finance specialist advising on investment frameworks for African space ventures.','Dakar','Jul 2025','DM')"><td class="s">Diallo M.</td><td><span class="tag tag-amber" style="font-size:8px">Space Finance</span> <span class="tag tag-green" style="font-size:8px">Entrepreneurship</span></td><td class="m">720</td><td class="m">800</td><td>Dakar</td></tr>
-          <tr class="click" onclick="openParticipantModal('Oumo Samuel','Founder of Solis. Space law and remote sensing, building the African space commons.','Kampala','Sep 2024','OS')"><td class="s">Oumo S.</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td class="m">847</td><td class="m">1,200</td><td>Kampala</td></tr>
-        </table>
+
+        <!-- Steward: Akello J. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Akello Jane','Astrophysics researcher specialising in exoplanet detection.','Kampala','Feb 2025','AJ')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md">AJ</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Akello J.</span><span class="badge b-active" style="font-size:8px">Steward</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Feb 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">1,800</span></span>
+            <span class="tag tag-blue" style="font-size:8px">Astrophysics <span style="opacity:.6;margin-left:2px">1,240</span></span>
+            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">600</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Astrophysics #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
+            <span class="tag tag-default" style="font-size:8px">Uganda Astronomical Society</span>
+          </div>
+        </div>
+
+        <!-- Steward: Osei K. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Osei Kwame','Propulsion engineer developing next-generation launch systems for small satellites.','Accra','Jun 2025','OK')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Osei K.</span><span class="badge b-active" style="font-size:8px">Steward</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Accra · Joined Jun 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-default" style="font-size:8px">Propulsion <span style="opacity:.6;margin-left:2px">2,000</span></span>
+            <span class="tag tag-default" style="font-size:8px">Launch Systems <span style="opacity:.6;margin-left:2px">1,380</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Propulsion #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Launch Systems #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
+            <span class="tag tag-default" style="font-size:8px">Ghana Space Society</span>
+          </div>
+        </div>
+
+        <!-- Member: Namugga C. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Namugga Claire','Space medicine researcher exploring bioastronautics for long-duration missions.','Entebbe','Jan 2025','NC')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">NC</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Namugga C.</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Entebbe · Joined Jan 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-purple" style="font-size:8px">Publications <span style="opacity:.6;margin-left:2px">1,400</span></span>
+            <span class="tag tag-amber" style="font-size:8px">Space Medicine <span style="opacity:.6;margin-left:2px">1,050</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Publications #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Space Medicine #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
+            <span class="tag tag-purple" style="font-size:8px">Space Law Circle</span>
+          </div>
+        </div>
+
+        <!-- Member: Mwenda T. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Mwenda Thomas','Remote sensing specialist with focus on East African agricultural monitoring.','Kampala','May 2025','MT')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md">MT</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Mwenda T.</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined May 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">1,200</span></span>
+            <span class="tag tag-blue" style="font-size:8px">Events <span style="opacity:.6;margin-left:2px">890</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Remote Sensing #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Events #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
+            <span class="tag tag-green" style="font-size:8px">Remote Sensing Circle</span>
+          </div>
+        </div>
+
+        <!-- Member: Kimani A. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Kimani Aisha','Science communicator bridging space research and public understanding across East Africa.','Nairobi','Mar 2025','KA')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md">KA</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Kimani A.</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Nairobi · Joined Mar 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-green" style="font-size:8px">Education <span style="opacity:.6;margin-left:2px">1,100</span></span>
+            <span class="tag tag-amber" style="font-size:8px">Communications <span style="opacity:.6;margin-left:2px">980</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Education #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Communications #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
+            <span class="tag tag-default" style="font-size:8px">Space Generation Advisory Council</span>
+          </div>
+        </div>
+
+        <!-- Member: Ssempa D. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Ssempa David','Policy analyst working on national space legislation for Uganda.','Kampala','Apr 2025','SD')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Apr 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">900</span></span>
+            <span class="tag tag-blue" style="font-size:8px">Policy <span style="opacity:.6;margin-left:2px">760</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Policy #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
+            <span class="tag tag-default" style="font-size:8px">Uganda Astronomical Society</span>
+            <span class="tag tag-default" style="font-size:8px">SGAC</span>
+          </div>
+        </div>
+
+        <!-- Member: Oumo S. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Oumo Samuel','Founder of Solis. Space law and remote sensing, building the African space commons.','Kampala','Sep 2024','OS')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-gold avatar-md">OS</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Oumo S.</span><span class="badge" style="background:var(--gold-soft);color:var(--gold);font-size:8px">Founder</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Sep 2024</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">1,200</span></span>
+            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">847</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Remote Sensing #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
+            <span class="tag tag-purple" style="font-size:8px">Space Law Circle</span>
+            <span class="tag tag-green" style="font-size:8px">Remote Sensing Circle</span>
+          </div>
+        </div>
+
+        <!-- Member: Diallo M. -->
+        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Diallo Mamadou','Space finance specialist advising on investment frameworks for African space ventures.','Dakar','Jul 2025','DM')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="avatar avatar-md">DM</div>
+            <div style="flex:1;min-width:0">
+              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Diallo M.</span></div>
+              <div style="font-size:11px;color:var(--text-tertiary)">Dakar · Joined Jul 2025</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span class="tag tag-amber" style="font-size:8px">Space Finance <span style="opacity:.6;margin-left:2px">800</span></span>
+            <span class="tag tag-green" style="font-size:8px">Entrepreneurship <span style="opacity:.6;margin-left:2px">720</span></span>
+          </div>
+          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
+            <span class="tag tag-amber" style="font-size:8px">Space Finance #1</span>
+            <span class="tag tag-amber" style="font-size:8px">Entrepreneurship #2</span>
+          </div>
+          <div class="flex items-center gap-1" style="flex-wrap:wrap">
+            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
+            <span class="tag tag-default" style="font-size:8px">Senegal Space Agency</span>
+          </div>
+        </div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Community Stats</div>
           <div class="aside-stat">
             <div class="aside-stat-item"><div class="aside-stat-val">8</div><div class="aside-stat-lbl">Participants</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">16</div><div class="aside-stat-lbl">Domains</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Stewards</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val">6</div><div class="aside-stat-lbl">Circles</div></div>
           </div>
         </div>
@@ -1195,6 +1379,10 @@
           <div class="aside-row"><span style="font-size:12px;color:var(--text)">Entebbe</span><span class="aside-value">1</span></div>
           <div class="aside-row"><span style="font-size:12px;color:var(--text)">Accra</span><span class="aside-value">1</span></div>
           <div class="aside-row"><span style="font-size:12px;color:var(--text)">Dakar</span><span class="aside-value">1</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Sort Order</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">List sorts with <strong>stewards first</strong>, then by Wh (descending), then by join date (earliest first).</div>
         </div>
       </div>
     </div>
