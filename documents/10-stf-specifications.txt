@@ -266,13 +266,12 @@ Multiple resolutions can exist in one deliberation cell. Each spawns its own aST
 
 Full overlay modal with:
 - Resolution text (editable textarea, pre-filled with proposal)
-- System settings section: toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition (checked → resolution is System-bound)
-- Non-system actions section: toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector (checked → resolution is Directive)
+- Action field (free text with autofill presets: Community Policy, Declaration, Deliverable Document, Service Contract, Agreement, Letter/Communication) + implementing circle(s) selector
 - Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
 - Save button (nullifies all existing votes on save)
 - Vote buttons enabled/disabled by accept checkbox in main view
 
-No manual type selector. Type is derived: system only → sys_bound, non-system only → non_system, both → hybrid.
+No type selector exposed to users. Resolution type is implicit — determined by the deliberation trigger context. Circle/Settings edits → system-bound. Direct proposals → directive.
 
 ### Accept Record Checkbox
 

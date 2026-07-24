@@ -470,12 +470,11 @@ Resolutions are the recorded outcomes of deliberation. A resolution is the discu
 
 **Resolution drafting modal** (full overlay):
 - Resolution text (editable textarea)
-- System settings section: toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition (checked → resolution is System-bound)
-- Non-system actions section: toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector (checked → resolution is Directive)
+- Action field (free text with autofill presets: Community Policy, Declaration, Deliverable Document, Service Contract, Agreement, Letter/Communication) + implementing circle(s) selector
 - Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
 - Save button (nullifies votes on save)
 
-Type is derived from content: system checked only → sys_bound, non-system checked only → non_system, both → hybrid. No manual type selector.
+Resolution type is implicit — set at the deliberation cell level by the trigger source, never shown to users. Circle/Settings edits produce system-bound proposals. Direct steward proposals are directives.
 
 ### Accept Record Checkbox
 

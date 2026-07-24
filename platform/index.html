@@ -45,6 +45,9 @@
       <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon">◷</span> Participants</div>
       <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon">◌</span> Profile</div>
     </div>
+    <div class="nav-section">
+      <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon">⚙</span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
+    </div>
   </nav>
 
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -1739,7 +1742,7 @@
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-circle')">Enter Circle Cell</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openSettingsModal()">Circle Settings</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openSettingsModal()">Edit</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Domain Map</button>
           </div>
         </div>
@@ -2162,34 +2165,24 @@
 4. Framework applies to all orbital operators within Commons jurisdiction
 5. Enforcement through existing policy resolution mechanisms</textarea>
       </div>
-      <!-- System Settings -->
-      <div class="card" style="margin-bottom:16px" id="res-modal-sys">
-        <div class="sec">System Settings <span class="tag tag-purple" style="font-size:7px;margin-left:4px">System-Bound</span></div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>Create/Edit Circle</strong> — modify circle boundaries, membership, mandate</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>Approve/Endorse Publication/Project/Event/Affiliation</strong> — approve pending submissions</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>Create/Edit Organisation</strong> — establish or modify organisational structures</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>Periodic aSTF Duration & Periods</strong> — set review cycles and deadlines</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>STF Composition Sizes & Durations</strong> — set minimum/maximum STF member counts and time limits</span></label>
-        </div>
-      </div>
-      <!-- Non-System Actions -->
-      <div class="card" style="margin-bottom:16px" id="res-modal-ns">
-        <div class="sec">Non-System Actions <span class="tag tag-gold" style="font-size:7px;margin-left:4px">Directive</span></div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-ns-cb" checked> <span><strong>Community Policy</strong> — governance rules for jSTF and Commons operations</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-ns-cb"> <span><strong>Declaration</strong> — formal position statement or announcement</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-ns-cb"> <span><strong>Deliverable Document</strong> — technical report, guide, or specification</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-ns-cb"> <span><strong>Service Contract</strong> — agreement between circles or with external parties</span></label>
-          <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-ns-cb"> <span><strong>Agreement</strong> — MOU, cooperation framework, or protocol</span></label>
-        </div>
-        <div style="margin-top:12px">
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px" id="res-modal-circles">
-            <span class="tag tag-purple" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Space Law Circle ✓</span>
-            <span class="tag tag-teal" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Remote Sensing Circle ✓</span>
-            <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
-          </div>
+      <!-- Resolution Actions (directive) -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="sec">Action</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Describe the action this resolution authorises. Type freely or choose from suggestions.</div>
+        <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="e.g. Community Policy, Declaration, Deliverable Document…" style="margin-bottom:8px">
+        <datalist id="action-presets">
+          <option value="Community Policy">
+          <option value="Declaration">
+          <option value="Deliverable Document">
+          <option value="Service Contract">
+          <option value="Agreement">
+          <option value="Letter/Communication">
+        </datalist>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px" id="res-modal-circles">
+          <span class="tag tag-purple" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Space Law Circle ✓</span>
+          <span class="tag tag-teal" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Remote Sensing Circle ✓</span>
+          <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
@@ -2418,6 +2411,7 @@ function openResolutionModal(idx) {
   var res = delibResolutions[idx];
   document.getElementById('res-modal-title').textContent = 'Resolution #' + (idx + 1);
   document.getElementById('res-modal-text').value = res.text;
+  document.getElementById('res-modal-action').value = res.action || '';
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
 }
@@ -2431,20 +2425,8 @@ function saveResolution() {
   if (!confirm('Saving this resolution will nullify all existing votes. Continue?')) return;
   var res = delibResolutions[delibSelectedRes];
   res.text = document.getElementById('res-modal-text').value;
-  var hasSys = document.querySelectorAll('.res-sys-cb:checked').length > 0;
-  var hasNs = document.querySelectorAll('.res-ns-cb:checked').length > 0;
-  res.type = hasSys && hasNs ? 'hybrid' : hasSys ? 'sys_bound' : 'non_system';
+  res.action = document.getElementById('res-modal-action').value;
   res.votesNullified = true;
-  // collect system settings
-  res.systemSettings = [];
-  document.querySelectorAll('.res-sys-cb:checked').forEach(function(cb) {
-    res.systemSettings.push(cb.parentElement.textContent.trim());
-  });
-  // collect non-system types
-  res.nonSystemTypes = [];
-  document.querySelectorAll('.res-ns-cb:checked').forEach(function(cb) {
-    res.nonSystemTypes.push(cb.parentElement.textContent.trim());
-  });
   // refresh sidebar
   updateResolutionList();
   closeResolutionModal();
@@ -2454,10 +2436,8 @@ function saveResolution() {
 function addResolution() {
   delibResolutions.push({
     id: delibResolutions.length + 1,
-    text: 'New resolution draft...',
-    type: 'non_system',
-    systemSettings: [],
-    nonSystemTypes: [],
+    text: 'New resolution draft…',
+    action: '',
     implementingCircles: [],
     votesNullified: false
   });
@@ -2468,12 +2448,10 @@ function updateResolutionList() {
   var list = document.getElementById('resolution-list');
   var html = '';
   delibResolutions.forEach(function(r, i) {
-    var typeLabel = r.type === 'sys_bound' ? 'System' : r.type === 'hybrid' ? 'Hybrid' : 'Directive';
-    var typeClass = r.type === 'sys_bound' ? 'tag-purple' : r.type === 'hybrid' ? 'tag-blue' : 'tag-gold';
     var shortText = r.text.length > 80 ? r.text.substring(0, 80) + '…' : r.text;
     var statusBadge = r.votesNullified ? '<span class="badge b-review" style="font-size:8px">Edited</span>' : '<span class="badge b-active" style="font-size:8px">Draft</span>';
     html += '<div class="res-summary">' +
-      '<div class="res-summary-hdr"><span class="res-summary-num">Resolution #' + (i + 1) + '</span><span class="tag ' + typeClass + '" style="font-size:7px">' + typeLabel + '</span></div>' +
+      '<div class="res-summary-hdr"><span class="res-summary-num">Resolution #' + (i + 1) + '</span></div>' +
       '<div class="res-summary-text">' + escapeHtml(shortText) + '</div>' +
       '<div class="res-summary-actions"><button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(' + i + ')">View / Edit</button>' + statusBadge + '</div></div>';
   });
