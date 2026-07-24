@@ -444,7 +444,7 @@ The core governance mechanism. A deliberation cell has four components:
 3. **Deliverable** — the motion, action, or outcome produced by deliberation (always one: a motion to aSTF)
 4. **Competence-weighted vote** — when all vote and the motion passes, the cell creates/opens an aSTF
 
-**No sidebar** — full-width content only.
+**Layout:** layout-split (1fr 300px sidebar). Main content = deliberation feed + vote. Sidebar = participating circles, guide, draft resolutions, conditional actions, system settings.
 
 **Proposal Origins (how a proposal enters a deliberation cell):**
 1. **Discussion thread → steward proposal**: A user creates a discussion thread, participants discuss, and a steward creates a proposal from that thread. The proposal links back to the source thread.
@@ -457,53 +457,62 @@ Deliberation cells can have multiple circles participating, not just the origina
 **Self-disqualification:**
 Circles can self-disqualify from a deliberation. This is an auditable decision — the circle appears as a "ghost/scar" in the participating circles list, showing "withdrew from deliberation by: [member name]" to indicate which member made the withdrawal decision. The scar is permanent and visible to auditors.
 
-### Parts to Include
+### Resolution Drafting
 
-What the motion proposes. Select the parts that apply — system-bound parts auto-execute on resolution; non-system parts are directives to named implementing circles.
+Resolutions are the recorded outcomes of deliberation. A resolution is the discussed decision that is voted on — not the original proposal. The proposal is the starting point; resolutions are drafted by participants based on deliberation.
 
-**1. Draft Motion** — the formal text of what this motion proposes. Gets sent to aSTF for blind adjudication.
+- The first resolution draft is the proposal text verbatim
+- Participants can edit the resolution or add additional resolutions
+- Each edit nullifies existing votes (must re-vote)
+- The resolution type (Directive / System / Hybrid) is set in the drafting modal
+- Multiple resolutions can exist in one deliberation cell, each spawns its own aSTF
+- A failed resolution is still recorded as a failed resolution (not discarded)
 
-**2. System Settings** (system-bound) — if the motion passes, the following system settings will be auto-executed by the Integrity Engine:
-- Create/Edit Circle — modify circle boundaries, membership, mandate
-- Approve/Endorse Publication/Project/Event/Affiliation — approve pending submissions
-- Create/Edit Organisation — establish or modify organisational structures
-- Create/Edit Domain — add, modify, or remove domains
-- Periodic aSTF Duration & Periods — set review cycles and deadlines
-- STF Composition Sizes & Durations — set minimum/maximum STF member counts and time limits
+**Resolution drafting modal** (full overlay):
+- Resolution text (editable textarea)
+- Resolution type selector: Directive (circle(s) implement), System (auto-executed by Integrity Engine), Hybrid (both)
+- System settings section (shown when type is System or Hybrid): toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition
+- Non-system actions section (shown when type is Directive or Hybrid): toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector
+- Current vote summary (informational)
+- Save button (nullifies votes on save)
 
-**3. Non-System Motions** (directive) — if the motion passes, the following documents or directives are created. The responsible circle(s) must implement:
-- Community Policy — governance rules for jSTF and Commons operations
-- Declaration — formal position statement or announcement
-- Deliverable Document — technical report, guide, or specification
-- Service Contract — agreement between circles or with external parties
-- Agreement — MOU, cooperation framework, or protocol
-- Letter / Communication — formal correspondence to members, circles, or external bodies
+### Accept Record Checkbox
 
-**Implementing Circle(s):**
-Non-system motions require named implementing circle(s) — the circle(s) responsible for executing the directive. Any steward can sponsor implementation. The implementing circle(s) are listed in the motion record.
-
-**Vote and aSTF:**
-When all participants have voted and the motion passes, the cell creates or opens an aSTF for blind adjudication.
+Before voting, participants must check "I confirm this discussion record accurately reflects the deliberation." This activates the vote buttons. The checkbox ensures participants agree the deliberation record is complete and accurate before voting.
 
 ### Deliberation Cell Voting Mechanics
 
 **Three vote options:** Abstain, Nay, Yea
 
 **Per-member vote weight:**
-Each member's vote weight = their Ws (soft competence) intersection with the deliberation domains. If a member has 2800 Ws in Xenobiology but the motion is about Space Law and Liability, their Xenobiology Ws contribute zero influence. Their Veterinary Biology Ws (200) may be significant if the motion touches that domain.
+Each member's vote weight = their Ws (soft competence) intersection with the deliberation domains. If a member has 2800 Ws in Xenobiology but the resolution is about Space Law and Liability, their Xenobiology Ws contribute zero influence. Their Veterinary Biology Ws (200) may be significant if the resolution touches that domain.
 
 **Per-domain vote breakdown:**
-For each domain the motion covers, the system shows:
+For each domain the resolution covers, the system shows:
+- Domain name
 - Yea Ws total (sum of all yea voters' Ws in that domain)
 - Nay Ws total (sum of all nay voters' Ws in that domain)
 - Total Ws in that domain
 - Individual voter contributions (avatar, Ws, vote direction)
 
 **Aggregate vote:**
-The final vote is an aggregate of all stewards on all intersecting domains with the motion, across all domains of the motion. Shown as total Yea Ws vs total Nay Ws across all domains.
+The final vote is an aggregate of all stewards on all intersecting domains with the resolution, across all domains of the resolution. Shown as total Yea Ws vs total Nay Ws.
 
-**Visual:**
-Table-based breakdown per domain, with an aggregate row at the bottom. This makes the weighted voting concept transparent — you can see exactly how each member's competence in each domain contributes to the outcome.
+**Decision Status Bar:**
+Shown below the vote table. Shows quorum status (e.g., "Quorum: 4/7"), vote result (e.g., "Yea 4,960 · Nay 932 (passes)"), and two buttons:
+- **Submit Resolution** — green, active when quorum met + passes, submits to aSTF
+- **Close Debate** — red, always active, anyone can press to crystallise the cell. Resolution recorded as final outcome.
+
+### System Settings Modal (tabbed)
+
+Opens as a full overlay. Four tabs:
+1. **Circle** — circle name, status, description, max members
+2. **STF** — min/max vSTF assessors, aSTF assessors, STF durations (days)
+3. **Quorum** — minimum participants, minimum % of members, pass threshold (% yea), abstain limit (%)
+4. **Deliberation** — max deliberation days, auto-close inactivity, max resolutions per cell, vote nullify on edit
+
+Submit creates a system-bound proposal to the deliberation cell.
+Also accessible from Circle Home sidebar as "Circle Settings".
 
 **3. Project Cell**
 - Projects can have their own cells for deliberation
@@ -553,32 +562,35 @@ When the disciplinary motion passes aSTF audit, the resolution can be:
 ### Flow Summary
 
 ```
-Discussion → Proposal (steward-sponsored) → Deliberation Cell (full-width, no sidebar)
+Discussion → Proposal (steward-sponsored) → Deliberation Cell (layout-split with sidebar)
                                                           ↓
-                                              Per-domain vote table (Ws intersection)
+                                              Accept record → Draft Resolution(s)
+                                              Edit/vote in modal → Per-domain vote table
                                               Yea Ws vs Nay Ws per domain + aggregate
                                                           ↓
-                                              Motion passes → opens aSTF (blind cell)
+                                              If passes: Submit Resolution → aSTF (blind cell)
+                                              If fails: Close Debate → Failed resolution recorded
                                                           ↓
                                               aSTF verdict: Resolution / Rejection
                                               → opens xSTF → Deliverable
+                                              (each resolution spawns its own aSTF)
 
 jSTF: Report → Anonymous post → Steward sponsors → jSTF Cell (blind)
                                                           ↓
                                                    Activity restriction (if needed)
                                                           ↓
-                                                   Disciplinary motion → aSTF audit
+                                                   Disciplinary resolution → aSTF audit
                                                           ↓
                                                    System-bound / Non-system resolution
 
 Periodic Review aSTF → Evaluates circle health + steward performance
 vSTF → Evaluates competence claims
-xSTF → Executes resolved motions → Deliverable
+xSTF → Executes resolved resolutions → Deliverable
 
 Circle Cell → originates proposals, creates xSTFs, reviews deliverables
               activities appear in circle's activity feed
 
-Circle Home → circle profile, discussions, motions, resolutions, activity, membership
+Circle Home → circle profile, discussions, resolutions, activity, membership, settings
               public-facing page accessible from circles list
 ```
 

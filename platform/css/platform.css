@@ -388,6 +388,42 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .circle-scar .scar-icon{font-size:10px;color:var(--text-tertiary)}
 .circle-scar .scar-text{font-size:11px;color:var(--text-tertiary);font-style:italic}
 
+/* ── Accept Checkbox ── */
+.accept-checkbox{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:16px;cursor:pointer;font-size:12px;color:var(--text-secondary)}
+.accept-checkbox input{cursor:pointer;width:16px;height:16px}
+.accept-checkbox span{line-height:1.4}
+
+/* ── Decision Status Bar ── */
+.decision-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-top:16px;gap:12px}
+.decision-bar .db-info{font-size:11px;color:var(--text-secondary);font-family:var(--mono)}
+.decision-bar .db-pass{color:var(--green);font-weight:600}
+.decision-bar .db-fail{color:var(--red);font-weight:600}
+.decision-bar .db-actions{display:flex;gap:6px;flex-shrink:0}
+
+/* ── Resolution Summary (Sidebar) ── */
+.res-summary{padding:8px 0;border-bottom:1px solid var(--border-subtle)}
+.res-summary:last-child{border-bottom:none}
+.res-summary-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.res-summary-num{font-size:10px;font-weight:600;color:var(--text)}
+.res-summary-text{font-size:9px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.res-summary-actions{display:flex;align-items:center;gap:6px}
+
+/* ── Conditional Actions ── */
+.cond-action{display:flex;align-items:flex-start;gap:6px;padding:4px 0}
+.cond-action-icon{font-size:8px;color:var(--gold);margin-top:2px;flex-shrink:0}
+
+/* ── Settings Tab Bar ── */
+.settings-tab-bar{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0}
+.settings-tab{padding:8px 16px;font-size:11px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px}
+.settings-tab:hover{color:var(--text-secondary)}
+.settings-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.settings-tab-content{padding:0}
+
+/* ── Resolution Type Options ── */
+.res-type-option{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius);flex:1;transition:all .12s}
+.res-type-option:hover{border-color:var(--gold-border)}
+.res-type-option:has(input:checked),.res-type-option input:checked + span{border-color:var(--gold-border);background:var(--gold-soft)}
+
 /* ── Circle Home ── */
 .circle-home-header{display:flex;gap:20px;align-items:flex-start;margin-bottom:20px}
 .circle-home-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--serif)}
