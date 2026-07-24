@@ -470,13 +470,12 @@ Resolutions are the recorded outcomes of deliberation. A resolution is the discu
 
 **Resolution drafting modal** (full overlay):
 - Resolution text (editable textarea)
-- Resolution type selector: Directive (circle(s) implement), System (auto-executed by Integrity Engine), Hybrid (both)
-- System settings section (shown when type is System or Hybrid): toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition
-- Non-system actions section (shown when type is Directive or Hybrid): toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector
+- System settings section: toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition (checked → resolution is System-bound)
+- Non-system actions section: toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector (checked → resolution is Directive)
 - Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
 - Save button (nullifies votes on save)
 
-Vote buttons in the modal are enabled/disabled by the accept checkbox in the main view.
+Type is derived from content: system checked only → sys_bound, non-system checked only → non_system, both → hybrid. No manual type selector.
 
 ### Accept Record Checkbox
 

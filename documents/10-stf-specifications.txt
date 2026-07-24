@@ -250,14 +250,12 @@ A deliberation cell is the core governance mechanism. Each deliberation cell use
 1. **Participating Circles** — active circles with member counts, ghost/scar for self-disqualified
 2. **Deliberation Guide** — explanation of what a deliberation cell is and the flow
 3. **Draft Resolutions** — summary cards for each resolution, Edit/View button → modal, + Add Resolution
-4. **Conditional Actions** — info rows showing what the resolution affects (e.g., creates a circle, endorses a publication)
-5. **System Settings** — Edit Settings button → opens tabbed settings modal
 
 ### Resolution vs Motion
 
 A **resolution** is the recorded outcome of deliberation — the decision that is voted on, not the original proposal. The proposal starts the discussion; participants draft one or more resolutions based on deliberation. Failed resolutions are still recorded as failed.
 
-Each resolution can have a type:
+Resolution type is derived from content:
 - **Directive** (non-system) — circle(s) implement
 - **System** — auto-executed by Integrity Engine
 - **Hybrid** — both
@@ -268,13 +266,13 @@ Multiple resolutions can exist in one deliberation cell. Each spawns its own aST
 
 Full overlay modal with:
 - Resolution text (editable textarea, pre-filled with proposal)
-- Resolution type selector
-- System settings section (shown for System/Hybrid)
-- Non-system actions section (shown for Directive/Hybrid) with implementing circle(s)
+- System settings section: toggles for Circle CRUD, approval, org CRUD, aSTF periods, STF composition (checked → resolution is System-bound)
+- Non-system actions section: toggles for Policy, Declaration, Deliverable, Contract, Agreement, Letter + implementing circle(s) selector (checked → resolution is Directive)
 - Vote control: Yea / Nay / Abstain buttons + per-domain vote breakdown table
 - Save button (nullifies all existing votes on save)
+- Vote buttons enabled/disabled by accept checkbox in main view
 
-Vote buttons in the modal are enabled/disabled by the accept checkbox in the main view.
+No manual type selector. Type is derived: system only → sys_bound, non-system only → non_system, both → hybrid.
 
 ### Accept Record Checkbox
 

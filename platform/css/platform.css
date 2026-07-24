@@ -408,21 +408,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .res-summary-text{font-size:9px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .res-summary-actions{display:flex;align-items:center;gap:6px}
 
-/* ── Conditional Actions ── */
-.cond-action{display:flex;align-items:flex-start;gap:6px;padding:4px 0}
-.cond-action-icon{font-size:8px;color:var(--gold);margin-top:2px;flex-shrink:0}
-
 /* ── Settings Tab Bar ── */
 .settings-tab-bar{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0}
 .settings-tab{padding:8px 16px;font-size:11px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px}
 .settings-tab:hover{color:var(--text-secondary)}
 .settings-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .settings-tab-content{padding:0}
-
-/* ── Resolution Type Options ── */
-.res-type-option{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:8px 12px;border:1px solid var(--border-subtle);border-radius:var(--radius);flex:1;transition:all .12s}
-.res-type-option:hover{border-color:var(--gold-border)}
-.res-type-option:has(input:checked),.res-type-option input:checked + span{border-color:var(--gold-border);background:var(--gold-soft)}
 
 /* ── Circle Home ── */
 .circle-home-header{display:flex;gap:20px;align-items:flex-start;margin-bottom:20px}

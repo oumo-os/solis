@@ -767,23 +767,6 @@
       <button class="btn btn-sm" style="width:100%;margin-top:6px;font-size:10px" onclick="addResolution()">+ Add Resolution</button>
     </div>
 
-    <!-- Conditional Actions -->
-    <div class="aside-card">
-      <div class="aside-title">Conditional Actions</div>
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
-        <div class="cond-action"><span class="cond-action-icon">◆</span><span style="font-size:9px;color:var(--text-secondary)">This resolution <strong>creates a new circle</strong></span></div>
-        <div class="cond-action"><span class="cond-action-icon">◆</span><span style="font-size:9px;color:var(--text-secondary)">This resolution <strong>endorses a publication</strong></span></div>
-        <div class="cond-action"><span class="cond-action-icon">◆</span><span style="font-size:9px;color:var(--text-secondary)">This resolution <strong>approves an affiliation</strong></span></div>
-      </div>
-    </div>
-
-    <!-- System Settings -->
-    <div class="aside-card">
-      <div class="aside-title">System Settings</div>
-      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;margin-bottom:8px;line-height:1.5">Edit circle configuration, STF composition, quorum thresholds, and deliberation defaults. Changes are submitted as a system-bound proposal.</div>
-      <button class="btn btn-sm" style="width:100%;font-size:10px" onclick="openSettingsModal()">Edit Settings</button>
-    </div>
-
       </div>
     </div>
   </div>
@@ -2179,17 +2162,8 @@
 4. Framework applies to all orbital operators within Commons jurisdiction
 5. Enforcement through existing policy resolution mechanisms</textarea>
       </div>
-      <div class="card" style="margin-bottom:16px">
-        <div class="sec">Resolution Type</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">How this resolution is implemented:</div>
-        <div class="flex gap-2 mb-3" id="res-modal-type">
-          <label class="res-type-option" onclick="document.getElementById('res-type-ns').checked=true;toggleResTypeFields()"><input type="radio" name="res-type" id="res-type-ns" value="non_system" checked> <span><strong>Directive</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Circle(s) implement</span></span></label>
-          <label class="res-type-option" onclick="document.getElementById('res-type-sys').checked=true;toggleResTypeFields()"><input type="radio" name="res-type" id="res-type-sys" value="sys_bound"> <span><strong>System</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Auto-executed</span></span></label>
-          <label class="res-type-option" onclick="document.getElementById('res-type-hyb').checked=true;toggleResTypeFields()"><input type="radio" name="res-type" id="res-type-hyb" value="hybrid"> <span><strong>Hybrid</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Both</span></span></label>
-        </div>
-      </div>
-      <!-- System Settings (shown for System/Hybrid) -->
-      <div class="card" style="margin-bottom:16px;display:none" id="res-modal-sys">
+      <!-- System Settings -->
+      <div class="card" style="margin-bottom:16px" id="res-modal-sys">
         <div class="sec">System Settings <span class="tag tag-purple" style="font-size:7px;margin-left:4px">System-Bound</span></div>
         <div style="display:flex;flex-direction:column;gap:6px">
           <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>Create/Edit Circle</strong> — modify circle boundaries, membership, mandate</span></label>
@@ -2199,7 +2173,7 @@
           <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="checkbox" class="res-sys-cb"> <span><strong>STF Composition Sizes & Durations</strong> — set minimum/maximum STF member counts and time limits</span></label>
         </div>
       </div>
-      <!-- Non-System Motions (shown for Directive/Hybrid) -->
+      <!-- Non-System Actions -->
       <div class="card" style="margin-bottom:16px" id="res-modal-ns">
         <div class="sec">Non-System Actions <span class="tag tag-gold" style="font-size:7px;margin-left:4px">Directive</span></div>
         <div style="display:flex;flex-direction:column;gap:6px">
@@ -2444,10 +2418,6 @@ function openResolutionModal(idx) {
   var res = delibResolutions[idx];
   document.getElementById('res-modal-title').textContent = 'Resolution #' + (idx + 1);
   document.getElementById('res-modal-text').value = res.text;
-  if (res.type === 'sys_bound') { document.getElementById('res-type-sys').checked = true; }
-  else if (res.type === 'hybrid') { document.getElementById('res-type-hyb').checked = true; }
-  else { document.getElementById('res-type-ns').checked = true; }
-  toggleResTypeFields();
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
 }
@@ -2457,20 +2427,13 @@ function closeResolutionModal() {
   document.body.classList.remove('modal-open');
 }
 
-function toggleResTypeFields() {
-  var type = document.querySelector('input[name="res-type"]:checked');
-  if (!type) return;
-  var val = type.value;
-  document.getElementById('res-modal-sys').style.display = (val === 'sys_bound' || val === 'hybrid') ? '' : 'none';
-  document.getElementById('res-modal-ns').style.display = (val === 'non_system' || val === 'hybrid') ? '' : 'none';
-}
-
 function saveResolution() {
   if (!confirm('Saving this resolution will nullify all existing votes. Continue?')) return;
   var res = delibResolutions[delibSelectedRes];
   res.text = document.getElementById('res-modal-text').value;
-  var typeEl = document.querySelector('input[name="res-type"]:checked');
-  res.type = typeEl ? typeEl.value : 'non_system';
+  var hasSys = document.querySelectorAll('.res-sys-cb:checked').length > 0;
+  var hasNs = document.querySelectorAll('.res-ns-cb:checked').length > 0;
+  res.type = hasSys && hasNs ? 'hybrid' : hasSys ? 'sys_bound' : 'non_system';
   res.votesNullified = true;
   // collect system settings
   res.systemSettings = [];
