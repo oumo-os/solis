@@ -306,7 +306,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .avatar-gold{background:var(--gold)}
 .avatar-system{border-radius:var(--radius);background:rgba(255,255,255,.15)}
 .avatar-square{border-radius:0}
-.participant-card{display:flex;align-items:stretch;height:120px}
+.participant-card{display:flex;align-items:center;height:120px}
 .participant-card .avatar-square{flex-shrink:0}
 .participant-card .pc-body{flex:1;padding:8px 10px;min-width:0;display:flex;flex-direction:column;gap:4px;overflow:hidden}
 .participant-card .pc-top{min-height:0}

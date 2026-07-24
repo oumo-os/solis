@@ -2065,10 +2065,9 @@ function nav(key) {
 function layoutParticipantCards(){
   document.querySelectorAll('.participant-card').forEach(function(c){
     var av=c.querySelector('.avatar-square');
-    var h=c.offsetHeight;
-    var w=Math.min(h, c.offsetWidth*0.25);
-    av.style.width=w+'px';
-    av.style.height=h+'px';
+    var s=Math.min(c.offsetHeight-16, c.offsetWidth*0.3);
+    av.style.width=s+'px';
+    av.style.height=s+'px';
   });
 }
 requestAnimationFrame(layoutParticipantCards);
