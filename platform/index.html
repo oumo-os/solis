@@ -859,18 +859,12 @@
     </div>
   </div>
 
-  <!-- ═══ jSTF: Court ═══ -->
   <div class="view" id="view-stf-jstf">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="stf-jstf-wrap">
-      <div class="room-header">
-        <div class="room-type-label">■ jSTF — Judicial Investigation</div>
-        <div class="room-title">Investigation: Credential Misrepresentation Claim</div>
-        <div class="room-meta">Judicial Circle · Write-restricted · Due Aug 01, 2026 · 🔒 Closed to external parties</div>
-      </div>
-      <div class="room-body">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">■ jSTF — Judicial Investigation</div>
         <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center">🔒 &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--red)">Room Environment</div><div class="room-env-text">Judicial investigation workspace. Investigation team has collaborative access. This Cell record is sealed from all non-team org members. The Judicial Circle has read access for oversight. Meta-aSTF will receive this Cell's report as read-only input.</div></div>
         <div class="sec">Case Record</div>
         <div class="accused-row">
           <div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
@@ -881,24 +875,62 @@
           <div class="court-charge">Trigger: Integrity Engine anomaly flag</div>
           <div class="court-text">Flag raised on Jul 10: statistical correlation detected between auditor assignment pattern and credential verification outcomes. Secondary flag: claimed W<sub>h</sub> credentials in Space Law domain appear inconsistent with demonstrated participation quality. Judicial Circle commissioned this investigation on Jul 12.</div>
         </div>
-        <div class="g2">
-          <div>
-            <div class="sec">Investigation Team</div>
-            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">FO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Fatima Ouedraogo</div><div style="font-size:11px;color:var(--text-tertiary)">Lead investigator</div></div><span class="badge b-active">Active</span></div>
-            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">BK</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Bongani Khumalo</div><div style="font-size:11px;color:var(--text-tertiary)">Evidence review</div></div><span class="badge b-active">Active</span></div>
-            <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">LM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Lena Müller</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law expert</div></div><span class="badge b-active">Active</span></div>
+        <div class="sec">Investigation Team</div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">FO</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Fatima Ouedraogo</div><div style="font-size:11px;color:var(--text-tertiary)">Lead investigator</div></div><span class="badge b-active">Active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">BK</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Bongani Khumalo</div><div style="font-size:11px;color:var(--text-tertiary)">Evidence review</div></div><span class="badge b-active">Active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">LM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Lena Müller</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law expert</div></div><span class="badge b-active">Active</span></div>
+        <div class="sec" style="margin-top:16px">Report Status</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Findings</span><span style="color:var(--green)">✓ Drafted</span></div>
+          <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Evidence appendix</span><span style="color:var(--green)">✓ Complete</span></div>
+          <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
+          <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
+        </div>
+        <div class="sec">Investigation Deliberations</div>
+        <div class="card">
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">FO</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Fatima O.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Evidence appendix is complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.</p></div></div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">BK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Bongani K.</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Confirmed. The statistical anomaly is significant — p-value below 0.01. Also found that 2 of the 3 verified candidates had prior personal contact with the accused outside Solis.</p></div></div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">LM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Lena M.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">The domain expertise gaps are also concerning. The accused's claimed Ws in Space Law doesn't match their publication record. Drafting the findings section now.</p></div></div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" placeholder="Add to investigation..."></textarea>
+          <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded. This cell is sealed — only investigation team and Judicial Circle have access.</div>
+        </div>
+        <div style="margin-top:16px"><button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise &amp; Forward to Meta-aSTF</button></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Assignment</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">jSTF — Investigation</span></div>
+          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Judicial</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 01, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Team</span><span style="font-size:11px;color:var(--text)">3 investigators</span></div>
+          <div class="aside-row"><span class="aside-label">Access</span><span style="font-size:11px;color:var(--red)">🔒 Sealed</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Accused</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:28px;height:28px;font-size:10px">DJ</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Daniel Jørgensen</div><div style="font-size:10px;color:var(--text-tertiary)">Former Space Law Circle</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Status: Under Review. Accused of credential misrepresentation and integrity violations.</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Trigger</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2"><strong style="color:var(--text)">Integrity Engine anomaly flag</strong></div>
+            <div class="mb-2">Statistical correlation between auditor assignment pattern and verification outcomes.</div>
+            <div>Secondary: Ws credentials inconsistent with participation quality.</div>
           </div>
-          <div>
-            <div class="sec">Report Status</div>
-            <div class="card" style="margin-bottom:0">
-              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Findings</span><span style="color:var(--green)">✓ Drafted</span></div>
-              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Evidence appendix</span><span style="color:var(--green)">✓ Complete</span></div>
-              <div class="flex justify-between mb-3"><span style="font-size:12px;color:var(--text-secondary)">Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
-              <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
-              <div class="divider"></div>
-              <button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise & Forward to Meta-aSTF</button>
-            </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Evidence</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between"><span>Assignment logs</span><span style="color:var(--green)">✓ Collected</span></div>
+            <div class="flex justify-between"><span>Credential records</span><span style="color:var(--green)">✓ Collected</span></div>
+            <div class="flex justify-between"><span>Verification outcomes</span><span style="color:var(--green)">✓ Collected</span></div>
+            <div class="flex justify-between"><span>External contacts</span><span style="color:var(--amber)">△ In progress</span></div>
           </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">How jSTF Works</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Judicial investigations are <strong>sealed cells</strong>. The team collaborates with full access. The Judicial Circle has read access for oversight. Meta-aSTF receives the report as read-only input. Findings go to the ledger; reviewer attribution is sealed.</div>
         </div>
       </div>
     </div>
@@ -1060,22 +1092,16 @@
     </div>
   </div>
 
-  <!-- ═══ p-aSTF: Periodic Circle Health Review ═══ -->
   <div class="view" id="view-stf-pastf">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="stf-astf-wrap">
-      <div class="room-header">
-        <div class="room-type-label" style="color:var(--blue)">◆ p-aSTF — Periodic Circle Health Review</div>
-        <div class="room-title">Space Law Circle — Health Audit</div>
-        <div class="room-meta">Assigned members: Akello J., Ssempa D. · Due Aug 05, 2026</div>
-      </div>
-      <div class="room-body">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ p-aSTF — Periodic Circle Health Review</div>
         <div class="blind-wall">🔒 &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--blue)">Room Environment</div><div class="room-env-text">Periodic Circle health review. You have been assigned 2 of the Circle's members for individual assessment. You also file a Circle-level rubric based on publicly observable information. Your scores and health tier are published; your attribution is permanently sealed.</div></div>
 
         <!-- Layer 1: Circle Rubric -->
         <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 1 — Circle Rubric (30 pts)</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Based on publicly observable information. No access to internal deliberations required.</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Based on publicly observable information. No access to internal deliberations required.</div>
         <table class="tbl" style="margin-bottom:16px">
           <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
           <tr><td style="font-weight:500">Activity</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Is the Circle visibly active in governance?</td></tr>
@@ -1115,7 +1141,7 @@
           <div class="g2" style="margin-bottom:0">
             <div>
               <div class="text-label mb-1">Replaceability (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer mandate</span></div>
+              <div class="flex items-center gap-2"><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer</span></div>
             </div>
             <div>
               <div class="text-label mb-1">Indispensable (0–5)</div>
@@ -1144,7 +1170,7 @@
           <div class="g2" style="margin-bottom:0">
             <div>
               <div class="text-label mb-1">Replaceability (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer mandate</span></div>
+              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer</span></div>
             </div>
             <div>
               <div class="text-label mb-1">Indispensable (0–5)</div>
@@ -1168,6 +1194,50 @@
         <textarea placeholder="Additional observations about the Circle and assigned members..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your p-aSTF review? Scores and tier will be published; your attribution is permanently sealed.',function(){})">Submit Review</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Assignment</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">p-aSTF — Circle Health</span></div>
+          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 05, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Your members</span><span style="font-size:11px;color:var(--text)">2 assigned</span></div>
+          <div class="aside-row"><span class="aside-label">Circle rubric</span><span style="font-size:11px;color:var(--text)">All reviewers</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Circle Profile</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Founded Mar 2026 · 8 members</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Mandate: Space Law &amp; Policy, Telecommunications, Debris Tracking, Regulatory Compliance</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Layer 1 — Circle Rubric</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between"><span>Activity</span><span style="color:var(--text)">5/6</span></div>
+            <div class="flex justify-between"><span>Competence Fit</span><span style="color:var(--gold)">6/7 <span style="font-size:9px">(78% pre-computed)</span></span></div>
+            <div class="flex justify-between"><span>Discipline</span><span style="color:var(--text)">5/6</span></div>
+            <div class="flex justify-between"><span>Cohesion</span><span style="color:var(--amber)">3/5</span></div>
+            <div class="flex justify-between"><span>Delivery</span><span style="color:var(--text)">4/6</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Layer 2 — Member Scores</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between mb-2"><span><strong>Akello J.</strong></span><span style="color:var(--text)">29/35</span></div>
+            <div class="flex justify-between"><span><strong>Ssempa D.</strong></span><span style="color:var(--amber)">17/35</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Reviewer Pool</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2">Each member assessed by <strong>2–3 independent reviewers</strong>.</div>
+            <div class="mb-2">You see only your assigned members.</div>
+            <div>Other reviewers' scores are invisible to you.</div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Ledger Rules</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1181,199 +1251,69 @@
           <span class="text-label">8 participants visible</span>
           <input placeholder="Search..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px">
         </div>
+        <div class="g3">
+          <!-- Steward: Akello J. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Akello Jane','Astrophysics researcher specialising in exoplanet detection.','Kampala','Feb 2025','AJ')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-1"><span style="font-size:13px;font-weight:500;color:var(--text)">Akello J.</span><span class="badge b-active" style="font-size:7px">Steward</span></div><div style="font-size:10px;color:var(--text-tertiary)">Kampala</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Space Law 1,800</span><span class="tag tag-blue" style="font-size:7px">Astrophysics 1,240</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Space Law #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">Uganda Astronomical Society</span></div>
+          </div>
 
-        <!-- Steward: Akello J. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Akello Jane','Astrophysics researcher specialising in exoplanet detection.','Kampala','Feb 2025','AJ')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md">AJ</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Akello J.</span><span class="badge b-active" style="font-size:8px">Steward</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Feb 2025</div>
-            </div>
+          <!-- Steward: Osei K. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Osei Kwame','Propulsion engineer developing next-generation launch systems for small satellites.','Accra','Jun 2025','OK')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px;background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-1"><span style="font-size:13px;font-weight:500;color:var(--text)">Osei K.</span><span class="badge b-active" style="font-size:7px">Steward</span></div><div style="font-size:10px;color:var(--text-tertiary)">Accra</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">Propulsion 2,000</span><span class="tag tag-default" style="font-size:7px">Launch Systems 1,380</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Propulsion #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">Ghana Space Society</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">1,800</span></span>
-            <span class="tag tag-blue" style="font-size:8px">Astrophysics <span style="opacity:.6;margin-left:2px">1,240</span></span>
-            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">600</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Astrophysics #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
-            <span class="tag tag-default" style="font-size:8px">Uganda Astronomical Society</span>
-          </div>
-        </div>
 
-        <!-- Steward: Osei K. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Osei Kwame','Propulsion engineer developing next-generation launch systems for small satellites.','Accra','Jun 2025','OK')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Osei K.</span><span class="badge b-active" style="font-size:8px">Steward</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Accra · Joined Jun 2025</div>
-            </div>
+          <!-- Namugga C. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Namugga Claire','Space medicine researcher exploring bioastronautics for long-duration missions.','Entebbe','Jan 2025','NC')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px;background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">NC</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">Namugga C.</div><div style="font-size:10px;color:var(--text-tertiary)">Entebbe</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Publications 1,400</span><span class="tag tag-amber" style="font-size:7px">Space Medicine 1,050</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Publications #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Space Law Circle</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-default" style="font-size:8px">Propulsion <span style="opacity:.6;margin-left:2px">2,000</span></span>
-            <span class="tag tag-default" style="font-size:8px">Launch Systems <span style="opacity:.6;margin-left:2px">1,380</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Propulsion #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Launch Systems #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
-            <span class="tag tag-default" style="font-size:8px">Ghana Space Society</span>
-          </div>
-        </div>
 
-        <!-- Member: Namugga C. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Namugga Claire','Space medicine researcher exploring bioastronautics for long-duration missions.','Entebbe','Jan 2025','NC')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">NC</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Namugga C.</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Entebbe · Joined Jan 2025</div>
-            </div>
+          <!-- Mwenda T. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Mwenda Thomas','Remote sensing specialist with focus on East African agricultural monitoring.','Kampala','May 2025','MT')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px">MT</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">Mwenda T.</div><div style="font-size:10px;color:var(--text-tertiary)">Kampala</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-green" style="font-size:7px">Remote Sensing 1,200</span><span class="tag tag-blue" style="font-size:7px">Events 890</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Remote Sensing #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-green" style="font-size:7px">Remote Sensing Circle</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-purple" style="font-size:8px">Publications <span style="opacity:.6;margin-left:2px">1,400</span></span>
-            <span class="tag tag-amber" style="font-size:8px">Space Medicine <span style="opacity:.6;margin-left:2px">1,050</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Publications #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Space Medicine #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
-            <span class="tag tag-purple" style="font-size:8px">Space Law Circle</span>
-          </div>
-        </div>
 
-        <!-- Member: Mwenda T. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Mwenda Thomas','Remote sensing specialist with focus on East African agricultural monitoring.','Kampala','May 2025','MT')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md">MT</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Mwenda T.</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined May 2025</div>
-            </div>
+          <!-- Kimani A. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Kimani Aisha','Science communicator bridging space research and public understanding across East Africa.','Nairobi','Mar 2025','KA')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px">KA</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">Kimani A.</div><div style="font-size:10px;color:var(--text-tertiary)">Nairobi</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-green" style="font-size:7px">Education 1,100</span><span class="tag tag-amber" style="font-size:7px">Communications 980</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Education #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">SGAC</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">1,200</span></span>
-            <span class="tag tag-blue" style="font-size:8px">Events <span style="opacity:.6;margin-left:2px">890</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Remote Sensing #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Events #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
-            <span class="tag tag-green" style="font-size:8px">Remote Sensing Circle</span>
-          </div>
-        </div>
 
-        <!-- Member: Kimani A. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Kimani Aisha','Science communicator bridging space research and public understanding across East Africa.','Nairobi','Mar 2025','KA')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md">KA</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Kimani A.</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Nairobi · Joined Mar 2025</div>
-            </div>
+          <!-- Ssempa D. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Ssempa David','Policy analyst working on national space legislation for Uganda.','Kampala','Apr 2025','SD')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px;background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:10px;color:var(--text-tertiary)">Kampala</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Space Law 900</span><span class="tag tag-blue" style="font-size:7px">Policy 760</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Space Law #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">UAS</span><span class="tag tag-default" style="font-size:7px">SGAC</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-green" style="font-size:8px">Education <span style="opacity:.6;margin-left:2px">1,100</span></span>
-            <span class="tag tag-amber" style="font-size:8px">Communications <span style="opacity:.6;margin-left:2px">980</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Education #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Communications #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
-            <span class="tag tag-default" style="font-size:8px">Space Generation Advisory Council</span>
-          </div>
-        </div>
 
-        <!-- Member: Ssempa D. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Ssempa David','Policy analyst working on national space legislation for Uganda.','Kampala','Apr 2025','SD')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Apr 2025</div>
-            </div>
+          <!-- Oumo S. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Oumo Samuel','Founder of Solis. Space law and remote sensing, building the African space commons.','Kampala','Sep 2024','OS')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-gold avatar-md" style="width:32px;height:32px;font-size:11px">OS</div><div style="flex:1;min-width:0"><div class="flex items-center gap-1"><span style="font-size:13px;font-weight:500;color:var(--text)">Oumo S.</span><span class="badge" style="background:var(--gold-soft);color:var(--gold);font-size:7px">Founder</span></div><div style="font-size:10px;color:var(--text-tertiary)">Kampala</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Space Law 1,200</span><span class="tag tag-green" style="font-size:7px">Remote Sensing 847</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Space Law #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-purple" style="font-size:7px">Space Law Circle</span><span class="tag tag-green" style="font-size:7px">RS Circle</span></div>
           </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">900</span></span>
-            <span class="tag tag-blue" style="font-size:8px">Policy <span style="opacity:.6;margin-left:2px">760</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Policy #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
-            <span class="tag tag-default" style="font-size:8px">Uganda Astronomical Society</span>
-            <span class="tag tag-default" style="font-size:8px">SGAC</span>
-          </div>
-        </div>
 
-        <!-- Member: Oumo S. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Oumo Samuel','Founder of Solis. Space law and remote sensing, building the African space commons.','Kampala','Sep 2024','OS')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-gold avatar-md">OS</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Oumo S.</span><span class="badge" style="background:var(--gold-soft);color:var(--gold);font-size:8px">Founder</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Sep 2024</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-purple" style="font-size:8px">Space Law <span style="opacity:.6;margin-left:2px">1,200</span></span>
-            <span class="tag tag-green" style="font-size:8px">Remote Sensing <span style="opacity:.6;margin-left:2px">847</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Space Law #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Remote Sensing #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Circles:</span>
-            <span class="tag tag-purple" style="font-size:8px">Space Law Circle</span>
-            <span class="tag tag-green" style="font-size:8px">Remote Sensing Circle</span>
-          </div>
-        </div>
-
-        <!-- Member: Diallo M. -->
-        <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="openParticipantModal('Diallo Mamadou','Space finance specialist advising on investment frameworks for African space ventures.','Dakar','Jul 2025','DM')">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="avatar avatar-md">DM</div>
-            <div style="flex:1;min-width:0">
-              <div class="flex items-center gap-2"><span style="font-size:14px;font-weight:500;color:var(--text)">Diallo M.</span></div>
-              <div style="font-size:11px;color:var(--text-tertiary)">Dakar · Joined Jul 2025</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span class="tag tag-amber" style="font-size:8px">Space Finance <span style="opacity:.6;margin-left:2px">800</span></span>
-            <span class="tag tag-green" style="font-size:8px">Entrepreneurship <span style="opacity:.6;margin-left:2px">720</span></span>
-          </div>
-          <div class="flex items-center gap-1 mb-2" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Interests:</span>
-            <span class="tag tag-amber" style="font-size:8px">Space Finance #1</span>
-            <span class="tag tag-amber" style="font-size:8px">Entrepreneurship #2</span>
-          </div>
-          <div class="flex items-center gap-1" style="flex-wrap:wrap">
-            <span style="font-size:9px;color:var(--text-tertiary);margin-right:2px">Affiliations:</span>
-            <span class="tag tag-default" style="font-size:8px">Senegal Space Agency</span>
+          <!-- Diallo M. -->
+          <div class="card" style="cursor:pointer" onclick="openParticipantModal('Diallo Mamadou','Space finance specialist advising on investment frameworks for African space ventures.','Dakar','Jul 2025','DM')">
+            <div class="flex items-center gap-2 mb-2"><div class="avatar avatar-md" style="width:32px;height:32px;font-size:11px">DM</div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:var(--text)">Diallo M.</div><div style="font-size:10px;color:var(--text-tertiary)">Dakar</div></div></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Space Finance 800</span><span class="tag tag-green" style="font-size:7px">Entrepreneurship 720</span></div>
+            <div class="flex items-center gap-1 mb-1" style="flex-wrap:wrap"><span class="tag tag-amber" style="font-size:7px">Space Finance #1</span></div>
+            <div class="flex items-center gap-1" style="flex-wrap:wrap"><span class="tag tag-default" style="font-size:7px">Senegal Space Agency</span></div>
           </div>
         </div>
       </div>
