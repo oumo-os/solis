@@ -1,0 +1,235 @@
+# Solis STF Specifications — Detailed Reference
+
+## 1. Motion Types
+
+Three distinct motion types, each requiring different handling:
+
+### sys_bound (System-Bound)
+- **What**: Parameter changes executed automatically by the Integrity Engine
+- **Example**: Adjusting Ws decay rates, modifying domain weights, updating standing thresholds
+- **Implementation**: The system executes the change directly — no human implementation needed
+- **Filing**: Motion specifies the parameter change; system enforces it
+
+### non_system (Non-System / Directive)
+- **What**: Directive to named implementing Circles — requires human execution
+- **Example**: "Space Law Circle shall publish a debris liability framework guide by Q3"
+- **Implementation**: Named Circle(s) must execute. Filing without naming implementing Circles returns 422 error
+- **Key rule**: A directive with no named responsible body is rejected at the API layer
+- **Gate 2**: Interpretive — the implementing Circle interprets how to fulfil the directive
+
+### hybrid (Both)
+- **What**: Combines system-bound parameter change AND human directive
+- **Example**: "Adjust domain weight for Space Law + Space Law Circle shall publish updated guidelines"
+- **Implementation**: System executes the parameter change; named Circle(s) execute the directive
+
+### Why This Taxonomy Exists
+- A software system needs to know which decisions it enforces automatically vs. which require human execution
+- The paper's model assumes Circles implement faithfully; this taxonomy makes the distinction explicit
+- The `implementing_circle_ids` requirement operationalises accountability: "the decision-makers are also the implementers"
+
+---
+
+## 2. vSTF Assessment of Steward
+
+### Purpose
+Evaluate whether a candidate is suitable for stewardship in a specific Circle.
+
+### Trigger
+Candidate x has been fronted for stewardship in Circle y.
+
+### Context Provided to Assessor
+- **Circle y's mandate**: Associated with dominion over:
+  - Knowledge domains (e.g., Space Law, Remote Sensing)
+  - Experiential domains (e.g., Debris Tracking, Policy Analysis)
+  - Affiliation domains/orgs (e.g., Uganda Astronomical Society)
+- **Auto-match data**: Intersection of candidate's Ws|Wh vs Circle requirement
+- **Assessor task**: Further investigation on candidate AND circle
+
+### Verdict
+Scale your approval of candidate as a steward of the above:
+
+```
+Disapprove [------------------------------------------] Approve
+           0                                            100
+```
+
+### Output
+- Approval score (0–100)
+- Rationale/justification
+- Filed to ledger (reviewer attribution sealed)
+
+---
+
+## 3. vSTF Assessment of Competence
+
+### Purpose
+Evaluate and adjust a member's self-declared competence claims.
+
+### Trigger
+Member x has submitted new competence claims.
+
+### Assessor Task
+1. Investigate, evaluate, and assess whether claims are acceptable
+2. Adjust where you think necessary
+3. Mark evaluated claims
+4. Adjust the rest or leave as-is based on your judgment
+
+### Assessment Interface
+For each claimed domain:
+
+| Domain | Claimed Wh | Adjusted Wh | Evaluated | Notes |
+|--------|-----------|-------------|-----------|-------|
+| Space Law | 1,200 | [slider/input] | ☑ | |
+| Remote Sensing | 800 | [slider/input] | ☑ | |
+| Policy | 400 | — | ☐ | Insufficient evidence |
+
+### Evaluation Options
+- **Slider**: Drag to adjust Wh value
+- **Direct input**: Enter exact number
+- **Leave unmarked**: With reason:
+  - Insufficient evidence
+  - Insufficient claims
+  - Omitted while evaluating
+  - Unable to effectively evaluate the specific domain
+  - Any other sufficient reason
+
+### Comments
+Free-text evaluation comments at the bottom.
+
+### Aggregation
+Your evaluation will be collectively aggregated against other evaluators to derive the final competence weights.
+
+---
+
+## 4. aSTF Structured Rubric (Motion aSTF)
+
+### Purpose
+Guide reviewers toward their verdict on a motion using a four-dimension scoring instrument.
+
+### Dimensions (30 points total)
+
+| Dimension | Max | Measures |
+|-----------|-----|----------|
+| **Jurisdiction** | 9 | Does the Circle have mandate authority here? |
+| **Depth/Effort** | 5 | Was deliberation substantive? |
+| **Alignment/Conflict** | 10 | Does the decision advance org tenets? Undisclosed conflicts? |
+| **Competence** | 6 | Were the right people in the deliberation? |
+| **Total** | **30** | |
+
+### Weighting Rationale
+- **Alignment/Conflict (10)**: Heaviest — core PAAS legitimacy check. A Circle acting within mandate but advancing faction interests is more serious than thin deliberation.
+- **Jurisdiction (9)**: Heavy — out-of-mandate action is structural, not correctable by more effort.
+- **Depth/Effort (5)**: Lighter — can be addressed through more deliberation.
+- **Competence (6)**: Lightest — composition gaps can be addressed through the Inferential Engine's gap-filling.
+
+### Key Principle
+The rubric **guides, it does not decide**. Reviewers see a running total as they score, but the verdict (Approve/Revision Request/Reject) is explicitly filed as a separate judgment. Scores are published evidence; the verdict is human determination.
+
+**Mechanising the verdict from the score would undermine the purpose of independent human audit.**
+
+### Malpractice Flagging
+- Motion aSTF reviewers can flag specific deliberation participants for jSTF pre-referral alongside any verdict
+- Even an Approve verdict can include flags — the motion can be sound while a participant's behaviour was not
+- Flag creates a `jstf_pre_referral` ledger event
+- The Judicial Circle decides whether to commission a full investigation
+
+### Verdict Options
+- **Approve**: Motion passes as Resolution
+- **Revision Request**: Motion returned to deliberation cell with specific revision notes
+- **Reject**: Motion rejected with explanation
+
+---
+
+## 5. Periodic aSTF (p-aSTF) — Circle Health Review
+
+### Purpose
+Two-layer periodic review assessing Circle health at both the collective and individual level.
+
+### Layer 1: Circle Rubric (All Reviewers, 30 pts)
+
+Based entirely on **publicly observable information** — the Circle profile page, Commons activity, motion and resolution record. No access to internal deliberations required.
+
+| Dimension | Max | Measures |
+|-----------|-----|----------|
+| **Activity** | 6 | Is the Circle visibly active in governance? |
+| **Competence Fit** | 7 | Does actual member Ws match mandate domains? |
+| **Discipline** | 6 | Does it stay within its mandate? |
+| **Cohesion** | 5 | Does it act as a collective or as isolated individuals? |
+| **Delivery** | 6 | Does it follow through — enacted resolutions, Gate 2 pass rate? |
+| **Total** | **30** | |
+
+**Competence Fit** is pre-computed by the Inferential Engine (percentage of mandate domains with Ws ≥ 800 among Circle members) and surfaced as a data point. The reviewer translates the number into a score — the data informs but does not replace the judgment.
+
+### Layer 2: Member Rubric (Assigned Reviewers Only, 35 pts health + 2 risk flags)
+
+Filed only for the reviewer's **assigned members** (1–3 per reviewer). Reviewers have access to assigned members' public governance records AND their deliberation contributions within the Circle.
+
+| Dimension | Max | Measures |
+|-----------|-----|----------|
+| **Effectiveness** | 5 | Responsive to matters that concern the Circle |
+| **Stewardship** | 7 | Projects the org's vision in their work |
+| **Participation** | 5 | Present and active |
+| **Investment** | 8 | Genuine skin in the game vs. seat-filling |
+| **Productivity** | 6 | Adds unique value |
+| **Role Fit** | 4 | Understands what the Circle requires of them |
+| **Health subtotal** | **35** | |
+
+**Weighting rationale:**
+- **Investment (8)**: Heaviest — strongest single predictor of governance quality
+- **Stewardship (7)**: Second — carrying the org's vision is the central PAAS accountability principle
+- **Role Fit (4)**: Lightest — role understanding can develop; not grounds for serious concern on its own
+
+### Risk Flags (Separate from health score, not additive)
+
+| Flag | Range | Trigger | Action |
+|------|-------|---------|--------|
+| **Replaceability** | 0–5 | Score > 3 | Knowledge-transfer mandate — structural risk signal, not quality judgment |
+| **Indispensable** | 0–5 | Score > 3 | jSTF pre-referral consideration — the anti-capture signal |
+
+### Bipartite Reviewer Assignment
+
+- p-aSTF pool assembled using independence-weighted candidate scoring (same as motion aSTF)
+- Each reviewer is assigned **1–3 Circle members** (never all)
+- Each member receives assessments from **2–3 independent reviewers**
+- Reviewer sees only their assigned members' data — not the full Circle roster, not other reviewers' scores
+
+**Design rationale**: Limits each reviewer's exposure to Circle's internal affairs while ensuring sufficient independent coverage. Reflects PAAS principle of maximum participation: many reviewers each doing a bounded task rather than a small set doing exhaustive work.
+
+### Health Tier
+
+Each reviewer files one of three health tiers alongside their rubric:
+
+| Tier | Meaning |
+|------|---------|
+| **Healthy** | Circle is functioning well |
+| **Watch** | Minor concerns, monitor |
+| **Concern** | Serious issues, action needed |
+
+The Integrity Engine **majority-votes** the final tier. The tier is the reviewer's judgment; the rubric scores are the published evidence.
+
+### Reviewer Availability
+
+- Members can declare **standing availability** for review work
+- Distinct from Curiosity (topical interest) — this is availability for the audit role specifically
+- The Inferential Engine uses it to build review pools on demand
+- Reviews happen continuously on each Circle's individual schedule (anchored to founding date, event-triggered on anomaly flags)
+- **No global audit calendar** — no term-based politics
+
+### Ledger Publication
+
+All scores, verdicts, and health tiers are published to the open ledger after review completes:
+- **Reviewer attribution is permanently sealed** — who scored whom is never disclosed
+- Every org member can see aggregate scores for every Circle and every member
+- **Transparency is maximal; retaliation surface is eliminated**
+
+### Unit of Assessment
+
+- **Individual member** is the unit of assessment
+- **Aggregate** is the Circle
+- A Circle with 7 members produces:
+  - 7 member rubric assessments (each from 2–3 reviewers)
+  - 1 circle rubric assessment (from all reviewers)
+- Circle health score = aggregate of member-level + Circle-level — NOT the reverse
+- A Circle with one member pulling the score down is distinguishable from uniformly mediocre Circle
+
+**Why**: PAAS replaces positional authority with individual demonstrated competence. A Circle health score that doesn't trace to individual members makes accountability diffuse. The member-level breakdown is the substantive finding; the aggregate exists for convenience.

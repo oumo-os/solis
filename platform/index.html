@@ -544,7 +544,7 @@
             <div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--purple)">Circle Cell</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--text)">Motion</span></div>
             <div style="margin-bottom:6px"><span style="color:var(--text)">Motion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">aSTF</span> <span style="color:var(--text-tertiary)">(blind) → Verdict</span></div>
             <div style="margin-bottom:6px"><span style="color:var(--green)">Resolution</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--blue)">xSTF</span> <span style="color:var(--text-tertiary)">(blind) → Deliverable</span></div>
-            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Projects have their own cells. Periodic review aSTFs audit circle health.</div>
+            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Projects have their own cells. Periodic review aSTFs (p-aSTF) audit circle health + individual member performance.</div>
           </div>
         </div>
         <div class="aside-card">
@@ -638,6 +638,13 @@
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
+        <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Motion Type</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Select how this motion will be implemented:</div>
+        <div class="flex gap-2 mb-3">
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="non_system" checked> <span><strong>Directive</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Circle(s) implement</span></span></label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="sys_bound"> <span><strong>System</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Auto-executed</span></span></label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)"><input type="radio" name="motion-type" value="hybrid"> <span><strong>Hybrid</strong><br><span style="font-size:9px;color:var(--text-tertiary)">Both</span></span></label>
+        </div>
         <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion? It will be sent to aSTF for blind adjudication.',function(){})">Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
       </div>
     </div>
@@ -661,7 +668,7 @@
           <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
           <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
           <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Motion adjudication: Debris liability framework</td><td>Space Law</td><td class="m">Jul 28</td><td><span class="badge b-active">Active</span></td></tr>
-          <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Periodic review: Space Law Circle health</td><td>Commons</td><td class="m">Aug 05</td><td><span class="badge b-pending">Selecting</span></td></tr>
+          <tr class="click" onclick="nav('stf-pastf')"><td><span class="tag tag-blue" style="font-size:8px">p-aSTF</span></td><td class="s">Periodic review: Space Law Circle health</td><td>Commons</td><td class="m">Aug 05</td><td><span class="badge b-pending">Selecting</span></td></tr>
           <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
           <tr class="click" onclick="nav('stf-xstf')"><td><span class="tag tag-green" style="font-size:8px">xSTF</span></td><td class="s">Execution: ITU coordination guide deliverable</td><td>Space Law</td><td class="m">Aug 15</td><td><span class="badge b-active">Active</span></td></tr>
         </table>
@@ -678,7 +685,8 @@
         <div class="aside-card">
           <div class="aside-title">STF Types</div>
           <div class="aside-row"><span class="aside-label" style="background:var(--purple-soft);color:var(--purple)">vSTF</span><span style="font-size:11px;color:var(--text)">Credential verification</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">aSTF</span><span style="font-size:11px;color:var(--text)">Motion adjudication / Periodic review</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">aSTF</span><span style="font-size:11px;color:var(--text)">Motion adjudication</span></div>
+          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">p-aSTF</span><span style="font-size:11px;color:var(--text)">Periodic circle health review</span></div>
           <div class="aside-row"><span class="aside-label" style="background:var(--red-soft);color:var(--red)">jSTF</span><span style="font-size:11px;color:var(--text)">Judicial investigation</span></div>
           <div class="aside-row"><span class="aside-label" style="background:var(--green-soft);color:var(--green)">xSTF</span><span style="font-size:11px;color:var(--text)">Execution / Deliverable production</span></div>
         </div>
@@ -695,28 +703,110 @@
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="stf-vstf-wrap">
       <div class="room-header">
-        <div class="room-type-label">◆ vSTF — Credential Verification Office</div>
-        <div class="room-title">W<sub>h</sub> Verification: 3 Candidates — Policy & Advocacy</div>
+        <div class="room-type-label">◆ vSTF — Verification Office</div>
+        <div class="room-title">2 Assessment Assignments</div>
         <div class="room-meta">Space Law Circle · Blind parallel assessment · Due Jul 19, 2026</div>
       </div>
       <div class="room-body">
         <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text">Forensic credential review. You have been assigned the submitted evidence packages for three candidates. Review each item independently. Provide your adjusted W<sub>h</sub> assessment with supporting rationale. Your assessment is sealed until all assessors have filed.</div></div>
+
+        <!-- ASSESSMENT 1: Steward Assessment -->
+        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Assessment 1 — Steward Candidacy</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text">Candidate <strong>Ssempa D.</strong> has been fronted for stewardship in the <strong>Space Law Circle</strong>. The Circle's mandate covers dominion over Knowledge domains (Space Law & Policy, Telecommunications), Experiential domains (Debris Tracking, Regulatory Compliance), and Affiliation (Uganda Astronomical Society, Space Generation Advisory Council). Your auto-match analysis shows the candidate's Ws intersection with Circle requirements. You are expected to do further investigation on the candidate and the Circle before filing your verdict.</div></div>
+
+        <div class="g2" style="margin-bottom:20px">
+          <div>
+            <div class="sec">Candidate Profile</div>
+            <div class="card" style="margin-bottom:0">
+              <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
+              <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
+              <table class="tbl" style="margin-bottom:12px">
+                <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
+                <tr><td>Space Law & Policy</td><td class="m">≥ 800</td><td class="m">900</td><td style="color:var(--green)">✓ Pass</td></tr>
+                <tr><td>Telecommunications</td><td class="m">≥ 800</td><td class="m">320</td><td style="color:var(--red)">✗ Gap</td></tr>
+                <tr><td>Debris Tracking</td><td class="m">≥ 600</td><td class="m">760</td><td style="color:var(--green)">✓ Pass</td></tr>
+                <tr><td>Regulatory Compliance</td><td class="m">≥ 600</td><td class="m">640</td><td style="color:var(--green)">✓ Pass</td></tr>
+              </table>
+              <div class="text-label mb-1">Affiliations</div>
+              <div class="flex gap-2"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="sec">Your Approval Verdict</div>
+            <div class="card" style="margin-bottom:0">
+              <div class="text-label mb-2">Disapprove ← → Approve</div>
+              <div style="position:relative;margin-bottom:16px">
+                <div style="height:6px;background:var(--border-subtle);border-radius:3px;position:relative">
+                  <div style="position:absolute;left:0;top:0;height:100%;width:72%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px"></div>
+                  <div style="position:absolute;left:72%;top:-5px;width:16px;height:16px;background:var(--green);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(-50%)"></div>
+                </div>
+                <div class="flex justify-between" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+              </div>
+              <div class="flex gap-2 mb-3"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Score:</span><input type="number" value="72" min="0" max="100" class="form-input" style="width:60px;padding:3px 6px;font-family:var(--mono);font-size:12px"></div>
+              <div class="text-label mb-2">Rationale</div>
+              <textarea placeholder="Justify your approval score..." class="form-input" style="height:70px;resize:none"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <!-- ASSESSMENT 2: Competence Assessment -->
+        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Assessment 2 — Competence Claims</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text"><strong>Akello J.</strong> has submitted new competence claims. Your task: investigate, evaluate, and assess whether their claims are acceptable. Adjust where you think necessary. Mark evaluated claims, adjust the rest or leave as is. You may leave non-evaluated claims unmarked and state the reason (insufficient evidence, insufficient claims, omitted while evaluating, unable to effectively evaluate, or any sufficient reason). Your evaluation will be collectively aggregated against other evaluators to derive final competence weights.</div></div>
+
         <div class="sec">Evidence Package</div>
-        <div class="evidence-shelf">
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate A — Policy Analysis Certificate</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate B — Advocacy Workshop Certificate</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Candidate C — Published Policy Brief</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
+        <div class="evidence-shelf" style="margin-bottom:16px">
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
         </div>
-        <div class="sec">Your W<sub>h</sub> Assessment</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="text-label mb-2">Current claimed W<sub>h</sub></div>
-          <div style="font-family:var(--serif);font-size:28px;color:var(--text);font-weight:600;margin-bottom:12px">1,200</div>
-          <div class="text-label mb-2">Your adjusted assessment</div>
-          <input type="number" value="1200" class="form-input" style="font-family:var(--mono);font-size:14px;margin-bottom:10px">
-          <textarea placeholder="Rationale for your assessment..." class="form-input" style="height:70px;resize:none"></textarea>
-        </div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this assessment? It will be submitted to the Meta-aSTF for review.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+
+        <div class="sec">Wh Assessment Table</div>
+        <table class="tbl" style="margin-bottom:16px">
+          <tr><th>Domain</th><th>Claimed Wh</th><th>Adjusted Wh</th><th>Evaluated</th><th>Reason (if unmarked)</th></tr>
+          <tr>
+            <td>Space Law & Policy</td>
+            <td class="m">1,800</td>
+            <td><input type="number" value="1600" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
+            <td><input type="checkbox" checked></td>
+            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
+          </tr>
+          <tr>
+            <td>Remote Sensing</td>
+            <td class="m">1,200</td>
+            <td><input type="number" value="1200" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
+            <td><input type="checkbox" checked></td>
+            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
+          </tr>
+          <tr>
+            <td>Policy & Advocacy</td>
+            <td class="m">640</td>
+            <td><input type="number" value="640" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
+            <td><input type="checkbox" checked></td>
+            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
+          </tr>
+          <tr>
+            <td>Telecommunications</td>
+            <td class="m">400</td>
+            <td style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">—</td>
+            <td><input type="checkbox"></td>
+            <td style="font-size:10px;color:var(--red)">Insufficient evidence</td>
+          </tr>
+          <tr>
+            <td>Physics</td>
+            <td class="m">300</td>
+            <td style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">—</td>
+            <td><input type="checkbox"></td>
+            <td style="font-size:10px;color:var(--text-tertiary)">Unable to evaluate — outside expertise</td>
+          </tr>
+        </table>
+
+        <div class="sec">Evaluation Comments</div>
+        <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
+
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File both assessments? They will be sealed until all assessors have filed.',function(){})">File Assessments</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
     </div>
   </div>
@@ -788,13 +878,35 @@
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Mandated domain: Space Law & Policy</div></div><span class="badge b-review">Sponsor</span></div>
         <div class="sec" style="margin-top:16px">Your Adjudication</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="text-label mb-2">Decision</div>
+          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">4-Dimension Rubric (30 pts max)</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
+          <table class="tbl" style="margin-bottom:12px">
+            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
+            <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
+            <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
+            <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
+            <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
+          </table>
+          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
+            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">25 / 30</span>
+          </div>
+
+          <div class="divider" style="margin:12px 0"></div>
+          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Verdict</div>
           <div class="flex gap-2 mb-3">
-            <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Approve (Resolution)</button>
-            <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm')">Reject</button>
+            <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
+            <button class="btn btn-sm" id="astf-revision" onclick="document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
+            <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
           </div>
           <div class="text-label mb-2">Rationale</div>
           <textarea placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none"></textarea>
+
+          <div class="divider" style="margin:12px 0"></div>
+          <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Malpractice Flagging (optional)</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
         </div>
         <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
@@ -845,6 +957,117 @@
           <div class="divider" style="margin:var(--space-3) 0"></div>
           <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ p-aSTF: Periodic Circle Health Review ═══ -->
+  <div class="view" id="view-stf-pastf">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="stf-astf-wrap">
+      <div class="room-header">
+        <div class="room-type-label" style="color:var(--blue)">◆ p-aSTF — Periodic Circle Health Review</div>
+        <div class="room-title">Space Law Circle — Health Audit</div>
+        <div class="room-meta">Assigned members: Akello J., Ssempa D. · Due Aug 05, 2026</div>
+      </div>
+      <div class="room-body">
+        <div class="blind-wall">🔒 &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
+        <div class="room-env"><div class="room-env-label" style="color:var(--blue)">Room Environment</div><div class="room-env-text">Periodic Circle health review. You have been assigned 2 of the Circle's members for individual assessment. You also file a Circle-level rubric based on publicly observable information. Your scores and health tier are published; your attribution is permanently sealed.</div></div>
+
+        <!-- Layer 1: Circle Rubric -->
+        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 1 — Circle Rubric (30 pts)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Based on publicly observable information. No access to internal deliberations required.</div>
+        <table class="tbl" style="margin-bottom:16px">
+          <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
+          <tr><td style="font-weight:500">Activity</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Is the Circle visibly active in governance?</td></tr>
+          <tr><td style="font-weight:500">Competence Fit</td><td class="m">7</td><td><input type="number" value="6" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does actual member Ws match mandate domains? <span style="color:var(--gold)">Pre-computed: 78%</span></td></tr>
+          <tr><td style="font-weight:500">Discipline</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it stay within its mandate?</td></tr>
+          <tr><td style="font-weight:500">Cohesion</td><td class="m">5</td><td><input type="number" value="3" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it act as a collective or as isolated individuals?</td></tr>
+          <tr><td style="font-weight:500">Delivery</td><td class="m">6</td><td><input type="number" value="4" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it follow through — enacted resolutions, Gate 2 pass rate?</td></tr>
+        </table>
+        <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
+          <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Circle Total</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">23 / 30</span>
+        </div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <!-- Layer 2: Member Rubric -->
+        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 2 — Member Rubric (35 pts + 2 risk flags)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Filed only for your assigned members. You see their public governance records AND their deliberation contributions within the Circle.</div>
+
+        <!-- Member 1 -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md">AJ</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Circle · Steward · Joined Jan 2026</div></div></div>
+          <table class="tbl" style="margin-bottom:12px">
+            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
+            <tr><td style="font-weight:500">Effectiveness</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Responsive to matters that concern the Circle</td></tr>
+            <tr><td style="font-weight:500">Stewardship</td><td class="m">7</td><td><input type="number" value="6" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Projects the org's vision in their work</td></tr>
+            <tr><td style="font-weight:500">Participation</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Present and active</td></tr>
+            <tr><td style="font-weight:500">Investment</td><td class="m">8</td><td><input type="number" value="7" min="0" max="8" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Genuine skin in the game vs. seat-filling</td></tr>
+            <tr><td style="font-weight:500">Productivity</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Adds unique value</td></tr>
+            <tr><td style="font-weight:500">Role Fit</td><td class="m">4</td><td><input type="number" value="3" min="0" max="4" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Understands what the Circle requires of them</td></tr>
+          </table>
+          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Health Subtotal</span>
+            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">29 / 35</span>
+          </div>
+          <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Risk Flags</div>
+          <div class="g2" style="margin-bottom:0">
+            <div>
+              <div class="text-label mb-1">Replaceability (0–5)</div>
+              <div class="flex items-center gap-2"><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer mandate</span></div>
+            </div>
+            <div>
+              <div class="text-label mb-1">Indispensable (0–5)</div>
+              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers jSTF pre-referral</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member 2 -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Circle · Member · Joined Mar 2026</div></div></div>
+          <table class="tbl" style="margin-bottom:12px">
+            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
+            <tr><td style="font-weight:500">Effectiveness</td><td class="m">5</td><td><input type="number" value="3" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Responsive to matters that concern the Circle</td></tr>
+            <tr><td style="font-weight:500">Stewardship</td><td class="m">7</td><td><input type="number" value="4" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Projects the org's vision in their work</td></tr>
+            <tr><td style="font-weight:500">Participation</td><td class="m">5</td><td><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Present and active</td></tr>
+            <tr><td style="font-weight:500">Investment</td><td class="m">8</td><td><input type="number" value="3" min="0" max="8" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Genuine skin in the game vs. seat-filling</td></tr>
+            <tr><td style="font-weight:500">Productivity</td><td class="m">6</td><td><input type="number" value="3" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Adds unique value</td></tr>
+            <tr><td style="font-weight:500">Role Fit</td><td class="m">4</td><td><input type="number" value="2" min="0" max="4" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Understands what the Circle requires of them</td></tr>
+          </table>
+          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
+            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Health Subtotal</span>
+            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--gold)">17 / 35</span>
+          </div>
+          <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Risk Flags</div>
+          <div class="g2" style="margin-bottom:0">
+            <div>
+              <div class="text-label mb-1">Replaceability (0–5)</div>
+              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer mandate</span></div>
+            </div>
+            <div>
+              <div class="text-label mb-1">Indispensable (0–5)</div>
+              <div class="flex items-center gap-2"><input type="number" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers jSTF pre-referral</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="divider" style="margin:20px 0"></div>
+
+        <!-- Health Tier -->
+        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Health Tier Verdict</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">The Integrity Engine majority-votes the final tier from all reviewers. Your tier is your judgment; the rubric scores are published evidence.</div>
+        <div class="flex gap-2 mb-4">
+          <button class="btn btn-sm" id="pastf-healthy" onclick="document.getElementById('pastf-healthy').classList.add('btn-sm');document.getElementById('pastf-healthy').style.background='var(--green-soft)';document.getElementById('pastf-healthy').style.color='var(--green)';document.getElementById('pastf-watch').classList.remove('btn-sm');document.getElementById('pastf-concern').classList.remove('btn-sm')">Healthy</button>
+          <button class="btn btn-sm" id="pastf-watch" onclick="document.getElementById('pastf-watch').classList.add('btn-sm');document.getElementById('pastf-watch').style.background='var(--gold-soft)';document.getElementById('pastf-watch').style.color='var(--gold)';document.getElementById('pastf-healthy').classList.remove('btn-sm');document.getElementById('pastf-concern').classList.remove('btn-sm')">Watch</button>
+          <button class="btn btn-sm" id="pastf-concern" onclick="document.getElementById('pastf-concern').classList.add('btn-sm');document.getElementById('pastf-concern').style.background='var(--red-soft)';document.getElementById('pastf-concern').style.color='var(--red)';document.getElementById('pastf-healthy').classList.remove('btn-sm');document.getElementById('pastf-watch').classList.remove('btn-sm')">Concern</button>
+        </div>
+
+        <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Review Notes</div>
+        <textarea placeholder="Additional observations about the Circle and assigned members..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your p-aSTF review? Scores and tier will be published; your attribution is permanently sealed.',function(){})">Submit Review</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
       </div>
     </div>
   </div>
@@ -1546,6 +1769,7 @@ var views = {
   'stf-astf':       ['STF Dash', 'aSTF — Adjudication'],
   'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
   'stf-xstf':       ['STF Dash', 'xSTF — Execution'],
+  'stf-pastf':      ['STF Dash', 'p-aSTF — Circle Health'],
   participants:     ['Participants'],
   profile:          ['Profile'],
   'thread-detail':  ['Discussions', 'Thread'],
@@ -1559,7 +1783,7 @@ var navMap = {
   observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'publication-detail':'observatory',
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
-  stf:'stf', 'stf-vstf':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf',
+  stf:'stf', 'stf-vstf':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
   participants:'participants', profile:'profile',
   'domain-map':'domain-map'
 };

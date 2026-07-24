@@ -182,7 +182,7 @@ report: string|null      // Written report
 ### STF (Special Task Force)
 ```
 id: string
-type: "vSTF" | "aSTF" | "xSTF" | "jSTF"
+type: "vSTF" | "aSTF" | "xSTF" | "jSTF" | "p-aSTF"
 domain_id: string
 commissioned_by: string  // Steward circle ID or participant (jSTF)
 reason: string
@@ -199,6 +199,114 @@ confirmed: boolean       // True when members know each other
 // Output
 verdict: string|null     // jSTF verdict or xSTF deliverable
 report: string|null      // Written report
+```
+
+### Motion
+```
+id: string
+title: string
+body: string
+proposer_id: string
+circle_id: string        // Commissioning circle
+domain_id: string
+type: "sys_bound" | "non_system" | "hybrid"
+
+// sys_bound: parameter change executed by Integrity Engine
+// non_system: directive to named implementing Circles (requires implementing_circle_ids)
+// hybrid: both system-bound + directive
+
+implementing_circle_ids: string[]  // Required for non_system/hybrid, rejected (422) if empty
+status: "deliberating" | "crystallised" | "adjudicating" | "resolved" | "rejected" | "revising"
+created_at: date
+crystallised_at: date|null
+adjudicated_at: date|null
+
+// For non_system/hybrid
+deadline: date|null
+delivery_status: string|null  // Track implementing circle progress
+
+// Link back
+cell_id: string          // Deliberation cell that produced this motion
+astf_id: string|null     // aSTF that adjudicated this motion
+resolution_id: string|null // If resolved, the resolution ID
+```
+
+### aSTF Rubric (Motion Adjudication)
+```
+// 30-point structured rubric
+jurisdiction: number     // 0-9: Does the Circle have mandate authority?
+depth_effort: number     // 0-5: Was deliberation substantive?
+alignment_conflict: number // 0-10: Does decision advance org tenets? Undisclosed conflicts?
+competence: number       // 0-6: Were the right people in the deliberation?
+total: number            // Sum (max 30)
+
+verdict: "approve" | "revision_request" | "reject"
+malpractice_flags: string[]  // Participant IDs flagged for jSTF pre-referral
+rationale: string
+```
+
+### p-aSTF Rubric (Periodic Circle Health Review)
+```
+// Layer 1: Circle rubric (all reviewers, 30 pts)
+circle_activity: number      // 0-6
+circle_competence_fit: number // 0-7 (pre-computed by Inferential Engine)
+circle_discipline: number    // 0-6
+circle_cohesion: number      // 0-5
+circle_delivery: number      // 0-6
+circle_total: number         // Sum (max 30)
+
+// Layer 2: Member rubric (assigned reviewers, 35 pts + 2 risk flags)
+member_effectiveness: number   // 0-5
+member_stewardship: number     // 0-7
+member_participation: number   // 0-5
+member_investment: number      // 0-8
+member_productivity: number    // 0-6
+member_role_fit: number        // 0-4
+member_health_total: number    // Sum (max 35)
+
+// Risk flags (separate, not additive)
+replaceability: number    // 0-5, >3 triggers knowledge-transfer mandate
+indispensable: number     // 0-5, >3 triggers jSTF pre-referral consideration
+
+health_tier: "healthy" | "watch" | "concern"
+```
+
+### vSTF Steward Assessment
+```
+id: string
+candidate_id: string
+circle_id: string
+assessor_id: string
+
+// Auto-match data (provided to assessor)
+candidate_ws_intersection: object  // Ws values vs circle mandate domains
+circle_mandate_domains: string[]   // Knowledge + experiential + affiliation domains
+
+// Assessor judgment
+approval_score: number    // 0-100 (Disapprove → Approve scale)
+rationale: string
+filed_at: date
+```
+
+### vSTF Competence Assessment
+```
+id: string
+candidate_id: string
+assessor_id: string
+
+// Per-domain evaluation
+evaluations: [
+  {
+    domain_id: string,
+    claimed_wh: number,
+    adjusted_wh: number|null,    // null = not adjusted
+    evaluated: boolean,
+    reason: string|null          // Why left unmarked (if applicable)
+  }
+]
+
+comments: string
+filed_at: date
 ```
 
 ### Activity (Audit Trail)
