@@ -455,7 +455,32 @@ The core governance mechanism. A deliberation cell has four components:
 Deliberation cells can have multiple circles participating, not just the originating circle.
 
 **Self-disqualification:**
-Circles can self-disqualify from a deliberation. This is an auditable decision — the circle appears as a "ghost/scar" in the participating circles list, showing they were invited but chose to withdraw. The scar is permanent and visible to auditors.
+Circles can self-disqualify from a deliberation. This is an auditable decision — the circle appears as a "ghost/scar" in the participating circles list, showing "withdrew from deliberation by: [member name]" to indicate which member made the withdrawal decision. The scar is permanent and visible to auditors.
+
+### Parts to Include
+
+What the motion proposes. Select the parts that apply — system-bound parts auto-execute on resolution; non-system parts are directives to named implementing circles.
+
+**1. Draft Motion** — the formal text of what this motion proposes. Gets sent to aSTF for blind adjudication.
+
+**2. System Settings** (system-bound) — if the motion passes, the following system settings will be auto-executed by the Integrity Engine:
+- Create/Edit Circle — modify circle boundaries, membership, mandate
+- Approve/Endorse Publication/Project/Event/Affiliation — approve pending submissions
+- Create/Edit Organisation — establish or modify organisational structures
+- Create/Edit Domain — add, modify, or remove domains
+- Periodic aSTF Duration & Periods — set review cycles and deadlines
+- STF Composition Sizes & Durations — set minimum/maximum STF member counts and time limits
+
+**3. Non-System Motions** (directive) — if the motion passes, the following documents or directives are created. The responsible circle(s) must implement:
+- Community Policy — governance rules for jSTF and Commons operations
+- Declaration — formal position statement or announcement
+- Deliverable Document — technical report, guide, or specification
+- Service Contract — agreement between circles or with external parties
+- Agreement — MOU, cooperation framework, or protocol
+- Letter / Communication — formal correspondence to members, circles, or external bodies
+
+**Implementing Circle(s):**
+Non-system motions require named implementing circle(s) — the circle(s) responsible for executing the directive. Any steward can sponsor implementation. The implementing circle(s) are listed in the motion record.
 
 **Vote and aSTF:**
 When all participants have voted and the motion passes, the cell creates or opens an aSTF for blind adjudication.

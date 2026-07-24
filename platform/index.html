@@ -696,82 +696,151 @@
       </div>
     </div>
 
-    <div class="g2">
-      <div>
-        <div class="sec">Deliberation</div>
-        <div class="card" style="margin-bottom:16px;padding:12px">
-          <div style="display:flex;flex-direction:column;gap:12px">
-            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello Jane</span><span class="text-xs" style="color:var(--text-tertiary)">3d ago</span></div><p class="text-sm">The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.</p></div></div>
-            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Osei Kwame</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?</p></div></div>
-            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:var(--navy-light)">MT</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Mwenda Thomas</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.</p></div></div>
-            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga Claire</span><span class="text-xs" style="color:var(--text-tertiary)">1d ago</span></div><p class="text-sm">I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.</p></div></div>
-          </div>
-          <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
-        </div>
+    <!-- Deliberation -->
+    <div class="sec">Deliberation</div>
+    <div class="card" style="margin-bottom:16px;padding:12px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello Jane</span><span class="text-xs" style="color:var(--text-tertiary)">3d ago</span></div><p class="text-sm">The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.</p></div></div>
+        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Osei Kwame</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?</p></div></div>
+        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:var(--navy-light)">MT</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Mwenda Thomas</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.</p></div></div>
+        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga Claire</span><span class="text-xs" style="color:var(--text-tertiary)">1d ago</span></div><p class="text-sm">I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.</p></div></div>
+      </div>
+      <div class="divider" style="margin:var(--space-3) 0"></div>
+      <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
+    </div>
 
-        <div class="sec">Vote</div>
-        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">Each member's vote weight is their Ws intersection with the deliberation domains. The final vote is an aggregate across all domains of the motion.</div>
-        <div class="vote-buttons">
-          <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green)">Yea</div><div class="vb-desc">I support this motion</div></div>
-          <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red)">Nay</div><div class="vb-desc">I oppose this motion</div></div>
-          <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary)">Abstain</div><div class="vb-desc">I withhold my vote</div></div>
-        </div>
+    <!-- Parts to Include -->
+    <div class="sec">Parts to Include</div>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">What this motion proposes. Select the parts that apply — system-bound parts auto-execute on resolution; non-system parts are directives to named implementing circles.</div>
 
-        <div class="sec" style="margin-top:8px">Per-Domain Vote Breakdown</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">Your Ws in each domain determines your vote weight. A xenobiologist's 2800 Ws in Xenobiology has zero influence on this motion — but their 200 in Veterinary Biology may be significant.</div>
-        <table class="vote-table">
-          <tr><th>Domain</th><th>Yea Ws</th><th>Nay Ws</th><th>Total</th><th>Voters</th></tr>
-          <tr>
-            <td class="domain-name"><span class="tag tag-purple" style="font-size:7px;margin-right:4px">LAW</span>Space Law</td>
-            <td class="vote-yea-cell">2,840</td>
-            <td class="vote-nay-cell">620</td>
-            <td class="vote-total-cell">3,460</td>
-            <td>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">1,800 yea</span></div>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">1,040 yea</span></div>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">620 nay</span></div>
-            </td>
-          </tr>
-          <tr>
-            <td class="domain-name"><span class="tag tag-amber" style="font-size:7px;margin-right:4px">LAW</span>Liability</td>
-            <td class="vote-yea-cell">1,200</td>
-            <td class="vote-nay-cell">312</td>
-            <td class="vote-total-cell">1,512</td>
-            <td>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">800 yea</span></div>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">400 yea</span></div>
-              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">312 nay</span></div>
-            </td>
-          </tr>
-          <tr>
-            <td class="domain-name"><span class="tag tag-green" style="font-size:7px;margin-right:4px">RS</span>Remote Sensing</td>
-            <td class="vote-yea-cell">920</td>
-            <td class="vote-nay-cell">0</td>
-            <td class="vote-total-cell">920</td>
-            <td>
-              <div class="voter-row"><div class="voter-avatar" style="background:var(--navy-light)">MT</div><span class="voter-ws">920 yea</span></div>
-            </td>
-          </tr>
-          <tr style="background:var(--surface-raised)">
-            <td class="domain-name" style="font-weight:700">Aggregate</td>
-            <td class="vote-yea-cell" style="font-size:13px">4,960</td>
-            <td class="vote-nay-cell" style="font-size:13px">932</td>
-            <td class="vote-total-cell" style="font-size:13px">5,892</td>
-            <td><span style="font-size:11px;color:var(--text-tertiary)">3 voted · 1 abstained</span></td>
-          </tr>
-        </table>
+    <div class="card" style="margin-bottom:12px">
+      <div class="sec" style="font-size:12px;margin-bottom:12px">Draft Motion</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">The formal text of what this motion proposes. This gets sent to aSTF for blind adjudication.</div>
+      <textarea class="msg-input" rows="4" placeholder="Draft the motion text here...">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
 
-        <div class="sec" style="margin-top:16px">Motion Flow</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-secondary);line-height:2">
-          <div><span style="color:var(--teal)">●</span> Commons discussion <span style="color:var(--text-tertiary)">— Thread #Thread-042</span></div>
-          <div><span style="color:var(--gold)">●</span> Steward sponsorship <span style="color:var(--text-tertiary)">— Akello J. sponsored</span></div>
-          <div><span style="color:var(--gold)">●</span> Deliberation <span style="color:var(--text-tertiary)">— This cell · 3d active</span></div>
-          <div><span style="color:var(--text)">○</span> Motion crystallisation <span style="color:var(--text-tertiary)">— Pending confirmation</span></div>
-          <div><span style="color:var(--text-tertiary)">○</span> aSTF blind adjudication <span style="color:var(--text-tertiary)">— Spawns after crystallisation</span></div>
-          <div><span style="color:var(--text-tertiary)">○</span> Verdict <span style="color:var(--text-tertiary)">— Resolution or Rejection</span></div>
+1. Operators must file manoeuvre intent with telemetry data before execution
+2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)
+3. Intent filing creates auditable record for post-incident assessment
+4. Framework applies to all orbital operators within Commons jurisdiction
+5. Enforcement through existing policy resolution mechanisms</textarea>
+      <div style="margin-top:8px"><span class="badge b-active" style="font-size:9px">Draft</span> <span style="font-size:10px;color:var(--text-tertiary)">Akello J. drafted this motion from deliberation record</span></div>
+    </div>
+
+    <!-- System Settings (system-bound) -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="sec" style="font-size:12px;margin-bottom:12px">System Settings <span class="tag tag-purple" style="font-size:7px;margin-left:4px">System-Bound</span></div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">If this motion passes, the following system settings will be auto-executed by the Integrity Engine:</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Create/Edit Circle</strong> — modify circle boundaries, membership, mandate</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Approve/Endorse Publication/Project/Event/Affiliation</strong> — approve pending submissions</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Create/Edit Organisation</strong> — establish or modify organisational structures</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Create/Edit Domain</strong> — add, modify, or remove domains</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Periodic aSTF Duration & Periods</strong> — set review cycles and deadlines</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>STF Composition Sizes & Durations</strong> — set minimum/maximum STF member counts and time limits</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Non-System Motions -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="sec" style="font-size:12px;margin-bottom:12px">Non-System Motions <span class="tag tag-gold" style="font-size:7px;margin-left:4px">Directive</span></div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">If this motion passes, the following documents or directives are created. The responsible circle(s) must implement.</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox" checked> <span><strong>Community Policy</strong> — governance rules for jSTF and Commons operations</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Declaration</strong> — formal position statement or announcement</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Deliverable Document</strong> — technical report, guide, or specification</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Service Contract</strong> — agreement between circles or with external parties</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Agreement</strong> — MOU, cooperation framework, or protocol</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);cursor:pointer;padding:6px 10px;border:1px solid var(--border-subtle);border-radius:var(--radius)">
+          <input type="checkbox"> <span><strong>Letter / Communication</strong> — formal correspondence to members, circles, or external bodies</span>
+        </label>
+      </div>
+      <div style="margin-top:10px">
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          <span class="tag tag-purple" style="font-size:9px">Space Law Circle ✓</span>
+          <span class="tag tag-teal" style="font-size:9px">Remote Sensing Circle ✓</span>
+          <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">+ any steward can sponsor implementation</span>
         </div>
       </div>
+    </div>
+
+    <!-- Vote -->
+    <div class="sec">Vote</div>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">Each member's vote weight is their Ws intersection with the deliberation domains. The final vote is an aggregate across all domains of the motion.</div>
+    <div class="vote-buttons">
+      <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green)">Yea</div><div class="vb-desc">I support this motion</div></div>
+      <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red)">Nay</div><div class="vb-desc">I oppose this motion</div></div>
+      <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary)">Abstain</div><div class="vb-desc">I withhold my vote</div></div>
+    </div>
+
+    <div class="sec" style="margin-top:8px">Per-Domain Vote Breakdown</div>
+    <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">Your Ws in each domain determines your vote weight. A xenobiologist's 2800 Ws in Xenobiology has zero influence on this motion — but their 200 in Veterinary Biology may be significant.</div>
+    <table class="vote-table">
+      <tr><th>Domain</th><th>Yea Ws</th><th>Nay Ws</th><th>Total</th><th>Voters</th></tr>
+      <tr>
+        <td class="domain-name"><span class="tag tag-purple" style="font-size:7px;margin-right:4px">LAW</span>Space Law</td>
+        <td class="vote-yea-cell">2,840</td>
+        <td class="vote-nay-cell">620</td>
+        <td class="vote-total-cell">3,460</td>
+        <td>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">1,800 yea</span></div>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">1,040 yea</span></div>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">620 nay</span></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="domain-name"><span class="tag tag-amber" style="font-size:7px;margin-right:4px">LAW</span>Liability</td>
+        <td class="vote-yea-cell">1,200</td>
+        <td class="vote-nay-cell">312</td>
+        <td class="vote-total-cell">1,512</td>
+        <td>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">800 yea</span></div>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">400 yea</span></div>
+          <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">312 nay</span></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="domain-name"><span class="tag tag-green" style="font-size:7px;margin-right:4px">RS</span>Remote Sensing</td>
+        <td class="vote-yea-cell">920</td>
+        <td class="vote-nay-cell">0</td>
+        <td class="vote-total-cell">920</td>
+        <td>
+          <div class="voter-row"><div class="voter-avatar" style="background:var(--navy-light)">MT</div><span class="voter-ws">920 yea</span></div>
+        </td>
+      </tr>
+      <tr style="background:var(--surface-raised)">
+        <td class="domain-name" style="font-weight:700">Aggregate</td>
+        <td class="vote-yea-cell" style="font-size:13px">4,960</td>
+        <td class="vote-nay-cell" style="font-size:13px">932</td>
+        <td class="vote-total-cell" style="font-size:13px">5,892</td>
+        <td><span style="font-size:11px;color:var(--text-tertiary)">3 voted · 1 abstained</span></td>
+      </tr>
+    </table>
+
+    <!-- Participating Circles + Motion Type in g2 -->
+    <div class="g2" style="margin-top:16px">
       <div>
         <div class="sec">Participating Circles</div>
         <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law domain match · Lead circle</div></div><span class="badge b-active">5 active</span></div>
@@ -779,11 +848,12 @@
         <!-- Self-disqualified circle — ghost/scar -->
         <div class="circle-scar">
           <div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px;position:relative">MH<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:1px solid var(--text-tertiary);font-size:6px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)">✕</span></div>
-          <div style="flex:1"><div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle — withdrew from deliberation</div><div style="font-size:9px;color:var(--text-tertiary);font-family:var(--mono)">Self-disqualified Jul 22 · Auditable decision</div></div>
+          <div style="flex:1"><div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle — withdrew from deliberation by: Osei Kwame</div><div style="font-size:9px;color:var(--text-tertiary);font-family:var(--mono)">Self-disqualified Jul 22 · Auditable decision</div></div>
         </div>
-
-        <div class="sec" style="margin-top:16px">Proposal Types</div>
-        <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
+      </div>
+      <div>
+        <div class="sec">Proposal Types</div>
+        <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">
           <div style="margin-bottom:6px"><strong style="color:var(--teal)">Discussion thread</strong> — A user creates a discussion, participants discuss, steward creates a proposal from the thread.</div>
           <div style="margin-bottom:6px"><strong style="color:var(--gold)">Direct proposal</strong> — A steward directly creates a proposal without a preceding discussion.</div>
           <div><strong style="color:var(--purple)">System-bound</strong> — A steward changes a system setting, submits as a proposal. Auto-executed on resolution.</div>
@@ -798,6 +868,17 @@
         </div>
         <div class="flex gap-2 mb-4"><button class="btn btn-primary btn-sm" onclick="confirmModal('Crystallise this motion? It will be sent to aSTF for blind adjudication.',function(){})">Crystallise Motion</button><button class="btn btn-sm" onclick="alert('Redraft request sent to the motion author.')">Request Redraft</button><button class="btn btn-danger btn-sm" onclick="confirmModal('Dissolve this Cell? All participating members will be notified.',function(){})">Dissolve Cell</button></div>
       </div>
+    </div>
+
+    <!-- Motion Flow -->
+    <div class="sec">Motion Flow</div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--text-secondary);line-height:2">
+      <div><span style="color:var(--teal)">●</span> Commons discussion <span style="color:var(--text-tertiary)">— Thread #Thread-042</span></div>
+      <div><span style="color:var(--gold)">●</span> Steward sponsorship <span style="color:var(--text-tertiary)">— Akello J. sponsored</span></div>
+      <div><span style="color:var(--gold)">●</span> Deliberation <span style="color:var(--text-tertiary)">— This cell · 3d active</span></div>
+      <div><span style="color:var(--text)">○</span> Motion crystallisation <span style="color:var(--text-tertiary)">— Pending confirmation</span></div>
+      <div><span style="color:var(--text-tertiary)">○</span> aSTF blind adjudication <span style="color:var(--text-tertiary)">— Spawns after crystallisation</span></div>
+      <div><span style="color:var(--text-tertiary)">○</span> Verdict <span style="color:var(--text-tertiary)">— Resolution or Rejection</span></div>
     </div>
   </div>
 
