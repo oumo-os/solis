@@ -2158,10 +2158,10 @@
         <div class="sec">Title</div>
         <input class="msg-input" id="res-modal-title-field" placeholder="Resolution title…" style="font-size:13px;font-weight:500">
       </div>
-      <div class="card" style="margin-bottom:16px">
+      <div class="card" style="margin-bottom:12px">
         <div class="sec">Resolution Text</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">This text will be sent to aSTF for blind adjudication. Every edit nullifies existing votes.</div>
-        <textarea class="msg-input" rows="6" id="res-modal-text" style="font-size:12px">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
+        <textarea class="msg-input" rows="20" id="res-modal-text" style="font-size:12px;font-family:inherit;line-height:1.5">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
 
 1. Operators must file manoeuvre intent with telemetry data before execution
 2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)
@@ -2169,30 +2169,30 @@
 4. Framework applies to all orbital operators within Commons jurisdiction
 5. Enforcement through existing policy resolution mechanisms</textarea>
       </div>
-      <!-- Resolution Actions (directive) -->
-      <div class="card" style="margin-bottom:16px">
-        <div class="sec">Action</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Describe the action this resolution authorises. Type freely or choose from suggestions.</div>
-        <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="e.g. Community Policy, Declaration, Deliverable Document…" style="margin-bottom:8px">
-        <datalist id="action-presets">
-          <option value="Community Policy">
-          <option value="Declaration">
-          <option value="Deliverable Document">
-          <option value="Service Contract">
-          <option value="Agreement">
-          <option value="Letter/Communication">
-        </datalist>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px" id="res-modal-circles">
-          <span class="tag tag-purple" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Space Law Circle ✓</span>
-          <span class="tag tag-teal" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Remote Sensing Circle ✓</span>
-          <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
+      <!-- Collapsible Details: Action + Version History -->
+      <details class="card" style="margin-bottom:12px;padding:10px 14px">
+        <summary style="font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer">Details <span style="font-weight:400;color:var(--text-tertiary)">— Action, implementing circles, version history</span></summary>
+        <div style="margin-top:10px">
+          <div class="sec" style="font-size:11px">Action</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Describe the action this resolution authorises.</div>
+          <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="e.g. Community Policy, Declaration, Deliverable Document…" style="margin-bottom:8px">
+          <datalist id="action-presets">
+            <option value="Community Policy">
+            <option value="Declaration">
+            <option value="Deliverable Document">
+            <option value="Service Contract">
+            <option value="Agreement">
+            <option value="Letter/Communication">
+          </datalist>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;font-weight:600">Implementing Circle(s)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px" id="res-modal-circles">
+            <span class="tag tag-purple" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Space Law Circle ✓</span>
+            <span class="tag tag-teal" style="font-size:9px;cursor:pointer" onclick="toggleImplementingCircle(this)">Remote Sensing Circle ✓</span>
+            <span style="font-size:9px;color:var(--text-tertiary);font-style:italic">Click to toggle</span>
+          </div>
+          <div class="sec" style="font-size:11px">Version History (<span id="version-count">1</span>)</div>
+          <div style="display:flex;flex-direction:column;gap:6px" id="version-list"></div>
         </div>
-      </div>
-      <!-- Version History -->
-      <details class="card" style="margin-bottom:16px;padding:10px 14px" id="res-modal-versions">
-        <summary style="font-size:11px;font-weight:600;color:var(--text-secondary);cursor:pointer">Version History (<span id="version-count">1</span>)</summary>
-        <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px" id="version-list"></div>
       </details>
       <label class="accept-checkbox" style="margin-bottom:12px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
       <div class="card" style="margin-bottom:16px">
