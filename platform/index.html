@@ -2155,6 +2155,10 @@
         <button class="btn btn-sm" style="font-size:10px;opacity:0.5;pointer-events:none" title="Coming in a future update — AI will generate a draft from the title, current text, and deliberation conversation">Draft with AI (future)</button>
       </div>
       <div class="card" style="margin-bottom:16px">
+        <div class="sec">Title</div>
+        <input class="msg-input" id="res-modal-title-field" placeholder="Resolution title…" style="font-size:13px;font-weight:500">
+      </div>
+      <div class="card" style="margin-bottom:16px">
         <div class="sec">Resolution Text</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">This text will be sent to aSTF for blind adjudication. Every edit nullifies existing votes.</div>
         <textarea class="msg-input" rows="6" id="res-modal-text" style="font-size:12px">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
@@ -2397,11 +2401,12 @@ function selectVote(btn, type) {
 // ─── Deliberation Cell ───
 var delibResolutions = [{
   id: 1,
+  title: 'Debris liability framework — proportional model',
   text: 'MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms',
   action: '',
   implementingCircles: ['Space Law Circle', 'Remote Sensing Circle'],
   votesNullified: false,
-  versions: [{ text: 'Initial draft', action: '', author: 'Akello Jane', ts: 'Jul 21, 2026 14:30' }]
+  versions: [{ title: 'Debris liability framework — proportional model', text: 'Initial draft', action: '', author: 'Akello Jane', ts: 'Jul 21, 2026 14:30' }]
 }];
 var delibSelectedRes = 0;
 
@@ -2415,6 +2420,7 @@ function openResolutionModal(idx) {
   delibSelectedRes = idx;
   var res = delibResolutions[idx];
   document.getElementById('res-modal-title').textContent = 'Resolution #' + (idx + 1);
+  document.getElementById('res-modal-title-field').value = res.title || '';
   document.getElementById('res-modal-text').value = res.text;
   document.getElementById('res-modal-action').value = res.action || '';
   document.getElementById('modal-accept-record').checked = false;
@@ -2427,6 +2433,7 @@ function openResolutionModal(idx) {
     var preview = v.text.length > 120 ? v.text.substring(0, 120) + '…' : v.text;
     return '<div style="font-size:10px;color:var(--text-secondary);padding:6px 8px;background:var(--surface-raised);border-radius:var(--radius);border-left:2px solid var(--gold-border)">' +
       '<div style="display:flex;justify-content:space-between;margin-bottom:2px"><strong style="font-size:10px">' + escapeHtml(v.author) + '</strong><span style="color:var(--text-tertiary);font-size:9px">' + v.ts + '</span></div>' +
+      (v.title ? '<div style="font-size:10px;font-weight:500;color:var(--text);margin-bottom:2px">' + escapeHtml(v.title) + '</div>' : '') +
       '<div style="color:var(--text-tertiary);font-size:9px;line-height:1.3">' + escapeHtml(preview) + '</div></div>';
   }).join('');
   document.getElementById('resolution-modal').classList.add('active');
@@ -2441,15 +2448,17 @@ function closeResolutionModal() {
 function saveResolution() {
   if (!confirm('Saving this resolution will nullify all existing votes. Continue?')) return;
   var res = delibResolutions[delibSelectedRes];
+  var title = document.getElementById('res-modal-title-field').value;
   var text = document.getElementById('res-modal-text').value;
   var action = document.getElementById('res-modal-action').value;
+  res.title = title;
   res.text = text;
   res.action = action;
   res.votesNullified = true;
   var now = new Date();
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   var author = MOCK ? MOCK.currentUser.name : 'You';
-  res.versions.push({ text: text, action: action, author: author, ts: ts });
+  res.versions.push({ title: title, text: text, action: action, author: author, ts: ts });
   updateResolutionList();
   closeResolutionModal();
   alert('Resolution #' + (delibSelectedRes + 1) + ' saved. Votes have been nullified.');
@@ -2460,11 +2469,12 @@ function addResolution() {
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   delibResolutions.push({
     id: delibResolutions.length + 1,
+    title: 'New resolution',
     text: 'New resolution draft…',
     action: '',
     implementingCircles: [],
     votesNullified: false,
-    versions: [{ text: 'New resolution draft…', action: '', author: MOCK ? MOCK.currentUser.name : 'You', ts: ts }]
+    versions: [{ title: 'New resolution', text: 'New resolution draft…', action: '', author: MOCK ? MOCK.currentUser.name : 'You', ts: ts }]
   });
   updateResolutionList();
 }
@@ -2473,11 +2483,10 @@ function updateResolutionList() {
   var list = document.getElementById('resolution-list');
   var html = '';
   delibResolutions.forEach(function(r, i) {
-    var shortText = r.text.length > 80 ? r.text.substring(0, 80) + '…' : r.text;
+    var title = r.title || 'Resolution #' + (i + 1);
     var statusBadge = r.votesNullified ? '<span class="badge b-review" style="font-size:8px">Edited</span>' : '<span class="badge b-active" style="font-size:8px">Draft</span>';
     html += '<div class="res-summary">' +
-      '<div class="res-summary-hdr"><span class="res-summary-num">Resolution #' + (i + 1) + '</span></div>' +
-      '<div class="res-summary-text">' + escapeHtml(shortText) + '</div>' +
+      '<div class="res-summary-hdr"><span class="res-summary-num">' + escapeHtml(title) + '</span></div>' +
       '<div class="res-summary-actions"><button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(' + i + ')">View / Edit</button>' + statusBadge + '</div></div>';
   });
   list.innerHTML = html;
