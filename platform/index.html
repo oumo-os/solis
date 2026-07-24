@@ -1756,6 +1756,7 @@
           <div class="aside-member"><div class="aside-member-avatar" style="background:var(--navy-light);color:#fff">MN</div><div><div style="font-weight:500">Mensah N.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 480 · 4d ago</div></div></div>
           <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--green),#0d3a20);color:#fff">AO</div><div><div style="font-weight:500">Aisha O.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 390 · 5d ago</div></div></div>
           <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;padding-top:6px;border-top:1px solid var(--border-subtle)"><span style="cursor:pointer;color:var(--gold)" onclick="openMembersModal()">View all stewards →</span></div>
+        </div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
           <div class="aside-tags">
@@ -2580,56 +2581,20 @@ var membersData = [
   {id:'mn',name:'Mensah Naa',initials:'MN',color:'var(--navy-light)',ws:1040,domains:['Astronomy','Education'],joined:'Apr 2025',lastActive:'4d ago',status:'active',topDomain:'Astronomy'},
   {id:'ao',name:'Aisha Omondi',initials:'AO',color:'linear-gradient(135deg,var(--green),#0d3a20)',ws:980,domains:['Comms','Education'],joined:'Mar 2025',lastActive:'5d ago',status:'active',topDomain:'Comms'},
   {id:'sd',name:'Ssempa David',initials:'SD',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:900,domains:['Space Law','Policy'],joined:'Apr 2025',lastActive:'6d ago',status:'active',topDomain:'Space Law'},
-  {id:'dm',name:'Diallo Mamadou',initials:'DM',color:'var(--border)',ws:800,domains:['Space Finance','Entrepreneurship'],joined:'Jul 2025',lastActive:'2w ago',status:'invited',topDomain:'Space Finance'}
+  {id:'dm',name:'Diallo Mamadou',initials:'DM',color:'var(--border)',ws:800,domains:['Space Finance','Entrepreneurship'],joined:'Jul 2025',lastActive:'2w ago',status:'invited',topDomain:'Space Finance'},
+  // Former
+  {id:'ek',name:'Esi Kojo',initials:'EK',color:'var(--text-tertiary)',ws:0,domains:['Policy','Astronomy'],joined:'Jan 2025',left:'May 2026',status:'former',topDomain:'Policy'},
+  {id:'nl',name:'Nadia Lubega',initials:'NL',color:'var(--text-tertiary)',ws:0,domains:['Space Med','Education'],joined:'Mar 2025',left:'Apr 2026',status:'former',topDomain:'Space Med'},
+  {id:'tb',name:'Thabo Banda',initials:'TB',color:'var(--text-tertiary)',ws:0,domains:['Space Law'],joined:'Feb 2026',left:'Jun 2026',status:'former',topDomain:'Space Law'}
 ];
 
-var membersHistory = {
-  aj:[
-    {type:'join',text:'Joined Space Law Circle',date:'Mar 2026'},
-    {type:'activity',text:'Voted on Debris Liability motion',date:'3h ago'},
-    {type:'activity',text:'Drafted resolution ITU coordination guide',date:'Jul 10'},
-    {type:'activity',text:'Posted Space Law analysis thread',date:'Jul 8'}
-  ],
-  ok:[
-    {type:'join',text:'Joined Space Law Circle',date:'Jun 2026'},
-    {type:'activity',text:'Contributed Propulsion domain competence review',date:'1d ago'},
-    {type:'activity',text:'Endorsed Artemis Accords discussion',date:'Jul 15'}
-  ],
-  nc:[
-    {type:'join',text:'Joined Space Law Circle',date:'Feb 2026'},
-    {type:'activity',text:'Submitted Publications domain report',date:'2d ago'},
-    {type:'activity',text:'Participated in liability framework deliberation',date:'Jul 12'}
-  ],
-  mt:[
-    {type:'join',text:'Joined Space Law Circle',date:'May 2026'},
-    {type:'activity',text:'Shared Remote Sensing data for policy review',date:'4d ago'},
-    {type:'activity',text:'Attended ITU coordination planning',date:'Jul 5'}
-  ],
-  mn:[
-    {type:'join',text:'Joined Space Law Circle',date:'Apr 2026'},
-    {type:'activity',text:'Contributed Astronomy education content',date:'4d ago'},
-    {type:'activity',text:'Co-authored observatory calendar',date:'Jul 3'}
-  ],
-  ao:[
-    {type:'join',text:'Joined Space Law Circle',date:'Apr 2026'},
-    {type:'activity',text:'Published Communications domain update',date:'5d ago'},
-    {type:'activity',text:'Moderated policy discussion thread',date:'Jun 28'}
-  ],
-  sd:[
-    {type:'join',text:'Joined Space Law Circle',date:'May 2026'},
-    {type:'activity',text:'Contributed Policy domain analysis',date:'6d ago'},
-    {type:'activity',text:'Reviewed national space legislation',date:'Jun 25'}
-  ],
-  dm:[
-    {type:'join',text:'Invited to Space Law Circle',date:'Jul 2026'},
-    {type:'activity',text:'Pending acceptance',date:'2w ago'}
-  ]
-};
+var activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
+var formerMembers = membersData.filter(function(m){return m.status==='former'});
 
 function openMembersModal() {
   var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
     '<div><span class="page-title" style="font-size:16px">Space Law Circle · Stewards</span>' +
-    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">8 stewards · 5 domains · 5,560 total Ws</div></div>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · 5 domains</div></div>' +
     '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Mandate: Space Law, Liability, Policy</span></div>' +
     '<div class="mm-layout">' +
       '<div class="mm-list" id="mm-list"></div>' +
@@ -2637,55 +2602,81 @@ function openMembersModal() {
     '</div>';
 
   openModal(html, { size: 'full', closeBtn: true, onOpen: function() {
-    renderMemberList(0);
-    renderMemberDetail(0);
+    renderMemberList();
   }});
 }
 
-function renderMemberList(selectedIdx) {
+function renderMemberList() {
   var list = document.getElementById('mm-list');
   if (!list) return;
-  list.innerHTML = '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;padding:0 4px">Select a steward to view details</div>' +
-    membersData.map(function(m, i) {
-      var statusDot = m.status === 'invited' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
-      var statusLabel = m.status === 'invited' ? 'Invited' : '';
-      return '<div class="mm-card' + (i === selectedIdx ? ' active' : '') + '" onclick="renderMemberDetail(' + i + ');document.querySelectorAll(\'.mm-card\').forEach(function(c){c.classList.remove(\'active\')});this.classList.add(\'active\')">' +
-        '<div class="mm-avatar" style="background:' + m.color + '">' + m.initials + '</div>' +
-        '<div class="mm-info"><div class="mm-name">' + m.name + '</div>' +
-        '<div class="mm-meta">' + m.topDomain + ' · ' + m.lastActive + ' ' + statusLabel + '</div></div>' +
-        '<div class="mm-ws">' + m.ws.toLocaleString() + '</div>' +
-      '</div>';
-    }).join('');
+
+  var activeHtml = activeMembers.map(function(m, i) {
+    var dot = m.status === 'invited' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
+    var label = m.status === 'invited' ? 'Invited' : '';
+    var lastOrDot = m.status === 'invited' ? (dot + ' ' + label) : m.lastActive;
+    return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '">' +
+      '<div class="mm-avatar" style="background:' + m.color + '">' + m.initials + '</div>' +
+      '<div class="mm-info"><div class="mm-name">' + m.name + '</div>' +
+      '<div class="mm-meta">' + m.topDomain + ' · ' + lastOrDot + '</div></div>' +
+      '<div class="mm-ws">' + m.ws.toLocaleString() + '</div>' +
+    '</div>';
+  }).join('');
+
+  var formerHtml = formerMembers.length ? formerMembers.map(function(m) {
+    return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '" style="opacity:0.55">' +
+      '<div class="mm-avatar" style="background:' + m.color + ';font-size:10px">' + m.initials + '</div>' +
+      '<div class="mm-info"><div class="mm-name" style="text-decoration:line-through">' + m.name + '</div>' +
+      '<div class="mm-meta">Left ' + m.left + '</div></div>' +
+    '</div>';
+  }).join('') : '';
+
+  var activeSection = '<div class="mm-section-title" style="margin:0 0 4px 4px">Active (' + activeMembers.length + ')</div>' + activeHtml;
+  var formerSection = formerHtml ? '<div class="mm-section-title" style="margin:12px 0 4px 4px">Former (' + formerMembers.length + ')</div>' + formerHtml : '';
+
+  list.innerHTML = activeSection + formerSection;
+  if (activeMembers.length) selectMember(activeMembers[0].id);
 }
 
-function renderMemberDetail(idx) {
+function selectMember(id) {
+  document.querySelectorAll('.mm-card').forEach(function(c){c.classList.remove('active')});
+  var card = document.getElementById('mm-card-' + id);
+  if (card) card.classList.add('active');
+  renderMemberDetail(id);
+}
+
+function renderMemberDetail(id) {
   var detail = document.getElementById('mm-detail');
   if (!detail) return;
-  var m = membersData[idx];
-  var history = membersHistory[m.id] || [];
+  var m = membersData.filter(function(d){return d.id===id})[0];
+  if (!m) return;
+
+  var isFormer = m.status === 'former';
+  var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
+    (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
+  var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + '</div>') : '';
+
+  var domainChips = m.domains.map(function(d) {
+    return '<span style="background:var(--gold-soft);color:var(--gold);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
+  }).join('');
+
   detail.innerHTML =
-    // Stats row
-    '<div class="mm-stat-row">' +
-      '<div class="mm-stat"><div class="mm-stat-val">' + m.ws.toLocaleString() + '</div><div class="mm-stat-label">Standing (Ws)</div></div>' +
+    '<div><div style="display:flex;align-items:center;margin-bottom:2px">' +
+      '<span style="font-size:16px;font-weight:600;color:var(--text)">' + m.name + '</span>' + statusBadge +
+    '</div>' + period +
+    '<div class="mm-stat-row" style="margin-top:12px">' +
+      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.ws.toLocaleString() + '</div><div class="mm-stat-label">Standing (Ws)</div></div>' : '') +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.domains.length + '</div><div class="mm-stat-label">Domains</div></div>' +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.joined + '</div><div class="mm-stat-label">Joined</div></div>' +
-      '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>' +
+      (isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.left + '</div><div class="mm-stat-label">Left</div></div>' : '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>') +
     '</div>' +
-    // Domain chips
     '<div class="mm-section-title">Domains</div>' +
-    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' +
-      m.domains.map(function(d) {
-        return '<span style="background:var(--gold-soft);color:var(--gold);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
-      }).join('') +
-    '</div>' +
-    // Activity History
-    '<div class="mm-section-title">Activity History</div>' +
-    '<div class="mm-timeline">' +
-      history.map(function(h) {
-        var cls = h.type === 'join' ? ' mm-event-join' : (h.type === 'leave' ? ' mm-event-leave' : '');
-        return '<div class="mm-event' + cls + '"><div>' + h.text + '</div><div class="mm-event-date">' + h.date + '</div></div>';
-      }).join('') +
-    '</div>';
+    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' + domainChips + '</div>' +
+    (isFormer ? '' :
+      '<div class="mm-section-title">History</div>' +
+      '<div class="mm-timeline">' +
+        '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
+        '<div class="mm-event"><div>Currently serving</div><div class="mm-event-date">Present</div></div>' +
+      '</div>');
 }
 
 function switchSettingsTab(idx, el) {
