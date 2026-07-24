@@ -1747,8 +1747,8 @@
           <div class="aside-title">Co-Stewards <span class="tag tag-default" style="font-size:7px">8</span></div>
           <div style="display:flex;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle)">
             <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">8</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Stewards</div></div>
-            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--gold)">5,560</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Total Ws</div></div>
-            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">5</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Domains</div></div>
+            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--gold)">3</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Mandate Domains</div></div>
+            <div style="text-align:center;flex:1"><div style="font-size:15px;font-weight:600;color:var(--text)">5</div><div style="font-size:8px;color:var(--text-tertiary);font-family:var(--mono)">Total Domains</div></div>
           </div>
           <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">AJ</div><div><div style="font-weight:500">Akello J.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 1,800 · 3h ago</div></div></div>
           <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div><div style="font-weight:500">Osei K.</div><div style="font-size:9px;color:var(--text-tertiary)">Ws 1,040 · 1d ago</div></div></div>
@@ -2283,6 +2283,21 @@
           <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
           <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15"></div>
         </div>
+        <!-- Mandate Domains -->
+        <div class="card">
+          <div class="sec">Mandate Domains</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Domains this circle has stewardship over. Changes create a system-bound proposal.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:4px">Space Law <span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:4px">Liability <span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:4px">Policy <span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+          </div>
+          <div style="display:flex;gap:4px">
+            <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="new-domain-input">
+            <button class="btn btn-sm" onclick="var i=document.getElementById('new-domain-input');if(i.value.trim()){var s=document.createElement('span');s.style.cssText='background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:4px;margin:2px';s.innerHTML=i.value.trim()+' <span style=\\'cursor:pointer;opacity:0.5\\' onclick=\\'this.parentElement.remove()\\'>×</span>';document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);i.value=''}">Add</button>
+          </div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
+        </div>
       </div>
       <!-- Tab 2: STF -->
       <div class="settings-tab-content" id="settings-tab-1" style="display:none">
@@ -2602,7 +2617,7 @@ var formerMembers = membersData.filter(function(m){return m.status==='former'});
 function openMembersModal() {
   var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
     '<div><span class="page-title" style="font-size:16px">Space Law Circle · Stewards</span>' +
-    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · 5 domains</div></div>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · Mandate: Space Law, Liability, Policy</div></div>' +
     '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Mandate: Space Law, Liability, Policy</span></div>' +
     '<div class="mm-layout">' +
       '<div class="mm-list" id="mm-list"></div>' +
@@ -2662,10 +2677,13 @@ function renderMemberDetail(id) {
   var isFormer = m.status === 'former';
   var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
     (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
+  var circleMandate = ['Space Law','Liability','Policy'];
   var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + (m.leftReason ? ' · <span style="color:var(--amber)">' + (reasonLabels[m.leftReason] || m.leftReason) + '</span>' : '') + '</div>') : '';
 
-  var domainChips = m.domains.map(function(d) {
-    return '<span style="background:var(--gold-soft);color:var(--gold);padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
+  var mandateOverlap = m.domains.filter(function(d){return circleMandate.indexOf(d)>-1}).length;
+  var mandateChips = m.domains.map(function(d) {
+    var inMandate = circleMandate.indexOf(d) > -1;
+    return '<span style="background:' + (inMandate ? 'var(--gold-soft)' : 'var(--surface-raised)') + ';color:' + (inMandate ? 'var(--gold)' : 'var(--text-tertiary)') + ';padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + (inMandate ? '' : '') + '</span>';
   }).join('');
 
   detail.innerHTML =
@@ -2673,13 +2691,13 @@ function renderMemberDetail(id) {
       '<span style="font-size:16px;font-weight:600;color:var(--text)">' + m.name + '</span>' + statusBadge +
     '</div>' + period +
     '<div class="mm-stat-row" style="margin-top:12px">' +
-      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.ws.toLocaleString() + '</div><div class="mm-stat-label">Standing (Ws)</div></div>' : '') +
+      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + mandateOverlap + '/' + m.domains.length + '</div><div class="mm-stat-label">Mandate Overlap</div></div>' : '') +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.domains.length + '</div><div class="mm-stat-label">Domains</div></div>' +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.joined + '</div><div class="mm-stat-label">Joined</div></div>' +
       (isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.left + '</div><div class="mm-stat-label">Left</div></div>' : '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>') +
     '</div>' +
     '<div class="mm-section-title">Domains</div>' +
-    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' + domainChips + '</div>' +
+    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:16px">' + mandateChips + '</div>' +
     (isFormer ? '<div class="mm-section-title">Departure</div><div class="mm-timeline">' +
         '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
         '<div class="mm-event mm-event-leave"><div>' + (reasonLabels[m.leftReason] || 'Left') + '</div><div class="mm-event-date">' + m.left + '</div></div>' +
