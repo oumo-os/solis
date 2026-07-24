@@ -656,17 +656,24 @@
     <div class="page-sub">Short-Term Facilitator assignments — blind isolated cells</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="sec">Your Assignment</div>
-        <div class="card click" onclick="nav('stf-vstf')">
+        <div class="sec">Your Assignments</div>
+        <div class="card click" onclick="nav('stf-vstf-steward')" style="margin-bottom:8px">
           <div class="flex justify-between mb-2"><span class="badge b-pending">Invitation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Jul 19</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">vSTF: Candidate Verification — Policy & Advocacy</div>
-          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">Wh verification for 3 candidates in the Policy & Advocacy domain.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Verification Office · Space Law Circle</div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">vSTF: Steward Candidacy — Ssempa D.</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">Evaluate candidate for Space Law Circle stewardship.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Steward Assessment · Space Law Circle</div>
+        </div>
+        <div class="card click" onclick="nav('stf-vstf-competence')">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">Invitation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Jul 19</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">vSTF: Competence Claims — Akello J.</div>
+          <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">Verify 5 domain competence claims with evidence review.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">vSTF Competence Assessment · Space Law Circle</div>
         </div>
         <div class="sec">Org-wide Active STFs</div>
         <table class="tbl">
           <tr><th>Room</th><th>Purpose</th><th>Circle</th><th>Deadline</th><th>Status</th></tr>
-          <tr class="click" onclick="nav('stf-vstf')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">W<sub>h</sub> verification: 3 candidates</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
+          <tr class="click" onclick="nav('stf-vstf-steward')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">Steward candidacy: Ssempa D. — Space Law Circle</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
+          <tr class="click" onclick="nav('stf-vstf-competence')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">Competence claims: Akello J. — 5 domains</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
           <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Motion adjudication: Debris liability framework</td><td>Space Law</td><td class="m">Jul 28</td><td><span class="badge b-active">Active</span></td></tr>
           <tr class="click" onclick="nav('stf-pastf')"><td><span class="tag tag-blue" style="font-size:8px">p-aSTF</span></td><td class="s">Periodic review: Space Law Circle health</td><td>Commons</td><td class="m">Aug 05</td><td><span class="badge b-pending">Selecting</span></td></tr>
           <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
@@ -677,7 +684,7 @@
         <div class="aside-card">
           <div class="aside-title">Your STF Summary</div>
           <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Pending</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Pending</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Active</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Completed</div></div>
           </div>
@@ -698,75 +705,95 @@
     </div>
   </div>
 
-  <!-- ═══ vSTF: Verification Office ═══ -->
-  <div class="view" id="view-stf-vstf">
+  <!-- ═══ vSTF: Steward Candidacy Assessment ═══ -->
+  <div class="view" id="view-stf-vstf-steward">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="stf-vstf-wrap">
-      <div class="room-header">
-        <div class="room-type-label">◆ vSTF — Verification Office</div>
-        <div class="room-title">2 Assessment Assignments</div>
-        <div class="room-meta">Space Law Circle · Blind parallel assessment · Due Jul 19, 2026</div>
-      </div>
-      <div class="room-body">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Steward Candidacy Assessment</div>
         <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
-
-        <!-- ASSESSMENT 1: Steward Assessment -->
-        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Assessment 1 — Steward Candidacy</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text">Candidate <strong>Ssempa D.</strong> has been fronted for stewardship in the <strong>Space Law Circle</strong>. The Circle's mandate covers dominion over Knowledge domains (Space Law & Policy, Telecommunications), Experiential domains (Debris Tracking, Regulatory Compliance), and Affiliation (Uganda Astronomical Society, Space Generation Advisory Council). Your auto-match analysis shows the candidate's Ws intersection with Circle requirements. You are expected to do further investigation on the candidate and the Circle before filing your verdict.</div></div>
-
-        <div class="g2" style="margin-bottom:20px">
-          <div>
-            <div class="sec">Candidate Profile</div>
-            <div class="card" style="margin-bottom:0">
-              <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
-              <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
-              <table class="tbl" style="margin-bottom:12px">
-                <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
-                <tr><td>Space Law & Policy</td><td class="m">≥ 800</td><td class="m">900</td><td style="color:var(--green)">✓ Pass</td></tr>
-                <tr><td>Telecommunications</td><td class="m">≥ 800</td><td class="m">320</td><td style="color:var(--red)">✗ Gap</td></tr>
-                <tr><td>Debris Tracking</td><td class="m">≥ 600</td><td class="m">760</td><td style="color:var(--green)">✓ Pass</td></tr>
-                <tr><td>Regulatory Compliance</td><td class="m">≥ 600</td><td class="m">640</td><td style="color:var(--green)">✓ Pass</td></tr>
-              </table>
-              <div class="text-label mb-1">Affiliations</div>
-              <div class="flex gap-2"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
+        <div class="sec">Candidate Profile</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
+          <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
+          <table class="tbl" style="margin-bottom:12px">
+            <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
+            <tr><td>Space Law &amp; Policy</td><td class="m">≥ 800</td><td class="m">900</td><td style="color:var(--green)">✓ Pass</td></tr>
+            <tr><td>Telecommunications</td><td class="m">≥ 800</td><td class="m">320</td><td style="color:var(--red)">✗ Gap</td></tr>
+            <tr><td>Debris Tracking</td><td class="m">≥ 600</td><td class="m">760</td><td style="color:var(--green)">✓ Pass</td></tr>
+            <tr><td>Regulatory Compliance</td><td class="m">≥ 600</td><td class="m">640</td><td style="color:var(--green)">✓ Pass</td></tr>
+          </table>
+          <div class="text-label mb-1">Affiliations</div>
+          <div class="flex gap-2"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
+        </div>
+        <div class="sec">Evidence Package</div>
+        <div class="evidence-shelf" style="margin-bottom:16px">
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — Policy Brief Publication</div><div class="ev-meta">Submitted Jul 11 · PDF · 340KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — UAS Membership Letter</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+        </div>
+        <div class="sec">Your Approval Verdict</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="text-label mb-2">Disapprove ← → Approve</div>
+          <div style="position:relative;margin-bottom:16px">
+            <div style="height:6px;background:var(--border-subtle);border-radius:3px;position:relative">
+              <div style="position:absolute;left:0;top:0;height:100%;width:72%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px"></div>
+              <div style="position:absolute;left:72%;top:-5px;width:16px;height:16px;background:var(--green);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(-50%)"></div>
             </div>
+            <div class="flex justify-between" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
           </div>
-          <div>
-            <div class="sec">Your Approval Verdict</div>
-            <div class="card" style="margin-bottom:0">
-              <div class="text-label mb-2">Disapprove ← → Approve</div>
-              <div style="position:relative;margin-bottom:16px">
-                <div style="height:6px;background:var(--border-subtle);border-radius:3px;position:relative">
-                  <div style="position:absolute;left:0;top:0;height:100%;width:72%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px"></div>
-                  <div style="position:absolute;left:72%;top:-5px;width:16px;height:16px;background:var(--green);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(-50%)"></div>
-                </div>
-                <div class="flex justify-between" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
-              </div>
-              <div class="flex gap-2 mb-3"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Score:</span><input type="number" value="72" min="0" max="100" class="form-input" style="width:60px;padding:3px 6px;font-family:var(--mono);font-size:12px"></div>
-              <div class="text-label mb-2">Rationale</div>
-              <textarea placeholder="Justify your approval score..." class="form-input" style="height:70px;resize:none"></textarea>
-            </div>
+          <div class="flex gap-2 mb-3"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Score:</span><input type="number" value="72" min="0" max="100" class="form-input" style="width:60px;padding:3px 6px;font-family:var(--mono);font-size:12px"></div>
+          <div class="text-label mb-2">Rationale</div>
+          <textarea placeholder="Justify your approval score..." class="form-input" style="height:80px;resize:none"></textarea>
+        </div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this steward assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Assignment</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">Steward Candidacy</span></div>
+          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 19, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Assessors</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Circle Mandate</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2"><strong style="color:var(--text)">Knowledge domains:</strong></div>
+            <div class="flex gap-1 mb-2"><span class="tag tag-purple" style="font-size:8px">Space Law &amp; Policy</span><span class="tag tag-purple" style="font-size:8px">Telecommunications</span></div>
+            <div class="mb-2"><strong style="color:var(--text)">Experiential domains:</strong></div>
+            <div class="flex gap-1 mb-2"><span class="tag tag-green" style="font-size:8px">Debris Tracking</span><span class="tag tag-green" style="font-size:8px">Regulatory Compliance</span></div>
+            <div class="mb-2"><strong style="color:var(--text)">Affiliations:</strong></div>
+            <div class="flex gap-1"><span class="tag tag-amber" style="font-size:8px">Uganda Astronomical Society</span><span class="tag tag-amber" style="font-size:8px">SGAC</span></div>
           </div>
         </div>
+        <div class="aside-card">
+          <div class="aside-title">Auto-Match Summary</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">3 of 4 domains pass. Telecommunications has a significant gap (320 vs 800 required). Assess whether this gap is disqualifying or can be addressed through mentorship.</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="divider" style="margin:20px 0"></div>
-
-        <!-- ASSESSMENT 2: Competence Assessment -->
-        <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Assessment 2 — Competence Claims</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--purple)">Room Environment</div><div class="room-env-text"><strong>Akello J.</strong> has submitted new competence claims. Your task: investigate, evaluate, and assess whether their claims are acceptable. Adjust where you think necessary. Mark evaluated claims, adjust the rest or leave as is. You may leave non-evaluated claims unmarked and state the reason (insufficient evidence, insufficient claims, omitted while evaluating, unable to effectively evaluate, or any sufficient reason). Your evaluation will be collectively aggregated against other evaluators to derive final competence weights.</div></div>
-
+  <!-- ═══ vSTF: Competence Claims Assessment ═══ -->
+  <div class="view" id="view-stf-vstf-competence">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Competence Claims Assessment</div>
+        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div class="sec">Evidence Package</div>
         <div class="evidence-shelf" style="margin-bottom:16px">
           <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
           <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
           <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
         </div>
-
         <div class="sec">Wh Assessment Table</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Investigate, evaluate, and assess whether claims are acceptable. Adjust where necessary. Leave non-evaluated claims unmarked with reason.</div>
         <table class="tbl" style="margin-bottom:16px">
           <tr><th>Domain</th><th>Claimed Wh</th><th>Adjusted Wh</th><th>Evaluated</th><th>Reason (if unmarked)</th></tr>
           <tr>
-            <td>Space Law & Policy</td>
+            <td>Space Law &amp; Policy</td>
             <td class="m">1,800</td>
             <td><input type="number" value="1600" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
             <td><input type="checkbox" checked></td>
@@ -780,7 +807,7 @@
             <td style="font-size:10px;color:var(--text-tertiary)">—</td>
           </tr>
           <tr>
-            <td>Policy & Advocacy</td>
+            <td>Policy &amp; Advocacy</td>
             <td class="m">640</td>
             <td><input type="number" value="640" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
             <td><input type="checkbox" checked></td>
@@ -801,12 +828,33 @@
             <td style="font-size:10px;color:var(--text-tertiary)">Unable to evaluate — outside expertise</td>
           </tr>
         </table>
-
         <div class="sec">Evaluation Comments</div>
         <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
-
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File both assessments? They will be sealed until all assessors have filed.',function(){})">File Assessments</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this competence assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Assignment</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">Competence Verification</span></div>
+          <div class="aside-row"><span class="aside-label">Candidate</span><span style="font-size:11px;color:var(--text)">Akello J.</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 19, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Assessors</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Candidate Profile</div>
+          <div class="flex items-center gap-3 mb-2"><div class="avatar avatar-md">AJ</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:10px;color:var(--text-tertiary)">Nairobi · Joined Jan 2026</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Current total Ws: 2,840. Claims to add 5 domains. 3 have evidence, 2 are unsupported.</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Evaluation Rules</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2">• Adjust claimed Wh if evidence doesn't support it</div>
+            <div class="mb-2">• Mark evaluated claims with checkbox</div>
+            <div class="mb-2">• Leave unmarked with reason if needed</div>
+            <div>• Final weights = aggregate of all assessors</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -916,46 +964,76 @@
   <!-- ═══ xSTF: Execution ═══ -->
   <div class="view" id="view-stf-xstf">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="stf-xstf-wrap">
-      <div class="room-header">
-        <div class="room-type-label" style="color:var(--green)">◆ xSTF — Execution Cell</div>
-        <div class="room-title">Deliverable: ITU Coordination Guide</div>
-        <div class="room-meta">Space Law Circle · Blind execution · Due Aug 15, 2026 · 45% complete</div>
-      </div>
-      <div class="room-body">
+    <div class="layout-split">
+      <div class="layout-main">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ xSTF — Execution Cell</div>
         <div class="blind-wall">🔒 &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; 🔒</div>
-        <div class="room-env"><div class="room-env-label" style="color:var(--green)">Room Environment</div><div class="room-env-text">Execution cell. This xSTF was commissioned by the Space Law Circle following Resolution approval. The team is producing the ITU Frequency Coordination Guide for emerging space nations. The commissioning circle provides requirements; the team executes blind. Deliverable will be submitted to the commissioning circle for review and publication.</div></div>
-        <div class="sec">Commissioning Requirements</div>
+        <div class="sec">Deliberations</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="flex justify-between mb-2"><span class="badge b-active">Resolution</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Approved Jul 25 · Space Law Circle</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">ITU Frequency Coordination Guide — Deliverable Specs</div>
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Commissioned by Space Law Circle. Deliverable: A plain-language guide covering ITU frequency coordination procedures for emerging space nations. Target audience: policy makers and technical leads in East African space agencies.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">
-            <div class="flex justify-between mb-1"><span>Sections required:</span><span style="color:var(--text)">4</span></div>
-            <div class="flex justify-between mb-1"><span>Length target:</span><span style="color:var(--text)">8,000–12,000 words</span></div>
-            <div class="flex justify-between mb-1"><span>Language:</span><span style="color:var(--text)">Plain English, no jargon</span></div>
-            <div class="flex justify-between"><span>Review cycle:</span><span style="color:var(--text)">Draft → Circle review → Final</span></div>
-          </div>
-        </div>
-        <div class="sec">Execution Progress</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Overall progress</span><span style="font-family:var(--mono);font-size:12px;color:var(--green)">45%</span></div>
-          <div class="htk" style="margin-bottom:12px"><div class="hfill" style="width:45%;background:var(--green)"></div></div>
-          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 1 — Introduction</span><span style="color:var(--green)">✓ Complete</span></div>
-          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 2 — ITU Process Overview</span><span style="color:var(--green)">✓ Complete</span></div>
-          <div class="flex justify-between mb-2"><span style="font-size:12px;color:var(--text-secondary)">Section 3 — Frequency Assignment</span><span style="color:var(--gold)">△ In progress</span></div>
-          <div class="flex justify-between"><span style="font-size:12px;color:var(--text-secondary)">Section 4 — Coordination Procedures</span><span style="color:var(--text-tertiary)">— Pending</span></div>
-        </div>
-        <div class="sec">Team</div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member A</div><div style="font-size:11px;color:var(--text-tertiary)">Section 1–2 author</div></div><span class="badge b-active">Active</span></div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member B</div><div style="font-size:11px;color:var(--text-tertiary)">Section 3–4 author</div></div><span class="badge b-active">Active</span></div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">TM</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Team Member C</div><div style="font-size:11px;color:var(--text-tertiary)">Review & formatting</div></div><span class="badge b-active">Active</span></div>
-        <div class="sec" style="margin-top:16px">Cell Messages</div>
-        <div class="card">
           <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member A</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member B</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">On it. Also started Section 3 — frequency assignment tables need a template from the circle.</p></div></div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member B</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">On it. Also started Section 3 — frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?</p></div></div>
+          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member C</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision — the ITU history paragraph is too detailed for the target audience.</p></div></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
           <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
+        </div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Mandate &amp; Requirements</div>
+          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>
+          <div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">Collaborative</span></div>
+          <div class="aside-row"><span class="aside-label">Commissioned</span><span style="font-size:11px;color:var(--text)">Space Law Circle</span></div>
+          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 15, 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Resolution</span><span style="font-size:11px;color:var(--green)">Approved Jul 25</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Deliverable Specs</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2"><strong style="color:var(--text)">ITU Frequency Coordination Guide</strong></div>
+            <div class="mb-2">Plain-language guide for emerging space nations. Target: policy makers and technical leads in East African space agencies.</div>
+            <div class="flex justify-between mb-1"><span>Sections:</span><span style="color:var(--text)">4</span></div>
+            <div class="flex justify-between mb-1"><span>Length:</span><span style="color:var(--text)">8,000–12,000 words</span></div>
+            <div class="flex justify-between mb-1"><span>Language:</span><span style="color:var(--text)">Plain English</span></div>
+            <div class="flex justify-between"><span>Review:</span><span style="color:var(--text)">Draft → Circle → Final</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Progress</div>
+          <div class="flex justify-between items-center mb-2"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Overall</span><span style="font-family:var(--mono);font-size:12px;color:var(--green)">45%</span></div>
+          <div class="htk mb-3"><div class="hfill" style="width:45%;background:var(--green)"></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between"><span>Task 0 — STF formulation</span><span style="color:var(--green)">✓</span></div>
+            <div class="flex justify-between"><span>Task 1 — Mandate comprehension</span><span style="color:var(--green)">✓</span></div>
+            <div class="flex justify-between"><span>Task 2 — Research &amp; drafting</span><span style="color:var(--gold)">△</span></div>
+            <div class="flex justify-between"><span>Task 3 — Internal review</span><span style="color:var(--text-tertiary)">—</span></div>
+            <div class="flex justify-between"><span>Task 4 — Circle review cycle</span><span style="color:var(--text-tertiary)">—</span></div>
+            <div class="flex justify-between"><span>Task 5 — Finalisation</span><span style="color:var(--text-tertiary)">—</span></div>
+            <div class="flex justify-between"><span>Task 6 — Dissolve STF</span><span style="color:var(--text-tertiary)">—</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Objectives</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+            <div class="flex justify-between"><span>Clarity of ITU process explanation</span><span style="color:var(--green)">✓</span></div>
+            <div class="flex justify-between"><span>Accuracy of coordination steps</span><span style="color:var(--gold)">△</span></div>
+            <div class="flex justify-between"><span>East Africa relevance</span><span style="color:var(--text-tertiary)">—</span></div>
+            <div class="flex justify-between"><span>Policy maker accessibility</span><span style="color:var(--text-tertiary)">—</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Deliverables</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+            <div class="mb-2"><strong style="color:var(--text)">Report:</strong></div>
+            <div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Draft v2 — ITU Frequency Coordination Guide (4,200 words so far)</div>
+            <div><strong style="color:var(--text)">Attachments:</strong></div>
+            <div class="flex gap-2" style="margin-top:4px"><span class="tag tag-purple" style="font-size:8px">📄 ITU reference doc</span><span class="tag tag-green" style="font-size:8px">📄 Coordination flowchart</span></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Team</div>
+          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member A</div><div style="font-size:9px;color:var(--text-tertiary)">Sections 1–2</div></div></div>
+          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member B</div><div style="font-size:9px;color:var(--text-tertiary)">Sections 3–4</div></div></div>
+          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member C</div><div style="font-size:9px;color:var(--text-tertiary)">Review &amp; formatting</div></div></div>
         </div>
       </div>
     </div>
@@ -1765,7 +1843,8 @@ var views = {
   'cell-circle':    ['Cells', 'Circle Cell'],
   'cell-delib':     ['Cells', 'Deliberation Cell'],
   stf:              ['STF Dash'],
-  'stf-vstf':       ['STF Dash', 'vSTF — Verification Office'],
+  'stf-vstf-steward': ['STF Dash', 'vSTF — Steward Candidacy'],
+  'stf-vstf-competence': ['STF Dash', 'vSTF — Competence Claims'],
   'stf-astf':       ['STF Dash', 'aSTF — Adjudication'],
   'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
   'stf-xstf':       ['STF Dash', 'xSTF — Execution'],
@@ -1783,7 +1862,7 @@ var navMap = {
   observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'publication-detail':'observatory',
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
-  stf:'stf', 'stf-vstf':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
+  stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
   participants:'participants', profile:'profile',
   'domain-map':'domain-map'
 };
