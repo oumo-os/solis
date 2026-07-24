@@ -305,6 +305,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .avatar-xl{width:56px;height:56px;font-size:18px}
 .avatar-gold{background:var(--gold)}
 .avatar-system{border-radius:var(--radius);background:rgba(255,255,255,.15)}
+.avatar-square{border-radius:0}
 
 /* ── Progress ── */
 .progress{height:3px;background:var(--border-subtle);border-radius:2px;overflow:hidden}
