@@ -1648,32 +1648,6 @@
     </div>
     <div class="layout-split">
       <div class="layout-main">
-        <!-- Circle Health -->
-        <div class="circle-section-title">Circle Health</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Last p-aSTF assessment</div>
-        <div class="card health-card" style="margin-bottom:16px">
-          <div class="health-tier healthy">✓</div>
-          <div class="health-details">
-            <div class="health-label">Healthy</div>
-            <div class="health-meta">Last assessed Jul 15 · 26/30 Circle · 31/35 Members · No risk flags</div>
-          </div>
-          <div style="display:flex;gap:6px">
-            <span style="font-size:9px;color:var(--text-tertiary)">Rubric: </span>
-            <span style="font-size:9px;color:var(--green);font-family:var(--mono)">A</span>
-            <span style="font-size:9px;color:var(--amber);font-family:var(--mono)">C</span>
-            <span style="font-size:9px;color:var(--blue);font-family:var(--mono)">D</span>
-          </div>
-        </div>
-
-        <!-- Competence Map -->
-        <div class="circle-section-title">Competence Map</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Desired Ws per domain vs highest member Ws · gold = target, navy = actual</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="comp-bar"><span class="comp-label">Space Law</span><div class="comp-track"><div class="comp-desired" style="width:100%"></div><div class="comp-actual" style="width:72%"></div></div><span class="comp-val"><span style="color:var(--gold)">2,500</span> · <span style="color:var(--navy-light)">1,800</span></span></div>
-          <div class="comp-bar"><span class="comp-label">Liability</span><div class="comp-track"><div class="comp-desired" style="width:100%"></div><div class="comp-actual" style="width:41%"></div></div><span class="comp-val"><span style="color:var(--gold)">1,800</span> · <span style="color:var(--navy-light)">740</span></span></div>
-          <div class="comp-bar"><span class="comp-label">Policy</span><div class="comp-track"><div class="comp-desired" style="width:100%"></div><div class="comp-actual" style="width:51%"></div></div><span class="comp-val"><span style="color:var(--gold)">1,500</span> · <span style="color:var(--navy-light)">760</span></span></div>
-        </div>
-
         <!-- Domain Activity -->
         <div class="circle-section-title">Domain Activity</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Contribution volume · gold = within mandate, grey = adjacent</div>
@@ -1768,6 +1742,25 @@
           <div class="aside-row"><span class="aside-label">Status</span><span class="badge b-active" style="font-size:8px">Active</span></div>
           <div class="aside-row"><span class="aside-label">Motions</span><span style="font-size:12px;color:var(--text)">2 active</span></div>
           <div class="aside-row"><span class="aside-label">Resolutions</span><span style="font-size:12px;color:var(--text)">1 enacted</span></div>
+        </div>
+        <!-- Circle Health -->
+        <div class="aside-card">
+          <div class="aside-title">Circle Health</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <div class="health-tier healthy" style="width:36px;height:36px;min-width:36px;font-size:9px">✓</div>
+            <div><div style="font-size:12px;font-weight:600;color:var(--text)">Healthy</div><div style="font-size:9px;color:var(--text-tertiary)">p-aSTF Jul 15 · 26/30 · 31/35</div></div>
+          </div>
+          <div style="font-size:9px;color:var(--text-secondary);border-top:1px solid var(--border-subtle);padding-top:6px">
+            <span style="font-family:var(--mono);color:var(--green)">A</span> Activity · <span style="font-family:var(--mono);color:var(--amber)">C</span> Competence · <span style="font-family:var(--mono);color:var(--blue)">D</span> Discipline · <span style="color:var(--green)">No flags</span>
+          </div>
+        </div>
+        <!-- Competence Map (primary domains) -->
+        <div class="aside-card">
+          <div class="aside-title">Competence Map <span class="tag tag-default" style="font-size:7px">Primary</span></div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:6px">Desired vs highest member Ws</div>
+          <div class="comp-bar" style="padding:3px 0"><span class="comp-label" style="font-size:9px;min-width:70px">Space Law</span><div class="comp-track" style="height:10px"><div class="comp-desired" style="width:100%"></div><div class="comp-actual" style="width:72%"></div></div><span class="comp-val" style="min-width:60px;font-size:8px"><span style="color:var(--navy-light)">1,800</span>/<span style="color:var(--gold)">2,500</span></span></div>
+          <div class="comp-bar" style="padding:3px 0"><span class="comp-label" style="font-size:9px;min-width:70px">Liability</span><div class="comp-track" style="height:10px"><div class="comp-desired" style="width:100%"></div><div class="comp-actual" style="width:41%"></div></div><span class="comp-val" style="min-width:60px;font-size:8px"><span style="color:var(--navy-light)">740</span>/<span style="color:var(--gold)">1,800</span></span></div>
+          <div style="font-size:8px;color:var(--text-tertiary);margin-top:4px;padding-top:4px;border-top:1px solid var(--border-subtle)"><span style="color:var(--text-secondary)">Secondary:</span> Policy <span style="color:var(--navy-light)">760</span>/<span style="color:var(--gold)">1,500</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Co-Stewards <span class="tag tag-default" style="font-size:7px">8</span></div>
@@ -2312,15 +2305,15 @@
         <!-- Mandate Domains -->
         <div class="card">
           <div class="sec">Mandate Domains &amp; Desired Competence</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Set desired competence weight (Ws) per domain. The competence map compares these targets against actual member Ws.</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Primary domains drive the competence map. Secondary domains are advisory.</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Space Law <input type="number" value="2500" style="width:55px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Liability <input type="number" value="1800" style="width:55px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Policy <input type="number" value="1500" style="width:55px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Space Law <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" checked onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="2500" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Liability <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" checked onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="1800" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Policy <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="1500" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
           </div>
           <div style="display:flex;gap:4px">
             <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="new-domain-input">
-            <button class="btn btn-sm" onclick="var i=document.getElementById('new-domain-input');if(i.value.trim()){var s=document.createElement('span');s.style.cssText='background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:6px;margin:2px';s.innerHTML=i.value.trim()+' <input type=\\"number\\" value=\\"1000\\" style=\\"width:55px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center\\" title=\\"Desired Ws\\"><span style=\\"cursor:pointer;opacity:0.5\\" onclick=\\"this.parentElement.remove()\\">×</span>';document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);i.value=''}">Add</button>
+            <button class="btn btn-sm" onclick="var i=document.getElementById('new-domain-input');if(i.value.trim()){var s=document.createElement('span');s.style.cssText='background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:6px;margin:2px';s.innerHTML=i.value.trim()+' <label style=\\"font-size:8px;color:var(--text-tertiary);cursor:pointer\\"><input type=\\"checkbox\\" onchange=\\"this.parentElement.style.opacity=this.checked?1:0.5\\"> P</label><input type=\\"number\\" value=\\"1000\\" style=\\"width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center\\" title=\\"Desired Ws\\"><span style=\\"cursor:pointer;opacity:0.5\\" onclick=\\"this.parentElement.remove()\\">×</span>';document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);i.value=''}">Add</button>
           </div>
           <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
         </div>
@@ -2703,20 +2696,21 @@ function renderMemberDetail(id) {
   var isFormer = m.status === 'former';
   var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
     (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
-  var circleMandate = ['Space Law','Liability','Policy'];
+  var primaryMandate = ['Space Law','Liability'];
+  var secondaryMandate = ['Policy'];
   var desiredWs = {'Space Law':2500,'Liability':1800,'Policy':1500};
   var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + (m.leftReason ? ' · <span style="color:var(--amber)">' + (reasonLabels[m.leftReason] || m.leftReason) + '</span>' : '') + '</div>') : '';
 
-  var mandateOverlap = m.domains.filter(function(d){return circleMandate.indexOf(d)>-1}).length;
+  var mandateOverlap = m.domains.filter(function(d){return primaryMandate.indexOf(d)>-1}).length;
   var mandateChips = m.domains.map(function(d) {
-    var inMandate = circleMandate.indexOf(d) > -1;
+    var inMandate = primaryMandate.indexOf(d) > -1;
     return '<span style="background:' + (inMandate ? 'var(--gold-soft)' : 'var(--surface-raised)') + ';color:' + (inMandate ? 'var(--gold)' : 'var(--text-tertiary)') + ';padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
   }).join('');
 
   var memberWs = {}; // per-domain Ws lookup from member data
   m.domains.forEach(function(d,i){ memberWs[d] = m.domainWs ? m.domainWs[i] : m.ws; });
 
-  var competenceBars = circleMandate.map(function(domain) {
+  var competenceBars = primaryMandate.map(function(domain) {
     var desired = desiredWs[domain] || 1000;
     var actual = memberWs[domain] || 0;
     var pct = Math.min(100, Math.round(actual / desired * 100));
@@ -2729,14 +2723,14 @@ function renderMemberDetail(id) {
       '<span style="font-size:16px;font-weight:600;color:var(--text)">' + m.name + '</span>' + statusBadge +
     '</div>' + period +
     '<div class="mm-stat-row" style="margin-top:12px">' +
-      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + mandateOverlap + '/' + m.domains.length + '</div><div class="mm-stat-label">Mandate Overlap</div></div>' : '') +
+      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + mandateOverlap + '/' + m.domains.length + '</div><div class="mm-stat-label">Primary Overlap</div></div>' : '') +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.domains.length + '</div><div class="mm-stat-label">Domains</div></div>' +
       '<div class="mm-stat"><div class="mm-stat-val">' + m.joined + '</div><div class="mm-stat-label">Joined</div></div>' +
       (isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.left + '</div><div class="mm-stat-label">Left</div></div>' : '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>') +
     '</div>' +
     '<div class="mm-section-title">Domains</div>' +
     '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">' + mandateChips + '</div>' +
-    (!isFormer ? '<div class="mm-section-title">Competence vs Mandate</div><div style="margin-bottom:14px">' + competenceBars + '</div>' : '') +
+    (!isFormer ? '<div class="mm-section-title">Competence (Primary Mandate)</div><div style="margin-bottom:14px">' + competenceBars + '</div>' : '') +
     (isFormer ? '<div class="mm-section-title">Departure</div><div class="mm-timeline">' +
         '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
         '<div class="mm-event mm-event-leave"><div>' + (reasonLabels[m.leftReason] || 'Left') + '</div><div class="mm-event-date">' + m.left + '</div></div>' +
