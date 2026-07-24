@@ -1,0 +1,578 @@
+{
+  "currentUser": {
+    "id": "os",
+    "name": "Oumo Samuel",
+    "location": "Kampala, Uganda",
+    "joined": "Jul 2026",
+    "status": "Active",
+    "standing": 847,
+    "standingDrift": "+42 this cycle",
+    "competence": 1200,
+    "competenceNote": "MSc Space Studies",
+    "interestScore": 34,
+    "interestDrift": "+6 from last cycle",
+    "activeRoles": 3,
+    "rolesBreakdown": "1 Circle · 2 Projects",
+    "bio": "Space law and remote sensing practitioner. Building the African space commons — open identity, shared competence, collective stewardship.",
+    "essay": "I believe Africa's space future should be commons-governed. Not owned by any single institution, but built collectively by those who contribute. Solis is my attempt to make that tangible.",
+    "domains": {
+      "space-law": { "ws": 1800, "wh": 1200, "interest": 1, "barWs": 72, "barWh": 100, "members": 24 },
+      "remote-sensing": { "ws": 1200, "wh": 800, "interest": 2, "barWs": 58, "barWh": 90, "members": 18 },
+      "policy": { "ws": 640, "wh": null, "interest": 3, "barWs": 20, "barWh": 70, "members": 11 },
+      "mars": { "ws": 600, "wh": null, "interest": 4, "barWs": 16, "barWh": 50, "members": 9 }
+    },
+    "circles": [
+      { "name": "Space Law Circle", "status": "Active", "since": "Jul 2026" },
+      { "name": "Remote Sensing Circle", "status": "Active", "since": "Aug 2026" }
+    ],
+    "activity": [
+      { "text": "Submitted evidence for vSTF Competence Claims review", "time": "2h ago", "type": "stf" },
+      { "text": "Replied to thread 'Liability frameworks for debris-generating manoeuvres'", "time": "1d ago", "type": "discussion" },
+      { "text": "Updated deliverable draft for ITU Coordination Guide", "time": "3d ago", "type": "project" },
+      { "text": "Endorsed Okello R.'s Space Law analysis", "time": "5d ago", "type": "endorsed" },
+      { "text": "Joined Remote Sensing Circle", "time": "1w ago", "type": "circle" }
+    ]
+  },
+
+  "participants": [
+    {
+      "id": "aj",
+      "name": "Akello Jane",
+      "initials": "AJ",
+      "location": "Kampala",
+      "joined": "Feb 2025",
+      "avatar": {},
+      "domains": [
+        { "name": "Space Law", "ws": 1800, "color": "tag-purple" },
+        { "name": "Astrophysics", "ws": 1240, "color": "tag-blue" }
+      ],
+      "circles": ["SL Circle"],
+      "orgs": ["UAS"],
+      "bio": "Astrophysics researcher specialising in exoplanet detection."
+    },
+    {
+      "id": "ok",
+      "name": "Osei Kwame",
+      "initials": "OK",
+      "location": "Accra",
+      "joined": "Jun 2025",
+      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "domains": [
+        { "name": "Propulsion", "ws": 2000, "color": "tag-default" },
+        { "name": "Launch Sys", "ws": 1380, "color": "tag-default" }
+      ],
+      "circles": [],
+      "orgs": ["GSS"],
+      "bio": "Propulsion engineer developing next-generation launch systems for small satellites."
+    },
+    {
+      "id": "nc",
+      "name": "Namugga Claire",
+      "initials": "NC",
+      "location": "Entebbe",
+      "joined": "Jan 2025",
+      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "domains": [
+        { "name": "Publications", "ws": 1400, "color": "tag-purple" },
+        { "name": "Space Med", "ws": 1050, "color": "tag-amber" }
+      ],
+      "circles": ["SL Circle"],
+      "orgs": [],
+      "bio": "Space medicine researcher exploring bioastronautics for long-duration missions."
+    },
+    {
+      "id": "mt",
+      "name": "Mwenda Thomas",
+      "initials": "MT",
+      "location": "Kampala",
+      "joined": "May 2025",
+      "avatar": {},
+      "domains": [
+        { "name": "Remote Sensing", "ws": 1200, "color": "tag-green" },
+        { "name": "Events", "ws": 890, "color": "tag-blue" }
+      ],
+      "circles": ["RS Circle"],
+      "orgs": [],
+      "bio": "Remote sensing specialist with focus on East African agricultural monitoring."
+    },
+    {
+      "id": "ka",
+      "name": "Kimani Aisha",
+      "initials": "KA",
+      "location": "Nairobi",
+      "joined": "Mar 2025",
+      "avatar": {},
+      "domains": [
+        { "name": "Education", "ws": 1100, "color": "tag-green" },
+        { "name": "Comms", "ws": 980, "color": "tag-amber" }
+      ],
+      "circles": [],
+      "orgs": ["SGAC"],
+      "bio": "Science communicator bridging space research and public understanding across East Africa."
+    },
+    {
+      "id": "sd",
+      "name": "Ssempa David",
+      "initials": "SD",
+      "location": "Kampala",
+      "joined": "Apr 2025",
+      "avatar": { "gradient": "linear-gradient(135deg,var(--purple),#3a1860)" },
+      "domains": [
+        { "name": "Space Law", "ws": 900, "color": "tag-purple" },
+        { "name": "Policy", "ws": 760, "color": "tag-blue" }
+      ],
+      "circles": [],
+      "orgs": ["UAS", "SGAC"],
+      "bio": "Policy analyst working on national space legislation for Uganda."
+    },
+    {
+      "id": "os",
+      "name": "Oumo Samuel",
+      "initials": "OS",
+      "location": "Kampala",
+      "joined": "Sep 2024",
+      "avatar": { "gold": true },
+      "domains": [
+        { "name": "Space Law", "ws": 1200, "color": "tag-purple" },
+        { "name": "Remote Sensing", "ws": 847, "color": "tag-green" }
+      ],
+      "circles": ["SL Circle", "RS Circle"],
+      "orgs": [],
+      "bio": "Founder of Solis. Space law and remote sensing, building the African space commons."
+    },
+    {
+      "id": "dm",
+      "name": "Diallo Mamadou",
+      "initials": "DM",
+      "location": "Dakar",
+      "joined": "Jul 2025",
+      "avatar": {},
+      "domains": [
+        { "name": "Space Finance", "ws": 800, "color": "tag-amber" },
+        { "name": "Entrepreneurship", "ws": 720, "color": "tag-green" }
+      ],
+      "circles": [],
+      "orgs": ["Sen. Space Agency"],
+      "bio": "Space finance specialist advising on investment frameworks for African space ventures."
+    }
+  ],
+
+  "circles": [
+    {
+      "id": "space-law",
+      "name": "Space Law Circle",
+      "status": "Active",
+      "members": 8,
+      "motions": 2,
+      "domains": ["Space Law", "Liability", "Policy"],
+      "description": "Stewards space law analysis, liability frameworks, and regulatory compliance.",
+      "founded": "Mar 2026"
+    },
+    {
+      "id": "remote-sensing",
+      "name": "Remote Sensing Circle",
+      "status": "Active",
+      "members": 6,
+      "motions": 1,
+      "domains": ["Remote Sensing", "Satellite", "Data"],
+      "description": "Satellite data analysis, Earth observation, and remote sensing methodologies.",
+      "founded": "Jan 2026"
+    },
+    {
+      "id": "mars",
+      "name": "Mars Habitability Circle",
+      "status": "Suggested",
+      "members": 4,
+      "motions": 0,
+      "domains": ["Mars", "Habitability"],
+      "description": "Life support systems, habitat design, and Mars colonisation research.",
+      "founded": "Jun 2026"
+    },
+    {
+      "id": "policy",
+      "name": "Policy & Advocacy Circle",
+      "status": "Suggested",
+      "members": 5,
+      "motions": 0,
+      "domains": ["Policy", "Advocacy"],
+      "description": "Policy analysis, advocacy strategies, and institutional partnerships.",
+      "founded": "May 2026"
+    }
+  ],
+
+  "domains": {
+    "astronomy-astrophysics": { "label": "Astronomy & Astrophysics", "short": "ASTRO", "color": "#6EB8FF", "hasCircle": true },
+    "aerospace-engineering": { "label": "Aerospace Engineering", "short": "AERO", "color": "#4ACCA8", "hasCircle": false },
+    "earth-planetary-science": { "label": "Earth & Planetary Science", "short": "EARTH", "color": "#7AACDA", "hasCircle": true },
+    "space-medicine-biology": { "label": "Space Medicine & Biology", "short": "MED", "color": "#FF8080", "hasCircle": false },
+    "space-law-policy": { "label": "Space Law & Policy", "short": "LAW", "color": "#FFB84D", "hasCircle": true },
+    "telecommunications-signals": { "label": "Telecom & Signals", "short": "COMMS", "color": "#B088F0", "hasCircle": false },
+    "computer-science-software": { "label": "CS & Software", "short": "CODE", "color": "#50E0C0", "hasCircle": true },
+    "physics": { "label": "Physics", "short": "PHYS", "color": "#AACCEE", "hasCircle": false },
+    "materials-science": { "label": "Materials Science", "short": "MAT", "color": "#E0A060", "hasCircle": false },
+    "robotics-automation": { "label": "Robotics & Automation", "short": "ROBO", "color": "#80D0FF", "hasCircle": false },
+    "remote-sensing": { "label": "Remote Sensing", "short": "RS", "color": "#40C090", "hasCircle": true },
+    "space-architecture": { "label": "Space Architecture", "short": "ARCH", "color": "#C0A0E0", "hasCircle": false },
+    "space-finance-economics": { "label": "Space Finance & Economics", "short": "FIN", "color": "#FFD060", "hasCircle": false },
+    "science-communication": { "label": "Science Communication", "short": "SCICOMM", "color": "#FF90B0", "hasCircle": false },
+    "philosophy-ethics-space": { "label": "Philosophy & Ethics", "short": "PHIL", "color": "#D0C0A0", "hasCircle": true },
+    "art-culture-space": { "label": "Art & Culture of Space", "short": "ART", "color": "#E0B0C0", "hasCircle": false }
+  },
+
+  "domainLayout": {
+    "worldSize": 1800,
+    "seeds": {
+      "astronomy-astrophysics": [280, 280],
+      "aerospace-engineering": [520, 180],
+      "earth-planetary-science": [380, 480],
+      "space-medicine-biology": [700, 350],
+      "space-law-policy": [1080, 380],
+      "telecommunications-signals": [900, 200],
+      "computer-science-software": [1200, 160],
+      "physics": [600, 550],
+      "materials-science": [800, 500],
+      "robotics-automation": [1000, 550],
+      "remote-sensing": [450, 650],
+      "space-architecture": [1100, 600],
+      "space-finance-economics": [1300, 400],
+      "science-communication": [1400, 250],
+      "philosophy-ethics-space": [750, 150],
+      "art-culture-space": [1350, 600]
+    },
+    "camera": { "x": 900, "y": 900, "scale": 0.5 }
+  },
+
+  "stfs": {
+    "pending": [
+      {
+        "id": "vstf-steward",
+        "type": "vSTF",
+        "purpose": "Steward Candidacy",
+        "candidate": "Ssempa David",
+        "circle": "Space Law",
+        "deadline": "Jul 19",
+        "status": "Invitation"
+      },
+      {
+        "id": "vstf-competence",
+        "type": "vSTF",
+        "purpose": "Competence Claims",
+        "candidate": "Akello Jane",
+        "circle": "Space Law",
+        "deadline": "Jul 19",
+        "status": "Invitation"
+      }
+    ],
+    "active": [
+      {
+        "id": "astf-debris",
+        "type": "aSTF",
+        "purpose": "Motion adjudication",
+        "title": "Debris liability framework",
+        "circle": "Space Law",
+        "deadline": "Jul 28",
+        "status": "Active"
+      },
+      {
+        "id": "xstf-itu",
+        "type": "xSTF",
+        "purpose": "Execution",
+        "title": "ITU coordination guide",
+        "circle": "Space Law",
+        "deadline": "Aug 15",
+        "status": "Active"
+      }
+    ],
+    "completed": [
+      {
+        "id": "pastf-space-law",
+        "type": "p-aSTF",
+        "purpose": "Periodic review",
+        "title": "Space Law Circle health",
+        "circle": "Commons",
+        "deadline": "Aug 05",
+        "status": "Selecting"
+      },
+      {
+        "id": "jstf-credential",
+        "type": "jSTF",
+        "purpose": "Investigation",
+        "title": "Credential misrepresentation",
+        "circle": "Judicial",
+        "deadline": "Aug 01",
+        "status": "Closed"
+      }
+    ]
+  },
+
+  "threads": [
+    {
+      "id": "thread-042",
+      "title": "Liability frameworks for debris-generating manoeuvres",
+      "author": "Akello Jane",
+      "domain": "Space Law",
+      "replies": 8,
+      "time": "2d ago"
+    },
+    {
+      "id": "thread-038",
+      "title": "Psychological design in confined habitats",
+      "author": "Namugga Claire",
+      "domain": "Mars Habitability",
+      "replies": 14,
+      "time": "3d ago"
+    },
+    {
+      "id": "thread-035",
+      "title": "Sentinel-2 data access for East Africa",
+      "author": "Mwenda Thomas",
+      "domain": "Remote Sensing",
+      "replies": 5,
+      "time": "5d ago"
+    },
+    {
+      "id": "thread-029",
+      "title": "ITU coordination procedures",
+      "author": "Akello Jane",
+      "domain": "Space Law",
+      "replies": 22,
+      "time": "1w ago"
+    }
+  ],
+
+  "projects": [
+    {
+      "id": "proj-001",
+      "title": "East Africa Space Sector Mapping",
+      "domains": ["Policy", "Remote Sensing"],
+      "lead": "Okello R.",
+      "progress": 60,
+      "role": "Contributor"
+    },
+    {
+      "id": "proj-002",
+      "title": "Space Debris Liability Framework Review",
+      "domains": ["Space Law"],
+      "lead": "You",
+      "progress": 30,
+      "role": "Lead"
+    },
+    {
+      "id": "proj-003",
+      "title": "Swahili Space Terminology",
+      "domains": ["Education", "Communications"],
+      "lead": "Kimani A.",
+      "progress": 75,
+      "role": "Observer"
+    }
+  ],
+
+  "cells": [
+    {
+      "id": "cell-14",
+      "type": "Project Cell",
+      "title": "East Africa Mapping",
+      "participants": 7,
+      "progress": 60,
+      "status": "Active"
+    },
+    {
+      "id": "cell-18",
+      "type": "Circle Cell",
+      "title": "Space Law Circle — Publications",
+      "members": 8,
+      "status": "Active",
+      "circle": "Space Law"
+    },
+    {
+      "id": "cell-21",
+      "type": "Deliberation Cell",
+      "title": "Debris liability framework — who bears responsibility?",
+      "participants": 12,
+      "status": "Active",
+      "daysActive": 3
+    },
+    {
+      "id": "cell-23",
+      "type": "aSTF Cell",
+      "title": "Motion: Debris liability",
+      "assessors": 3,
+      "deadline": "Jul 28",
+      "status": "Active"
+    },
+    {
+      "id": "cell-19",
+      "type": "xSTF Cell",
+      "title": "Resolution: ITU coordination guide",
+      "progress": 45,
+      "deadline": "Aug 15",
+      "status": "Active"
+    }
+  ],
+
+  "inbox": [
+    {
+      "type": "vSTF",
+      "title": "Candidate Verification — Ssempa D.",
+      "desc": "Steward candidacy assessment for Space Law Circle",
+      "time": "Jul 12",
+      "badge": "Invitation",
+      "detail": "Expires Jul 19"
+    },
+    {
+      "type": "Deliberation",
+      "title": "Motion crystallising — Space Law",
+      "desc": "Akello J. sponsored debris liability framework",
+      "time": "Jul 11",
+      "badge": "Active",
+      "detail": "12 participants"
+    },
+    {
+      "type": "aSTF",
+      "title": "Cell #Cell-23 — Motion adjudication",
+      "desc": "Debris liability framework — blind review",
+      "time": "Jul 10",
+      "badge": "Due Jul 28",
+      "detail": "3 assessors"
+    },
+    {
+      "type": "xSTF",
+      "title": "Cell #Cell-19 — ITU guide 45% complete",
+      "desc": "Execution deliverable on track",
+      "time": "Jul 9",
+      "badge": "Due Aug 15",
+      "detail": "3 team members"
+    },
+    {
+      "type": "Cell",
+      "title": "Cell update — Kenya section",
+      "desc": "East Africa Mapping project: Kenya section 80% complete",
+      "time": "Jul 8",
+      "badge": "Update",
+      "detail": ""
+    },
+    {
+      "type": "Competence",
+      "title": "Competence verified — Space Law",
+      "desc": "Your Space Law Wh increased by +50",
+      "time": "Jul 7",
+      "badge": "Verified",
+      "detail": "Wh 1200 → 1250"
+    }
+  ],
+
+  "stats": {
+    "discussions": { "threads": 4, "replies": 22, "endorsed": 3 },
+    "projects": { "active": 3, "lead": 1, "contributor": 2 },
+    "observatory": { "resources": "200+", "publications": 14, "events": 38 },
+    "cells": { "active": 5, "lead": 1, "member": 4 },
+    "stfs": { "pending": 2, "active": 1, "completed": 3 },
+    "participants": { "total": 8, "stewards": 2, "circles": 6 }
+  },
+
+  "news": [
+    { "title": "ESA confirms Lunar Gateway module delivery for 2027", "time": "2h ago", "source": "ESA" },
+    { "title": "Kenya launches first CubeSat from Malindi Space Centre", "time": "5h ago", "source": "BBC" },
+    { "title": "New space debris tracking protocol adopted by 12 nations", "time": "1d ago", "source": "UNOOSA" },
+    { "title": "African Space Policy Summit dates confirmed for August", "time": "2d ago", "source": "AU" }
+  ],
+
+  "events": [
+    { "title": "African Space Policy Summit", "date": "Aug 15", "location": "Nairobi" },
+    { "title": "Artemis Accords Webinar", "date": "Aug 22", "location": "Online" },
+    { "title": "Space Debris Workshop", "date": "Sep 5", "location": "Kampala" },
+    { "title": "IAF Congress", "date": "Sep 20", "location": "Milan" }
+  ],
+
+  "opportunities": [
+    { "title": "ESA Trainee Programme", "deadline": "Sep 30", "type": "Traineeship" },
+    { "title": "AU Space Research Grant", "deadline": "Oct 15", "type": "Grant" },
+    { "title": "Remote Sensing Analyst — RCMRD", "deadline": "Aug 20", "type": "Position" },
+    { "title": "Call for Papers — African Space Law Journal", "deadline": "Nov 1", "type": "Publication" }
+  ],
+
+  "publications": [
+    {
+      "title": "Liability frameworks for orbital debris: An African perspective",
+      "authors": ["Okello M."],
+      "journal": "African Space Law Journal",
+      "date": "Jun 2026",
+      "views": 142,
+      "downloads": 38
+    },
+    {
+      "title": "Space policy harmonisation in East Africa",
+      "authors": ["Ssempa D."],
+      "journal": "Policy Brief",
+      "date": "May 2026",
+      "views": 89,
+      "downloads": 22
+    },
+    {
+      "title": "Remote sensing for agricultural monitoring in Uganda",
+      "authors": ["Nakabugo B."],
+      "journal": "Research Report",
+      "date": "Apr 2026",
+      "views": 67,
+      "downloads": 15
+    }
+  ],
+
+  "registration": {
+    "domains": [
+      { "name": "Astronomy & Astrophysics", "type": "knowledge" },
+      { "name": "Aerospace Engineering", "type": "knowledge" },
+      { "name": "Earth & Planetary Science", "type": "knowledge" },
+      { "name": "Space Medicine & Biology", "type": "knowledge" },
+      { "name": "Space Law & Policy", "type": "knowledge" },
+      { "name": "Telecommunications & Signals", "type": "knowledge" },
+      { "name": "Computer Science & Software", "type": "knowledge" },
+      { "name": "Physics", "type": "knowledge" },
+      { "name": "Materials Science", "type": "knowledge" },
+      { "name": "Robotics & Automation", "type": "knowledge" },
+      { "name": "Remote Sensing", "type": "knowledge" },
+      { "name": "Space Architecture", "type": "knowledge" },
+      { "name": "Space Finance & Economics", "type": "knowledge" },
+      { "name": "Science Communication", "type": "knowledge" },
+      { "name": "Philosophy & Ethics", "type": "knowledge" },
+      { "name": "Art & Culture of Space", "type": "knowledge" },
+      { "name": "Uganda Astronomical Society", "type": "affiliation" },
+      { "name": "East African Astronomical Society", "type": "affiliation" },
+      { "name": "African Astronomical Society", "type": "affiliation" },
+      { "name": "Space Generation Advisory Council", "type": "affiliation" },
+      { "name": "Swahili", "type": "experiential" },
+      { "name": "English", "type": "experiential" },
+      { "name": "Luganda", "type": "experiential" },
+      { "name": "Python", "type": "experiential" },
+      { "name": "GIS", "type": "experiential" },
+      { "name": "Field Research", "type": "experiential" },
+      { "name": "Public Speaking", "type": "experiential" },
+      { "name": "Technical Writing", "type": "experiential" }
+    ],
+    "eloMap": {
+      "affiliation": { "Affiliate": 500, "Member": 1000, "Representative": 1500, "Leadership": 2000 },
+      "knowledge": { "Enthusiast": 200, "Elementary": 400, "Highschool": 600, "Bachelors": 1000, "Masters": 1500, "PhD": 2000, "Professional": 2500, "Expert": 3000 },
+      "experiential": { "Explored": 300, "Familiar": 600, "Experienced": 1000, "Fluent": 1500, "Native": 2000, "Professional": 2500 }
+    },
+    "knowledgeLevels": ["Enthusiast", "Elementary", "Highschool", "Bachelors", "Masters", "PhD", "Professional", "Expert"],
+    "experientialLevels": ["Explored", "Familiar", "Experienced", "Fluent", "Native", "Professional"],
+    "defaultInterests": [
+      { "domain": "astronomy-astrophysics", "label": "Astronomy & Astrophysics", "rank": 1, "checked": true },
+      { "domain": "space-law-policy", "label": "Space Law & Policy", "rank": 2, "checked": true },
+      { "domain": "remote-sensing", "label": "Remote Sensing", "rank": 3, "checked": true },
+      { "domain": "earth-planetary-science", "label": "Earth & Planetary Science", "rank": 4, "checked": true },
+      { "domain": "computer-science-software", "label": "CS & Software", "rank": 5, "checked": true },
+      { "domain": "space-finance-economics", "label": "Space Finance & Economics", "rank": 6, "checked": false },
+      { "domain": "philosophy-ethics-space", "label": "Philosophy & Ethics", "rank": 7, "checked": false },
+      { "domain": "space-medicine-biology", "label": "Space Medicine & Biology", "rank": 8, "checked": false },
+      { "domain": "aerospace-engineering", "label": "Aerospace Engineering", "rank": 9, "checked": false },
+      { "domain": "science-communication", "label": "Science Communication", "rank": 10, "checked": false },
+      { "domain": "robotics-automation", "label": "Robotics & Automation", "rank": 11, "checked": false },
+      { "domain": "materials-science", "label": "Materials Science", "rank": 12, "checked": false },
+      { "domain": "telecommunications-signals", "label": "Telecom & Signals", "rank": 13, "checked": false },
+      { "domain": "space-architecture", "label": "Space Architecture", "rank": 14, "checked": false },
+      { "domain": "physics", "label": "Physics", "rank": 15, "checked": false },
+      { "domain": "art-culture-space", "label": "Art & Culture of Space", "rank": 16, "checked": false }
+    ]
+  }
+}
