@@ -1648,58 +1648,89 @@
     </div>
     <div class="layout-split">
       <div class="layout-main">
-        <!-- Discussions (restricted to circle) -->
-        <div class="sec">Circle Discussions</div>
-        <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">Restricted discussions visible to circle members. Proposals originate here and move to deliberation cells.</div>
-        <div class="card click" onclick="nav('cell-circle')" style="margin-bottom:8px">
-          <div class="flex justify-between mb-2"><span class="badge b-review">Restricted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">2h ago · 4 replies</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Proportional liability model for manoeuvre-induced debris. Now in multi-circle deliberation.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability</div>
-        </div>
-        <div class="card click" style="margin-bottom:8px">
-          <div class="flex justify-between mb-2"><span class="badge b-vol">Drafted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 18 · 2 replies</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Artemis Accords ratification recommendation</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Recommendation for East African ratification. Pending steward review.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Policy</div>
-        </div>
-        <div class="card click" style="margin-bottom:8px">
-          <div class="flex justify-between mb-2"><span class="badge b-enacted">Resolved</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 10 · 22 replies</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination procedures — plain language walkthrough</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Practical guide to ITU frequency coordination. Now published to Observatory.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · ITU</div>
+        <!-- Domain Activity -->
+        <div class="circle-section-title">Domain Activity</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Contribution volume · gold = within mandate, grey = adjacent</div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="dom-act-bar"><span class="dom-act-label">Space Law</span><div class="dom-act-track"><div class="dom-act-fill mandate" style="width:92%"></div></div><span class="dom-act-pct">92%</span></div>
+          <div class="dom-act-bar"><span class="dom-act-label">Liability</span><div class="dom-act-track"><div class="dom-act-fill mandate" style="width:74%"></div></div><span class="dom-act-pct">74%</span></div>
+          <div class="dom-act-bar"><span class="dom-act-label">Policy</span><div class="dom-act-track"><div class="dom-act-fill mandate" style="width:58%"></div></div><span class="dom-act-pct">58%</span></div>
+          <div class="dom-act-bar"><span class="dom-act-label">Remote Sensing</span><div class="dom-act-track"><div class="dom-act-fill adjacent" style="width:32%"></div></div><span class="dom-act-pct">32%</span></div>
+          <div class="dom-act-bar"><span class="dom-act-label">Education</span><div class="dom-act-track"><div class="dom-act-fill adjacent" style="width:18%"></div></div><span class="dom-act-pct">18%</span></div>
         </div>
 
-        <!-- Motions -->
-        <div class="sec" style="margin-top:16px">Motions</div>
-        <div class="card click" style="margin-bottom:8px" onclick="nav('cell-delib')">
-          <div class="flex justify-between mb-2"><span class="badge b-pending">In Deliberation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3d active</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Multi-circle deliberation. Space Law + Remote Sensing + Mars Habitability (withdrew).</div>
+        <!-- Circle Cells (Motions) -->
+        <div class="flex items-center justify-between" style="margin-bottom:10px">
+          <div class="circle-section-title" style="margin:0;border:none;padding:0">Circle Cells</div>
+          <button class="btn btn-sm" style="font-size:9px">+ New Cell</button>
         </div>
-        <div class="card click" style="margin-bottom:8px" onclick="nav('stf-astf')">
-          <div class="flex justify-between mb-2"><span class="badge b-active">aSTF Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Jul 28</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Artemis Accords ratification framework</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Blind adjudication. 3 assessors evaluating motion.</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Motions and special business under deliberation</div>
+        <div class="cell-card" onclick="nav('cell-delib')">
+          <div class="cell-card-top">
+            <span class="cell-card-title">Debris liability framework — proportional model</span>
+            <span class="status-pill status-deliberating"><span class="status-pill-dot"></span>Deliberating</span>
+          </div>
+          <div class="cell-card-meta"><span>6 members · 3d active</span><span>Space Law · Liability</span></div>
+        </div>
+        <div class="cell-card">
+          <div class="cell-card-top">
+            <span class="cell-card-title">Weighted vote decay parameter revision</span>
+            <span class="status-pill status-drafting"><span class="status-pill-dot"></span>Drafting</span>
+          </div>
+          <div class="cell-card-meta"><span>4 members · 5d active</span><span>Policy</span></div>
+        </div>
+        <div class="cell-card" onclick="nav('stf-astf')">
+          <div class="cell-card-top">
+            <span class="cell-card-title">Artemis Accords ratification framework</span>
+            <span class="status-pill status-finalising"><span class="status-pill-dot"></span>Finalising</span>
+          </div>
+          <div class="cell-card-meta"><span>8 members · 8d active</span><span>Space Law · Policy</span></div>
+        </div>
+
+        <!-- STF Cells -->
+        <div class="circle-section-title" style="margin-top:16px">STF Cells</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Audit and execution STFs commissioned here</div>
+        <div class="cell-card" onclick="nav('stf-astf')">
+          <div class="cell-card-top">
+            <span class="cell-card-title">aSTF · Debris liability adjudication</span>
+            <span class="status-pill status-active"><span class="status-pill-dot"></span>Active</span>
+          </div>
+          <div class="cell-card-meta" style="margin-bottom:8px"><span>3 assessors</span><span>Due Jul 28</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="progress" style="flex:1;height:4px"><div class="progress-fill" style="width:62%;background:var(--blue)"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary);min-width:30px;text-align:right">62%</span>
+          </div>
+        </div>
+        <div class="cell-card" onclick="nav('stf-xstf')">
+          <div class="cell-card-top">
+            <span class="cell-card-title">xSTF · ITU coordination guide execution</span>
+            <span class="status-pill status-concluded"><span class="status-pill-dot"></span>Concluded</span>
+          </div>
+          <div class="cell-card-meta" style="margin-bottom:8px"><span>3 team members</span><span>Completed Aug 10</span></div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="progress" style="flex:1;height:4px"><div class="progress-fill" style="width:100%;background:var(--text-tertiary)"></div></div>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary);min-width:30px;text-align:right">100%</span>
+          </div>
         </div>
 
         <!-- Resolutions -->
-        <div class="sec" style="margin-top:16px">Resolutions</div>
-        <div class="card" style="margin-bottom:8px">
-          <div class="flex justify-between mb-2"><span class="badge b-enacted">Enacted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 10</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination guide publication</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Non-system resolution. xSTF executed. Guide published to Observatory.</div>
+        <div class="circle-section-title" style="margin-top:16px">Resolutions</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Enacted policy adopted by this circle</div>
+        <div class="card" style="margin-bottom:6px">
+          <div class="flex justify-between mb-2"><span class="badge b-enacted" style="font-size:8px">Enacted</span><span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary)">Jul 10</span></div>
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination guide publication</div>
+          <div style="font-size:11px;color:var(--text-tertiary);line-height:1.4">Non-system resolution. xSTF executed. Guide published to Observatory.</div>
         </div>
 
         <!-- Activity -->
-        <div class="sec" style="margin-top:16px">Circle Activity</div>
+        <div class="circle-section-title" style="margin-top:16px">Circle Activity</div>
         <div class="card">
-          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Akello J. created proposal 'Debris liability framework'<div class="ai-when">3d ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Akello J. created proposal <strong>'Debris liability framework'</strong><div class="ai-when">3d ago</div></div>
           <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Mars Habitability Circle self-disqualified from deliberation<div class="ai-when">3d ago</div></div>
           <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>xSTF spawned for ITU coordination guide execution<div class="ai-when">1w ago</div></div>
           <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>Resolution passed: ITU coordination guide publication<div class="ai-when">1w ago</div></div>
           <div class="activity-item"><div class="ai-dot" style="background:var(--blue)"></div>Mensah N. joined the circle<div class="ai-when">2w ago</div></div>
-          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Circle cell messages: 3 new messages<div class="ai-when">2h ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Circle cell messages: 3 new<div class="ai-when">2h ago</div></div>
         </div>
       </div>
       <div class="layout-aside">
