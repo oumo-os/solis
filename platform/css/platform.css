@@ -451,6 +451,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .dom-act-fill.mandate{background:var(--gold)}
 .dom-act-fill.adjacent{background:var(--border)}
 .dom-act-pct{font-size:9px;color:var(--text-tertiary);font-family:var(--mono);min-width:28px;text-align:right}
+/* ── Competence Map ── */
+.comp-bar{display:flex;align-items:center;gap:8px;padding:5px 0}
+.comp-label{font-size:10px;color:var(--text-secondary);font-family:var(--mono);min-width:100px}
+.comp-track{flex:1;height:16px;position:relative;border-radius:3px;overflow:visible}
+.comp-desired{position:absolute;top:0;left:0;height:100%;background:var(--gold-soft);border:1px dashed var(--gold);border-radius:3px;z-index:0}
+.comp-actual{position:absolute;top:2px;left:2px;height:calc(100% - 4px);background:var(--navy-light);border-radius:2px;z-index:1;transition:width .6s ease}
+.comp-val{font-size:9px;color:var(--text-tertiary);font-family:var(--mono);min-width:80px;text-align:right}
+.comp-actual.over{background:var(--green)}
+/* ── Circle Health ── */
+.health-card{display:flex;gap:12px;align-items:center;padding:14px 16px}
+.health-tier{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--mono);min-width:44px}
+.health-tier.healthy{background:var(--green-soft);color:var(--green)}
+.health-tier.watch{background:var(--amber-soft);color:var(--amber)}
+.health-tier.concern{background:var(--red-soft);color:var(--red)}
+.health-details{flex:1;min-width:0}
+.health-label{font-size:11px;font-weight:600;color:var(--text)}
+.health-meta{font-size:10px;color:var(--text-tertiary);margin-top:1px}
 
 /* ── Cell Card ── */
 .cell-card{padding:12px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface);margin-bottom:6px;cursor:pointer;transition:border-color .12s}
