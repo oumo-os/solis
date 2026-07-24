@@ -2160,7 +2160,7 @@ function dmRender(){
     var twinkle2=Math.sin(DM.time*0.4+id.charCodeAt(1)*3.7)*0.5+0.5;
     var glint=Math.pow(Math.sin(DM.time*0.25+id.charCodeAt(2)*1.9),12);
     var op;
-    if(isF)op=1;else if(isN)op=0.8;else if(hasF)op=0.04;else op=0.35+twinkle*0.25+twinkle2*0.15+glint*0.5;
+    if(isF)op=1;else if(isN)op=0.8;else if(hasF)op=0.04;else op=0.55+twinkle*0.2+twinkle2*0.1+glint*0.5;
 
     var sx=(pos.x-c.x)*c.scale+DM_dims.w/2;
     var sy=(pos.y-c.y)*c.scale+DM_dims.h/2;
