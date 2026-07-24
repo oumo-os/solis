@@ -242,12 +242,34 @@ A deliberation cell is the core governance mechanism. Each deliberation cell con
 
 1. **Deliberation** — a chat thread where participants discuss the proposal
 2. **Proposal** — the formal proposal being deliberated, with a link to the source discussion thread (if any), or report messages (for jSTF), or complaint (for jSTF)
-3. **Deliverable** — the motion, action, or outcome produced by deliberation
+3. **Deliverable** — the motion, action, or outcome produced by deliberation (always one: a motion to aSTF)
 4. **Competence-weighted vote** — when all vote and the motion passes, the cell creates or opens an aSTF
+
+**No sidebar** — full-width content only.
 
 ### Multi-Circle Participation
 
 Deliberation cells can have multiple circles participating, not just the originating circle.
+
+Circles can **self-disqualify** from a deliberation — this is an auditable decision. The circle appears as a "ghost/scar" in the participating circles list, showing they were invited but chose to withdraw. The scar is permanent and visible to auditors.
+
+### Voting Mechanics
+
+**Three vote options:** Abstain, Nay, Yea
+
+**Per-member vote weight:**
+Each member's vote weight = their Ws (soft competence) intersection with the deliberation domains. If a member has 2800 Ws in Xenobiology but the motion is about Space Law and Liability, their Xenobiology Ws contribute zero influence. Their Veterinary Biology Ws (200) may be significant if the motion touches that domain.
+
+**Per-domain vote breakdown:**
+For each domain the motion covers, the system shows a table with:
+- Domain name
+- Yea Ws total (sum of all yea voters' Ws in that domain)
+- Nay Ws total (sum of all nay voters' Ws in that domain)
+- Total Ws in that domain
+- Individual voter contributions (avatar, Ws, vote direction)
+
+**Aggregate vote:**
+The final vote is an aggregate of all stewards on all intersecting domains with the motion, across all domains of the motion. Shown as total Yea Ws vs total Nay Ws across all domains, with a final row summarising.
 
 ### Vote and aSTF
 
@@ -312,7 +334,8 @@ When the disciplinary motion passes aSTF audit, the resolution can be:
 ```
 Discussion Thread (any member) → Steward creates Proposal → Deliberation Cell (stewards + domain members)
                                                           ↓
-                                              Competence-weighted vote
+                                              Per-domain vote table (Ws intersection)
+                                              Yea Ws vs Nay Ws per domain + aggregate
                                                           ↓
                                               Motion passes → opens aSTF (blind cell)
                                                           ↓
@@ -328,3 +351,14 @@ jSTF: Report (any member) → Anonymous post → Steward sponsors → jSTF Cell 
                                                               ↓
                                                       System-bound / Non-system resolution
 ```
+
+### Voting Mechanics Summary
+
+| Component | Detail |
+|-----------|--------|
+| Vote options | Abstain, Nay, Yea |
+| Member weight | Ws in intersecting domains only |
+| Per-domain breakdown | Table: Yea Ws / Nay Ws / Total / Voters |
+| Aggregate | Sum of all Yea Ws vs Nay Ws across all domains |
+| Pass condition | Aggregate Yea Ws > aggregate Nay Ws |
+| Self-disqualify | Auditable withdrawal — ghost/scar visible to auditors |

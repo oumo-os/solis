@@ -407,25 +407,44 @@ Space Generation Advisory Council — Vienna, affiliated since 2026
 
 ---
 
-## Cells — Deep Clarification (2026-07-24)
+## Cells — Deep Clarification (2026-07-24, updated 2026-07-25)
 
 ### What is a Cell?
 A Cell is a **deliberation/discussion/activity space** — think of it as a chatroom, but each one is unique in its purpose and membership. Cells are where work actually happens.
 
+### Circle Home vs Circle Cell
+
+**Circle Home** (accessible from circles list):
+- The circle's public-facing page — profile, discussions, activity, membership, histories
+- Shows: circle profile, restricted discussions, motions, resolutions, circle activity feed
+- Discussions here are restricted to circle members
+- Accessible from the circles list
+
+**Circle Cell** (restricted, accessible from cells dashboard):
+- A private work cell for circle members, like a project cell
+- Where proposals originate, xSTFs are created, deliverables are produced
+- Has: proposals list, xSTFs list, deliverables, cell messages
+- Activities in the circle cell appear in the circle's activity feed
+- Circle cells are listed in the circle's activities
+
 ### Cell Types and Their Lifecycle
 
 **1. Circle Cell**
-- Created by a Steward Circle for internal deliberation
+- Restricted work cell for circle members
+- Where proposals originate, xSTFs are created, deliverables are produced
 - Members: circle stewards + mandated domain participants
-- Purpose: discuss governance, policies, domain direction
+- Purpose: originate proposals, create xSTFs, review deliverables
+- Activities here feed into the circle's activity feed
 
 **2. Deliberation Cell**
 The core governance mechanism. A deliberation cell has four components:
 
 1. **Deliberation** — a chat thread where participants discuss
 2. **Proposal** — the formal proposal being deliberated, with a link to the source discussion thread if any (or report message(s) for jSTF, or complaint for jSTF)
-3. **Deliverable** — the motion, action, or outcome produced by deliberation
+3. **Deliverable** — the motion, action, or outcome produced by deliberation (always one: a motion to aSTF)
 4. **Competence-weighted vote** — when all vote and the motion passes, the cell creates/opens an aSTF
+
+**No sidebar** — full-width content only.
 
 **Proposal Origins (how a proposal enters a deliberation cell):**
 1. **Discussion thread → steward proposal**: A user creates a discussion thread, participants discuss, and a steward creates a proposal from that thread. The proposal links back to the source thread.
@@ -435,12 +454,36 @@ The core governance mechanism. A deliberation cell has four components:
 **Multi-circle participation:**
 Deliberation cells can have multiple circles participating, not just the originating circle.
 
+**Self-disqualification:**
+Circles can self-disqualify from a deliberation. This is an auditable decision — the circle appears as a "ghost/scar" in the participating circles list, showing they were invited but chose to withdraw. The scar is permanent and visible to auditors.
+
 **Vote and aSTF:**
 When all participants have voted and the motion passes, the cell creates or opens an aSTF for blind adjudication.
+
+### Deliberation Cell Voting Mechanics
+
+**Three vote options:** Abstain, Nay, Yea
+
+**Per-member vote weight:**
+Each member's vote weight = their Ws (soft competence) intersection with the deliberation domains. If a member has 2800 Ws in Xenobiology but the motion is about Space Law and Liability, their Xenobiology Ws contribute zero influence. Their Veterinary Biology Ws (200) may be significant if the motion touches that domain.
+
+**Per-domain vote breakdown:**
+For each domain the motion covers, the system shows:
+- Yea Ws total (sum of all yea voters' Ws in that domain)
+- Nay Ws total (sum of all nay voters' Ws in that domain)
+- Total Ws in that domain
+- Individual voter contributions (avatar, Ws, vote direction)
+
+**Aggregate vote:**
+The final vote is an aggregate of all stewards on all intersecting domains with the motion, across all domains of the motion. Shown as total Yea Ws vs total Nay Ws across all domains.
+
+**Visual:**
+Table-based breakdown per domain, with an aggregate row at the bottom. This makes the weighted voting concept transparent — you can see exactly how each member's competence in each domain contributes to the outcome.
 
 **3. Project Cell**
 - Projects can have their own cells for deliberation
 - Project cells may have different membership rules than circle cells
+- Spawn deliverables (unlike circle cells which originate proposals)
 
 **4. Motion → aSTF (Adjudication STF)**
 - A motion from deliberation spawns an **aSTF** (Adjudication Special Task Force)
@@ -485,11 +528,15 @@ When the disciplinary motion passes aSTF audit, the resolution can be:
 ### Flow Summary
 
 ```
-Discussion → Proposal (steward-sponsored) → Deliberation Cell → Motion → aSTF → Resolution
-      ↑                                                        ↓
-      └──── Link to source thread ────────────────────────── Vote (competence-weighted)
-                                                                      ↓
-                                                              Resolution passes → opens aSTF
+Discussion → Proposal (steward-sponsored) → Deliberation Cell (full-width, no sidebar)
+                                                          ↓
+                                              Per-domain vote table (Ws intersection)
+                                              Yea Ws vs Nay Ws per domain + aggregate
+                                                          ↓
+                                              Motion passes → opens aSTF (blind cell)
+                                                          ↓
+                                              aSTF verdict: Resolution / Rejection
+                                              → opens xSTF → Deliverable
 
 jSTF: Report → Anonymous post → Steward sponsors → jSTF Cell (blind)
                                                           ↓
@@ -497,12 +544,17 @@ jSTF: Report → Anonymous post → Steward sponsors → jSTF Cell (blind)
                                                           ↓
                                                    Disciplinary motion → aSTF audit
                                                           ↓
-                                                   System-bound resolution (circle removal, vSTF trigger, Ws freeze)
-                                                   OR non-system resolution (policy citation)
+                                                   System-bound / Non-system resolution
 
 Periodic Review aSTF → Evaluates circle health + steward performance
 vSTF → Evaluates competence claims
 xSTF → Executes resolved motions → Deliverable
+
+Circle Cell → originates proposals, creates xSTFs, reviews deliverables
+              activities appear in circle's activity feed
+
+Circle Home → circle profile, discussions, motions, resolutions, activity, membership
+              public-facing page accessible from circles list
 ```
 
 ### Key Principles
@@ -513,3 +565,5 @@ xSTF → Executes resolved motions → Deliverable
 - **Anonymous reporting**: jSTF reports are anonymous to protect reporters; sponsors are stewards who take responsibility
 - **Proportionate discipline**: jSTF can restrict activity during investigation but must cite policy precedent for punitive action
 - **aSTF independence**: aSTF never sees jSTF members — audits the decision, not the people
+- **Domain intersection voting**: Deliberation votes are weighted by member Ws in the specific domains the motion covers, not total Ws
+- **Self-disqualification scars**: Circles that withdraw from deliberations leave permanent auditable ghosts/scars
