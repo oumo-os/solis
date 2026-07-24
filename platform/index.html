@@ -2065,19 +2065,19 @@ function nav(key) {
 
 function layoutParticipantCards(){
   var cards=document.querySelectorAll('.participant-card');
-  var maxH=0;
-  cards.forEach(function(c){c.style.height='';if(c.offsetHeight>maxH)maxH=c.offsetHeight;});
+  var h=200;
   cards.forEach(function(c){
     var av=c.querySelector('.avatar-square');
-    if(c.offsetWidth < maxH * 0.5){
+    if(c.offsetWidth < h * 0.5){
       c.classList.add('flex-col');
+      c.style.height='';
       av.style.width='100%';
       av.style.height='48px';
     } else {
       c.classList.remove('flex-col');
-      c.style.height=maxH+'px';
+      c.style.height=h+'px';
       av.style.height='';
-      av.style.width=maxH+'px';
+      av.style.width=h+'px';
     }
   });
 }
