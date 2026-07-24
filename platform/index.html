@@ -2065,8 +2065,16 @@ function nav(key) {
 
 function layoutParticipantCards(){
   document.querySelectorAll('.participant-card').forEach(function(c){
-    if(c.offsetWidth < c.offsetHeight * 0.5) c.classList.add('flex-col');
-    else c.classList.remove('flex-col');
+    var av=c.querySelector('.avatar-square');
+    if(c.offsetWidth < c.offsetHeight * 0.5){
+      c.classList.add('flex-col');
+      av.style.width='100%';
+      av.style.height='48px';
+    } else {
+      c.classList.remove('flex-col');
+      av.style.height='';
+      av.style.width=c.offsetHeight+'px';
+    }
   });
 }
 layoutParticipantCards();
