@@ -422,6 +422,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .dm-canvas{position:relative;height:calc(100vh - 180px);min-height:400px;background:#0E1E34;border-radius:var(--radius-lg);overflow:hidden;cursor:crosshair}
 .dm-canvas svg{display:block;pointer-events:none}
 .dm-hud{position:absolute;bottom:12px;left:14px;font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(200,150,14,0.3);text-transform:uppercase;pointer-events:none}
+.dm-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--mono);font-size:10px;letter-spacing:2px;color:rgba(200,150,14,0.35);text-transform:uppercase;pointer-events:none;transition:opacity 1.5s ease;animation:dmHintPulse 3s ease-in-out infinite}
+.dm-hint.hidden{opacity:0}
+@keyframes dmHintPulse{0%,100%{opacity:0.35}50%{opacity:0.55}}
 .dm-chip{position:absolute;top:12px;right:14px;background:rgba(14,30,52,0.92);border:1px solid rgba(200,150,14,0.15);border-radius:4px;padding:10px 14px;pointer-events:none;backdrop-filter:blur(8px);min-width:160px;z-index:5}
 .dm-chip .tag{font-family:var(--mono);font-size:8px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:4px;font-weight:600}
 .dm-chip .name{font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:8px;color:#fff}
