@@ -166,7 +166,20 @@
       "motions": 2,
       "domains": ["Space Law", "Liability", "Policy"],
       "description": "Stewards space law analysis, liability frameworks, and regulatory compliance.",
-      "founded": "Mar 2026"
+      "founded": "Mar 2026",
+      "proposals": [
+        { "id": "prop-01", "title": "Debris liability framework — proportional model", "status": "In Deliberation", "date": "Jul 21" },
+        { "id": "prop-02", "title": "Artemis Accords ratification recommendation", "status": "Drafted", "date": "Jul 18" }
+      ],
+      "resolutions": [
+        { "id": "res-01", "title": "ITU coordination guide publication", "date": "Jul 10", "type": "non_system" }
+      ],
+      "activity": [
+        { "text": "Akello J. created proposal 'Debris liability framework'", "time": "3d ago", "type": "proposal" },
+        { "text": "xSTF spawned for ITU coordination guide execution", "time": "1w ago", "type": "xstf" },
+        { "text": "Resolution passed: ITU coordination guide publication", "time": "1w ago", "type": "resolution" },
+        { "text": "Mensah N. joined the circle", "time": "2w ago", "type": "member" }
+      ]
     },
     {
       "id": "remote-sensing",
@@ -176,7 +189,15 @@
       "motions": 1,
       "domains": ["Remote Sensing", "Satellite", "Data"],
       "description": "Satellite data analysis, Earth observation, and remote sensing methodologies.",
-      "founded": "Jan 2026"
+      "founded": "Jan 2026",
+      "proposals": [
+        { "id": "prop-03", "title": "East Africa SAR data sharing protocol", "status": "Active", "date": "Jul 15" }
+      ],
+      "resolutions": [],
+      "activity": [
+        { "text": "Kimani A. submitted SAR interferometry data", "time": "4d ago", "type": "discussion" },
+        { "text": "Proposal 'SAR data sharing protocol' entered deliberation", "time": "1w ago", "type": "proposal" }
+      ]
     },
     {
       "id": "mars",
@@ -186,7 +207,12 @@
       "motions": 0,
       "domains": ["Mars", "Habitability"],
       "description": "Life support systems, habitat design, and Mars colonisation research.",
-      "founded": "Jun 2026"
+      "founded": "Jun 2026",
+      "proposals": [],
+      "resolutions": [],
+      "activity": [
+        { "text": "Namugga C. posted confined habitats discussion", "time": "3d ago", "type": "discussion" }
+      ]
     },
     {
       "id": "policy",
@@ -196,7 +222,10 @@
       "motions": 0,
       "domains": ["Policy", "Advocacy"],
       "description": "Policy analysis, advocacy strategies, and institutional partnerships.",
-      "founded": "May 2026"
+      "founded": "May 2026",
+      "proposals": [],
+      "resolutions": [],
+      "activity": []
     }
   ],
 
@@ -483,10 +512,20 @@
     {
       "id": "cell-18",
       "type": "Circle Cell",
-      "title": "Space Law Circle — Publications",
+      "title": "Space Law Circle — Internal",
       "members": 8,
       "status": "Active",
-      "circle": "Space Law"
+      "circle": "Space Law",
+      "proposals": [
+        { "id": "prop-01", "title": "Debris liability framework — proportional model", "status": "In Deliberation", "date": "Jul 21" },
+        { "id": "prop-02", "title": "Artemis Accords ratification recommendation", "status": "Drafted", "date": "Jul 18" }
+      ],
+      "xstfs": [
+        { "id": "xstf-itu", "title": "ITU coordination guide execution", "progress": 45, "deadline": "Aug 15" }
+      ],
+      "deliverables": [
+        { "id": "del-01", "title": "ITU Coordination Guide — Final Draft", "status": "Complete", "date": "Aug 10" }
+      ]
     },
     {
       "id": "cell-21",
@@ -494,7 +533,49 @@
       "title": "Debris liability framework — who bears responsibility?",
       "participants": 12,
       "status": "Active",
-      "daysActive": 3
+      "daysActive": 3,
+      "domains": ["Space Law", "Liability", "Remote Sensing"],
+      "circles": [
+        { "name": "Space Law Circle", "initials": "SL", "gradient": "linear-gradient(135deg,var(--purple),#3a1860)", "status": "active", "role": "Lead" },
+        { "name": "Remote Sensing Circle", "initials": "RS", "gradient": "linear-gradient(135deg,var(--teal),#0d4040)", "status": "active", "role": "Contributing" },
+        { "name": "Mars Habitability Circle", "initials": "MH", "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)", "status": "self-disqualified", "role": "Withdrew" }
+      ],
+      "votes": {
+        "domains": [
+          {
+            "name": "Space Law",
+            "yea": 2840,
+            "nay": 620,
+            "total": 3460,
+            "voters": [
+              { "name": "Akello Jane", "initials": "AJ", "ws": 1800, "vote": "yea" },
+              { "name": "Osei Kwame", "initials": "OK", "ws": 1040, "vote": "yea" },
+              { "name": "Namugga Claire", "initials": "NC", "ws": 620, "vote": "nay" }
+            ]
+          },
+          {
+            "name": "Liability",
+            "yea": 1200,
+            "nay": 312,
+            "total": 1512,
+            "voters": [
+              { "name": "Akello Jane", "initials": "AJ", "ws": 800, "vote": "yea" },
+              { "name": "Osei Kwame", "initials": "OK", "ws": 400, "vote": "yea" },
+              { "name": "Namugga Claire", "initials": "NC", "ws": 312, "vote": "nay" }
+            ]
+          },
+          {
+            "name": "Remote Sensing",
+            "yea": 920,
+            "nay": 0,
+            "total": 920,
+            "voters": [
+              { "name": "Mwenda Thomas", "initials": "MT", "ws": 920, "vote": "yea" }
+            ]
+          }
+        ],
+        "summary": { "yea": 4960, "nay": 932, "abstain": 340 }
+      }
     },
     {
       "id": "cell-23",
@@ -512,7 +593,7 @@
       "deadline": "Aug 15",
       "status": "Active"
     }
-  ],
+  ],,
 
   "inbox": [
     {

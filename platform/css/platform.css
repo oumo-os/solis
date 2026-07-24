@@ -357,6 +357,46 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .feed-filter:hover{color:var(--text-secondary)}
 .feed-filter.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:500}
 
+/* ── Deliberation Vote Table ── */
+.vote-table{width:100%;border-collapse:collapse;margin-bottom:16px}
+.vote-table th{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-tertiary);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border);font-weight:400}
+.vote-table td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);vertical-align:middle}
+.vote-table tr:last-child td{border-bottom:none}
+.vote-table .domain-name{font-weight:500;color:var(--text)}
+.vote-table .vote-yea-cell{color:var(--green);font-family:var(--mono);font-weight:500}
+.vote-table .vote-nay-cell{color:var(--red);font-family:var(--mono);font-weight:500}
+.vote-table .vote-abstain-cell{color:var(--text-tertiary);font-family:var(--mono)}
+.vote-table .vote-total-cell{color:var(--text);font-family:var(--mono);font-weight:600}
+.vote-table .voter-row{display:flex;align-items:center;gap:6px}
+.vote-table .voter-avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:600;color:#fff;flex-shrink:0}
+.vote-table .voter-ws{font-family:var(--mono);font-size:10px;color:var(--text-tertiary)}
+.vote-buttons{display:flex;gap:8px;margin-bottom:16px}
+.vote-btn{flex:1;padding:12px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface);cursor:pointer;text-align:center;transition:all .12s;font-family:var(--sans)}
+.vote-btn:hover{border-color:var(--gold-border)}
+.vote-btn.selected-yea{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+.vote-btn.selected-nay{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+.vote-btn.selected-abstain{border-color:var(--text-tertiary);background:var(--surface-raised);color:var(--text-secondary)}
+.vote-btn .vb-label{font-size:14px;font-weight:600;margin-bottom:2px}
+.vote-btn .vb-desc{font-size:10px;color:var(--text-tertiary)}
+
+/* ── Self-Disqualify / Ghost Scars ── */
+.circle-ghost{opacity:0.45;border-style:dashed}
+.circle-ghost .hav{position:relative}
+.circle-ghost .hav::after{content:'✕';position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:1px solid var(--text-tertiary);font-size:7px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)}
+.circle-ghost-label{font-family:var(--mono);font-size:9px;color:var(--text-tertiary);font-style:italic;letter-spacing:.05em}
+.circle-scar{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px dashed var(--border);border-radius:var(--radius);background:var(--surface-raised);margin-bottom:6px;opacity:0.5}
+.circle-scar .scar-icon{font-size:10px;color:var(--text-tertiary)}
+.circle-scar .scar-text{font-size:11px;color:var(--text-tertiary);font-style:italic}
+
+/* ── Circle Home ── */
+.circle-home-header{display:flex;gap:20px;align-items:flex-start;margin-bottom:20px}
+.circle-home-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--serif)}
+.circle-home-info{flex:1}
+.circle-home-info h1{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--text);margin:0 0 4px}
+.circle-home-info .meta{font-size:12px;color:var(--text-secondary);margin-bottom:8px}
+.circle-section{margin-bottom:20px}
+.circle-section-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
 /* ── Progress ── */
 .progress{height:3px;background:var(--border-subtle);border-radius:2px;overflow:hidden}
 .progress-fill{height:100%;background:var(--gold);border-radius:2px}

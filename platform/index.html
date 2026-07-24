@@ -490,10 +490,10 @@
             <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
           </div>
           <div class="card click" onclick="nav('cell-circle')">
-            <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Publications</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Private circle cell. 8 members. Stewarding publications and endorsements.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Active</div>
+            <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18 · Restricted</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Restricted Cell</div>
+            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposals, xSTFs, and deliverables. 2 proposals active, 1 xSTF executing.</div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Proposals + xSTFs</div>
           </div>
           <div class="card click" onclick="nav('cell-delib')">
             <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
@@ -528,9 +528,11 @@
           <div class="aside-title">Cell Lifecycle</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--mono)">
             <div style="margin-bottom:6px"><span style="color:var(--teal)">Discussion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">(steward-sponsored)</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--purple)">Circle Cell</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--text)">Motion</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--text)">Motion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">aSTF</span> <span style="color:var(--text-tertiary)">(blind) → Verdict</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--purple)">Deliberation Cell</span> <span style="color:var(--text-tertiary)">(multi-circle)</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--purple)">Deliberation</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--gold)">Motion</span> <span style="color:var(--text-tertiary)">(crystallised)</span></div>
+            <div style="margin-bottom:6px"><span style="color:var(--gold)">Motion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">aSTF</span> <span style="color:var(--text-tertiary)">(blind) → Verdict</span></div>
             <div style="margin-bottom:6px"><span style="color:var(--green)">Resolution</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--blue)">xSTF</span> <span style="color:var(--text-tertiary)">(blind) → Deliverable</span></div>
+            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Circle Cells originate proposals. Project Cells spawn deliverables. Deliberation Cells produce motions.</div>
             <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Projects have their own cells. Periodic review aSTFs (p-aSTF) audit circle health + individual member performance.</div>
           </div>
         </div>
@@ -574,19 +576,93 @@
     <div class="hero">
       <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px">SL</div>
       <div style="flex:1">
-        <div class="hero-title">Space Law Circle — Publications</div>
-        <div class="hero-desc">Private to circle members · aSTF has read access</div>
-        <div class="hero-tags"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-18 · 8 members</span></div>
+        <div class="hero-title">Space Law Circle — Restricted Cell</div>
+        <div class="hero-desc">Private to circle members · Proposals, xSTFs, and deliverables originate here.</div>
+        <div class="hero-tags"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-18 · 8 members · Restricted</span></div>
       </div>
     </div>
-    <div class="sec">Cell Messages</div>
-    <div class="card">
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello J.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">The Ssempa discussion on debris liability has 22 replies and strong engagement. Proposing we elevate it to an Observatory article.</p></div></div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga C.</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Agreed. Quality is strong. I'd suggest requesting a summary section from Ssempa before we approve.</p></div></div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md avatar-system">◆</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--text-secondary)">System</span><span class="text-xs" style="color:var(--text-tertiary)">30m ago</span><span class="badge b-enacted" style="font-size:8px">System</span></div><p class="text-sm" style="color:var(--blue)">Decision logged: Elevation of thread #4 to Observatory article pending author revision. aSTF notified.</p></div></div>
-      <div class="divider" style="margin:var(--space-3) 0"></div>
-      <textarea class="msg-input" rows="2" placeholder="Add to circle cell..."></textarea>
-      <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded and readable by the aSTF.</div>
+
+    <div class="layout-split">
+      <div class="layout-main">
+        <!-- Proposals -->
+        <div class="sec">Proposals</div>
+        <div class="card click" style="margin-bottom:8px" onclick="nav('cell-delib')">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">In Deliberation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 21</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Proportional liability model for manoeuvre-induced debris. Multi-circle deliberation active.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability · Remote Sensing</div>
+        </div>
+        <div class="card click" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-vol">Drafted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 18</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Artemis Accords ratification recommendation</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Recommendation for East African ratification of the Artemis Accords. Pending steward review.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Policy</div>
+        </div>
+        <button class="btn btn-sm" style="margin-bottom:20px">+ Submit New Proposal</button>
+
+        <!-- xSTFs -->
+        <div class="sec">xSTFs (Execution)</div>
+        <div class="card click" style="margin-bottom:8px" onclick="nav('stf-xstf')">
+          <div class="flex justify-between mb-2"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Aug 15</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination guide execution</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Blind execution cell. Producing final deliverable per commissioning circle specs.</div>
+          <div class="htk" style="width:100%;margin-bottom:4px"><div class="hfill" style="width:45%;background:var(--gold)"></div></div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">45% complete · 3 team members</div>
+        </div>
+        <button class="btn btn-sm" style="margin-bottom:20px">+ Create xSTF</button>
+
+        <!-- Deliverables -->
+        <div class="sec">Deliverables</div>
+        <div class="card" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-enacted">Complete</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Aug 10</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU Coordination Guide — Final Draft</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Produced by xSTF-ITU. Published to Observatory. 22 citations.</div>
+        </div>
+
+        <!-- Cell Messages -->
+        <div class="sec" style="margin-top:16px">Cell Messages</div>
+        <div class="card">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello J.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">The ITU guide xSTF is progressing well. Let's review the draft when it's ready.</p></div></div>
+            <div style="display:flex;gap:10px"><div class="avatar avatar-md">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga C.</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Agreed. Also — the debris liability proposal is now in deliberation. Multi-circle participation.</p></div></div>
+          </div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" placeholder="Message to circle cell..."></textarea>
+          <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded. Restricted to circle members.</div>
+        </div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Circle Profile</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:32px;height:32px;font-size:12px">SL</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Founded Mar 2026</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Members</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">AJ</div><div><div style="font-weight:500">Akello J.</div><div style="font-size:9px;color:var(--text-tertiary)">Steward</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div><div style="font-weight:500">Osei K.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040);color:#fff">NC</div><div><div style="font-weight:500">Namugga C.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--navy-light);color:#fff">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--green),#0d3a20);color:#fff">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 3 more</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-delib')">+ Submit Proposal</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">+ Create xSTF</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Circle Home</button>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Domains</div>
+          <div class="aside-tags">
+            <span class="tag tag-purple" style="font-size:9px">Space Law</span>
+            <span class="tag tag-amber" style="font-size:9px">Liability</span>
+            <span class="tag tag-green" style="font-size:9px">Policy</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -598,7 +674,7 @@
       <div style="flex:1">
         <div class="hero-title">Debris liability framework — who bears responsibility?</div>
         <div class="hero-desc">Sponsored by Akello J. (Space Law steward). From Commons thread #Thread-042.</div>
-        <div class="hero-tags"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-21 · Space Law · 3d active</span></div>
+        <div class="hero-tags"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-21 · 3d active · One deliverable: motion to aSTF</span></div>
       </div>
     </div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise motion → then spawn aSTF for blind adjudication.</span></div></div>
@@ -634,11 +710,58 @@
           <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
         </div>
 
-        <div class="sec">Preliminary Vote</div>
-        <div class="vote-bar">
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Weighted competence vote — Space Law Domain</div>
-          <div class="vote-row"><span class="vote-yea">YEA 1,847</span><div class="vote-track"><div class="vote-yea-fill" style="width:78%"></div></div><span class="vote-nay">NAY 312</span></div>
+        <div class="sec">Vote</div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">Each member's vote weight is their Ws intersection with the deliberation domains. The final vote is an aggregate across all domains of the motion.</div>
+        <div class="vote-buttons">
+          <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green)">Yea</div><div class="vb-desc">I support this motion</div></div>
+          <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red)">Nay</div><div class="vb-desc">I oppose this motion</div></div>
+          <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary)">Abstain</div><div class="vb-desc">I withhold my vote</div></div>
         </div>
+
+        <div class="sec" style="margin-top:8px">Per-Domain Vote Breakdown</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">Your Ws in each domain determines your vote weight. A xenobiologist's 2800 Ws in Xenobiology has zero influence on this motion — but their 200 in Veterinary Biology may be significant.</div>
+        <table class="vote-table">
+          <tr><th>Domain</th><th>Yea Ws</th><th>Nay Ws</th><th>Total</th><th>Voters</th></tr>
+          <tr>
+            <td class="domain-name"><span class="tag tag-purple" style="font-size:7px;margin-right:4px">LAW</span>Space Law</td>
+            <td class="vote-yea-cell">2,840</td>
+            <td class="vote-nay-cell">620</td>
+            <td class="vote-total-cell">3,460</td>
+            <td>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">1,800 yea</span></div>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">1,040 yea</span></div>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">620 nay</span></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="domain-name"><span class="tag tag-amber" style="font-size:7px;margin-right:4px">LAW</span>Liability</td>
+            <td class="vote-yea-cell">1,200</td>
+            <td class="vote-nay-cell">312</td>
+            <td class="vote-total-cell">1,512</td>
+            <td>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><span class="voter-ws">800 yea</span></div>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><span class="voter-ws">400 yea</span></div>
+              <div class="voter-row"><div class="voter-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><span class="voter-ws">312 nay</span></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="domain-name"><span class="tag tag-green" style="font-size:7px;margin-right:4px">RS</span>Remote Sensing</td>
+            <td class="vote-yea-cell">920</td>
+            <td class="vote-nay-cell">0</td>
+            <td class="vote-total-cell">920</td>
+            <td>
+              <div class="voter-row"><div class="voter-avatar" style="background:var(--navy-light)">MT</div><span class="voter-ws">920 yea</span></div>
+            </td>
+          </tr>
+          <tr style="background:var(--surface-raised)">
+            <td class="domain-name" style="font-weight:700">Aggregate</td>
+            <td class="vote-yea-cell" style="font-size:13px">4,960</td>
+            <td class="vote-nay-cell" style="font-size:13px">932</td>
+            <td class="vote-total-cell" style="font-size:13px">5,892</td>
+            <td><span style="font-size:11px;color:var(--text-tertiary)">3 voted · 1 abstained</span></td>
+          </tr>
+        </table>
+
         <div class="sec" style="margin-top:16px">Motion Flow</div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--text-secondary);line-height:2">
           <div><span style="color:var(--teal)">●</span> Commons discussion <span style="color:var(--text-tertiary)">— Thread #Thread-042</span></div>
@@ -651,8 +774,13 @@
       </div>
       <div>
         <div class="sec">Participating Circles</div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Domain match</div></div><span class="badge b-active">5 active</span></div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap</div></div><span class="badge b-active">3 active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Space Law Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law domain match · Lead circle</div></div><span class="badge b-active">5 active</span></div>
+        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:11px;color:var(--text-tertiary)">Debris tracking overlap · Contributing</div></div><span class="badge b-active">3 active</span></div>
+        <!-- Self-disqualified circle — ghost/scar -->
+        <div class="circle-scar">
+          <div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px;position:relative">MH<span style="position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:1px solid var(--text-tertiary);font-size:6px;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary)">✕</span></div>
+          <div style="flex:1"><div style="font-size:11px;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle — withdrew from deliberation</div><div style="font-size:9px;color:var(--text-tertiary);font-family:var(--mono)">Self-disqualified Jul 22 · Auditable decision</div></div>
+        </div>
 
         <div class="sec" style="margin-top:16px">Proposal Types</div>
         <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">
@@ -1536,62 +1664,98 @@
     </div>
   </div>
 
-  <!-- ═══ CIRCLE DETAIL ═══ -->
+  <!-- ═══ CIRCLE HOME ═══ -->
   <div class="view" id="view-circle-detail">
-    <div class="back" onclick="nav('circles')">← Back to Circles</div>
+    <div class="back" onclick="nav('circles')">← Circles</div>
     <div class="hero">
-      <div class="hero-icon" style="background:var(--purple-soft);border:1px solid var(--purple-border);color:var(--purple);font-size:18px">SL</div>
+      <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px">SL</div>
       <div style="flex:1">
         <div class="hero-title" id="cd-name">Space Law Circle</div>
-        <div class="hero-desc" id="cd-desc">Deliberative body for space law policy discussions and legal framework development across African space agencies.</div>
-        <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">14 members · 2 motions</span></div>
+        <div class="hero-desc" id="cd-desc">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</div>
+        <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">Founded Mar 2026 · 8 members · 2 motions</span></div>
       </div>
       <button class="btn btn-primary" style="font-size:12px">Join Circle</button>
     </div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="sec">Active Motions</div>
-        <div class="card click">
-          <div class="flex justify-between mb-2"><span class="badge b-active">Open</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3 days ago · 12 votes</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Artemis Accords Ratification Framework</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposed by Sarah R. Framework for East African ratification of the Artemis Accords.</div>
-          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Policy</div>
-        </div>
-        <div class="card click">
-          <div class="flex justify-between mb-2"><span class="badge b-pending">Voting</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">1 week ago · 8 votes</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Debris Liability Standards for LEO</div>
-          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposed by Okello R. Standards for liability in low Earth orbit debris incidents.</div>
+        <!-- Discussions (restricted to circle) -->
+        <div class="sec">Circle Discussions</div>
+        <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">Restricted discussions visible to circle members. Proposals originate here and move to deliberation cells.</div>
+        <div class="card click" onclick="nav('cell-circle')" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-review">Restricted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">2h ago · 4 replies</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Proportional liability model for manoeuvre-induced debris. Now in multi-circle deliberation.</div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability</div>
         </div>
-        <div class="sec" style="margin-top:16px">Recent Activity</div>
+        <div class="card click" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-vol">Drafted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 18 · 2 replies</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Artemis Accords ratification recommendation</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Recommendation for East African ratification. Pending steward review.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Policy</div>
+        </div>
+        <div class="card click" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-enacted">Resolved</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 10 · 22 replies</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination procedures — plain language walkthrough</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Practical guide to ITU frequency coordination. Now published to Observatory.</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · ITU</div>
+        </div>
+
+        <!-- Motions -->
+        <div class="sec" style="margin-top:16px">Motions</div>
+        <div class="card click" style="margin-bottom:8px" onclick="nav('cell-delib')">
+          <div class="flex justify-between mb-2"><span class="badge b-pending">In Deliberation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">3d active</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Multi-circle deliberation. Space Law + Remote Sensing + Mars Habitability (withdrew).</div>
+        </div>
+        <div class="card click" style="margin-bottom:8px" onclick="nav('stf-astf')">
+          <div class="flex justify-between mb-2"><span class="badge b-active">aSTF Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due Jul 28</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Artemis Accords ratification framework</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Blind adjudication. 3 assessors evaluating motion.</div>
+        </div>
+
+        <!-- Resolutions -->
+        <div class="sec" style="margin-top:16px">Resolutions</div>
+        <div class="card" style="margin-bottom:8px">
+          <div class="flex justify-between mb-2"><span class="badge b-enacted">Enacted</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 10</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">ITU coordination guide publication</div>
+          <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4">Non-system resolution. xSTF executed. Guide published to Observatory.</div>
+        </div>
+
+        <!-- Activity -->
+        <div class="sec" style="margin-top:16px">Circle Activity</div>
         <div class="card">
-          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Kimani A. posted in "Artemis Accords" thread<div class="ai-when">2h ago</div></div>
-          <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>New member Mensah N. joined the circle<div class="ai-when">1d ago</div></div>
-          <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Motion "LEO Liability" moved to voting phase<div class="ai-when">3d ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Akello J. created proposal 'Debris liability framework'<div class="ai-when">3d ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Mars Habitability Circle self-disqualified from deliberation<div class="ai-when">3d ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>xSTF spawned for ITU coordination guide execution<div class="ai-when">1w ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>Resolution passed: ITU coordination guide publication<div class="ai-when">1w ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--blue)"></div>Mensah N. joined the circle<div class="ai-when">2w ago</div></div>
+          <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Circle cell messages: 3 new messages<div class="ai-when">2h ago</div></div>
         </div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Circle Info</div>
           <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:12px;color:var(--text)">Domain</span></div>
-          <div class="aside-row"><span class="aside-label">Members</span><span style="font-size:12px;color:var(--text)">14</span></div>
+          <div class="aside-row"><span class="aside-label">Founded</span><span style="font-size:12px;color:var(--text)">Mar 2026</span></div>
+          <div class="aside-row"><span class="aside-label">Members</span><span style="font-size:12px;color:var(--text)">8</span></div>
           <div class="aside-row"><span class="aside-label">Status</span><span class="badge b-active" style="font-size:8px">Active</span></div>
           <div class="aside-row"><span class="aside-label">Motions</span><span style="font-size:12px;color:var(--text)">2 active</span></div>
+          <div class="aside-row"><span class="aside-label">Resolutions</span><span style="font-size:12px;color:var(--text)">1 enacted</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Members</div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">SR</div><div><div style="font-weight:500">Sarah R.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OK</div><div><div style="font-weight:500">Okello R.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--green-soft);color:var(--green)">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
-          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 9 more</div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">AJ</div><div><div style="font-weight:500">Akello J.</div><div style="font-size:9px;color:var(--text-tertiary)">Steward</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--amber),#5a3a00);color:#fff">OK</div><div><div style="font-weight:500">Osei K.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--teal),#0d4040);color:#fff">NC</div><div><div style="font-weight:500">Namugga C.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--navy-light);color:#fff">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
+          <div class="aside-member"><div class="aside-member-avatar" style="background:linear-gradient(135deg,var(--green),#0d3a20);color:#fff">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 3 more</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
           <div class="aside-tags">
             <span class="tag tag-purple" style="font-size:9px">Space Law</span>
-            <span class="tag tag-blue" style="font-size:9px">Liability</span>
+            <span class="tag tag-amber" style="font-size:9px">Liability</span>
             <span class="tag tag-green" style="font-size:9px">Policy</span>
           </div>
         </div>
@@ -1600,6 +1764,13 @@
           <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
           <div class="aside-link" onclick="nav('thread-detail')">LEO debris liability framework</div>
           <div class="aside-link" onclick="nav('thread-detail')">ITU coordination procedures</div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-circle')">Enter Circle Cell</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Domain Map</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2103,6 +2274,13 @@ document.addEventListener('click', function(e) {
     e.target.classList.add('active');
   }
 });
+
+// Vote selection
+function selectVote(btn, type) {
+  var buttons = btn.parentElement.querySelectorAll('.vote-btn');
+  buttons.forEach(function(b) { b.className = 'vote-btn'; });
+  btn.classList.add('selected-' + type);
+}
 
 window.addEventListener('hashchange', function() {
   var key = window.location.hash.replace('#', '') || 'personal';
