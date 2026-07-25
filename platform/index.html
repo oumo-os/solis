@@ -3297,8 +3297,32 @@ document.addEventListener('DOMContentLoaded',function(){
 // ─────────────────────────────────────────────────────────────────────────────
 // DOMAIN MAP
 // ─────────────────────────────────────────────────────────────────────────────
-var DM_IDS=[];
-var DM_META={};
+var DM_IDS=[
+  "astronomy-astrophysics","aerospace-engineering","earth-planetary-science",
+  "space-medicine-biology","space-law-policy","telecommunications-signals",
+  "computer-science-software","physics","materials-science",
+  "robotics-automation","remote-sensing","space-architecture",
+  "space-finance-economics","science-communication",
+  "philosophy-ethics-space","art-culture-space"
+];
+var DM_META={
+  "astronomy-astrophysics":{label:"Astronomy & Astrophysics",short:"ASTRO",color:"#6EB8FF",steward:true},
+  "aerospace-engineering":{label:"Aerospace Engineering",short:"AERO",color:"#4ACCA8",steward:false},
+  "earth-planetary-science":{label:"Earth & Planetary Science",short:"EARTH",color:"#7AACDA",steward:true},
+  "space-medicine-biology":{label:"Space Medicine & Biology",short:"MED",color:"#FF8080",steward:false},
+  "space-law-policy":{label:"Space Law & Policy",short:"LAW",color:"#FFB84D",steward:true},
+  "telecommunications-signals":{label:"Telecom & Signals",short:"COMMS",color:"#B088F0",steward:false},
+  "computer-science-software":{label:"CS & Software",short:"CODE",color:"#50E0C0",steward:true},
+  "physics":{label:"Physics",short:"PHYS",color:"#AACCEE",steward:false},
+  "materials-science":{label:"Materials Science",short:"MAT",color:"#E0A060",steward:false},
+  "robotics-automation":{label:"Robotics & Automation",short:"ROBO",color:"#80D0FF",steward:false},
+  "remote-sensing":{label:"Remote Sensing",short:"RS",color:"#40C090",steward:true},
+  "space-architecture":{label:"Space Architecture",short:"ARCH",color:"#C0A0E0",steward:false},
+  "space-finance-economics":{label:"Space Finance & Economics",short:"FIN",color:"#FFD060",steward:false},
+  "science-communication":{label:"Science Communication",short:"SCICOMM",color:"#FF90B0",steward:false},
+  "philosophy-ethics-space":{label:"Philosophy & Ethics",short:"PHIL",color:"#D0C0A0",steward:true},
+  "art-culture-space":{label:"Art & Culture of Space",short:"ART",color:"#E0B0C0",steward:false}
+};
 
 function dmMkRng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/0xffffffff;};}
 function dmGenMembers(){
