@@ -425,10 +425,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .res-summary-actions{display:flex;align-items:center;gap:6px}
 
 /* ── Settings Tab Bar ── */
-.settings-tab-bar{display:flex;gap:2px;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0}
-.settings-tab{padding:8px 16px;font-size:11px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px}
-.settings-tab:hover{color:var(--text-secondary)}
-.settings-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.settings-tab-bar{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:0}
+.settings-tab{padding:8px 16px;font-size:11px;font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;transition:all .12s;margin-bottom:-1px;border-radius:var(--radius) var(--radius) 0 0}
+.settings-tab:hover{color:var(--text-secondary);background:var(--surface-raised)}
+.settings-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold-soft)}
 .settings-tab-content{padding:0}
 
 /* ── Circle Home ── */
@@ -739,12 +739,12 @@ select.form-input{cursor:pointer}
 .modal-header{font-family:var(--display);font-size:16px;font-weight:600;color:var(--text);margin-bottom:16px;padding-right:24px}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-subtle)}
 @keyframes modalIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.reg-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.reg-modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
 .reg-modal-overlay.active{display:flex}
 body.modal-open{overflow:hidden}
-.reg-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:680px;height:80vh;max-height:80vh;display:flex;flex-direction:column;position:relative;animation:modalIn .2s ease}
-.reg-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;color:var(--text-tertiary);cursor:pointer;z-index:1}
-.reg-modal-close:hover{color:var(--text)}
+.reg-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:680px;height:80vh;max-height:80vh;display:flex;flex-direction:column;position:relative;animation:modalIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.reg-modal-close{position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;color:var(--text-tertiary);cursor:pointer;z-index:1;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);transition:all .12s}
+.reg-modal-close:hover{color:var(--text);background:var(--surface-raised)}
 .reg-modal-body{padding:24px;overflow-y:auto;flex:1;min-height:0}
 .reg-modal-title{font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:4px;padding-right:24px}
 .reg-modal-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
@@ -808,3 +808,24 @@ body.modal-open{overflow:hidden}
 /* ── Badge variants ── */
 .b-enacted{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
 .b-failed{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
+
+/* ── Vote Summary ── */
+.vote-buttons{display:flex;gap:6px}
+.vote-btn{padding:8px 16px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .12s;text-align:center}
+.vote-btn:hover{border-color:var(--gold-border)}
+.vote-btn.selected-yea{border-color:var(--green);background:var(--green-soft)}
+.vote-btn.selected-nay{border-color:var(--red);background:var(--red-soft)}
+.vote-btn.selected-abstain{border-color:var(--text-tertiary);background:var(--surface-raised)}
+.vote-table{width:100%;border-collapse:collapse;font-size:11px}
+.vote-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-tertiary);text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+.vote-table td{padding:6px 8px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary)}
+.vote-table .domain-name{font-weight:500;color:var(--text)}
+.vote-yea-cell{color:var(--green)!important;font-family:var(--mono);font-weight:500}
+.vote-nay-cell{color:var(--red)!important;font-family:var(--mono);font-weight:500}
+.vote-total-cell{font-family:var(--mono);font-weight:600;color:var(--text)!important}
+.voter-scroll{display:flex;gap:4px;flex-wrap:wrap}
+.voter-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:var(--radius);font-size:9px;font-family:var(--mono)}
+.voter-chip.yea{background:var(--green-soft);color:var(--green)}
+.voter-chip.nay{background:var(--red-soft);color:var(--red)}
+.voter-ini{font-weight:600}
+.voter-ws{font-size:8px;opacity:.7}
