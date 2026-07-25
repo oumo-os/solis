@@ -20,6 +20,7 @@
   --mono:'IBM Plex Mono','Courier New',monospace;
   --sans:'IBM Plex Sans','Inter',system-ui,sans-serif;
   --serif:'Crimson Pro','Playfair Display',Georgia,serif;
+  --display:'Playfair Display',Georgia,serif;
   --sidebar-w:220px;--topbar-h:48px;
 }
 
@@ -37,10 +38,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .member-card{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer}
 .member-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:14px;font-weight:700;color:#fff;margin-bottom:8px}
 .member-name{font-size:13px;font-weight:600;color:#fff;line-height:1.2}
-.member-meta{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);margin-top:2px}
+.member-meta{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
 .nav-section{padding:12px 0 4px}
 .nav-label{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.12em;padding:0 20px 6px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,.45);font-size:13px;transition:all .12s;border-left:2px solid transparent;text-decoration:none}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:rgba(255,255,255,.65);font-size:13px;transition:all .12s;border-left:2px solid transparent;text-decoration:none}
 .nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
 .nav-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--gold)}
 .nav-icon{width:16px;text-align:center;font-size:13px;opacity:.7}
@@ -538,7 +539,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 }
 @media(max-width:450px){
   .g2,.g3,.g4{grid-template-columns:1fr}
-}
   .blind-grid{grid-template-columns:1fr}
   .flow{gap:4px}
   .fstep{padding:5px 10px;font-size:11px}
