@@ -165,6 +165,8 @@
       "members": 8,
       "motions": 2,
       "domains": ["Space Law", "Liability", "Policy"],
+      "mandate": { "primary": ["Space Law", "Liability"], "secondary": ["Policy"] },
+      "desiredWs": { "Space Law": 2500, "Liability": 1800, "Policy": 1500 },
       "description": "Stewards space law analysis, liability frameworks, and regulatory compliance.",
       "founded": "Mar 2026",
       "proposals": [
@@ -179,7 +181,24 @@
         { "text": "xSTF spawned for ITU coordination guide execution", "time": "1w ago", "type": "xstf" },
         { "text": "Resolution passed: ITU coordination guide publication", "time": "1w ago", "type": "resolution" },
         { "text": "Mensah N. joined the circle", "time": "2w ago", "type": "member" }
-      ]
+      ],
+      "roster": {
+        "active": [
+          { "id": "aj", "name": "Akello Jane", "initials": "AJ", "color": "linear-gradient(135deg,var(--purple),#3a1860)", "ws": 1800, "domains": ["Space Law", "Astrophysics"], "domainWs": [1800, 1240], "joined": "Feb 2025", "lastActive": "3h ago", "status": "active", "topDomain": "Space Law" },
+          { "id": "ok", "name": "Osei Kwame", "initials": "OK", "color": "linear-gradient(135deg,var(--amber),#5a3a00)", "ws": 2000, "domains": ["Propulsion", "Launch Sys"], "domainWs": [2000, 1380], "joined": "Jun 2025", "lastActive": "1d ago", "status": "active", "topDomain": "Propulsion" },
+          { "id": "nc", "name": "Namugga Claire", "initials": "NC", "color": "linear-gradient(135deg,var(--amber),#5a3a00)", "ws": 1400, "domains": ["Publications", "Space Med"], "domainWs": [1400, 1050], "joined": "Jan 2025", "lastActive": "2d ago", "status": "active", "topDomain": "Publications" },
+          { "id": "mt", "name": "Mwenda Thomas", "initials": "MT", "color": "linear-gradient(135deg,var(--teal),#0d4040)", "ws": 1200, "domains": ["Remote Sensing", "Events"], "domainWs": [1200, 890], "joined": "May 2025", "lastActive": "4d ago", "status": "active", "topDomain": "Remote Sensing" },
+          { "id": "mn", "name": "Mensah Naa", "initials": "MN", "color": "var(--navy-light)", "ws": 1040, "domains": ["Astronomy", "Education"], "domainWs": [1040, 980], "joined": "Apr 2025", "lastActive": "4d ago", "status": "active", "topDomain": "Astronomy" },
+          { "id": "ao", "name": "Aisha Omondi", "initials": "AO", "color": "linear-gradient(135deg,var(--green),#0d3a20)", "ws": 980, "domains": ["Comms", "Education"], "domainWs": [980, 920], "joined": "Mar 2025", "lastActive": "5d ago", "status": "active", "topDomain": "Comms" },
+          { "id": "sd", "name": "Ssempa David", "initials": "SD", "color": "linear-gradient(135deg,var(--purple),#3a1860)", "ws": 900, "domains": ["Space Law", "Policy"], "domainWs": [900, 760], "joined": "Apr 2025", "lastActive": "6d ago", "status": "active", "topDomain": "Space Law" },
+          { "id": "dm", "name": "Diallo Mamadou", "initials": "DM", "color": "var(--border)", "ws": 800, "domains": ["Space Finance", "Entrepreneurship"], "domainWs": [800, 720], "joined": "Jul 2025", "lastActive": "2w ago", "status": "invited", "topDomain": "Space Finance" }
+        ],
+        "former": [
+          { "id": "ek", "name": "Esi Kojo", "initials": "EK", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Policy", "Astronomy"], "domainWs": [700, 500], "joined": "Jan 2025", "left": "May 2026", "status": "former", "topDomain": "Policy", "leftReason": "term-expiry" },
+          { "id": "nl", "name": "Nadia Lubega", "initials": "NL", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Space Med", "Education"], "domainWs": [800, 600], "joined": "Mar 2025", "left": "Apr 2026", "status": "former", "topDomain": "Space Med", "leftReason": "resignation" },
+          { "id": "tb", "name": "Thabo Banda", "initials": "TB", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Space Law"], "domainWs": [600], "joined": "Feb 2026", "left": "Jun 2026", "status": "former", "topDomain": "Space Law", "leftReason": "competence-drift" }
+        ]
+      }
     },
     {
       "id": "remote-sensing",
@@ -228,6 +247,15 @@
       "activity": []
     }
   ],
+
+  "exitReasonLabels": {
+    "term-expiry": "Term expired",
+    "resignation": "Resigned",
+    "jstf-removal": "jSTF forced removal",
+    "jstf-flush": "jSTF full circle flush",
+    "circle-dissolved": "Circle disbanded",
+    "competence-drift": "Competence drift"
+  },
 
   "domains": {
     "astronomy-astrophysics": { "label": "Astronomy & Astrophysics", "short": "ASTRO", "color": "#6EB8FF", "hasCircle": true },
@@ -539,6 +567,17 @@
         { "name": "Space Law Circle", "initials": "SL", "gradient": "linear-gradient(135deg,var(--purple),#3a1860)", "status": "active", "role": "Lead" },
         { "name": "Remote Sensing Circle", "initials": "RS", "gradient": "linear-gradient(135deg,var(--teal),#0d4040)", "status": "active", "role": "Contributing" },
         { "name": "Mars Habitability Circle", "initials": "MH", "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)", "status": "self-disqualified", "role": "Withdrew" }
+      ],
+      "draftResolutions": [
+        {
+          "id": 1,
+          "title": "Debris liability framework — proportional model",
+          "text": "MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms",
+          "action": "",
+          "implementingCircles": ["Space Law Circle", "Remote Sensing Circle"],
+          "votesNullified": false,
+          "versions": [{ "title": "Debris liability framework — proportional model", "text": "Initial draft", "action": "", "author": "Akello Jane", "ts": "Jul 21, 2026 14:30" }]
+        }
       ],
       "votes": {
         "domains": [

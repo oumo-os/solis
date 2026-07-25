@@ -71,7 +71,7 @@
     <div class="page-sub">Participant · Kampala, Uganda · Member since Jul 2026 · Active</div>
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong. A deliberation cell you're watching has crystallised a motion — it's now heading to aSTF for blind adjudication. <span style="color:var(--gold)">Cell #Cell-21 → aSTF #Cell-23</span></div></div>
     <div class="g4">
-      <div class="card metric-card"><div class="mc-label">Competence W<sub>s</sub></div><div class="mc-val">847</div><div class="mc-sub">Perceived competence</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
+      <div class="card metric-card"><div class="mc-label">Standing</div><div class="mc-val">847</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">1,200</div><div class="mc-sub">Declared + verified</div><div class="mc-drift mc-flat">MSc Space Studies</div></div>
       <div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">34</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift mc-up">↑ 6 from last cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">3</div><div class="mc-sub">1 Circle · 2 Projects</div><div class="mc-drift mc-flat">Since Jul 2026</div></div>
@@ -1497,7 +1497,7 @@
   <!-- ═══ PROFILE ═══ -->
   <div class="view" id="view-profile">
     <div class="page-title">Profile</div>
-    <div class="page-sub">Your competence declarations and Ws</div>
+    <div class="page-sub">Your competence declarations and standing</div>
     <div class="profile-header">
       <div class="avatar avatar-gold avatar-xl">OS</div>
       <div class="profile-info">
@@ -1507,7 +1507,7 @@
       </div>
       <div class="profile-standing">
         <div class="val">847</div>
-        <div class="lbl">Ws</div>
+        <div class="lbl">Standing</div>
         <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
       </div>
     </div>
@@ -2068,24 +2068,7 @@
         <div class="card" style="margin-bottom:16px">
           <div class="sec">Your Interests</div>
           <div class="form-hint">Select domains you're curious about. Drag to rank by priority (#1 = most interested). Start with 5.</div>
-          <div id="reg-interests">
-            <div class="reg-interest-row" draggable="true" data-domain="astronomy-astrophysics"><input type="checkbox" checked> <span>Astronomy & Astrophysics</span><div class="reg-rank"><span class="reg-rank-num">1</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="space-law-policy"><input type="checkbox" checked> <span>Space Law & Policy</span><div class="reg-rank"><span class="reg-rank-num">2</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="remote-sensing"><input type="checkbox" checked> <span>Remote Sensing</span><div class="reg-rank"><span class="reg-rank-num">3</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="earth-planetary-science"><input type="checkbox" checked> <span>Earth & Planetary Science</span><div class="reg-rank"><span class="reg-rank-num">4</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="computer-science-software"><input type="checkbox" checked> <span>CS & Software</span><div class="reg-rank"><span class="reg-rank-num">5</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="space-finance-economics"><input type="checkbox"> <span>Space Finance & Economics</span><div class="reg-rank"><span class="reg-rank-num">6</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="philosophy-ethics-space"><input type="checkbox"> <span>Philosophy & Ethics</span><div class="reg-rank"><span class="reg-rank-num">7</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="science-communication"><input type="checkbox"> <span>Science Communication</span><div class="reg-rank"><span class="reg-rank-num">8</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="robotics-automation"><input type="checkbox"> <span>Robotics & Automation</span><div class="reg-rank"><span class="reg-rank-num">9</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="aerospace-engineering"><input type="checkbox"> <span>Aerospace Engineering</span><div class="reg-rank"><span class="reg-rank-num">10</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="physics"><input type="checkbox"> <span>Physics</span><div class="reg-rank"><span class="reg-rank-num">11</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="materials-science"><input type="checkbox"> <span>Materials Science</span><div class="reg-rank"><span class="reg-rank-num">12</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="space-medicine-biology"><input type="checkbox"> <span>Space Medicine & Biology</span><div class="reg-rank"><span class="reg-rank-num">13</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="telecommunications-signals"><input type="checkbox"> <span>Telecom & Signals</span><div class="reg-rank"><span class="reg-rank-num">14</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="space-architecture"><input type="checkbox"> <span>Space Architecture</span><div class="reg-rank"><span class="reg-rank-num">15</span></div></div>
-            <div class="reg-interest-row" draggable="true" data-domain="art-culture-space"><input type="checkbox"> <span>Art & Culture of Space</span><div class="reg-rank"><span class="reg-rank-num">16</span></div></div>
-          </div>
+          <div id="reg-interests"></div>
           <div style="margin-top:10px;display:flex;gap:8px;align-items:center;position:relative">
             <input class="form-input" id="reg-add-interest" placeholder="Add a custom domain..." style="font-size:12px;max-width:260px">
             <div class="reg-domain-suggest" id="reg-add-interest-suggest" style="display:none"></div>
@@ -2484,15 +2467,7 @@ function toggleVersionList() {
 }
 
 // ─── Deliberation Cell ───
-var delibResolutions = [{
-  id: 1,
-  title: 'Debris liability framework — proportional model',
-  text: 'MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms',
-  action: '',
-  implementingCircles: ['Space Law Circle', 'Remote Sensing Circle'],
-  votesNullified: false,
-  versions: [{ title: 'Debris liability framework — proportional model', text: 'Initial draft', action: '', author: 'Akello Jane', ts: 'Jul 21, 2026 14:30' }]
-}];
+var delibResolutions = [];
 var delibSelectedRes = 0;
 
 function toggleAcceptRecord(checked) {
@@ -2607,37 +2582,18 @@ function closeSettingsModal() {
 }
 
 // ─── Member Roster Modal ───
-var membersData = [
-  {id:'aj',name:'Akello Jane',initials:'AJ',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:1800,domains:['Space Law','Astrophysics'],domainWs:[1800,1240],joined:'Feb 2025',lastActive:'3h ago',status:'active',topDomain:'Space Law'},
-  {id:'ok',name:'Osei Kwame',initials:'OK',color:'linear-gradient(135deg,var(--amber),#5a3a00)',ws:2000,domains:['Propulsion','Launch Sys'],domainWs:[2000,1380],joined:'Jun 2025',lastActive:'1d ago',status:'active',topDomain:'Propulsion'},
-  {id:'nc',name:'Namugga Claire',initials:'NC',color:'linear-gradient(135deg,var(--amber),#5a3a00)',ws:1400,domains:['Publications','Space Med'],domainWs:[1400,1050],joined:'Jan 2025',lastActive:'2d ago',status:'active',topDomain:'Publications'},
-  {id:'mt',name:'Mwenda Thomas',initials:'MT',color:'linear-gradient(135deg,var(--teal),#0d4040)',ws:1200,domains:['Remote Sensing','Events'],domainWs:[1200,890],joined:'May 2025',lastActive:'4d ago',status:'active',topDomain:'Remote Sensing'},
-  {id:'mn',name:'Mensah Naa',initials:'MN',color:'var(--navy-light)',ws:1040,domains:['Astronomy','Education'],domainWs:[1040,980],joined:'Apr 2025',lastActive:'4d ago',status:'active',topDomain:'Astronomy'},
-  {id:'ao',name:'Aisha Omondi',initials:'AO',color:'linear-gradient(135deg,var(--green),#0d3a20)',ws:980,domains:['Comms','Education'],domainWs:[980,920],joined:'Mar 2025',lastActive:'5d ago',status:'active',topDomain:'Comms'},
-  {id:'sd',name:'Ssempa David',initials:'SD',color:'linear-gradient(135deg,var(--purple),#3a1860)',ws:900,domains:['Space Law','Policy'],domainWs:[900,760],joined:'Apr 2025',lastActive:'6d ago',status:'active',topDomain:'Space Law'},
-  {id:'dm',name:'Diallo Mamadou',initials:'DM',color:'var(--border)',ws:800,domains:['Space Finance','Entrepreneurship'],domainWs:[800,720],joined:'Jul 2025',lastActive:'2w ago',status:'invited',topDomain:'Space Finance'},
-  // Former
-  {id:'ek',name:'Esi Kojo',initials:'EK',color:'var(--text-tertiary)',ws:0,domains:['Policy','Astronomy'],domainWs:[700,500],joined:'Jan 2025',left:'May 2026',status:'former',topDomain:'Policy',leftReason:'term-expiry'},
-  {id:'nl',name:'Nadia Lubega',initials:'NL',color:'var(--text-tertiary)',ws:0,domains:['Space Med','Education'],domainWs:[800,600],joined:'Mar 2025',left:'Apr 2026',status:'former',topDomain:'Space Med',leftReason:'resignation'},
-  {id:'tb',name:'Thabo Banda',initials:'TB',color:'var(--text-tertiary)',ws:0,domains:['Space Law'],domainWs:[600],joined:'Feb 2026',left:'Jun 2026',status:'former',topDomain:'Space Law',leftReason:'competence-drift'}
-];
-
-var reasonLabels = {
-  'term-expiry': 'Term expired',
-  'resignation': 'Resigned',
-  'jstf-removal': 'jSTF forced removal',
-  'jstf-flush': 'jSTF full circle flush',
-  'circle-dissolved': 'Circle disbanded',
-  'competence-drift': 'Competence drift'
-};
-var activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
-var formerMembers = membersData.filter(function(m){return m.status==='former'});
+var membersData = [];
+var reasonLabels = {};
+var activeMembers = [];
+var formerMembers = [];
 
 function openMembersModal() {
+  var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
+  var mandateText = 'Mandate: ' + (circle.domains || []).join(', ');
   var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-    '<div><span class="page-title" style="font-size:16px">Space Law Circle · Stewards</span>' +
-    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · Mandate: Space Law, Liability, Policy</div></div>' +
-    '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">Mandate: Space Law, Liability, Policy</span></div>' +
+    '<div><span class="page-title" style="font-size:16px">' + (circle.name || 'Circle') + ' · Stewards</span>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · ' + mandateText + '</div></div>' +
+    '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">' + mandateText + '</span></div>' +
     '<div class="mm-layout">' +
       '<div class="mm-list" id="mm-list"></div>' +
       '<div class="mm-detail" id="mm-detail"></div>' +
@@ -2690,15 +2646,16 @@ function selectMember(id) {
 function renderMemberDetail(id) {
   var detail = document.getElementById('mm-detail');
   if (!detail) return;
+  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
   var m = membersData.filter(function(d){return d.id===id})[0];
   if (!m) return;
 
   var isFormer = m.status === 'former';
   var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
     (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
-  var primaryMandate = ['Space Law','Liability'];
-  var secondaryMandate = ['Policy'];
-  var desiredWs = {'Space Law':2500,'Liability':1800,'Policy':1500};
+  var primaryMandate = (rosterCircle.mandate && rosterCircle.mandate.primary) || [];
+  var secondaryMandate = (rosterCircle.mandate && rosterCircle.mandate.secondary) || [];
+  var desiredWs = rosterCircle.desiredWs || {};
   var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + (m.leftReason ? ' · <span style="color:var(--amber)">' + (reasonLabels[m.leftReason] || m.leftReason) + '</span>' : '') + '</div>') : '';
 
   var mandateOverlap = m.domains.filter(function(d){return primaryMandate.indexOf(d)>-1}).length;
@@ -2732,12 +2689,12 @@ function renderMemberDetail(id) {
     '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">' + mandateChips + '</div>' +
     (!isFormer ? '<div class="mm-section-title">Competence (Primary Mandate)</div><div style="margin-bottom:14px">' + competenceBars + '</div>' : '') +
     (isFormer ? '<div class="mm-section-title">Departure</div><div class="mm-timeline">' +
-        '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
+        '<div class="mm-event mm-event-join"><div>Joined ' + (rosterCircle.name || 'the Circle') + '</div><div class="mm-event-date">' + m.joined + '</div></div>' +
         '<div class="mm-event mm-event-leave"><div>' + (reasonLabels[m.leftReason] || 'Left') + '</div><div class="mm-event-date">' + m.left + '</div></div>' +
       '</div>' :
       '<div class="mm-section-title">History</div>' +
       '<div class="mm-timeline">' +
-        '<div class="mm-event mm-event-join"><div>Joined Space Law Circle</div><div class="mm-event-date">' + m.joined + '</div></div>' +
+        '<div class="mm-event mm-event-join"><div>Joined ' + (rosterCircle.name || 'the Circle') + '</div><div class="mm-event-date">' + m.joined + '</div></div>' +
         '<div class="mm-event"><div>Currently serving</div><div class="mm-event-date">Present</div></div>' +
       '</div>');
 }
@@ -2771,6 +2728,30 @@ window.addEventListener('hashchange', function() {
   if (views[key]) nav(key);
 });
 loadMockData().then(function() {
+  // ─── Derive all view-state from MOCK (single source of truth) ───
+  var spaceLawCircle = (MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
+  var roster = spaceLawCircle.roster || { active: [], former: [] };
+  membersData = roster.active.concat(roster.former);
+  reasonLabels = MOCK.exitReasonLabels || {};
+  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
+  formerMembers = membersData.filter(function(m){return m.status==='former'});
+
+  var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
+  delibResolutions = (delibCell.draftResolutions || []).map(function(r){ return r; });
+
+  REG_DOMAINS = (MOCK.registration && MOCK.registration.domains) || [];
+  REG_ELO_MAP = (MOCK.registration && MOCK.registration.eloMap) || {};
+  REG_KNOWLEDGE_LEVELS = (MOCK.registration && MOCK.registration.knowledgeLevels) || [];
+  REG_EXPERIENTIAL_LEVELS = (MOCK.registration && MOCK.registration.experientialLevels) || [];
+
+  DM_IDS = Object.keys(MOCK.domains || {});
+  DM_META = {};
+  DM_IDS.forEach(function(id){
+    var d = MOCK.domains[id];
+    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle };
+  });
+  renderDefaultInterestRows();
+
   var participantsGrid = document.getElementById('participants-grid');
   if (participantsGrid) participantsGrid.innerHTML = renderParticipantCards();
   var inboxList = document.getElementById('inbox-list');
@@ -2796,14 +2777,6 @@ loadMockData().then(function() {
 var regStep=1;
 var regStepLabels={1:'About You',2:'Your Background',3:'Your Domains'};
 var regIsEdit=false;
-
-// Mock profile data for prefill
-var MOCK_PROFILE={
-  name:'Oumo Samuel',
-  location:'Kampala, Uganda',
-  bio:'Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development.',
-  essay:'I came to Solis because I believe African nations need a stronger voice in international space governance. My background is in space law, and I want to help build the capacity of East African institutions to participate meaningfully in debates about lunar resource extraction, debris liability, and orbital spectrum management.'
-};
 
 function openParticipantModal(name,bio,location,joined,avatar){
   document.getElementById('pd-name').textContent=name||'Okello Robert';
@@ -2840,10 +2813,11 @@ function regPrefill(){
   var l=document.getElementById('reg-location');
   var b=document.getElementById('reg-bio');
   var e=document.getElementById('reg-essay');
-  if(n) n.value=MOCK_PROFILE.name;
-  if(l) l.value=MOCK_PROFILE.location;
-  if(b) b.value=MOCK_PROFILE.bio;
-  if(e) e.value=MOCK_PROFILE.essay;
+  var profile=(MOCK && MOCK.currentUser) || {};
+  if(n) n.value=profile.name||'';
+  if(l) l.value=profile.location||'';
+  if(b) b.value=profile.bio||'';
+  if(e) e.value=profile.essay||'';
 }
 document.getElementById('reg-modal').addEventListener('click',function(e){
   if(e.target===this) closeRegModal();
@@ -2864,25 +2838,8 @@ function regResetSteps(){
   document.getElementById('reg-step-label').textContent=regStepLabels[1];
 }
 
-// Domain registry — existing domains with types
-var REG_DOMAINS=[
-  // Knowledge domains (from the 16)
-  {name:'Astronomy & Astrophysics',type:'knowledge'},{name:'Aerospace Engineering',type:'knowledge'},
-  {name:'Earth & Planetary Science',type:'knowledge'},{name:'Space Medicine & Biology',type:'knowledge'},
-  {name:'Space Law & Policy',type:'knowledge'},{name:'Telecom & Signals',type:'knowledge'},
-  {name:'CS & Software',type:'knowledge'},{name:'Physics',type:'knowledge'},
-  {name:'Materials Science',type:'knowledge'},{name:'Robotics & Automation',type:'knowledge'},
-  {name:'Remote Sensing',type:'knowledge'},{name:'Space Architecture',type:'knowledge'},
-  {name:'Space Finance & Economics',type:'knowledge'},{name:'Science Communication',type:'knowledge'},
-  {name:'Philosophy & Ethics',type:'knowledge'},{name:'Art & Culture of Space',type:'knowledge'},
-  // Affiliation domains (examples)
-  {name:'Uganda Astronomical Society',type:'affiliation'},{name:'East African Astronomical Society',type:'affiliation'},
-  {name:'African Astronomical Society',type:'affiliation'},{name:'Space Generation Advisory Council',type:'affiliation'},
-  // Experiential domains (examples)
-  {name:'Swahili',type:'experiential'},{name:'English',type:'experiential'},{name:'Luganda',type:'experiential'},
-  {name:'Python',type:'experiential'},{name:'GIS',type:'experiential'},{name:'Field Research',type:'experiential'},
-  {name:'Public Speaking',type:'experiential'},{name:'Technical Writing',type:'experiential'}
-];
+// Domain registry — existing domains with types (from MOCK.registration.domains)
+var REG_DOMAINS=[];
 
 function regNext(step){
   document.getElementById('reg-s'+regStep).style.display='none';
@@ -3076,16 +3033,10 @@ function regInitAffiliationInputs(){
   });
 }
 
-// ELO mapping for experience levels
-var REG_ELO_MAP={
-  affiliation:{Affiliate:500,Member:1000,Representative:1500,Leadership:2000},
-  knowledge:{Enthusiast:200,Elementary:400,Highschool:600,Bachelors:1000,Masters:1500,PhD:2000,Professional:2500,Expert:3000},
-  experiential:{Explored:300,Familiar:600,Experienced:1000,Fluent:1500,Native:2000,Professional:2500}
-};
-
-// Knowledge levels for Other types that are academic (Publication, Certification, Course)
-var REG_KNOWLEDGE_LEVELS=['Enthusiast','Elementary','Highschool','Bachelors','Masters','PhD','Professional','Expert'];
-var REG_EXPERIENTIAL_LEVELS=['Explored','Familiar','Experienced','Fluent','Native','Professional'];
+// ELO mapping and level lists for experience levels (from MOCK.registration)
+var REG_ELO_MAP={};
+var REG_KNOWLEDGE_LEVELS=[];
+var REG_EXPERIENTIAL_LEVELS=[];
 
 // Filter Other level dropdown based on type selection
 function regFilterOtherLevels(typeSelect){
@@ -3286,6 +3237,15 @@ function regInitInterestDrag(){
   container.addEventListener('change',function(){regRenumberInterests();});
 }
 
+function renderDefaultInterestRows(){
+  var container=document.getElementById('reg-interests');
+  if(!container||!MOCK||!MOCK.registration) return;
+  var rows=(MOCK.registration.defaultInterests||[]).slice().sort(function(a,b){return a.rank-b.rank;});
+  container.innerHTML=rows.map(function(r){
+    return '<div class="reg-interest-row" draggable="true" data-domain="'+r.domain+'"><input type="checkbox"'+(r.checked?' checked':'')+'> <span>'+r.label+'</span><div class="reg-rank"><span class="reg-rank-num">'+(r.checked?r.rank:'')+'</span></div></div>';
+  }).join('');
+}
+
 function regRenumberInterests(){
   var rows=document.querySelectorAll('#reg-interests .reg-interest-row');
   var n=1;
@@ -3308,32 +3268,8 @@ document.addEventListener('DOMContentLoaded',function(){
 // ─────────────────────────────────────────────────────────────────────────────
 // DOMAIN MAP
 // ─────────────────────────────────────────────────────────────────────────────
-var DM_IDS=[
-  "astronomy-astrophysics","aerospace-engineering","earth-planetary-science",
-  "space-medicine-biology","space-law-policy","telecommunications-signals",
-  "computer-science-software","physics","materials-science",
-  "robotics-automation","remote-sensing","space-architecture",
-  "space-finance-economics","science-communication",
-  "philosophy-ethics-space","art-culture-space"
-];
-var DM_META={
-  "astronomy-astrophysics":{label:"Astronomy & Astrophysics",short:"ASTRO",color:"#6EB8FF",steward:true},
-  "aerospace-engineering":{label:"Aerospace Engineering",short:"AERO",color:"#4ACCA8",steward:false},
-  "earth-planetary-science":{label:"Earth & Planetary Science",short:"EARTH",color:"#7AACDA",steward:true},
-  "space-medicine-biology":{label:"Space Medicine & Biology",short:"MED",color:"#FF8080",steward:false},
-  "space-law-policy":{label:"Space Law & Policy",short:"LAW",color:"#FFB84D",steward:true},
-  "telecommunications-signals":{label:"Telecom & Signals",short:"COMMS",color:"#B088F0",steward:false},
-  "computer-science-software":{label:"CS & Software",short:"CODE",color:"#50E0C0",steward:true},
-  "physics":{label:"Physics",short:"PHYS",color:"#AACCEE",steward:false},
-  "materials-science":{label:"Materials Science",short:"MAT",color:"#E0A060",steward:false},
-  "robotics-automation":{label:"Robotics & Automation",short:"ROBO",color:"#80D0FF",steward:false},
-  "remote-sensing":{label:"Remote Sensing",short:"RS",color:"#40C090",steward:true},
-  "space-architecture":{label:"Space Architecture",short:"ARCH",color:"#C0A0E0",steward:false},
-  "space-finance-economics":{label:"Space Finance & Economics",short:"FIN",color:"#FFD060",steward:false},
-  "science-communication":{label:"Science Communication",short:"SCICOMM",color:"#FF90B0",steward:false},
-  "philosophy-ethics-space":{label:"Philosophy & Ethics",short:"PHIL",color:"#D0C0A0",steward:true},
-  "art-culture-space":{label:"Art & Culture of Space",short:"ART",color:"#E0B0C0",steward:false}
-};
+var DM_IDS=[];
+var DM_META={};
 
 function dmMkRng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/0xffffffff;};}
 function dmGenMembers(){
