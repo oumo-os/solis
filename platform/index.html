@@ -2325,22 +2325,22 @@
         <span style="cursor:pointer;color:var(--gold);margin-left:6px" onclick="toggleVersionList()">show</span>
       </div>
       <div id="version-list" style="display:none;margin-bottom:10px"></div>
-      <!-- Accept + Vote — compact like email To/CC -->
+      <!-- Accept + Vote -->
       <label class="accept-checkbox" style="margin-bottom:8px;padding:6px 10px;font-size:11px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
-      <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:8px">
-        <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;flex:1">
+      <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px">
+        <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;display:flex;gap:4px">
           <div class="vote-btn" onclick="selectVote(this,'yea')"><div class="vb-label" style="color:var(--green);font-size:11px">Yea</div></div>
           <div class="vote-btn" onclick="selectVote(this,'nay')"><div class="vb-label" style="color:var(--red);font-size:11px">Nay</div></div>
           <div class="vote-btn" onclick="selectVote(this,'abstain')"><div class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</div></div>
         </div>
-        <div id="vote-summary" style="display:flex;gap:16px;align-items:center;font-family:var(--mono);font-size:11px;padding:8px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);flex-shrink:0">
-          <div style="text-align:center"><div style="color:var(--green);font-size:16px;font-weight:600" id="vs-yea">0</div><div style="font-size:8px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px">Yea</div></div>
-          <div style="text-align:center"><div style="color:var(--text-tertiary);font-size:16px;font-weight:600" id="vs-total">0</div><div style="font-size:8px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px">Total Ws</div></div>
-          <div style="text-align:center"><div style="color:var(--red);font-size:16px;font-weight:600" id="vs-nay">0</div><div style="font-size:8px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.5px">Nay</div></div>
+        <div id="vote-summary" style="display:flex;gap:0;font-family:var(--mono);font-size:11px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);overflow:hidden;flex-shrink:0">
+          <div style="padding:6px 12px;border-right:1px solid var(--border-subtle)"><span style="color:var(--green);font-weight:600" id="vs-yea-pct">0%</span> <span style="font-size:9px;color:var(--text-tertiary)">Yea</span></div>
+          <div style="padding:6px 12px;border-right:1px solid var(--border-subtle)"><span style="color:var(--red);font-weight:600" id="vs-nay-pct">0%</span> <span style="font-size:9px;color:var(--text-tertiary)">Nay</span></div>
+          <div style="padding:6px 12px"><span style="color:var(--text-tertiary);font-weight:600" id="vs-abs-pct">0%</span> <span style="font-size:9px;color:var(--text-tertiary)">Abs</span></div>
         </div>
-      </div>
-      <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:12px;padding:6px 10px;background:var(--surface-raised);border-radius:var(--radius);border-left:3px solid var(--gold)">
-        <strong>Domain weighting:</strong> Each attached domain receives an equal share of influence. Effective vote weight = Ws &divide; <span id="vs-domain-count">3</span> domains. This ensures resolutions with broader domain coverage distribute influence fairly.
+        <div style="display:flex;align-items:center;padding:6px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);flex-shrink:0">
+          <span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span>&nbsp;/&nbsp;<span id="vs-qrm-total">0</span>&nbsp;<span style="font-size:8px">voted</span>&nbsp;<span style="margin:0 2px;color:var(--border)">&middot;</span>&nbsp;<span style="font-size:8px">QRM&nbsp;2/3</span>
+        </div>
       </div>
       <div style="margin-bottom:12px">
         <span style="font-size:10px;color:var(--text-tertiary);cursor:pointer" onclick="toggleBreakdown()">&#9656; Show per-domain vote breakdown</span>
@@ -2586,31 +2586,40 @@ function selectVote(btn, type) {
 // Effective vote weight per domain = member's Ws in that domain / N domains.
 // This ensures resolutions with broader domain coverage distribute influence fairly.
 function updateVoteSummary() {
-  var yea = 0, nay = 0, total = 0;
-  var domainCount = 3; // number of attached domains for this resolution
-  var domainShare = 1 / domainCount; // equal share per domain
+  var domainCount = 3;
+  var totalMembers = 8; // deliberating members
+  var requiredFraction = 2/3;
+  var votedCount = 5; // members who voted (yea or nay)
 
-  // Hardcoded vote data for demo (in production, this would come from delibResolutions[i].votes)
+  // Hardcoded vote data for demo
   var domainVotes = [
     { domain: 'Space Law', yea: 2840, nay: 620 },
     { domain: 'Liability', yea: 1200, nay: 312 },
     { domain: 'Remote Sensing', yea: 920, nay: 0 }
   ];
 
+  var yeaTotal = 0, nayTotal = 0, absTotal = 340;
+  var domainShare = 1 / domainCount;
   domainVotes.forEach(function(d) {
-    yea += d.yea * domainShare;
-    nay += d.nay * domainShare;
+    yeaTotal += d.yea * domainShare;
+    nayTotal += d.nay * domainShare;
   });
-  total = yea + nay;
+  var totalWeight = yeaTotal + nayTotal + absTotal;
 
-  var yeaEl = document.getElementById('vs-yea');
-  var nayEl = document.getElementById('vs-nay');
-  var totalEl = document.getElementById('vs-total');
-  var domainCountEl = document.getElementById('vs-domain-count');
-  if (yeaEl) yeaEl.textContent = Math.round(yea).toLocaleString();
-  if (nayEl) nayEl.textContent = Math.round(nay).toLocaleString();
-  if (totalEl) totalEl.textContent = Math.round(total).toLocaleString();
-  if (domainCountEl) domainCountEl.textContent = domainCount;
+  var yeaPct = totalWeight > 0 ? Math.round(yeaTotal / totalWeight * 100) : 0;
+  var nayPct = totalWeight > 0 ? Math.round(nayTotal / totalWeight * 100) : 0;
+  var absPct = totalWeight > 0 ? Math.round(absTotal / totalWeight * 100) : 0;
+
+  var yeaPctEl = document.getElementById('vs-yea-pct');
+  var nayPctEl = document.getElementById('vs-nay-pct');
+  var absPctEl = document.getElementById('vs-abs-pct');
+  var qrmCountEl = document.getElementById('vs-qrm-count');
+  var qrmTotalEl = document.getElementById('vs-qrm-total');
+  if (yeaPctEl) yeaPctEl.textContent = yeaPct + '%';
+  if (nayPctEl) nayPctEl.textContent = nayPct + '%';
+  if (absPctEl) absPctEl.textContent = absPct + '%';
+  if (qrmCountEl) qrmCountEl.textContent = votedCount;
+  if (qrmTotalEl) qrmTotalEl.textContent = totalMembers;
 }
 
 function toggleBreakdown() {
