@@ -2298,15 +2298,13 @@
       <!-- Drafting metadata — compact row -->
       <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Action</div>
-          <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="Community Policy, Declaration…" style="font-size:11px;padding:5px 8px">
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Resolution Type</div>
+          <input class="msg-input" list="action-presets" id="res-modal-action" placeholder="Policy, Resolution, Declaration…" style="font-size:11px;padding:5px 8px">
           <datalist id="action-presets">
-            <option value="Community Policy">
+            <option value="Policy">
+            <option value="Resolution">
             <option value="Declaration">
-            <option value="Deliverable Document">
-            <option value="Service Contract">
-            <option value="Agreement">
-            <option value="Letter/Communication">
+            <option value="Report">
           </datalist>
         </div>
         <div style="flex:1;min-width:0">
@@ -2327,26 +2325,29 @@
       <div id="version-list" style="display:none;margin-bottom:10px"></div>
       <!-- Accept + Vote -->
       <label class="accept-checkbox" style="margin-bottom:10px;padding:6px 10px;font-size:11px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
-      <!-- Vote buttons with built-in percentages -->
-      <div style="display:flex;gap:6px;align-items:stretch;margin-bottom:10px">
-        <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;display:flex;gap:4px;flex:1">
-          <div class="vote-btn vote-btn-yea" onclick="selectVote(this,'yea')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-            <span style="color:var(--green);font-weight:600;font-size:13px" id="vs-yea-pct">0%</span>
-            <span class="vb-label" style="color:var(--green);font-size:11px">Yea</span>
-          </div>
-          <div class="vote-btn vote-btn-nay" onclick="selectVote(this,'nay')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-            <span style="color:var(--red);font-weight:600;font-size:13px" id="vs-nay-pct">0%</span>
-            <span class="vb-label" style="color:var(--red);font-size:11px">Nay</span>
-          </div>
-          <div class="vote-btn vote-btn-abs" onclick="selectVote(this,'abstain')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-            <span style="color:var(--text-tertiary);font-weight:600;font-size:13px" id="vs-abs-pct">0%</span>
-            <span class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</span>
-          </div>
+      <!-- Vote buttons — full width -->
+      <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;display:flex;gap:4px;margin-bottom:8px">
+        <div class="vote-btn vote-btn-yea" onclick="selectVote(this,'yea')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="color:var(--green);font-weight:600;font-size:13px" id="vs-yea-pct">0%</span>
+          <span class="vb-label" style="color:var(--green);font-size:11px">Yea</span>
         </div>
-        <div style="display:flex;flex-direction:column;justify-content:center;padding:6px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);flex-shrink:0;gap:2px">
-          <div><span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span> / <span id="vs-qrm-total">0</span> voted</div>
-          <div style="font-size:8px">QRM 2/3 &middot; Pass &gt;50%</div>
+        <div class="vote-btn vote-btn-nay" onclick="selectVote(this,'nay')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="color:var(--red);font-weight:600;font-size:13px" id="vs-nay-pct">0%</span>
+          <span class="vb-label" style="color:var(--red);font-size:11px">Nay</span>
         </div>
+        <div class="vote-btn vote-btn-abs" onclick="selectVote(this,'abstain')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="color:var(--text-tertiary);font-weight:600;font-size:13px" id="vs-abs-pct">0</span>
+          <span class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</span>
+        </div>
+      </div>
+      <!-- Quorum summary — full width, verbose -->
+      <div id="vote-quorum-bar" style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:8px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:10px;line-height:1.5">
+        <div><span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span> / <span id="vs-qrm-total">0</span> members voted</div>
+        <div>Quorum (2/3): <span style="font-weight:600" id="vs-qrm-req">6</span> required</div>
+        <div id="vs-qrm-status" style="color:var(--red)">Quorum <strong>not met</strong></div>
+        <div>Pass: <strong>&gt;50%</strong> of effective Yea+Nay</div>
+        <div>Yea ratio: <span style="font-weight:600" id="vs-pass-ratio">0%</span></div>
+        <div id="vs-pass-status" style="color:var(--text-tertiary)">Pending vote</div>
       </div>
       <!-- Breakdown toggle -->
       <div style="margin-bottom:12px">
@@ -2368,16 +2369,33 @@
             </table>
           </div>
           <!-- Quorum & Threshold Details -->
-          <div style="margin-top:10px;padding:10px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-size:10px;color:var(--text-secondary);line-height:1.6">
-            <div style="font-weight:600;color:var(--text);margin-bottom:4px">Quorum &amp; Threshold</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
-              <div>Deliberating members: <strong>8</strong></div>
-              <div>Quorum required (2/3): <strong>6</strong></div>
-              <div>Voted (Yea + Nay): <strong id="vs-voted-count">4</strong></div>
-              <div style="color:var(--red)" id="vs-quorum-status">Quorum: <strong>not met</strong></div>
-              <div>Pass threshold: <strong>&gt;50%</strong> of effective Yea+Nay</div>
-              <div>Current Yea ratio: <strong id="vs-pass-ratio">84%</strong></div>
-            </div>
+          <div style="margin-top:10px;overflow-x:auto">
+            <table class="vote-table" style="min-width:auto">
+              <thead>
+                <tr><th colspan="4" style="text-transform:none;letter-spacing:0;font-size:11px;font-weight:600;color:var(--text)">Quorum &amp; Threshold</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Deliberating members</td><td style="font-family:var(--mono);font-weight:600">8</td>
+                  <td>Quorum required (2/3)</td><td style="font-family:var(--mono);font-weight:600" id="vs-qrm-req-cell">6</td>
+                </tr>
+                <tr>
+                  <td>Voted (Yea + Nay)</td><td style="font-family:var(--mono);font-weight:600" id="vs-voted-count-cell">4</td>
+                  <td>Abstained</td><td style="font-family:var(--mono)" id="vs-abs-count-cell">1</td>
+                </tr>
+                <tr>
+                  <td>Quorum status</td><td id="vs-quorum-status-cell" style="color:var(--red);font-weight:600">Not met</td>
+                  <td>Effective Yea+Nay</td><td style="font-family:var(--mono)" id="vs-eff-yn-cell">1,964</td>
+                </tr>
+                <tr>
+                  <td>Pass threshold</td><td style="font-family:var(--mono)">&gt;50% (&gt;<span id="vs-threshold-cell">982</span>)</td>
+                  <td>Effective Yea</td><td style="font-family:var(--mono);color:var(--green);font-weight:600" id="vs-eff-yea-cell">1,653</td>
+                </tr>
+                <tr>
+                  <td>Result</td><td id="vs-result-cell" colspan="3" style="color:var(--text-tertiary);font-style:italic">Pending — quorum not yet met</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -2613,27 +2631,28 @@ function selectVote(btn, type) {
 // Effective vote weight per domain = member's Ws in that domain / N domains.
 // This ensures resolutions with broader domain coverage distribute influence fairly.
 function updateVoteSummary() {
-  var domainCount = 3;
   var totalMembers = 8;
   var requiredFraction = 2/3;
+  var quorumReq = Math.ceil(totalMembers * requiredFraction);
   var votedCount = 5;
 
-  // Demo data: per-domain, per-voter raw ws
-  var voters = ['AJ','OK','NC','MT','SR'];
+  // Domain data: name, tag, share (configurable — AI will set these)
   var domainVotes = [
-    { tag:'LAW', name:'Space Law', share:1/3, voters:{AJ:1800,OK:1040,NC:-620} },
-    { tag:'LAW', name:'Liability', share:1/3, voters:{AJ:800,OK:400,NC:-312} },
-    { tag:'RS',  name:'Remote Sensing', share:1/3, voters:{MT:920} }
+    { tag:'LAW', name:'Space Law',     share:0.38, voters:{AJ:1800,OK:1040,NC:-620} },
+    { tag:'LAW', name:'Liability',      share:0.35, voters:{AJ:800, OK:400, NC:-312} },
+    { tag:'RS',  name:'Remote Sensing', share:0.27, voters:{MT:920} }
   ];
 
   var absTotal = 340;
+  var absCount = totalMembers - votedCount;
 
-  // Sum effective yea/nay across domains
+  // Effective yea/nay (weighted by domain share)
   var effYea = 0, effNay = 0;
+  var rawYea = 0, rawNay = 0;
   domainVotes.forEach(function(d) {
     Object.keys(d.voters).forEach(function(v) {
-      if (d.voters[v] > 0) effYea += d.voters[v] * d.share;
-      else effNay += Math.abs(d.voters[v]) * d.share;
+      if (d.voters[v] > 0) { effYea += d.voters[v] * d.share; rawYea += d.voters[v]; }
+      else { effNay += Math.abs(d.voters[v]) * d.share; rawNay += Math.abs(d.voters[v]); }
     });
   });
   var totalWeight = effYea + effNay + absTotal;
@@ -2644,22 +2663,59 @@ function updateVoteSummary() {
 
   setText('vs-yea-pct', yeaPct + '%');
   setText('vs-nay-pct', nayPct + '%');
-  setText('vs-abs-pct', absPct + '%');
+  setText('vs-abs-pct', absCount + ' abstain');
+
+  // Quorum bar
   setText('vs-qrm-count', votedCount);
   setText('vs-qrm-total', totalMembers);
+  setText('vs-qrm-req', quorumReq);
+  var qrmMet = votedCount >= quorumReq;
+  var qrmStatusEl = document.getElementById('vs-qrm-status');
+  if (qrmStatusEl) {
+    qrmStatusEl.style.color = qrmMet ? 'var(--green)' : 'var(--red)';
+    qrmStatusEl.innerHTML = 'Quorum <strong>' + (qrmMet ? 'met' : 'not met') + '</strong>';
+  }
 
   // Pass ratio
-  var passRatio = (effYea + effNay) > 0 ? Math.round(effYea / (effYea + effNay) * 100) : 0;
-  var passEl = document.getElementById('vs-pass-ratio');
-  if (passEl) {
-    passEl.textContent = passRatio + '%';
-    passEl.style.color = passRatio > 50 ? 'var(--green)' : 'var(--red)';
+  var effYN = effYea + effNay;
+  var passRatio = effYN > 0 ? Math.round(effYea / effYN * 100) : 0;
+  setText('vs-pass-ratio', passRatio + '%');
+  var passStatusEl = document.getElementById('vs-pass-status');
+  if (passStatusEl) {
+    if (!qrmMet) {
+      passStatusEl.textContent = 'Pending — quorum not yet met';
+      passStatusEl.style.color = 'var(--text-tertiary)';
+    } else if (passRatio > 50) {
+      passStatusEl.textContent = 'Passed';
+      passStatusEl.style.color = 'var(--green)';
+    } else {
+      passStatusEl.textContent = 'Failed';
+      passStatusEl.style.color = 'var(--red)';
+    }
   }
-  setText('vs-voted-count', votedCount);
-  var qrmEl = document.getElementById('vs-quorum-status');
-  if (qrmEl) {
-    var met = votedCount >= Math.ceil(totalMembers * requiredFraction);
-    qrmEl.innerHTML = 'Quorum: <strong style="color:' + (met ? 'var(--green)' : 'var(--red)') + '">' + (met ? 'met' : 'not met') + '</strong>';
+
+  // Threshold table
+  setText('vs-qrm-req-cell', quorumReq);
+  setText('vs-voted-count-cell', votedCount);
+  setText('vs-abs-count-cell', totalMembers - votedCount);
+  setText('vs-eff-yn-cell', fmt(Math.round(effYN)));
+  setText('vs-eff-yea-cell', fmt(Math.round(effYea)));
+  setText('vs-threshold-cell', fmt(Math.round(effYN / 2)));
+  var qrmCell = document.getElementById('vs-quorum-status-cell');
+  if (qrmCell) { qrmCell.textContent = qrmMet ? 'Met' : 'Not met'; qrmCell.style.color = qrmMet ? 'var(--green)' : 'var(--red)'; }
+  var resultCell = document.getElementById('vs-result-cell');
+  if (resultCell) {
+    if (!qrmMet) {
+      resultCell.textContent = 'Pending — quorum not yet met';
+      resultCell.style.color = 'var(--text-tertiary)';
+      resultCell.style.fontStyle = 'italic';
+    } else if (passRatio > 50) {
+      resultCell.innerHTML = '<span style="color:var(--green);font-weight:600">Passed</span> — Yea ' + passRatio + '% exceeds &gt;50% threshold';
+      resultCell.style.fontStyle = 'normal';
+    } else {
+      resultCell.innerHTML = '<span style="color:var(--red);font-weight:600">Failed</span> — Yea ' + passRatio + '% does not exceed &gt;50% threshold';
+      resultCell.style.fontStyle = 'normal';
+    }
   }
 
   // ── Render breakdown table ──
@@ -2667,10 +2723,10 @@ function updateVoteSummary() {
   var tfoot = document.getElementById('vote-breakdown-foot');
   if (!tbody) return;
 
-  var simpleYea = 0, simpleNay = 0;
+  var absCount = totalMembers - votedCount;
+  var voters = ['AJ','OK','NC','MT','SR'];
   var tagColors = { LAW:'tag-purple', RS:'tag-green', BIO:'tag-amber' };
 
-  // Domain rows
   var rows = '';
   domainVotes.forEach(function(d) {
     var dYea = 0, dNay = 0;
@@ -2678,7 +2734,6 @@ function updateVoteSummary() {
       if (d.voters[v] > 0) dYea += d.voters[v]; else dNay += Math.abs(d.voters[v]);
     });
     var dTotal = dYea + dNay;
-    simpleYea += dYea; simpleNay += dNay;
 
     rows += '<tr>';
     rows += '<td class="domain-name"><span class="tag ' + (tagColors[d.tag]||'tag-purple') + '" style="font-size:7px;margin-right:4px">' + d.tag + '</span>' + d.name + '</td>';
@@ -2699,14 +2754,13 @@ function updateVoteSummary() {
   });
   tbody.innerHTML = rows;
 
-  // Foot: Simple Totals, Effective Totals
   var footRows = '';
-  var simpleTotal = simpleYea + simpleNay;
+  var simpleTotal = rawYea + rawNay;
   footRows += '<tr style="background:var(--surface-raised)">';
   footRows += '<td class="domain-name" style="font-weight:600">Simple Totals</td>';
   footRows += '<td style="font-size:9px;color:var(--text-tertiary)">&Sigma; raw</td>';
-  footRows += '<td class="vote-yea-cell" style="text-align:right;font-size:12px">' + fmt(simpleYea) + '</td>';
-  footRows += '<td class="vote-nay-cell" style="text-align:right;font-size:12px">' + fmt(simpleNay) + '</td>';
+  footRows += '<td class="vote-yea-cell" style="text-align:right;font-size:12px">' + fmt(rawYea) + '</td>';
+  footRows += '<td class="vote-nay-cell" style="text-align:right;font-size:12px">' + fmt(rawNay) + '</td>';
   footRows += '<td class="vote-total-cell" style="text-align:right;font-size:12px">' + fmt(simpleTotal) + '</td>';
   voters.forEach(function() { footRows += '<td></td>'; });
   footRows += '</tr>';
@@ -2714,9 +2768,9 @@ function updateVoteSummary() {
   footRows += '<tr style="background:var(--gold-soft)">';
   footRows += '<td class="domain-name" style="font-weight:600;color:var(--gold)">Effective Totals</td>';
   footRows += '<td style="font-size:9px;color:var(--text-tertiary)">&Sigma;(raw &times; share)</td>';
-  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)" id="vs-eff-yea">' + fmt(Math.round(effYea)) + '</td>';
-  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)" id="vs-eff-nay">' + fmt(Math.round(effNay)) + '</td>';
-  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;font-family:var(--mono)" id="vs-eff-total">' + fmt(Math.round(effYea + effNay)) + '</td>';
+  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">' + fmt(Math.round(effYea)) + '</td>';
+  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">' + fmt(Math.round(effNay)) + '</td>';
+  footRows += '<td style="text-align:right;font-size:12px;font-weight:600;font-family:var(--mono)">' + fmt(Math.round(effYN)) + '</td>';
   voters.forEach(function() { footRows += '<td></td>'; });
   footRows += '</tr>';
   tfoot.innerHTML = footRows;

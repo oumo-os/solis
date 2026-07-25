@@ -1,13 +1,13 @@
 # Vote Weight System
 
-**Version:** 1.0
+**Version:** 2.0
 **Last updated:** 26 July 2026
 
 ---
 
 ## Overview
 
-Every vote in Solis carries weight proportional to the voter's competence in the domains relevant to the resolution. This ensures that decisions are influenced most by those with the greatest stake and knowledge in the affected areas.
+Every vote in Solis carries weight proportional to the voter's competence in the domains relevant to the resolution. Domain shares are configurable — by default equal (1/N), but an AI categoriser can assign unequal weights based on resolution relevance.
 
 ---
 
@@ -21,15 +21,26 @@ Each participant has a **Ws value per domain** — a number between 0 and 3000 r
 
 A resolution is attached to one or more **implementing domains**. A voter's effective weight in a resolution is derived from the intersection of their domain competences with the resolution's attached domains.
 
-### Equal Domain Share
+### Domain Shares
 
-When a resolution is attached to **N domains**, each domain receives an equal share of influence:
+Each attached domain receives a **share** of influence. By default, shares are equal:
 
 ```
 Domain share = 1 / N
 ```
 
-For example, a resolution attached to Space Law, Liability, and Remote Sensing gives each domain 33.3% influence.
+But shares can be **unequal** — set by the AI categoriser based on how central each domain is to the resolution:
+
+```
+Domain share = relevance_score(d) / Σ relevance_scores(all domains)
+```
+
+Example with unequal shares:
+- Space Law: 0.38 (most central)
+- Liability: 0.35 (strongly related)
+- Remote Sensing: 0.27 (tangentially related)
+
+Shares must sum to 1.0.
 
 ---
 
@@ -40,67 +51,62 @@ For example, a resolution attached to Space Law, Liability, and Remote Sensing g
 For each domain `d` attached to the resolution:
 
 ```
-Voter's weight in domain d = Ws(voter, d) / N
+Voter's weight in domain d = Ws(voter, d) × share(d)
 ```
 
 Where:
 - `Ws(voter, d)` = the voter's competence in domain d
-- `N` = total number of attached domains
+- `share(d)` = the domain's assigned share (default 1/N)
 
 ### Step 2: Aggregate Weight
 
 The voter's total effective weight across all domains:
 
 ```
-Effective weight = Σ (Ws(voter, d) / N) for all attached domains d
+Effective weight = Σ (Ws(voter, d) × share(d)) for all attached domains d
 ```
 
 ### Step 3: Vote Ratio
 
-The final vote ratio is computed as:
-
 ```
 Yea ratio = Σ (yea voters' effective weights) / Σ (all voters' effective weights)
 Nay ratio = Σ (nay voters' effective weights) / Σ (all voters' effective weights)
-Abstain ratio = Σ (abstain voters' effective weights) / Σ (all voters' effective weights)
 ```
+
+Abstentions are tracked as a count only — their weight is not calculated.
 
 ---
 
 ## Example
 
 ### Resolution: "Debris Liability Framework"
-- **Attached domains:** Space Law, Liability, Remote Sensing (N = 3)
+- **Attached domains:** Space Law (38%), Liability (35%), Remote Sensing (27%)
 
-### Voters
+### Per-Domain Breakdown
 
-| Voter | Domain | Raw Ws | Effective Ws (Ws/3) | Vote |
-|-------|--------|--------|---------------------|------|
-| Akello Jane | Space Law | 1,800 | 600 | Yea |
-| Akello Jane | Liability | 800 | 267 | Yea |
-| Akello Jane | Remote Sensing | 0 | 0 | Yea |
-| Osei Kwame | Space Law | 1,040 | 347 | Yea |
-| Osei Kwame | Liability | 400 | 133 | Yea |
-| Osei Kwame | Remote Sensing | 0 | 0 | Yea |
-| Namugga Claire | Space Law | 620 | 207 | Nay |
-| Namugga Claire | Liability | 312 | 104 | Nay |
-| Namugga Claire | Remote Sensing | 0 | 0 | Nay |
-| Mwenda Thomas | Remote Sensing | 920 | 307 | Yea |
+| Domain | Share | Yea Ws | Nay Ws | Total | AJ | OK | NC | MT |
+|--------|-------|--------|--------|-------|----|----|----|----|
+| LAW Space Law | 38% | 2,840 | 620 | 3,460 | +1,800 | +1,040 | -620 | — |
+| LAW Liability | 35% | 1,200 | 312 | 1,512 | +800 | +400 | -312 | — |
+| RS Remote Sensing | 27% | 920 | 0 | 920 | — | — | — | +920 |
+
+### Totals
+
+| Row | Yea | Nay | Total |
+|-----|-----|-----|-------|
+| **Simple Totals** (Σ raw) | 4,960 | 932 | 5,892 |
+| **Effective Totals** (Σ raw × share) | 1,653 | 311 | 1,964 |
 
 ### Results
 
-| Vote | Effective Weight | Ratio |
-|------|-----------------|-------|
-| Yea | 600 + 267 + 0 + 347 + 133 + 0 + 307 = **1,654** | **60%** |
-| Nay | 207 + 104 + 0 = **311** | **20%** |
-| Abstain | 340 (from mock data) | **20%** |
-| **Total** | **2,305** | **100%** |
-
-### Quorum Check
-
-- **Voted:** 4 members (yea or nay)
-- **Required:** 2/3 of 8 deliberating members = 5.33 → **6 required**
-- **Result:** Quorum NOT met (4 < 6)
+| Metric | Value |
+|--------|-------|
+| Yea ratio (effective) | 84% |
+| Nay ratio (effective) | 16% |
+| Abstained | 3 members |
+| Pass threshold | >50% of effective Yea+Nay |
+| Quorum required (2/3 of 8) | 6 |
+| Quorum status | **Not met** (5 voted < 6 required) |
 
 ---
 
@@ -118,22 +124,64 @@ Both conditions must be met for a resolution to pass.
 Among valid votes:
 - **Yea must exceed 50%** of total effective weight (yea + nay)
 - Abstentions do not count toward the denominator
+- If quorum is not met, the result is "Pending"
+
+---
+
+## UI Layout
+
+### Vote Summary Bar
+
+Three buttons showing:
+- **Yea**: percentage of effective weight (e.g. "84% Yea")
+- **Nay**: percentage of effective weight (e.g. "16% Nay")
+- **Abstain**: count only (e.g. "3 abstain")
+
+### Quorum Bar
+
+Full-width informational bar below the vote buttons:
+```
+5 / 8 members voted  ·  Quorum (2/3): 6 required  ·  Quorum not met  ·  Pass: >50%  ·  Yea ratio: 84%  ·  Passed
+```
+
+### Per-Domain Breakdown Table
+
+```
+Domain            Share   Yea Ws  Nay Ws  Total    AJ      OK      NC      MT
+─────────────────────────────────────────────────────────────────────────────────
+LAW Space Law     38%     2,840     620   3,460  +1,800  +1,040   -620      —
+LAW Liability     35%     1,200     312   1,512    +800    +400   -312      —
+RS  Remote Sens.  27%       920       0     920      —       —       —    +920
+─────────────────────────────────────────────────────────────────────────────────
+Simple Totals     Σ raw   4,960     932   5,892
+Effective Totals  Σ×share 1,653     311   1,964
+```
+
+Voter columns show signed weights: positive = yea, negative = nay.
+
+### Quorum & Threshold Table
+
+```
+Quorum & Threshold
+Deliberating members    8       Quorum required (2/3)  6
+Voted (Yea + Nay)       5       Abstained              3
+Quorum status           Not met Effective Yea+Nay      1,964
+Pass threshold          >50% (>982)  Effective Yea     1,653
+Result                  Passed — Yea 84% exceeds >50% threshold
+```
 
 ---
 
 ## Future: AI Domain Categorisation
 
-Currently, all attached domains receive equal share. In a future version:
+Domain shares will be set by an AI drafter and categoriser:
 
-- An AI will analyse the resolution text and assign **weighted relevance scores** to each domain
-- Domains more central to the resolution will carry greater influence
-- This replaces the equal-share model with a relevance-weighted model
+1. **AI Drafter**: Analyses resolution text and assigns relevance scores to each domain
+2. **AI Categoriser**: Suggests resolution type (Policy, Resolution, Declaration, Report)
+3. **Share assignment**: `share(d) = relevance_score(d) / Σ relevance_scores`
+4. **Human override**: Shares are editable in the resolution modal before voting
 
-The formula becomes:
-
-```
-Domain share = relevance_score(d) / Σ relevance_scores(all domains)
-```
+This replaces the equal-share model with a relevance-weighted model, ensuring domains more central to the resolution carry greater influence.
 
 ---
 
@@ -145,11 +193,17 @@ Domain share = relevance_score(d) / Σ relevance_scores(all domains)
 - But if it also affects Remote Sensing, RS practitioners should have a voice
 - Per-domain Ws ensures both conditions are met
 
-### Why equal domain share?
+### Why configurable domain shares?
 
-- Prevents gaming by attaching many low-relevance domains
-- Simple and transparent
-- Easy to understand and audit
+- Equal shares are a safe default — transparent and hard to game
+- Unequal shares let the AI reflect that some domains are more central to a resolution
+- Prevents a tangential domain from diluting the influence of core domains
+
+### Why abstain as count only?
+
+- Abstaining means "I have no opinion on this" — there's no weight to calculate
+- Showing a count is sufficient for transparency
+- Avoids confusion about what an abstain "weight" would mean
 
 ### Why not one-person-one-vote?
 
@@ -171,25 +225,29 @@ member.domainWs = {
   "Remote Sensing": 0
 };
 
-// Resolution attached domains
-resolution.implementingCircles = ["Space Law Circle", "Remote Sensing Circle"];
-// Derived domains from circle mandates
-resolution.domains = ["Space Law", "Liability", "Remote Sensing"];
+// Resolution: domain shares (configurable)
+resolution.domainShares = {
+  "Space Law": 0.38,
+  "Liability": 0.35,
+  "Remote Sensing": 0.27
+};
 
-// Vote per domain
+// Vote per domain (raw ws values, signed: positive=yea, negative=nay)
 resolution.votes.domains = [
-  { name: "Space Law", yea: 2840, nay: 620, total: 3460 },
-  { name: "Liability", yea: 1200, nay: 312, total: 1512 },
-  { name: "Remote Sensing", yea: 920, nay: 0, total: 920 }
+  { tag:'LAW', name:'Space Law', share:0.38, voters:{AJ:1800, OK:1040, NC:-620} },
+  { tag:'LAW', name:'Liability', share:0.35, voters:{AJ:800, OK:400, NC:-312} },
+  { tag:'RS',  name:'Remote Sensing', share:0.27, voters:{MT:920} }
 ];
 ```
 
 ### Calculation Flow
 
 1. When a resolution is opened in the modal, `updateVoteSummary()` is called
-2. It reads the domain vote data and computes effective weights
-3. It displays the aggregate percentages in the vote summary bar
-4. The breakdown table shows per-domain detail with voter chips
+2. It reads the domain vote data and computes effective weights using domain shares
+3. Simple totals (Σ raw) and effective totals (Σ raw × share) are computed
+4. Percentages shown in vote buttons use effective totals
+5. Quorum and pass/fail status are displayed in the quorum bar and threshold table
+6. Breakdown table is rendered dynamically with per-voter signed columns
 
 ---
 
@@ -198,3 +256,4 @@ resolution.votes.domains = [
 - `to_prod.md` — Phase 3: Competence & Weight System
 - `platform/index.html` — `updateVoteSummary()`, `selectVote()`
 - `platform/mock.json` — `votes.domains`, `members.domainWs`
+- `docs/modal-design.md` — Resolution modal UI decisions
