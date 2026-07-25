@@ -2001,10 +2001,14 @@
 <!-- ═══ REGISTRATION MODAL ═══ -->
 <div class="reg-modal-overlay" id="reg-modal">
   <div class="reg-modal">
-    <button class="reg-modal-close" onclick="closeRegModal()">&times;</button>
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeRegModal()">&times;</button>
+        <span class="modal-titlebar-title">Join the Commons</span>
+        <span style="font-size:9px;color:var(--text-tertiary);margin-left:8px">Step <span id="reg-step-num">1</span> of 3 · <span id="reg-step-label">About You</span></span>
+      </div>
+    </div>
     <div class="reg-modal-body">
-      <div class="reg-modal-title">Join the Commons</div>
-      <div class="reg-modal-sub">Step <span id="reg-step-num">1</span> of 3 · <span id="reg-step-label">About You</span></div>
       <div class="reg-modal-steps">
         <div id="reg-p1" class="reg-pip active"></div>
         <div id="reg-p2" class="reg-pip"></div>
@@ -2205,13 +2209,17 @@
 
 <div class="reg-modal-overlay" id="pd-modal">
   <div class="reg-modal" style="max-width:640px">
-    <button class="reg-modal-close" onclick="closeParticipantModal()">&times;</button>
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeParticipantModal()">&times;</button>
+        <span class="modal-titlebar-title" id="pd-name">Participant</span>
+      </div>
+    </div>
     <div class="reg-modal-body">
       <div class="hero" style="margin-bottom:16px">
         <div class="hero-icon" id="pd-avatar" style="background:var(--teal-soft);border:1px solid var(--teal-border);color:var(--teal);font-size:18px">OK</div>
         <div style="flex:1">
-          <div class="hero-title" id="pd-name">Okello Robert</div>
-          <div class="hero-desc" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
+          <div style="font-size:12px;color:var(--text-secondary)" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
           <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px" id="pd-meta">Kampala, Uganda · Joined Mar 2025</span></div>
         </div>
       </div>
@@ -2411,9 +2419,13 @@
 <!-- ═══ SYSTEM SETTINGS MODAL ═══ -->
 <div class="reg-modal-overlay" id="settings-modal">
   <div class="reg-modal" style="max-width:640px">
-    <button class="reg-modal-close" onclick="closeSettingsModal()">&times;</button>
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeSettingsModal()">&times;</button>
+        <span class="modal-titlebar-title">System Settings</span>
+      </div>
+    </div>
     <div class="reg-modal-body">
-      <div class="reg-modal-title">System Settings</div>
       <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">STF composition, quorum thresholds, and deliberation defaults.</div>
       <div class="settings-tab-bar">
         <div class="settings-tab active" onclick="switchSettingsTab(0,this)">STF</div>
@@ -2466,9 +2478,10 @@
           </div>
         </div>
       </div>
-      <div class="flex justify-between" style="gap:8px;margin-top:12px">
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="submitSystemProposal()">Submit as Proposal</button><button class="btn btn-sm" onclick="closeSettingsModal()">Cancel</button></div>
-      </div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="submitSystemProposal()">Submit as Proposal</button>
+      <button class="btn btn-sm" onclick="closeSettingsModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -2476,9 +2489,13 @@
 <!-- ═══ CIRCLE SETTINGS MODAL ═══ -->
 <div class="reg-modal-overlay" id="circle-settings-modal">
   <div class="reg-modal" style="max-width:640px">
-    <button class="reg-modal-close" onclick="closeCircleSettingsModal()">&times;</button>
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeCircleSettingsModal()">&times;</button>
+        <span class="modal-titlebar-title">Circle Settings</span>
+      </div>
+    </div>
     <div class="reg-modal-body">
-      <div class="reg-modal-title">Circle Settings</div>
       <div class="settings-tab-bar">
         <div class="settings-tab active" onclick="switchCircleSettingsTab(0,this)">Configuration</div>
         <div class="settings-tab" onclick="switchCircleSettingsTab(1,this)">Mandate Domains</div>
@@ -2520,9 +2537,10 @@
           <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
         </div>
       </div>
-      <div class="flex justify-between" style="gap:8px;margin-top:12px">
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="submitCircleProposal()">Submit as Proposal</button><button class="btn btn-sm" onclick="closeCircleSettingsModal()">Cancel</button></div>
-      </div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="submitCircleProposal()">Submit as Proposal</button>
+      <button class="btn btn-sm" onclick="closeCircleSettingsModal()">Cancel</button>
     </div>
   </div>
 </div>
