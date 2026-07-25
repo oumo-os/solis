@@ -752,6 +752,16 @@ body.modal-open{overflow:hidden}
 .reg-modal-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
 .reg-modal-steps{display:flex;gap:4px;margin-bottom:20px}
 
+/* ── Modal titlebar ── */
+.modal-titlebar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border-subtle);background:var(--surface-raised);border-radius:var(--radius-lg) var(--radius-lg) 0 0;position:sticky;top:0;z-index:2}
+.modal-titlebar-left{display:flex;align-items:center;gap:8px;min-width:0}
+.modal-titlebar-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.modal-titlebar-title{font-family:var(--display);font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.modal-titlebar-btn{background:none;border:none;font-size:18px;color:var(--text-tertiary);cursor:pointer;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);transition:all .12s;flex-shrink:0}
+.modal-titlebar-btn:hover{color:var(--text);background:var(--surface)}
+.modal-titlebar-btn-redraft{border:1px solid var(--border-subtle);background:var(--surface);transition:all .12s}
+.modal-titlebar-btn-redraft:hover{border-color:var(--gold-border);background:var(--gold-soft)}
+
 /* ── Reply composer ── */
 .reply-composer{background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px}
 .reply-composer textarea{width:100%;border:none;background:transparent;font-family:var(--sans);font-size:13px;color:var(--text);resize:vertical;min-height:60px;outline:none}

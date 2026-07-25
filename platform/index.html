@@ -2266,12 +2266,20 @@
 <!-- ═══ RESOLUTION EDIT/VIEW MODAL ═══ -->
 <div class="reg-modal-overlay" id="resolution-modal">
   <div class="reg-modal" style="max-width:720px">
-    <button class="reg-modal-close" onclick="closeResolutionModal()">&times;</button>
-    <div class="reg-modal-body">
-      <div class="flex items-center justify-between mb-3">
-        <div class="reg-modal-title" id="res-modal-title">Resolution</div>
-        <div id="res-modal-status" style="font-size:9px;color:var(--text-tertiary)"></div>
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeResolutionModal()">&times;</button>
+        <span class="modal-titlebar-title" id="res-modal-title">Resolution</span>
+        <span id="res-modal-status" style="font-size:9px;color:var(--text-tertiary);margin-left:8px"></span>
       </div>
+      <div class="modal-titlebar-right">
+        <span id="res-redraft-count" style="font-size:9px;color:var(--text-tertiary);margin-right:8px"></span>
+        <button class="btn btn-sm modal-titlebar-btn-redraft" id="btn-redraft-resolution" onclick="requestRedraft()" style="display:none;font-size:10px">
+          Auto Redraft (AI) <span id="res-redraft-badge" style="margin-left:4px;padding:1px 5px;border-radius:8px;font-size:8px;font-weight:600;background:var(--surface);border:1px solid var(--border-subtle)"></span>
+        </button>
+      </div>
+    </div>
+    <div class="reg-modal-body">
       <div class="card" style="margin-bottom:16px">
         <div class="sec">Title</div>
         <input class="msg-input" id="res-modal-title-field" placeholder="Resolution title…" style="font-size:13px;font-weight:500">
@@ -2319,17 +2327,17 @@
       <label class="accept-checkbox" style="margin-bottom:10px;padding:6px 10px;font-size:11px"><input type="checkbox" id="modal-accept-record" onchange="toggleAcceptRecord(this.checked)"> <span>I confirm this resolution as drafted accurately reflects the deliberation.</span></label>
       <!-- Vote buttons — full width -->
       <div class="vote-buttons" id="modal-vote-buttons" style="opacity:0.4;pointer-events:none;display:flex;gap:4px;margin-bottom:8px">
-        <div class="vote-btn vote-btn-yea" onclick="selectVote(this,'yea')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="color:var(--green);font-weight:600;font-size:13px" id="vs-yea-pct">0%</span>
-          <span class="vb-label" style="color:var(--green);font-size:11px">Yea</span>
+        <div class="vote-btn vote-btn-yea" onclick="selectVote(this,'yea')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 8px">
+          <span style="color:var(--green);font-weight:600;font-size:15px;line-height:1" id="vs-yea-pct">0%</span>
+          <span class="vb-label" style="color:var(--green);font-size:10px;font-weight:500">Yea</span>
         </div>
-        <div class="vote-btn vote-btn-nay" onclick="selectVote(this,'nay')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="color:var(--red);font-weight:600;font-size:13px" id="vs-nay-pct">0%</span>
-          <span class="vb-label" style="color:var(--red);font-size:11px">Nay</span>
+        <div class="vote-btn vote-btn-nay" onclick="selectVote(this,'nay')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 8px">
+          <span style="color:var(--red);font-weight:600;font-size:15px;line-height:1" id="vs-nay-pct">0%</span>
+          <span class="vb-label" style="color:var(--red);font-size:10px;font-weight:500">Nay</span>
         </div>
-        <div class="vote-btn vote-btn-abs" onclick="selectVote(this,'abstain')" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
-          <span style="color:var(--text-tertiary);font-weight:600;font-size:13px" id="vs-abs-pct">0</span>
-          <span class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</span>
+        <div class="vote-btn vote-btn-abs" onclick="selectVote(this,'abstain')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:10px 8px">
+          <span style="color:var(--text-tertiary);font-weight:600;font-size:15px;line-height:1" id="vs-abs-pct">0</span>
+          <span class="vb-label" style="color:var(--text-secondary);font-size:10px;font-weight:500">Abstain</span>
         </div>
       </div>
       <!-- Quorum summary — compact single line -->
@@ -2393,10 +2401,7 @@
         </div>
       </div>
       <div class="flex justify-between" style="gap:8px">
-        <div class="flex gap-2">
-          <button class="btn btn-primary" id="btn-save-resolution" onclick="saveResolution()">Save</button>
-          <button class="btn btn-sm" id="btn-redraft-resolution" onclick="requestRedraft()" style="display:none">Auto Redraft (AI)</button>
-        </div>
+        <button class="btn btn-primary" id="btn-save-resolution" onclick="saveResolution()">Save</button>
         <button class="btn btn-sm" onclick="closeResolutionModal()">Close</button>
       </div>
     </div>
@@ -2859,9 +2864,7 @@ function updateResolutionSlot() {
       '<div style="font-size:9px;color:var(--text-tertiary);margin-bottom:6px">' + versionText + ' &middot; ' +
         (res.votesNullified ? '<span style="color:var(--amber)">Votes nullified</span>' : 'Votes active') + '</div>' +
       '<div class="res-summary-actions">' +
-        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0, false)">Open</button>' +
-        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0, true)">Edit</button>' +
-        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px' + (canRedraftResult.ok ? '' : 'opacity:0.4;pointer-events:none') + '" onclick="requestRedraft()" title="' + escapeHtml(redraftLabel) + '">Redraft</button>' +
+        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0)">Open</button>' +
         statusBadge +
       '</div>' +
     '</div>';
@@ -2905,7 +2908,7 @@ function generateResolution() {
 
     delibResolutions = [res];
     updateResolutionSlot();
-    openResolutionModal(0, false);
+    openResolutionModal(0);
   }, 1500);
 }
 
@@ -2955,6 +2958,9 @@ function requestRedraft() {
 
   if (got < needed) {
     updateResolutionSlot();
+    // Update modal badge if open
+    var badge = document.getElementById('res-redraft-badge');
+    if (badge) { badge.textContent = got + '/' + needed; }
     alert('Confirmation recorded (' + got + '/' + needed + '). ' + (needed - got) + ' more participants must confirm before redraft proceeds.');
     return;
   }
@@ -2990,12 +2996,12 @@ function executeRedraft() {
     res.versions.push({ title: title, text: text, action: res.action, author: 'AI Drafter', ts: ts });
 
     updateResolutionSlot();
-    openResolutionModal(0, false);
+    openResolutionModal(0);
   }, 1500);
 }
 
 // ─── Resolution Modal ───
-function openResolutionModal(idx, editMode) {
+function openResolutionModal(idx) {
   delibSelectedRes = idx;
   var res = delibResolutions[idx];
   if (!res) return;
@@ -3007,35 +3013,47 @@ function openResolutionModal(idx, editMode) {
   document.getElementById('modal-accept-record').checked = false;
   toggleAcceptRecord(false);
 
-  // Set read-only or edit mode
+  // Always editable
   var titleField = document.getElementById('res-modal-title-field');
   var textField = document.getElementById('res-modal-text');
   var actionField = document.getElementById('res-modal-action');
-  var saveBtn = document.getElementById('btn-save-resolution');
-  var redraftBtn = document.getElementById('btn-redraft-resolution');
+  titleField.removeAttribute('readonly');
+  textField.removeAttribute('readonly');
+  actionField.removeAttribute('readonly');
+
+  // Status
   var statusEl = document.getElementById('res-modal-status');
-
-  if (editMode) {
-    titleField.removeAttribute('readonly');
-    textField.removeAttribute('readonly');
-    actionField.removeAttribute('readonly');
-    saveBtn.style.display = '';
-    redraftBtn.style.display = '';
-    statusEl.textContent = 'Editing';
-  } else {
-    titleField.setAttribute('readonly', '');
-    textField.setAttribute('readonly', '');
-    actionField.setAttribute('readonly', '');
-    saveBtn.style.display = 'none';
-    redraftBtn.style.display = 'none';
-    statusEl.textContent = 'View only';
-  }
-
-  // Domain shares display
   var shares = res.domainShares;
+  var shareText = '';
   if (shares) {
-    var shareParts = Object.keys(shares).map(function(k) { return k + ': ' + Math.round(shares[k] * 100) + '%'; });
-    statusEl.textContent += ' · ' + shareParts.join(', ');
+    shareText = ' · ' + Object.keys(shares).map(function(k) { return k + ' ' + Math.round(shares[k] * 100) + '%'; }).join(', ');
+  }
+  statusEl.textContent = (res.votesNullified ? 'Votes nullified' : 'Draft') + shareText;
+
+  // Redraft button in header
+  var redraftBtn = document.getElementById('btn-redraft-resolution');
+  var redraftCount = document.getElementById('res-redraft-count');
+  var redraftBadge = document.getElementById('res-redraft-badge');
+  var meta = res.aiDraftMeta || { draftCount: 0, maxDrafts: 3, confirmations: [], confirmQuorum: 3 };
+  var check = canRedraft(res);
+
+  if (check.ok) {
+    redraftBtn.style.display = '';
+    redraftBtn.style.opacity = '1';
+    redraftBtn.style.pointerEvents = '';
+    redraftCount.textContent = (meta.maxDrafts - meta.draftCount) + ' remaining';
+    var confCount = meta.confirmations.length;
+    var confNeeded = meta.confirmQuorum;
+    redraftBadge.textContent = confCount + '/' + confNeeded;
+    redraftBadge.style.background = confCount >= confNeeded ? 'var(--green-soft)' : 'var(--surface)';
+    redraftBadge.style.color = confCount >= confNeeded ? 'var(--green)' : 'var(--text-tertiary)';
+    redraftBadge.style.borderColor = confCount >= confNeeded ? 'var(--green-border)' : 'var(--border-subtle)';
+  } else {
+    redraftBtn.style.display = '';
+    redraftBtn.style.opacity = '0.4';
+    redraftBtn.style.pointerEvents = 'none';
+    redraftCount.textContent = check.reason;
+    redraftBadge.textContent = '';
   }
 
   // Version history
