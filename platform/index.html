@@ -31,6 +31,7 @@
       <div class="nav-label">Commons</div>
       <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">◎</span> Discussions</div>
       <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon">◈</span> Projects</div>
+      <div class="nav-item" data-v="resolutions" onclick="nav('resolutions')"><span class="nav-icon">&#11041;</span> Governance</div>
       <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon">◉</span> Observatory</div>
       <div class="nav-item" data-v="domain-map" onclick="nav('domain-map')"><span class="nav-icon">✦</span> Domain Map</div>
     </div>
@@ -167,7 +168,25 @@
         <div class="post-compose">
           <div class="post-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px">OS</div>
           <div style="flex:1">
+            <div class="compose-type-selector" id="compose-type-selector">
+              <button class="compose-type-btn active" data-type="discussion" onclick="selectContentType(this,'discussion')"><span class="compose-type-icon">&#9678;</span><span class="compose-type-label">Discussion</span></button>
+              <button class="compose-type-btn" data-type="proposal" onclick="selectContentType(this,'proposal')"><span class="compose-type-icon">&#9674;</span><span class="compose-type-label">Proposal</span></button>
+              <button class="compose-type-btn" data-type="event" onclick="selectContentType(this,'event')"><span class="compose-type-icon">&#9782;</span><span class="compose-type-label">Event</span></button>
+              <button class="compose-type-btn" data-type="article" onclick="selectContentType(this,'article')"><span class="compose-type-icon">&#9998;</span><span class="compose-type-label">Article</span></button>
+              <button class="compose-type-btn" data-type="opportunity" onclick="selectContentType(this,'opportunity')"><span class="compose-type-icon">&#10022;</span><span class="compose-type-label">Opportunity</span></button>
+              <button class="compose-type-btn" data-type="publication" onclick="selectContentType(this,'publication')"><span class="compose-type-icon">&#9673;</span><span class="compose-type-label">Publication</span></button>
+            </div>
+            <div class="compose-pub-subtype" id="compose-pub-subtype" style="display:none">
+              <select class="form-input" id="compose-pub-type-select" style="font-size:11px;padding:4px 8px;margin-bottom:8px">
+                <option value="">Select publication type...</option>
+                <option value="policy">Policy</option>
+                <option value="resolution">Resolution</option>
+                <option value="declaration">Declaration</option>
+                <option value="report">Report</option>
+              </select>
+            </div>
             <textarea rows="2" placeholder="Start a discussion..."></textarea>
+            <div id="compose-extra-fields"></div>
             <div class="post-compose-actions">
               <div class="post-compose-tools">
                 <button title="Attach file">&#128206;</button>
@@ -332,7 +351,7 @@
     <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Observatory:</strong> Curated knowledge for the curious. No participation required — entirely open.</div></div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="g3" style="margin-bottom:20px">
+        <div class="g4" style="margin-bottom:20px">
           <div class="card click" onclick="nav('observatory-news')">
             <div class="flex justify-between mb-2"><span class="badge" style="background:var(--gold-soft);color:var(--gold);border-color:var(--gold-border)">News</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Updated daily</span></div>
             <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Curated space sector coverage</div>
@@ -347,6 +366,11 @@
             <div class="flex justify-between mb-2"><span class="badge" style="background:var(--green-soft);color:var(--green);border-color:var(--green-border)">Opportunities</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">12 open</span></div>
             <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Scholarships, fellowships, open calls</div>
             <div style="font-size:12px;color:var(--text-tertiary)">Grants, jobs, call for papers</div>
+          </div>
+          <div class="card click" onclick="nav('observatory-publications')">
+            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--purple-soft);color:var(--purple);border-color:var(--purple-border)">Publications</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">14 pieces</span></div>
+            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Essays, reports & governance</div>
+            <div style="font-size:12px;color:var(--text-tertiary)">Curated knowledge from participants</div>
           </div>
         </div>
         <div class="g2">
@@ -383,7 +407,7 @@
               </div>
               <span class="tag tag-pub" style="font-size:8px">Report</span>
             </div>
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">14 published pieces · <span style="color:var(--gold);cursor:pointer">Submit a publication →</span></div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">14 published pieces · <span style="color:var(--gold);cursor:pointer" onclick="nav('observatory-publications')">View all publications →</span></div>
           </div>
         </div>
       </div>
@@ -1794,7 +1818,7 @@
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-circle')">Enter Circle Cell</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openSettingsModal()">Edit</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openCircleSettingsModal()">Circle Settings</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Domain Map</button>
           </div>
         </div>
@@ -1839,6 +1863,21 @@
       <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">Remote Sensing Analyst — RCMRD</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Full-time position at the Regional Centre for Mapping of Resources for Development, Nairobi.</div><div style="margin-top:8px"><span class="badge b-pending">Reviewing</span></div></div>
       <div class="card"><div style="font-size:13px;font-weight:500;color:var(--text)">Call for Papers: African Space Law Journal</div><div style="font-size:11px;color:var(--text-secondary);margin-top:4px">Inaugural issue. Topics: national space legislation, resource governance, debris liability. Deadline: Nov 30, 2026.</div><div style="margin-top:8px"><span class="badge b-active">Open</span></div></div>
     </div>
+  </div>
+
+  <!-- ═══ OBSERVATORY: PUBLICATIONS ═══ -->
+  <div class="view" id="view-observatory-publications">
+    <div class="back" onclick="nav('observatory')">&#8592; Back to Observatory</div>
+    <div class="page-title">Publications</div>
+    <div class="page-sub">Essays, reports, guides, and governance publications</div>
+    <div class="flex gap-2 mb-3">
+      <button class="btn btn-primary btn-sm" onclick="filterPubType('all',this)">All</button>
+      <button class="btn btn-sm" onclick="filterPubType('essay',this)">Essays</button>
+      <button class="btn btn-sm" onclick="filterPubType('guide',this)">Guides</button>
+      <button class="btn btn-sm" onclick="filterPubType('report',this)">Reports</button>
+      <button class="btn btn-sm" onclick="filterPubType('resolution',this)">Resolutions</button>
+    </div>
+    <div id="observatory-publications-list" style="margin-top:12px"></div>
   </div>
 
   <!-- ═══ PUBLICATION DETAIL ═══ -->
@@ -1912,6 +1951,55 @@
       <div class="dm-hud" id="dm-hud"><span id="dm-hud-text"></span><span class="dm-hint" id="dm-hint"> · Click a star to explore</span></div>
       <div class="dm-chip" id="dm-chip" style="display:none"></div>
       <div class="dm-panel" id="dm-panel" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ═══ GOVERNANCE: RESOLUTIONS ═══ -->
+  <div class="view" id="view-resolutions">
+    <div class="page-title">Governance</div>
+    <div class="page-sub">Resolutions, policies, and enacted decisions</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="feed-filters" id="resolutions-filters">
+          <button class="feed-filter active" onclick="filterResolutions('all',this)">All</button>
+          <button class="feed-filter" onclick="filterResolutions('enacted',this)">Enacted</button>
+          <button class="feed-filter" onclick="filterResolutions('pending',this)">Pending</button>
+          <button class="feed-filter" onclick="filterResolutions('failed',this)">Failed</button>
+        </div>
+        <div id="resolutions-list"></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Governance Stats</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val" id="res-total">0</div><div class="aside-stat-lbl">Total</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val" id="res-enacted-count" style="color:var(--green)">0</div><div class="aside-stat-lbl">Enacted</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val" id="res-pending-count" style="color:var(--gold)">0</div><div class="aside-stat-lbl">Pending</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Resolution Lifecycle</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
+            <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
+            <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
+            <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
+            <div><span style="color:var(--green)">&#9679;</span> Enacted Resolution</div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">By Circle</div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Publication</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Resolutions marked "for publication" appear in Observatory Publications. Internal resolutions are visible only to circle members.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2269,49 +2357,13 @@
     <button class="reg-modal-close" onclick="closeSettingsModal()">&times;</button>
     <div class="reg-modal-body">
       <div class="reg-modal-title">System Settings</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">STF composition, quorum thresholds, and deliberation defaults.</div>
       <div class="settings-tab-bar">
-        <div class="settings-tab active" onclick="switchSettingsTab(0,this)">Circle</div>
-        <div class="settings-tab" onclick="switchSettingsTab(1,this)">STF</div>
-        <div class="settings-tab" onclick="switchSettingsTab(2,this)">Quorum</div>
-        <div class="settings-tab" onclick="switchSettingsTab(3,this)">Deliberation</div>
+        <div class="settings-tab active" onclick="switchSettingsTab(0,this)">STF</div>
+        <div class="settings-tab" onclick="switchSettingsTab(1,this)">Quorum</div>
+        <div class="settings-tab" onclick="switchSettingsTab(2,this)">Deliberation</div>
       </div>
-      <!-- Tab 1: Circle -->
       <div class="settings-tab-content" id="settings-tab-0">
-        <div class="card" style="margin-bottom:12px">
-          <div class="sec">Circle Configuration</div>
-          <div class="form-grid">
-            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle"></div>
-            <div class="form-group"><label class="form-label">Status</label><select class="form-input"><option selected>Active</option><option>Inactive</option><option>Probation</option></select></div>
-          </div>
-          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
-          <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15"></div>
-        </div>
-        <!-- Mandate Domains -->
-        <div class="card">
-          <div class="sec">Mandate Domains &amp; Desired Competence</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Primary domains drive the competence map. Secondary domains are advisory.</div>
-          <div style="margin-bottom:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Primary</div>
-            <div id="primary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
-              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Space Law <input type="number" value="2500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Liability <input type="number" value="1800" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-            </div>
-          </div>
-          <div style="margin-bottom:12px">
-            <div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Secondary</div>
-            <div id="secondary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
-              <span class="mandate-tag secondary" style="background:var(--surface-raised);color:var(--text-secondary);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)">Policy <input type="number" value="1500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--text-secondary);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToPrimary(this.parentElement)">↑</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-            </div>
-          </div>
-          <div style="display:flex;gap:4px">
-            <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="new-domain-input">
-            <button class="btn btn-sm" onclick="addMandateDomain()">Add</button>
-          </div>
-          <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
-        </div>
-      </div>
-      <!-- Tab 2: STF -->
-      <div class="settings-tab-content" id="settings-tab-1" style="display:none">
         <div class="card" style="margin-bottom:12px">
           <div class="sec">STF Composition & Durations</div>
           <div class="form-grid">
@@ -2324,8 +2376,7 @@
           </div>
         </div>
       </div>
-      <!-- Tab 3: Quorum -->
-      <div class="settings-tab-content" id="settings-tab-2" style="display:none">
+      <div class="settings-tab-content" id="settings-tab-1" style="display:none">
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Quorum Thresholds</div>
           <div class="form-grid">
@@ -2336,8 +2387,7 @@
           </div>
         </div>
       </div>
-      <!-- Tab 4: Deliberation -->
-      <div class="settings-tab-content" id="settings-tab-3" style="display:none">
+      <div class="settings-tab-content" id="settings-tab-2" style="display:none">
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Defaults</div>
           <div class="form-grid">
@@ -2350,6 +2400,60 @@
       </div>
       <div class="flex justify-between" style="gap:8px;margin-top:12px">
         <div class="flex gap-2"><button class="btn btn-primary" onclick="submitSystemProposal()">Submit as Proposal</button><button class="btn btn-sm" onclick="closeSettingsModal()">Cancel</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CIRCLE SETTINGS MODAL ═══ -->
+<div class="reg-modal-overlay" id="circle-settings-modal">
+  <div class="reg-modal" style="max-width:640px">
+    <button class="reg-modal-close" onclick="closeCircleSettingsModal()">&times;</button>
+    <div class="reg-modal-body">
+      <div class="reg-modal-title">Circle Settings</div>
+      <div class="settings-tab-bar">
+        <div class="settings-tab active" onclick="switchCircleSettingsTab(0,this)">Configuration</div>
+        <div class="settings-tab" onclick="switchCircleSettingsTab(1,this)">Mandate Domains</div>
+      </div>
+      <!-- Tab 0: Circle Configuration -->
+      <div class="settings-tab-content" id="circle-settings-tab-0">
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Circle Configuration</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle"></div>
+            <div class="form-group"><label class="form-label">Status</label><select class="form-input"><option selected>Active</option><option>Inactive</option><option>Probation</option></select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
+          <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15"></div>
+        </div>
+      </div>
+      <!-- Tab 1: Mandate Domains -->
+      <div class="settings-tab-content" id="circle-settings-tab-1" style="display:none">
+        <div class="card">
+          <div class="sec">Mandate Domains &amp; Desired Competence</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Primary domains drive the competence map. Secondary domains are advisory.</div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:600;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Primary</div>
+            <div id="circle-primary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Space Law <input type="number" value="2500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Liability <input type="number" value="1800" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Secondary</div>
+            <div id="circle-secondary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="mandate-tag secondary" style="background:var(--surface-raised);color:var(--text-secondary);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)">Policy <input type="number" value="1500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--text-secondary);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToPrimary(this.parentElement)">↑</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+            </div>
+          </div>
+          <div style="display:flex;gap:4px">
+            <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="circle-new-domain-input">
+            <button class="btn btn-sm" onclick="addCircleMandateDomain()">Add</button>
+          </div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
+        </div>
+      </div>
+      <div class="flex justify-between" style="gap:8px;margin-top:12px">
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="submitCircleProposal()">Submit as Proposal</button><button class="btn btn-sm" onclick="closeCircleSettingsModal()">Cancel</button></div>
       </div>
     </div>
   </div>
@@ -2402,13 +2506,16 @@ var views = {
   profile:          ['Profile'],
   'thread-detail':  ['Discussions', 'Thread'],
   'domain-map':     ['Domain Map'],
+  'resolutions':    ['Governance'],
+  'observatory-publications': ['Observatory', 'Publications'],
   'registration':   ['Registration']
 };
 var navMap = {
   personal:'personal', inbox:'inbox',
   commons:'commons', 'thread-detail':'commons',
   undertakings:'undertakings', 'undertaking-detail':'undertakings',
-  observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'publication-detail':'observatory',
+  observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'observatory-publications':'observatory', 'publication-detail':'observatory',
+  'resolutions':'resolutions',
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
   stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
@@ -2622,7 +2729,8 @@ function moveDomainToSecondary(el) {
   if (num) num.style.color = 'var(--text-secondary)';
   var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
   if (arrows[0]) { arrows[0].textContent = '\u2191'; arrows[0].onclick = function() { moveDomainToPrimary(el); }; }
-  document.getElementById('secondary-domains').appendChild(el);
+  var target = el.closest('.reg-modal') ? document.getElementById('circle-secondary-domains') : document.getElementById('secondary-domains');
+  if (target) target.appendChild(el);
 }
 
 function moveDomainToPrimary(el) {
@@ -2634,7 +2742,175 @@ function moveDomainToPrimary(el) {
   if (num) num.style.color = 'var(--gold)';
   var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
   if (arrows[0]) { arrows[0].textContent = '\u2193'; arrows[0].onclick = function() { moveDomainToSecondary(el); }; }
-  document.getElementById('primary-domains').appendChild(el);
+  var target = el.closest('.reg-modal') ? document.getElementById('circle-primary-domains') : document.getElementById('primary-domains');
+  if (target) target.appendChild(el);
+}
+
+function addCircleMandateDomain() {
+  var i = document.getElementById('circle-new-domain-input');
+  if (!i.value.trim()) return;
+  var container = document.getElementById('circle-primary-domains');
+  var span = document.createElement('span');
+  span.className = 'mandate-tag primary';
+  span.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)';
+  var name = document.createTextNode(i.value.trim() + ' ');
+  var num = document.createElement('input');
+  num.type = 'number'; num.value = '1000';
+  num.style.cssText = 'width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
+  num.title = 'Desired Ws';
+  var down = document.createElement('span');
+  down.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; down.textContent = '\u2193';
+  down.onclick = function() { moveDomainToSecondary(span); };
+  var rm = document.createElement('span');
+  rm.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; rm.textContent = '\u00d7';
+  rm.onclick = function() { span.remove(); };
+  span.appendChild(name); span.appendChild(num); span.appendChild(down); span.appendChild(rm);
+  container.appendChild(span);
+  i.value = '';
+}
+
+// ─── Circle Settings Modal ───
+function openCircleSettingsModal() {
+  document.getElementById('circle-settings-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeCircleSettingsModal() {
+  document.getElementById('circle-settings-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function switchCircleSettingsTab(idx, el) {
+  document.querySelectorAll('#circle-settings-modal .settings-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.querySelectorAll('#circle-settings-modal .settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
+  document.getElementById('circle-settings-tab-' + idx).style.display = '';
+}
+
+function submitCircleProposal() {
+  closeCircleSettingsModal();
+  alert('Circle settings submitted as a proposal to the Circle cell.');
+}
+
+// ─── Content Type Selector ───
+function selectContentType(btn, type) {
+  document.querySelectorAll('.compose-type-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var pubSubtype = document.getElementById('compose-pub-subtype');
+  var textarea = document.querySelector('#view-commons .post-compose textarea');
+  var extraFields = document.getElementById('compose-extra-fields');
+  if (pubSubtype) pubSubtype.style.display = (type === 'publication') ? 'block' : 'none';
+  var placeholders = {
+    discussion: 'Start a discussion...',
+    proposal: 'Describe your proposal...',
+    event: 'Event title and details...',
+    article: 'Write your article...',
+    opportunity: 'Describe the opportunity...',
+    publication: 'Publication abstract...'
+  };
+  if (textarea) textarea.placeholder = placeholders[type] || 'Start a discussion...';
+  if (extraFields) {
+    var html = '';
+    if (type === 'event') {
+      html = '<div class="g2" style="margin-top:10px"><div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" style="font-size:11px"></div><div class="form-group"><label class="form-label">Location</label><input class="form-input" placeholder="Online / Venue" style="font-size:11px"></div></div>';
+    } else if (type === 'opportunity') {
+      html = '<div class="g2" style="margin-top:10px"><div class="form-group"><label class="form-label">Deadline</label><input type="date" class="form-input" style="font-size:11px"></div><div class="form-group"><label class="form-label">Type</label><select class="form-input" style="font-size:11px"><option>Grant</option><option>Fellowship</option><option>Job</option><option>Call for Papers</option><option>Workshop</option></select></div></div><div class="form-group" style="margin-top:6px"><label class="form-label">Link</label><input class="form-input" placeholder="https://..." style="font-size:11px"></div>';
+    } else if (type === 'article') {
+      html = '<div class="form-group" style="margin-top:10px"><label class="form-label">Title</label><input class="form-input" placeholder="Article title..." style="font-size:11px"></div>';
+    } else if (type === 'publication') {
+      html = '<div class="form-group" style="margin-top:10px"><label class="form-label">Abstract</label><textarea class="form-input" rows="2" placeholder="Brief abstract..." style="font-size:11px"></textarea></div><div class="form-group" style="margin-top:6px"><label class="form-label">Co-authors</label><input class="form-input" placeholder="Comma-separated names" style="font-size:11px"></div>';
+    }
+    extraFields.innerHTML = html;
+  }
+}
+
+// ─── Governance / Resolutions View ───
+var resolutionsData = [
+  { id: 'R-001', title: 'ITU Coordination Guide Publication', status: 'enacted', date: 'Jul 10, 2026', circles: ['Space Law'], visibility: 'public', text: 'Commission xSTF to produce and publish an ITU frequency coordination guide for emerging space nations.', forPublication: true },
+  { id: 'R-002', title: 'Proportional Liability Framework for Debris', status: 'pending', date: 'Jul 25, 2026', circles: ['Space Law', 'Remote Sensing'], visibility: 'internal', text: 'Establish proportional liability framework for manoeuvre-induced orbital debris.', forPublication: false },
+  { id: 'R-003', title: 'Artemis Accords Ratification Recommendation', status: 'pending', date: 'Jul 22, 2026', circles: ['Space Law'], visibility: 'internal', text: 'Recommend East African nations pursue coordinated ratification of the Artemis Accords.', forPublication: false },
+  { id: 'R-004', title: 'Space Debris Tracking Standards', status: 'failed', date: 'Jun 30, 2026', circles: ['Remote Sensing'], visibility: 'internal', text: 'Mandate adoption of international space debris tracking standards for all LEO operators.', forPublication: false },
+  { id: 'R-005', title: 'Weighted Vote Decay Parameter Revision', status: 'pending', date: 'Jul 20, 2026', circles: ['Space Law', 'Policy'], visibility: 'internal', text: 'Revise the vote decay parameter to better reflect sustained engagement versus one-time participation.', forPublication: false }
+];
+
+function renderResolutionsList(filter) {
+  var list = document.getElementById('resolutions-list');
+  if (!list) return;
+  filter = filter || 'all';
+  var filtered = resolutionsData.filter(function(r) { return filter === 'all' || r.status === filter; });
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No resolutions match this filter.</div></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(function(r) {
+    var badgeClass = r.status === 'enacted' ? 'b-enacted' : r.status === 'pending' ? 'b-pending' : 'b-failed';
+    var statusLabel = r.status.charAt(0).toUpperCase() + r.status.slice(1);
+    var circlesHtml = r.circles.map(function(c) { return '<span class="tag tag-purple" style="font-size:8px">' + c + '</span>'; }).join(' ');
+    var pubBadge = r.forPublication ? '<span class="tag" style="font-size:7px;margin-left:4px;background:var(--purple-soft);color:var(--purple)">For Publication</span>' : '';
+    var visIcon = r.visibility === 'public' ? '&#9673; Public' : '&#9678; Internal';
+    return '<div class="card" style="margin-bottom:8px">'
+      + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + statusLabel + '</span>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + r.id + ' &middot; ' + r.date + '</span></div>'
+      + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.title + '</div>'
+      + '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">' + r.text + '</div>'
+      + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' + circlesHtml
+      + '<span style="font-size:9px;color:var(--text-tertiary);margin-left:auto">' + visIcon + '</span>' + pubBadge
+      + '</div></div>';
+  }).join('');
+  var total = resolutionsData.length;
+  var enacted = resolutionsData.filter(function(r) { return r.status === 'enacted'; }).length;
+  var pending = resolutionsData.filter(function(r) { return r.status === 'pending'; }).length;
+  var totalEl = document.getElementById('res-total');
+  var enactedEl = document.getElementById('res-enacted-count');
+  var pendingEl = document.getElementById('res-pending-count');
+  if (totalEl) totalEl.textContent = total;
+  if (enactedEl) enactedEl.textContent = enacted;
+  if (pendingEl) pendingEl.textContent = pending;
+}
+
+function filterResolutions(filter, btn) {
+  document.querySelectorAll('#resolutions-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderResolutionsList(filter);
+}
+
+// ─── Observatory Publications ───
+function renderObservatoryPublications(filter) {
+  var el = document.getElementById('observatory-publications-list');
+  if (!el) return;
+  var pubs = [
+    { title: 'Why East Africa Needs a Coordinated Space Debris Policy', type: 'essay', author: 'Okello R., Kimani A.', date: 'Jun 2026', domains: ['Space Law', 'Policy'] },
+    { title: 'Understanding the Outer Space Treaty — A Plain Language Guide', type: 'guide', author: 'Akello Jane', date: 'May 2026', domains: ['Space Law'] },
+    { title: 'AfricaSpace 2026 — What the Summit Means for East Africa', type: 'report', author: 'Solis Observatory', date: 'Apr 2026', domains: ['Policy', 'Education'] },
+    { title: 'Orbital Mechanics 101', type: 'guide', author: 'Mensah Naa', date: 'Mar 2026', domains: ['Astrophysics'] },
+    { title: 'Remote Sensing Data Handbook', type: 'guide', author: 'Mwenda Thomas', date: 'Feb 2026', domains: ['Remote Sensing'] }
+  ];
+  resolutionsData.filter(function(r) { return r.status === 'enacted' && r.forPublication; }).forEach(function(r) {
+    pubs.push({ title: r.title, type: 'resolution', author: 'Governance', date: r.date, domains: r.circles });
+  });
+  if (filter && filter !== 'all') {
+    pubs = pubs.filter(function(p) { return p.type === filter; });
+  }
+  if (pubs.length === 0) {
+    el.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No publications found.</div></div>';
+    return;
+  }
+  el.innerHTML = pubs.map(function(p) {
+    var typeColors = { essay: 'tag-blue', guide: 'tag-green', report: 'tag-amber', resolution: 'tag-purple' };
+    var typeLabels = { essay: 'Essay', guide: 'Guide', report: 'Report', resolution: 'Resolution' };
+    var domainsHtml = (p.domains || []).map(function(d) { return '<span class="tag tag-default" style="font-size:8px">' + d + '</span>'; }).join(' ');
+    return '<div class="card" style="margin-bottom:8px">'
+      + '<div class="flex justify-between mb-1"><span style="font-size:13px;font-weight:500;color:var(--text)">' + p.title + '</span>'
+      + '<span class="tag ' + (typeColors[p.type] || 'tag-default') + '" style="font-size:8px">' + (typeLabels[p.type] || p.type) + '</span></div>'
+      + '<div style="font-size:11px;color:var(--text-tertiary)">' + p.author + ' &middot; ' + p.date + '</div>'
+      + '<div style="margin-top:6px;display:flex;gap:4px">' + domainsHtml + '</div></div>';
+  }).join('');
+}
+
+function filterPubType(type, btn) {
+  document.querySelectorAll('#view-observatory-publications .btn').forEach(function(b) { b.classList.remove('btn-primary'); });
+  if (btn) btn.classList.add('btn-primary');
+  renderObservatoryPublications(type);
 }
 
 // ─── Member Roster Modal ───
@@ -2835,6 +3111,8 @@ loadMockData().then(function() {
   var stfBody = document.getElementById('stf-body');
   if (stfBody) stfBody.innerHTML = renderSTFRows();
   layoutParticipantCards();
+  renderResolutionsList();
+  renderObservatoryPublications();
   var initial = window.location.hash.replace('#', '') || 'personal';
   nav(views[initial] ? initial : 'personal');
 });

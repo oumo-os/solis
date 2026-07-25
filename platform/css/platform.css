@@ -795,3 +795,16 @@ body.modal-open{overflow:hidden}
 @media(max-width:600px){
   .layout-aside{grid-template-columns:1fr}
 }
+
+/* ── Compose Type Selector ── */
+.compose-type-selector{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--border-subtle)}
+.compose-type-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:transparent;cursor:pointer;font-size:10px;color:var(--text-tertiary);transition:all .12s;min-width:60px}
+.compose-type-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+.compose-type-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-soft)}
+.compose-type-icon{font-size:14px}
+.compose-type-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.compose-pub-subtype{margin-bottom:8px}
+
+/* ── Badge variants ── */
+.b-enacted{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
+.b-failed{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
