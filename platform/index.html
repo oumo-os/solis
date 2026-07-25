@@ -2796,6 +2796,10 @@ function fmt(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+function confirmModal(msg, onConfirm) {
+  if (confirm(msg)) onConfirm();
+}
+
 function toggleBreakdown() {
   var el = document.getElementById('vote-breakdown');
   var toggler = el.previousElementSibling;
