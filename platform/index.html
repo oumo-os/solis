@@ -2296,7 +2296,7 @@
           </div>
           <div style="display:flex;gap:4px">
             <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="new-domain-input">
-            <button class="btn btn-sm" onclick="var i=document.getElementById('new-domain-input');if(i.value.trim()){var s=document.createElement('span');s.style.cssText='background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:6px;margin:2px';s.innerHTML=i.value.trim()+' <label style=\\"font-size:8px;color:var(--text-tertiary);cursor:pointer\\"><input type=\\"checkbox\\" onchange=\\"this.parentElement.style.opacity=this.checked?1:0.5\\"> P</label><input type=\\"number\\" value=\\"1000\\" style=\\"width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center\\" title=\\"Desired Ws\\"><span style=\\"cursor:pointer;opacity:0.5\\" onclick=\\"this.parentElement.remove()\\">×</span>';document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);i.value=''}">Add</button>
+            <button class="btn btn-sm" onclick="addMandateDomain()">Add</button>
           </div>
           <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
         </div>
@@ -2579,6 +2579,35 @@ function openSettingsModal() {
 function closeSettingsModal() {
   document.getElementById('settings-modal').classList.remove('active');
   document.body.classList.remove('modal-open');
+}
+
+function addMandateDomain() {
+  var i = document.getElementById('new-domain-input');
+  if (!i.value.trim()) return;
+  var s = document.createElement('span');
+  s.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:6px;margin:2px';
+  var label = document.createElement('label');
+  label.style.cssText = 'font-size:8px;color:var(--text-tertiary);cursor:pointer';
+  var cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.onchange = function() { label.style.opacity = this.checked ? 1 : 0.5; };
+  label.appendChild(cb);
+  label.appendChild(document.createTextNode(' P'));
+  var num = document.createElement('input');
+  num.type = 'number';
+  num.value = '1000';
+  num.style.cssText = 'width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
+  num.title = 'Desired Ws';
+  var rm = document.createElement('span');
+  rm.style.cssText = 'cursor:pointer;opacity:0.5';
+  rm.textContent = '\u00d7';
+  rm.onclick = function() { s.remove(); };
+  s.appendChild(document.createTextNode(i.value.trim() + ' '));
+  s.appendChild(label);
+  s.appendChild(num);
+  s.appendChild(rm);
+  document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);
+  i.value = '';
 }
 
 // ─── Member Roster Modal ───
