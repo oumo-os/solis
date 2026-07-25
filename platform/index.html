@@ -2400,10 +2400,10 @@
           </div>
         </div>
       </div>
-      <div class="flex justify-between" style="gap:8px">
-        <button class="btn btn-primary" id="btn-save-resolution" onclick="saveResolution()">Save</button>
-        <button class="btn btn-sm" onclick="closeResolutionModal()">Close</button>
-      </div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" id="btn-save-resolution" onclick="saveResolution()">Save</button>
+      <button class="btn btn-sm" onclick="closeResolutionModal()">Close</button>
     </div>
   </div>
 </div>
@@ -2679,7 +2679,7 @@ function updateVoteSummary() {
 
   setText('vs-yea-pct', yeaPct + '%');
   setText('vs-nay-pct', nayPct + '%');
-  setText('vs-abs-pct', absCount + ' abstain');
+  setText('vs-abs-pct', absCount);
 
   // Quorum bar
   setText('vs-qrm-count', votedCount);
@@ -3023,12 +3023,7 @@ function openResolutionModal(idx) {
 
   // Status
   var statusEl = document.getElementById('res-modal-status');
-  var shares = res.domainShares;
-  var shareText = '';
-  if (shares) {
-    shareText = ' · ' + Object.keys(shares).map(function(k) { return k + ' ' + Math.round(shares[k] * 100) + '%'; }).join(', ');
-  }
-  statusEl.textContent = (res.votesNullified ? 'Votes nullified' : 'Draft') + shareText;
+  statusEl.textContent = res.votesNullified ? 'Votes nullified' : 'Draft';
 
   // Redraft button in header
   var redraftBtn = document.getElementById('btn-redraft-resolution');

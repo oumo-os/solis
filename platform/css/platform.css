@@ -761,6 +761,7 @@ body.modal-open{overflow:hidden}
 .modal-titlebar-btn:hover{color:var(--text);background:var(--surface)}
 .modal-titlebar-btn-redraft{border:1px solid var(--border-subtle);background:var(--surface);transition:all .12s}
 .modal-titlebar-btn-redraft:hover{border-color:var(--gold-border);background:var(--gold-soft)}
+.modal-footerbar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border-subtle);background:var(--surface-raised);border-radius:0 0 var(--radius-lg) var(--radius-lg);position:sticky;bottom:0;z-index:2}
 
 /* ── Reply composer ── */
 .reply-composer{background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-top:12px}
