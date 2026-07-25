@@ -1,6 +1,6 @@
 # Modal Design Decisions
 
-**Version:** 1.0
+**Version:** 2.0
 **Last updated:** 26 July 2026
 
 ---
@@ -17,7 +17,7 @@ Solis uses a unified modal system with consistent structure, sizing, and interac
 |-------|-----|------|---------|
 | Registration | `reg-modal` | 680px, 80vh | 3-step registration or profile edit |
 | Participant Detail | `pd-modal` | 640px, 80vh | View member profile |
-| Resolution | `resolution-modal` | 720px, 80vh | Edit/view/vote on resolutions |
+| Resolution | `resolution-modal` | 720px, 80vh | View/edit/vote on resolution (one per cell) |
 | System Settings | `settings-modal` | 640px, 80vh | STF, Quorum, Deliberation config |
 | Circle Settings | `circle-settings-modal` | 640px, 80vh | Circle config, Mandate Domains |
 | Members Modal | (inline) | full | Circle steward roster |

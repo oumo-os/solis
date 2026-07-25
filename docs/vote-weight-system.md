@@ -1,13 +1,13 @@
 # Vote Weight System
 
-**Version:** 2.0
+**Version:** 3.0
 **Last updated:** 26 July 2026
 
 ---
 
 ## Overview
 
-Every vote in Solis carries weight proportional to the voter's competence in the domains relevant to the resolution. Domain shares are configurable — by default equal (1/N), but an AI categoriser can assign unequal weights based on resolution relevance.
+Every vote in Solis carries weight proportional to the voter's competence in the domains relevant to the resolution. Each deliberation cell has exactly one resolution. Domain shares are set by the AI drafter based on resolution relevance — users cannot edit them. If the AI fails, equal shares (1/N) are used as fallback.
 
 ---
 
@@ -21,13 +21,20 @@ Each participant has a **Ws value per domain** — a number between 0 and 3000 r
 
 A resolution is attached to one or more **implementing domains**. A voter's effective weight in a resolution is derived from the intersection of their domain competences with the resolution's attached domains.
 
-### Domain Shares
+### Domain Shares (AI-Generated)
 
-Each attached domain receives a **share** of influence. By default, shares are equal:
+Each attached domain receives a **share** of influence. Shares are set by the AI drafter:
 
 ```
-Domain share = 1 / N
+Domain share = relevance_score(d) / Σ relevance_scores(all domains)
 ```
+
+Example with AI-generated shares:
+- Space Law: 0.38 (most central to the resolution)
+- Liability: 0.35 (strongly related)
+- Remote Sensing: 0.27 (tangentially related)
+
+**Shares are not user-editable.** If the AI fails to produce shares, equal shares (1/N) are used as fallback.
 
 But shares can be **unequal** — set by the AI categoriser based on how central each domain is to the resolution:
 
@@ -172,16 +179,22 @@ Result                  Passed — Yea 84% exceeds >50% threshold
 
 ---
 
-## Future: AI Domain Categorisation
+## AI Domain Categorisation (Implemented)
 
-Domain shares will be set by an AI drafter and categoriser:
+Domain shares are set by the AI drafter when a resolution is generated or redrafted:
 
-1. **AI Drafter**: Analyses resolution text and assigns relevance scores to each domain
-2. **AI Categoriser**: Suggests resolution type (Policy, Resolution, Declaration, Report)
-3. **Share assignment**: `share(d) = relevance_score(d) / Σ relevance_scores`
-4. **Human override**: Shares are editable in the resolution modal before voting
+1. **AI Drafter**: Analyses proposal text, deliberation messages, and context
+2. **Share assignment**: `share(d) = relevance_score(d) / Σ relevance_scores`
+3. **AI Categoriser**: Suggests resolution type (Policy, Resolution, Declaration, Report)
+4. **No human override**: Shares are not editable — users can request a redraft if shares seem wrong
+5. **Fallback**: If AI fails, equal shares (1/N) are used
 
-This replaces the equal-share model with a relevance-weighted model, ensuring domains more central to the resolution carry greater influence.
+Redraft limits prevent abuse:
+- Maximum 3 auto-redrafts per resolution
+- 5-minute cooldown between redrafts
+- 1/3 of deliberating participants must confirm before redraft executes
+
+See `docs/ai-drafter.md` for full details.
 
 ---
 
@@ -193,11 +206,12 @@ This replaces the equal-share model with a relevance-weighted model, ensuring do
 - But if it also affects Remote Sensing, RS practitioners should have a voice
 - Per-domain Ws ensures both conditions are met
 
-### Why configurable domain shares?
+### Why AI-generated (not user-editable) shares?
 
-- Equal shares are a safe default — transparent and hard to game
-- Unequal shares let the AI reflect that some domains are more central to a resolution
-- Prevents a tangential domain from diluting the influence of core domains
+- Users could game editable shares by inflating their own domain's weight
+- AI can objectively assess relevance from the resolution text and deliberation
+- Redraft mechanism gives users recourse if AI shares seem wrong
+- Equal-share fallback ensures system works even if AI fails
 
 ### Why abstain as count only?
 
