@@ -306,6 +306,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 /* ── Message Input ── */
 .msg-input{width:100%;border:1px solid var(--border);border-radius:var(--radius);padding:var(--space-3);font-family:var(--sans);font-size:13px;color:var(--text);outline:none;resize:none;transition:border-color .12s;background:var(--surface)}
 .msg-input:focus{border-color:var(--navy-light)}
+.msg-input[readonly]{opacity:.7;cursor:default;background:var(--surface-raised)}
 .msg-input::placeholder{color:var(--text-tertiary)}
 
 /* ── Avatar ── */
@@ -643,6 +644,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .form-label{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:4px}
 .form-input{width:100%;padding:8px 10px;font-size:13px;color:var(--text);background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;transition:border-color .12s}
 .form-input:focus{outline:none;border-color:var(--gold)}
+.form-input[readonly]{opacity:.7;cursor:default;background:var(--surface)}
 textarea.form-input{resize:vertical}
 select.form-input{cursor:pointer}
 .form-hint{font-size:11px;color:var(--text-tertiary);margin-bottom:12px}

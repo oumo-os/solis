@@ -775,20 +775,12 @@
       </div>
     </div>
 
-    <!-- Draft Resolutions -->
+    <!-- Resolution -->
     <div class="aside-card">
-      <div class="aside-title">Draft Resolutions</div>
-      <div id="resolution-list" style="margin-top:4px">
-        <div class="res-summary">
-          <div class="res-summary-hdr"><span class="res-summary-num">Resolution #1</span><span class="tag tag-gold" style="font-size:7px">Directive</span></div>
-          <div class="res-summary-text">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris…</div>
-          <div class="res-summary-actions">
-            <button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0)">View / Edit</button>
-            <span class="badge b-active" style="font-size:8px">Draft</span>
-          </div>
-        </div>
+      <div class="aside-title">Resolution</div>
+      <div id="resolution-slot" style="margin-top:4px">
+        <!-- Rendered by updateResolutionSlot() -->
       </div>
-      <button class="btn btn-sm" style="width:100%;margin-top:6px;font-size:10px" onclick="addResolution()">+ Add Resolution</button>
     </div>
 
       </div>
@@ -2277,8 +2269,8 @@
     <button class="reg-modal-close" onclick="closeResolutionModal()">&times;</button>
     <div class="reg-modal-body">
       <div class="flex items-center justify-between mb-3">
-        <div class="reg-modal-title" id="res-modal-title">Resolution #1</div>
-        <button class="btn btn-sm" style="font-size:10px;opacity:0.5;pointer-events:none" title="Coming in a future update — AI will generate a draft from the title, current text, and deliberation conversation">Draft with AI (future)</button>
+        <div class="reg-modal-title" id="res-modal-title">Resolution</div>
+        <div id="res-modal-status" style="font-size:9px;color:var(--text-tertiary)"></div>
       </div>
       <div class="card" style="margin-bottom:16px">
         <div class="sec">Title</div>
@@ -2340,14 +2332,15 @@
           <span class="vb-label" style="color:var(--text-secondary);font-size:11px">Abstain</span>
         </div>
       </div>
-      <!-- Quorum summary — full width, verbose -->
-      <div id="vote-quorum-bar" style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:8px 12px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:10px;line-height:1.5">
-        <div><span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span> / <span id="vs-qrm-total">0</span> members voted</div>
-        <div>Quorum (2/3): <span style="font-weight:600" id="vs-qrm-req">6</span> required</div>
-        <div id="vs-qrm-status" style="color:var(--red)">Quorum <strong>not met</strong></div>
-        <div>Pass: <strong>&gt;50%</strong> of effective Yea+Nay</div>
-        <div>Yea ratio: <span style="font-weight:600" id="vs-pass-ratio">0%</span></div>
-        <div id="vs-pass-status" style="color:var(--text-tertiary)">Pending vote</div>
+      <!-- Quorum summary — compact single line -->
+      <div id="vote-quorum-bar" style="display:flex;gap:6px 12px;padding:6px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <span><span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span>/<span id="vs-qrm-total">0</span> voted</span>
+        <span>QRM <span style="font-weight:600" id="vs-qrm-req">6</span></span>
+        <span id="vs-qrm-status" style="color:var(--red)">not met</span>
+        <span>&middot;</span>
+        <span>Yea <span style="font-weight:600" id="vs-pass-ratio">0%</span></span>
+        <span>&gt;50%</span>
+        <span id="vs-pass-status" style="color:var(--text-tertiary)">pending</span>
       </div>
       <!-- Breakdown toggle -->
       <div style="margin-bottom:12px">
@@ -2400,7 +2393,11 @@
         </div>
       </div>
       <div class="flex justify-between" style="gap:8px">
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="saveResolution()">Save (nullifies votes)</button><button class="btn btn-sm" onclick="closeResolutionModal()">Cancel</button></div>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" id="btn-save-resolution" onclick="saveResolution()">Save</button>
+          <button class="btn btn-sm" id="btn-redraft-resolution" onclick="requestRedraft()" style="display:none">Auto Redraft (AI)</button>
+        </div>
+        <button class="btn btn-sm" onclick="closeResolutionModal()">Close</button>
       </div>
     </div>
   </div>
@@ -2448,8 +2445,19 @@
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Max Deliberation Days</label><input class="form-input" type="number" value="14"></div>
             <div class="form-group"><label class="form-label">Auto-Close After Inactivity</label><input class="form-input" type="number" value="7"><span style="font-size:10px;color:var(--text-tertiary)">days</span></div>
-            <div class="form-group"><label class="form-label">Max Resolutions per Cell</label><input class="form-input" type="number" value="10"></div>
             <div class="form-group"><label class="form-label">Vote Nullify on Edit</label><select class="form-input"><option selected>Yes</option><option>No</option></select></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">AI Drafter</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Max Auto-Redrafts per Resolution</label><input class="form-input" type="number" value="3"></div>
+            <div class="form-group"><label class="form-label">Redraft Cooldown</label><input class="form-input" type="number" value="5"><span style="font-size:10px;color:var(--text-tertiary)">min</span></div>
+            <div class="form-group"><label class="form-label">Confirmation Quorum</label><select class="form-input"><option selected>1/3 participants</option><option>1/2 participants</option><option>Unanimous</option></select></div>
+            <div class="form-group"><label class="form-label">AI Sets Domain Weights</label><select class="form-input"><option selected>Yes (recommended)</option><option>No (equal shares)</option></select></div>
+          </div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;line-height:1.5">
+            AI drafter generates resolution text, title, type, and domain weight shares from the proposal and deliberation. Domain weights are not user-editable. If AI fails, equal shares (1/N) are used as fallback.
           </div>
         </div>
       </div>
@@ -2636,11 +2644,14 @@ function updateVoteSummary() {
   var quorumReq = Math.ceil(totalMembers * requiredFraction);
   var votedCount = 5;
 
-  // Domain data: name, tag, share (configurable — AI will set these)
+  // Domain data — shares from resolution (AI-generated or default equal)
+  var res = delibResolutions[0];
+  var shares = (res && res.domainShares) ? res.domainShares : { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
+
   var domainVotes = [
-    { tag:'LAW', name:'Space Law',     share:0.38, voters:{AJ:1800,OK:1040,NC:-620} },
-    { tag:'LAW', name:'Liability',      share:0.35, voters:{AJ:800, OK:400, NC:-312} },
-    { tag:'RS',  name:'Remote Sensing', share:0.27, voters:{MT:920} }
+    { tag:'LAW', name:'Space Law',     share:shares['Space Law'] || 0.33, voters:{AJ:1800,OK:1040,NC:-620} },
+    { tag:'LAW', name:'Liability',      share:shares['Liability'] || 0.33, voters:{AJ:800, OK:400, NC:-312} },
+    { tag:'RS',  name:'Remote Sensing', share:shares['Remote Sensing'] || 0.34, voters:{MT:920} }
   ];
 
   var absTotal = 340;
@@ -2672,8 +2683,8 @@ function updateVoteSummary() {
   var qrmMet = votedCount >= quorumReq;
   var qrmStatusEl = document.getElementById('vs-qrm-status');
   if (qrmStatusEl) {
+    qrmStatusEl.textContent = qrmMet ? 'met' : 'not met';
     qrmStatusEl.style.color = qrmMet ? 'var(--green)' : 'var(--red)';
-    qrmStatusEl.innerHTML = 'Quorum <strong>' + (qrmMet ? 'met' : 'not met') + '</strong>';
   }
 
   // Pass ratio
@@ -2683,13 +2694,13 @@ function updateVoteSummary() {
   var passStatusEl = document.getElementById('vs-pass-status');
   if (passStatusEl) {
     if (!qrmMet) {
-      passStatusEl.textContent = 'Pending — quorum not yet met';
+      passStatusEl.textContent = 'pending';
       passStatusEl.style.color = 'var(--text-tertiary)';
     } else if (passRatio > 50) {
-      passStatusEl.textContent = 'Passed';
+      passStatusEl.textContent = 'passed';
       passStatusEl.style.color = 'var(--green)';
     } else {
-      passStatusEl.textContent = 'Failed';
+      passStatusEl.textContent = 'failed';
       passStatusEl.style.color = 'var(--red)';
     }
   }
@@ -2802,6 +2813,7 @@ function toggleVersionList() {
 // ─── Deliberation Cell ───
 var delibResolutions = [];
 var delibSelectedRes = 0;
+var delibParticipants = ['AJ','OK','NC','MT','SR','LP','DK','RW'];
 
 function toggleAcceptRecord(checked) {
   var btns = document.getElementById('modal-vote-buttons');
@@ -2809,16 +2821,220 @@ function toggleAcceptRecord(checked) {
   btns.style.opacity = checked ? 1 : 0.4;
 }
 
-function openResolutionModal(idx) {
+// ─── Resolution Slot (one per cell) ───
+function updateResolutionSlot() {
+  var slot = document.getElementById('resolution-slot');
+  if (!slot) return;
+  var res = delibResolutions[0];
+
+  if (!res) {
+    slot.innerHTML =
+      '<div style="text-align:center;padding:16px 8px">' +
+        '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">No resolution drafted yet</div>' +
+        '<button class="btn btn-primary" style="font-size:11px;width:100%" onclick="generateResolution()">Generate Resolution (AI)</button>' +
+      '</div>';
+    return;
+  }
+
+  var title = escapeHtml(res.title || 'Untitled');
+  var typeTag = res.action ? '<span class="tag tag-gold" style="font-size:7px;margin-left:6px">' + escapeHtml(res.action) + '</span>' : '';
+  var statusBadge = res.votesNullified
+    ? '<span class="badge b-review" style="font-size:8px">Edited</span>'
+    : '<span class="badge b-active" style="font-size:8px">Draft</span>';
+  var versionText = res.versions.length + ' version' + (res.versions.length > 1 ? 's' : '');
+
+  // Redraft availability
+  var meta = res.aiDraftMeta || { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null };
+  var canRedraftResult = canRedraft(res);
+  var redraftLabel = 'Auto Redraft (AI)';
+  if (!canRedraftResult.ok) redraftLabel = canRedraftResult.reason;
+
+  slot.innerHTML =
+    '<div class="res-summary">' +
+      '<div class="res-summary-hdr"><span class="res-summary-num">' + title + '</span>' + typeTag + '</div>' +
+      '<div style="font-size:9px;color:var(--text-tertiary);margin-bottom:6px">' + versionText + ' &middot; ' +
+        (res.votesNullified ? '<span style="color:var(--amber)">Votes nullified</span>' : 'Votes active') + '</div>' +
+      '<div class="res-summary-actions">' +
+        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0, false)">Open</button>' +
+        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(0, true)">Edit</button>' +
+        '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px' + (canRedraftResult.ok ? '' : 'opacity:0.4;pointer-events:none') + '" onclick="requestRedraft()" title="' + escapeHtml(redraftLabel) + '">Redraft</button>' +
+        statusBadge +
+      '</div>' +
+    '</div>';
+}
+
+// ─── AI Drafter ───
+function generateResolution() {
+  var slot = document.getElementById('resolution-slot');
+  if (slot) slot.innerHTML =
+    '<div style="text-align:center;padding:16px 8px;color:var(--gold)">' +
+      '<div style="font-size:11px;margin-bottom:6px">Generating resolution…</div>' +
+      '<div style="font-size:9px;color:var(--text-tertiary)">AI is analysing proposal and deliberation</div>' +
+    '</div>';
+
+  // Simulate AI generation (would be API call in production)
+  setTimeout(function() {
+    var now = new Date();
+    var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    // Gather deliberation messages from the cell
+    var discussion = gatherDeliberation();
+
+    var res = {
+      id: 1,
+      title: 'Debris Liability Framework — Proportional Model',
+      text: 'MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms',
+      action: 'Policy',
+      implementingCircles: ['Space Law Circle', 'Remote Sensing Circle'],
+      domainShares: { 'Space Law': 0.38, 'Liability': 0.35, 'Remote Sensing': 0.27 },
+      votesNullified: false,
+      aiDraftMeta: {
+        draftCount: 1,
+        maxDrafts: 3,
+        cooldownMs: 300000,
+        lastDraftTs: now.getTime(),
+        confirmations: [],
+        confirmQuorum: Math.ceil(delibParticipants.length / 3)
+      },
+      versions: [{ title: 'Debris Liability Framework — Proportional Model', text: 'Initial AI draft', action: 'Policy', author: 'AI Drafter', ts: ts }]
+    };
+
+    delibResolutions = [res];
+    updateResolutionSlot();
+    openResolutionModal(0, false);
+  }, 1500);
+}
+
+function gatherDeliberation() {
+  // In production, this would read from the deliberation messages DOM or API
+  // For now, return the hardcoded discussion from the cell
+  return [
+    { author: 'Akello Jane', text: 'The core issue is that current liability frameworks assume clear fault attribution...' },
+    { author: 'Osei Kwame', text: 'What about the precedent from maritime law? The COLREGS framework...' },
+    { author: 'Mwenda Thomas', text: 'From a remote sensing perspective — tracking manoeuvre intent requires telemetry...' },
+    { author: 'Namugga Claire', text: "I'd support a graduated liability model: good-faith manoeuvres..." }
+  ];
+}
+
+function canRedraft(res) {
+  var meta = res.aiDraftMeta || { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null };
+  if (meta.draftCount >= meta.maxDrafts) return { ok: false, reason: 'Max redrafts (3) reached' };
+  if (meta.lastDraftTs) {
+    var elapsed = Date.now() - meta.lastDraftTs;
+    if (elapsed < meta.cooldownMs) {
+      var mins = Math.ceil((meta.cooldownMs - elapsed) / 60000);
+      return { ok: false, reason: 'Cooldown ' + mins + 'm' };
+    }
+  }
+  return { ok: true };
+}
+
+function requestRedraft() {
+  var res = delibResolutions[0];
+  if (!res) return;
+
+  var check = canRedraft(res);
+  if (!check.ok) { alert(check.reason); return; }
+
+  var meta = res.aiDraftMeta;
+  var userId = MOCK ? MOCK.currentUser.id : 'you';
+
+  // Check if user already confirmed
+  if (meta.confirmations.indexOf(userId) !== -1) {
+    alert('You have already confirmed this redraft.');
+    return;
+  }
+
+  meta.confirmations.push(userId);
+  var needed = meta.confirmQuorum;
+  var got = meta.confirmations.length;
+
+  if (got < needed) {
+    updateResolutionSlot();
+    alert('Confirmation recorded (' + got + '/' + needed + '). ' + (needed - got) + ' more participants must confirm before redraft proceeds.');
+    return;
+  }
+
+  // Quorum met — execute redraft
+  executeRedraft();
+}
+
+function executeRedraft() {
+  var res = delibResolutions[0];
+  if (!res) return;
+
+  var slot = document.getElementById('resolution-slot');
+  if (slot) slot.innerHTML =
+    '<div style="text-align:center;padding:16px 8px;color:var(--gold)">' +
+      '<div style="font-size:11px;margin-bottom:6px">Redrafting…</div>' +
+      '<div style="font-size:9px;color:var(--text-tertiary)">AI is revising the resolution</div>' +
+    '</div>';
+
+  setTimeout(function() {
+    var now = new Date();
+    var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+    var title = res.title;
+    var text = res.text + '\n\n[Redrafted — refinements based on deliberation]';
+
+    res.title = title;
+    res.text = text;
+    res.votesNullified = true;
+    res.aiDraftMeta.draftCount++;
+    res.aiDraftMeta.lastDraftTs = now.getTime();
+    res.aiDraftMeta.confirmations = [];
+    res.versions.push({ title: title, text: text, action: res.action, author: 'AI Drafter', ts: ts });
+
+    updateResolutionSlot();
+    openResolutionModal(0, false);
+  }, 1500);
+}
+
+// ─── Resolution Modal ───
+function openResolutionModal(idx, editMode) {
   delibSelectedRes = idx;
   var res = delibResolutions[idx];
-  document.getElementById('res-modal-title').textContent = 'Resolution #' + (idx + 1);
+  if (!res) return;
+
+  document.getElementById('res-modal-title').textContent = res.title || 'Resolution';
   document.getElementById('res-modal-title-field').value = res.title || '';
-  document.getElementById('res-modal-text').value = res.text;
+  document.getElementById('res-modal-text').value = res.text || '';
   document.getElementById('res-modal-action').value = res.action || '';
   document.getElementById('modal-accept-record').checked = false;
   toggleAcceptRecord(false);
-  // populate version history
+
+  // Set read-only or edit mode
+  var titleField = document.getElementById('res-modal-title-field');
+  var textField = document.getElementById('res-modal-text');
+  var actionField = document.getElementById('res-modal-action');
+  var saveBtn = document.getElementById('btn-save-resolution');
+  var redraftBtn = document.getElementById('btn-redraft-resolution');
+  var statusEl = document.getElementById('res-modal-status');
+
+  if (editMode) {
+    titleField.removeAttribute('readonly');
+    textField.removeAttribute('readonly');
+    actionField.removeAttribute('readonly');
+    saveBtn.style.display = '';
+    redraftBtn.style.display = '';
+    statusEl.textContent = 'Editing';
+  } else {
+    titleField.setAttribute('readonly', '');
+    textField.setAttribute('readonly', '');
+    actionField.setAttribute('readonly', '');
+    saveBtn.style.display = 'none';
+    redraftBtn.style.display = 'none';
+    statusEl.textContent = 'View only';
+  }
+
+  // Domain shares display
+  var shares = res.domainShares;
+  if (shares) {
+    var shareParts = Object.keys(shares).map(function(k) { return k + ': ' + Math.round(shares[k] * 100) + '%'; });
+    statusEl.textContent += ' · ' + shareParts.join(', ');
+  }
+
+  // Version history
   var vCount = document.getElementById('version-count');
   var vMore = document.getElementById('version-more');
   var vList = document.getElementById('version-list');
@@ -2832,6 +3048,7 @@ function openResolutionModal(idx) {
       '<div style="color:var(--text-tertiary);font-size:9px;line-height:1.3">' + escapeHtml(preview) + '</div></div>';
   }).join('');
   vList.style.display = 'none';
+
   updateVoteSummary();
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
@@ -2842,7 +3059,7 @@ function closeResolutionModal() {
   document.body.classList.remove('modal-open');
   document.getElementById('vote-breakdown').style.display = 'none';
   var toggler = document.getElementById('vote-breakdown').previousElementSibling;
-  toggler.textContent = '▸ Show per-domain vote breakdown';
+  toggler.textContent = '▸ Per-domain breakdown';
 }
 
 function saveResolution() {
@@ -2859,37 +3076,8 @@ function saveResolution() {
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   var author = MOCK ? MOCK.currentUser.name : 'You';
   res.versions.push({ title: title, text: text, action: action, author: author, ts: ts });
-  updateResolutionList();
+  updateResolutionSlot();
   closeResolutionModal();
-  alert('Resolution #' + (delibSelectedRes + 1) + ' saved. Votes have been nullified.');
-}
-
-function addResolution() {
-  var now = new Date();
-  var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  delibResolutions.push({
-    id: delibResolutions.length + 1,
-    title: 'New resolution',
-    text: 'New resolution draft…',
-    action: '',
-    implementingCircles: [],
-    votesNullified: false,
-    versions: [{ title: 'New resolution', text: 'New resolution draft…', action: '', author: MOCK ? MOCK.currentUser.name : 'You', ts: ts }]
-  });
-  updateResolutionList();
-}
-
-function updateResolutionList() {
-  var list = document.getElementById('resolution-list');
-  var html = '';
-  delibResolutions.forEach(function(r, i) {
-    var title = r.title || 'Resolution #' + (i + 1);
-    var statusBadge = r.votesNullified ? '<span class="badge b-review" style="font-size:8px">Edited</span>' : '<span class="badge b-active" style="font-size:8px">Draft</span>';
-    html += '<div class="res-summary">' +
-      '<div class="res-summary-hdr"><span class="res-summary-num">' + escapeHtml(title) + '</span></div>' +
-      '<div class="res-summary-actions"><button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionModal(' + i + ')">View / Edit</button>' + statusBadge + '</div></div>';
-  });
-  list.innerHTML = html;
 }
 
 function submitResolution() {
@@ -3300,6 +3488,12 @@ loadMockData().then(function() {
 
   var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
   delibResolutions = (delibCell.draftResolutions || []).map(function(r){ return r; });
+  // Ensure domainShares and aiDraftMeta exist on existing resolutions
+  delibResolutions.forEach(function(r) {
+    if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
+    if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
+  });
+  updateResolutionSlot();
 
   REG_DOMAINS = (MOCK.registration && MOCK.registration.domains) || [];
   REG_ELO_MAP = (MOCK.registration && MOCK.registration.eloMap) || {};
