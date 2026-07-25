@@ -3521,10 +3521,11 @@ function dmRender(){
     svg+='<circle cx="'+sx+'" cy="'+sy+'" r="'+sr*(isF?1.7:isN?1.2:1)+'" fill="'+meta.color+'"'+(isF?' filter="url(#dmHaloSm)"':'')+'/>';
 
     // Label
-    if(isF||(hasF&&isN)){
-      var ly=sy-sr-(isF?sl*0.5+6:8);
-      var ls=isF?7*c.scale:5.5*c.scale;
-      svg+='<text x="'+sx+'" y="'+ly+'" text-anchor="middle" font-size="'+ls+'" letter-spacing="1.5" fill="'+(isF?'#fff':'rgba(200,150,14,0.5)')+'" font-family="inherit" font-weight="'+(isF?600:400)+'" style="text-transform:uppercase;pointer-events:none"'+(isF?' filter="url(#dmLabel)"':'')+' opacity="'+(isF?1:0.7)+'">'+meta.label+'</text>';
+    if(isF||(hasF&&isN)||(!hasF&&c.scale>0.6)){
+      var ly=sy-sr-(isF?sl*0.5+8:10);
+      var ls=isF?10*c.scale:8*c.scale;
+      var lop=isF?1:(hasF&&isN?0.8:0.45+twinkle*0.1);
+      svg+='<text x="'+sx+'" y="'+ly+'" text-anchor="middle" font-size="'+ls+'" letter-spacing="1.5" fill="'+(isF?'#fff':'rgba(200,150,14,0.6)')+'" font-family="inherit" font-weight="'+(isF?700:500)+'" style="text-transform:uppercase;pointer-events:none"'+(isF?' filter="url(#dmLabel)"':'')+' opacity="'+lop+'">'+meta.label+'</text>';
     }
 
     svg+='</g>';
