@@ -2221,12 +2221,13 @@
             <option value="Letter/Communication">
           </datalist>
         </div>
-        <div>
-          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Circle(s)</div>
-          <div style="display:flex;flex-wrap:wrap;gap:3px" id="res-modal-circles">
-            <span class="tag tag-purple" style="font-size:8px;cursor:pointer;padding:2px 6px" onclick="toggleImplementingCircle(this)">SL ✓</span>
-            <span class="tag tag-teal" style="font-size:8px;cursor:pointer;padding:2px 6px" onclick="toggleImplementingCircle(this)">RS ✓</span>
-            <span style="font-size:8px;color:var(--text-tertiary);font-style:italic">click</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Implementing Circle(s)</div>
+          <div id="res-modal-circles" style="display:flex;flex-wrap:wrap;gap:4px">
+            <span class="impl-circle active" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)"><span style="font-size:10px">&#10003;</span> Space Law Circle</span>
+            <span class="impl-circle active" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)"><span style="font-size:10px">&#10003;</span> Remote Sensing Circle</span>
+            <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Policy Circle</span>
+            <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Education Circle</span>
           </div>
         </div>
       </div>
@@ -2288,11 +2289,19 @@
         <!-- Mandate Domains -->
         <div class="card">
           <div class="sec">Mandate Domains &amp; Desired Competence</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Primary domains drive the competence map. Secondary domains are advisory.</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Space Law <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" checked onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="2500" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Liability <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" checked onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="1800" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
-            <span style="background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:flex;align-items:center;gap:6px">Policy <label style="font-size:8px;color:var(--text-tertiary);cursor:pointer"><input type="checkbox" onchange="this.parentElement.style.opacity=this.checked?1:0.5"> P</label><input type="number" value="1500" style="width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:0.5" onclick="this.parentElement.remove()">×</span></span>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Primary domains drive the competence map. Secondary domains are advisory.</div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:600;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Primary</div>
+            <div id="primary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Space Law <input type="number" value="2500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Liability <input type="number" value="1800" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+            </div>
+          </div>
+          <div style="margin-bottom:12px">
+            <div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Secondary</div>
+            <div id="secondary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
+              <span class="mandate-tag secondary" style="background:var(--surface-raised);color:var(--text-secondary);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)">Policy <input type="number" value="1500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--text-secondary);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToPrimary(this.parentElement)">↑</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
+            </div>
           </div>
           <div style="display:flex;gap:4px">
             <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="new-domain-input">
@@ -2584,30 +2593,48 @@ function closeSettingsModal() {
 function addMandateDomain() {
   var i = document.getElementById('new-domain-input');
   if (!i.value.trim()) return;
-  var s = document.createElement('span');
-  s.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:3px 10px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:6px;margin:2px';
-  var label = document.createElement('label');
-  label.style.cssText = 'font-size:8px;color:var(--text-tertiary);cursor:pointer';
-  var cb = document.createElement('input');
-  cb.type = 'checkbox';
-  cb.onchange = function() { label.style.opacity = this.checked ? 1 : 0.5; };
-  label.appendChild(cb);
-  label.appendChild(document.createTextNode(' P'));
+  var container = document.getElementById('primary-domains');
+  var span = document.createElement('span');
+  span.className = 'mandate-tag primary';
+  span.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)';
+  var name = document.createTextNode(i.value.trim() + ' ');
   var num = document.createElement('input');
-  num.type = 'number';
-  num.value = '1000';
-  num.style.cssText = 'width:50px;font-size:10px;padding:1px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
+  num.type = 'number'; num.value = '1000';
+  num.style.cssText = 'width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
   num.title = 'Desired Ws';
+  var down = document.createElement('span');
+  down.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; down.textContent = '\u2193';
+  down.onclick = function() { moveDomainToSecondary(span); };
   var rm = document.createElement('span');
-  rm.style.cssText = 'cursor:pointer;opacity:0.5';
-  rm.textContent = '\u00d7';
-  rm.onclick = function() { s.remove(); };
-  s.appendChild(document.createTextNode(i.value.trim() + ' '));
-  s.appendChild(label);
-  s.appendChild(num);
-  s.appendChild(rm);
-  document.querySelector('#settings-tab-0 .card:last-child div:first-of-type').appendChild(s);
+  rm.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; rm.textContent = '\u00d7';
+  rm.onclick = function() { span.remove(); };
+  span.appendChild(name); span.appendChild(num); span.appendChild(down); span.appendChild(rm);
+  container.appendChild(span);
   i.value = '';
+}
+
+function moveDomainToSecondary(el) {
+  el.className = 'mandate-tag secondary';
+  el.style.background = 'var(--surface-raised)';
+  el.style.color = 'var(--text-secondary)';
+  el.style.borderColor = 'var(--border)';
+  var num = el.querySelector('input');
+  if (num) num.style.color = 'var(--text-secondary)';
+  var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
+  if (arrows[0]) { arrows[0].textContent = '\u2191'; arrows[0].onclick = function() { moveDomainToPrimary(el); }; }
+  document.getElementById('secondary-domains').appendChild(el);
+}
+
+function moveDomainToPrimary(el) {
+  el.className = 'mandate-tag primary';
+  el.style.background = 'var(--gold-soft)';
+  el.style.color = 'var(--gold)';
+  el.style.borderColor = 'var(--gold-border)';
+  var num = el.querySelector('input');
+  if (num) num.style.color = 'var(--gold)';
+  var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
+  if (arrows[0]) { arrows[0].textContent = '\u2193'; arrows[0].onclick = function() { moveDomainToSecondary(el); }; }
+  document.getElementById('primary-domains').appendChild(el);
 }
 
 // ─── Member Roster Modal ───
@@ -2741,9 +2768,21 @@ function submitSystemProposal() {
 }
 
 function toggleImplementingCircle(el) {
-  var txt = el.textContent;
-  if (txt.indexOf('✓') > -1) { el.textContent = txt.replace(' ✓', ''); el.style.opacity = 0.5; }
-  else { el.textContent = txt + ' ✓'; el.style.opacity = 1; }
+  var isActive = el.classList.contains('active');
+  var check = el.querySelector('span');
+  if (isActive) {
+    el.classList.remove('active');
+    el.style.background = 'var(--surface-raised)';
+    el.style.color = 'var(--text-tertiary)';
+    el.style.borderColor = 'var(--border)';
+    if (check) { check.style.opacity = '.3'; }
+  } else {
+    el.classList.add('active');
+    el.style.background = 'var(--green-soft)';
+    el.style.color = 'var(--green)';
+    el.style.borderColor = 'var(--green-border)';
+    if (check) { check.style.opacity = '1'; }
+  }
 }
 
 function escapeHtml(s) {
