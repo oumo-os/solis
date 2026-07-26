@@ -762,7 +762,7 @@
           <div class="text-label mb-2">Rationale</div>
           <textarea placeholder="Justify your approval score..." class="form-input" style="height:80px;resize:none"></textarea>
         </div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this steward assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this steward assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -847,7 +847,7 @@
         <div class="sec">Evaluation Comments</div>
         <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this competence assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this competence assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1080,7 +1080,7 @@
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
-        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div></div>
+        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1263,7 +1263,7 @@
 
         <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Review Notes</div>
         <textarea placeholder="Additional observations about the Circle and assigned members..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your p-aSTF review? Scores and tier will be published; your attribution is permanently sealed.',function(){})">Submit Review</button><button class="btn" onclick="alert('Draft saved.')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your p-aSTF review? Scores and tier will be published; your attribution is permanently sealed.',function(){})">Submit Review</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -3232,1036 +3232,16 @@ function requestRedraft() {
   if (!res) return;
 
   var check = canRedraft(res);
-  if (!check.ok) { alert(check.reason); return; }
-
-  var meta = res.aiDraftMeta;
-  var userId = MOCK ? MOCK.currentUser.id : 'you';
-
-  // Check if user already confirmed
-  if (meta.confirmations.indexOf(userId) !== -1) {
-    alert('You have already confirmed this redraft.');
-    return;
-  }
-
-  meta.confirmations.push(userId);
-  var needed = meta.confirmQuorum;
-  var got = meta.confirmations.length;
-
-  if (got < needed) {
-    updateResolutionSlot();
-    // Update modal badge if open
-    var badge = document.getElementById('res-redraft-badge');
-    if (badge) { badge.textContent = got + '/' + needed; }
-    alert('Confirmation recorded (' + got + '/' + needed + '). ' + (needed - got) + ' more participants must confirm before redraft proceeds.');
-    return;
-  }
-
-  // Quorum met — execute redraft
-  executeRedraft();
-}
-
-function executeRedraft() {
-  var res = delibResolutions[0];
-  if (!res) return;
-
-  var slot = document.getElementById('resolution-slot');
-  if (slot) slot.innerHTML =
-    '<div style="text-align:center;padding:16px 8px;color:var(--gold)">' +
-      '<div style="font-size:11px;margin-bottom:6px">Redrafting…</div>' +
-      '<div style="font-size:9px;color:var(--text-tertiary)">AI is revising the resolution</div>' +
-    '</div>';
-
-  setTimeout(function() {
-    var now = new Date();
-    var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-    var title = res.title;
-    var text = res.text + '\n\n[Redrafted — refinements based on deliberation]';
-
-    res.title = title;
-    res.text = text;
-    res.votesNullified = true;
-    res.aiDraftMeta.draftCount++;
-    res.aiDraftMeta.lastDraftTs = now.getTime();
-    res.aiDraftMeta.confirmations = [];
-    res.versions.push({ title: title, text: text, action: res.action, author: 'AI Drafter', ts: ts });
-
-    updateResolutionSlot();
-    openResolutionModal(0);
-  }, 1500);
-}
-
-// ─── Resolution Modal ───
-function openResolutionModal(idx) {
-  delibSelectedRes = idx;
-  var res = delibResolutions[idx];
-  if (!res) return;
-
-  document.getElementById('res-modal-title').textContent = res.title || 'Resolution';
-  document.getElementById('res-modal-title-field').value = res.title || '';
-  document.getElementById('res-modal-text').value = res.text || '';
-  document.getElementById('res-modal-action').value = res.action || '';
-  document.getElementById('modal-accept-record').checked = false;
-  toggleAcceptRecord(false);
-
-  // Always editable
-  var titleField = document.getElementById('res-modal-title-field');
-  var textField = document.getElementById('res-modal-text');
-  var actionField = document.getElementById('res-modal-action');
-  titleField.removeAttribute('readonly');
-  textField.removeAttribute('readonly');
-  actionField.removeAttribute('readonly');
-
-  // Status
-  var statusEl = document.getElementById('res-modal-status');
-  statusEl.textContent = res.votesNullified ? 'Votes nullified' : 'Draft';
-
-  // Redraft button in header
-  var redraftBtn = document.getElementById('btn-redraft-resolution');
-  var redraftCount = document.getElementById('res-redraft-count');
-  var redraftBadge = document.getElementById('res-redraft-badge');
-  var meta = res.aiDraftMeta || { draftCount: 0, maxDrafts: 3, confirmations: [], confirmQuorum: 3 };
-  var check = canRedraft(res);
-
-  if (check.ok) {
-    redraftBtn.style.display = '';
-    redraftBtn.style.opacity = '1';
-    redraftBtn.style.pointerEvents = '';
-    redraftCount.textContent = (meta.maxDrafts - meta.draftCount) + ' remaining';
-    var confCount = meta.confirmations.length;
-    var confNeeded = meta.confirmQuorum;
-    redraftBadge.textContent = confCount + '/' + confNeeded;
-    redraftBadge.style.background = confCount >= confNeeded ? 'var(--green-soft)' : 'var(--surface)';
-    redraftBadge.style.color = confCount >= confNeeded ? 'var(--green)' : 'var(--text-tertiary)';
-    redraftBadge.style.borderColor = confCount >= confNeeded ? 'var(--green-border)' : 'var(--border-subtle)';
-  } else {
-    redraftBtn.style.display = '';
-    redraftBtn.style.opacity = '0.4';
-    redraftBtn.style.pointerEvents = 'none';
-    redraftCount.textContent = check.reason;
-    redraftBadge.textContent = '';
-  }
-
-  // Version history
-  var vCount = document.getElementById('version-count');
-  var vMore = document.getElementById('version-more');
-  var vList = document.getElementById('version-list');
-  vCount.textContent = res.versions.length;
-  vMore.style.display = res.versions.length > 1 ? 'inline' : 'none';
-  vList.innerHTML = res.versions.slice().reverse().map(function(v) {
-    var preview = v.text.length > 120 ? v.text.substring(0, 120) + '…' : v.text;
-    return '<div style="font-size:10px;color:var(--text-secondary);padding:6px 8px;background:var(--surface-raised);border-radius:var(--radius);border-left:2px solid var(--gold-border)">' +
-      '<div style="display:flex;justify-content:space-between;margin-bottom:2px"><strong style="font-size:10px">' + escapeHtml(v.author) + '</strong><span style="color:var(--text-tertiary);font-size:9px">' + v.ts + '</span></div>' +
-      (v.title ? '<div style="font-size:10px;font-weight:500;color:var(--text);margin-bottom:2px">' + escapeHtml(v.title) + '</div>' : '') +
-      '<div style="color:var(--text-tertiary);font-size:9px;line-height:1.3">' + escapeHtml(preview) + '</div></div>';
-  }).join('');
-  vList.style.display = 'none';
-
-  updateVoteSummary();
-  document.getElementById('resolution-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-}
-
-function closeResolutionModal() {
-  document.getElementById('resolution-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-  document.getElementById('vote-breakdown').style.display = 'none';
-  var toggler = document.getElementById('vote-breakdown').previousElementSibling;
-  toggler.textContent = '▸ Per-domain breakdown';
-}
-
-function saveResolution() {
-  if (!confirm('Saving this resolution will nullify all existing votes. Continue?')) return;
-  var res = delibResolutions[delibSelectedRes];
-  var title = document.getElementById('res-modal-title-field').value;
-  var text = document.getElementById('res-modal-text').value;
-  var action = document.getElementById('res-modal-action').value;
-  res.title = title;
-  res.text = text;
-  res.action = action;
-  res.votesNullified = true;
-  var now = new Date();
-  var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  var author = MOCK ? MOCK.currentUser.name : 'You';
-  res.versions.push({ title: title, text: text, action: action, author: author, ts: ts });
-  updateResolutionSlot();
-  closeResolutionModal();
-}
-
-function submitResolution() {
-  confirmModal('Submit this resolution to aSTF for blind adjudication? Assessors will review the resolution and vote to pass or reject.', function() {
-    alert('Resolution #' + (delibSelectedRes + 1) + ' submitted to aSTF.');
-  });
-}
-
-function closeDebate() {
-  confirmModal('Close debate and crystallise this cell? The current resolution will be recorded as the final outcome (passed or failed).', function() {
-    alert('Cell crystallised. Resolution recorded.');
-  });
-}
-
-// ─── System Settings ───
-function openSettingsModal() {
-  document.getElementById('settings-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-}
-
-function closeSettingsModal() {
-  document.getElementById('settings-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-
-function addMandateDomain() {
-  var i = document.getElementById('new-domain-input');
-  if (!i.value.trim()) return;
-  var container = document.getElementById('primary-domains');
-  var span = document.createElement('span');
-  span.className = 'mandate-tag primary';
-  span.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)';
-  var name = document.createTextNode(i.value.trim() + ' ');
-  var num = document.createElement('input');
-  num.type = 'number'; num.value = '1000';
-  num.style.cssText = 'width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
-  num.title = 'Desired Ws';
-  var down = document.createElement('span');
-  down.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; down.textContent = '\u2193';
-  down.onclick = function() { moveDomainToSecondary(span); };
-  var rm = document.createElement('span');
-  rm.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; rm.textContent = '\u00d7';
-  rm.onclick = function() { span.remove(); };
-  span.appendChild(name); span.appendChild(num); span.appendChild(down); span.appendChild(rm);
-  container.appendChild(span);
-  i.value = '';
-}
-
-function moveDomainToSecondary(el) {
-  el.className = 'mandate-tag secondary';
-  el.style.background = 'var(--surface-raised)';
-  el.style.color = 'var(--text-secondary)';
-  el.style.borderColor = 'var(--border)';
-  var num = el.querySelector('input');
-  if (num) num.style.color = 'var(--text-secondary)';
-  var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
-  if (arrows[0]) { arrows[0].textContent = '\u2191'; arrows[0].onclick = function() { moveDomainToPrimary(el); }; }
-  var target = el.closest('.reg-modal') ? document.getElementById('circle-secondary-domains') : document.getElementById('secondary-domains');
-  if (target) target.appendChild(el);
-}
-
-function moveDomainToPrimary(el) {
-  el.className = 'mandate-tag primary';
-  el.style.background = 'var(--gold-soft)';
-  el.style.color = 'var(--gold)';
-  el.style.borderColor = 'var(--gold-border)';
-  var num = el.querySelector('input');
-  if (num) num.style.color = 'var(--gold)';
-  var arrows = el.querySelectorAll('span[style*="cursor:pointer"]');
-  if (arrows[0]) { arrows[0].textContent = '\u2193'; arrows[0].onclick = function() { moveDomainToSecondary(el); }; }
-  var target = el.closest('.reg-modal') ? document.getElementById('circle-primary-domains') : document.getElementById('primary-domains');
-  if (target) target.appendChild(el);
-}
-
-function addCircleMandateDomain() {
-  var i = document.getElementById('circle-new-domain-input');
-  if (!i.value.trim()) return;
-  var container = document.getElementById('circle-primary-domains');
-  var span = document.createElement('span');
-  span.className = 'mandate-tag primary';
-  span.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)';
-  var name = document.createTextNode(i.value.trim() + ' ');
-  var num = document.createElement('input');
-  num.type = 'number'; num.value = '1000';
-  num.style.cssText = 'width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
-  num.title = 'Desired Ws';
-  var down = document.createElement('span');
-  down.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; down.textContent = '\u2193';
-  down.onclick = function() { moveDomainToSecondary(span); };
-  var rm = document.createElement('span');
-  rm.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; rm.textContent = '\u00d7';
-  rm.onclick = function() { span.remove(); };
-  span.appendChild(name); span.appendChild(num); span.appendChild(down); span.appendChild(rm);
-  container.appendChild(span);
-  i.value = '';
-}
-
-// ─── Circle Settings Modal ───
-function openCircleSettingsModal() {
-  document.getElementById('circle-settings-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-}
-
-function closeCircleSettingsModal() {
-  document.getElementById('circle-settings-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-
-function switchCircleSettingsTab(idx, el) {
-  document.querySelectorAll('#circle-settings-modal .settings-tab').forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
-  document.querySelectorAll('#circle-settings-modal .settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
-  document.getElementById('circle-settings-tab-' + idx).style.display = '';
-}
-
-function submitCircleProposal() {
-  closeCircleSettingsModal();
-  alert('Circle settings submitted as a proposal to the Circle cell.');
-}
-
-// ─── Organisation Modals ───
-var orgs = [];
-var orgDomains = {};
-
-function openOrgSettingsModal(orgId) {
-  var org = orgs.find(function(o) { return o.id === orgId; });
-  if (!org) return;
-  document.getElementById('org-settings-name').value = org.name;
-  document.getElementById('org-settings-acronym').value = org.acronym;
-  document.getElementById('org-settings-shortname').value = org.shortname;
-  document.getElementById('org-settings-location').value = org.location;
-  document.getElementById('org-settings-summary').value = org.summary;
-  document.getElementById('org-settings-website').value = org.website || '';
-  orgDomains = {};
-  (org.knowledgeDomains || []).forEach(function(d) { orgDomains[d] = true; });
-  renderOrgSettingsDomains();
-  document.getElementById('org-settings-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-  document.getElementById('org-settings-modal').dataset.orgId = orgId;
-}
-
-function closeOrgSettingsModal() {
-  document.getElementById('org-settings-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-
-function switchOrgSettingsTab(idx, el) {
-  document.querySelectorAll('#org-settings-modal .settings-tab').forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
-  document.querySelectorAll('#org-settings-modal .settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
-  document.getElementById('org-settings-tab-' + idx).style.display = '';
-}
-
-function renderOrgSettingsDomains() {
-  var el = document.getElementById('org-settings-domains');
-  if (!el) return;
-  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
-  el.innerHTML = '';
-  Object.keys(orgDomains).forEach(function(key) {
-    if (!orgDomains[key]) return;
-    var meta = domainMeta[key] || {};
-    var tag = document.createElement('span');
-    tag.style.cssText = 'background:var(--surface-raised);color:var(--text);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)';
-    tag.innerHTML = (meta.label || key) + ' <span style="cursor:pointer;opacity:.4;font-size:13px" onclick="removeOrgDomain(\'' + key + '\')">&times;</span>';
-    el.appendChild(tag);
-  });
-}
-
-function addOrgDomain() {
-  var i = document.getElementById('org-new-domain-input');
-  if (!i.value.trim()) return;
-  var key = i.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  orgDomains[key] = true;
-  if (!MOCK.domains[key]) {
-    MOCK.domains[key] = { label: i.value.trim(), short: key.slice(0, 6).toUpperCase(), color: '#808080', hasCircle: false, type: 'affiliate' };
-  } else {
-    MOCK.domains[key].type = 'affiliate';
-  }
-  renderOrgSettingsDomains();
-  i.value = '';
-}
-
-function removeOrgDomain(key) {
-  delete orgDomains[key];
-  renderOrgSettingsDomains();
-}
-
-function submitOrgSettingsProposal() {
-  var id = document.getElementById('org-settings-modal').dataset.orgId;
-  closeOrgSettingsModal();
-  alert('Organisation settings for ' + id + ' submitted as a proposal.');
-}
-
-function openOrgDetailModal(orgId) {
-  var org = orgs.find(function(o) { return o.id === orgId; });
-  if (!org) return;
-  document.getElementById('org-detail-name').textContent = org.name;
-  var body = document.getElementById('org-detail-body');
-  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
-  var members = (typeof MOCK !== 'undefined' && MOCK.participants) ? MOCK.participants.filter(function(p) {
-    return (p.interests || []).some(function(i) {
-      return (org.knowledgeDomains || []).indexOf(i.domain || i) !== -1;
-    });
-  }) : [];
-  var domainsHtml = (org.knowledgeDomains || []).map(function(key) {
-    var meta = domainMeta[key] || {};
-    return '<span class="tag" style="background:' + (meta.color || '#808080') + '22;color:' + (meta.color || '#808080') + ';border:1px solid ' + (meta.color || '#808080') + '44">' + (meta.label || key) + '</span>';
-  }).join(' ');
-  var membersHtml = members.length > 0
-    ? members.map(function(m) {
-        return '<div class="flex items-center gap-2 mb-3">' +
-          '<div class="avatar-square" style="width:32px;height:32px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text)">' + (m.initials || '??') + '</div>' +
-          '<div><div style="font-size:12px;font-weight:600;color:var(--text)">' + (m.name || 'Unknown') + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + (m.location || '—') + '</div></div>' +
-        '</div>';
-      }).join('')
-    : '<div style="font-size:11px;color:var(--text-tertiary);padding:12px 0">No affiliated members yet.</div>';
-  body.innerHTML =
-    '<div class="card" style="margin-bottom:12px">' +
-      '<div class="flex items-center gap-2 mb-4">' +
-        '<div style="width:48px;height:48px;border-radius:8px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold-border)">' + (org.acronym || '??') + '</div>' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:600;color:var(--text)">' + (org.name || 'Unknown') + '</div>' +
-          '<div style="font-size:10px;color:var(--text-tertiary)">' + (org.location || '—') + (org.founded ? ' · Founded ' + org.founded : '') + (org.memberCount ? ' · ' + fmt(org.memberCount) + ' members' : '') + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">' + (org.summary || 'No summary.') + '</div>' +
-      '<div class="mb-4"><span class="text-label">Knowledge Domains</span><div class="flex gap-1 mt-2" style="flex-wrap:wrap">' + domainsHtml + '</div></div>' +
-      '<div class="mb-4"><span class="text-label">Affiliated Members</span><div class="mt-2">' + membersHtml + '</div></div>' +
-      '<div style="display:flex;gap:4px">' +
-        '<button class="btn btn-sm btn-primary" onclick="closeOrgDetailModal();openOrgSettingsModal(\'' + org.id + '\')">Settings</button>' +
-        (org.website ? '<button class="btn btn-sm" onclick="window.open(\'' + org.website + '\',\'_blank\')">Visit Website</button>' : '') +
-      '</div>' +
-    '</div>';
-  document.getElementById('org-detail-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-}
-
-function closeOrgDetailModal() {
-  document.getElementById('org-detail-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-
-function renderOrganisations() {
-  var grid = document.getElementById('orgs-grid');
-  if (!grid || !orgs.length) return;
-  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
-  var search = (document.getElementById('org-search') || {}).value || '';
-  var filtered = orgs.filter(function(o) {
-    return !search || o.name.toLowerCase().indexOf(search.toLowerCase()) !== -1 || (o.acronym || '').toLowerCase().indexOf(search.toLowerCase()) !== -1;
-  });
-  grid.innerHTML = filtered.map(function(org) {
-    var domainsHtml = (org.knowledgeDomains || []).map(function(key) {
-      var meta = domainMeta[key] || {};
-      return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:9px;background:' + (meta.color || '#808080') + '18;color:' + (meta.color || '#808080') + ';border:1px solid ' + (meta.color || '#808080') + '33"><span style="width:6px;height:6px;border-radius:50%;background:' + (meta.color || '#808080') + '"></span>' + (meta.label || key) + '</span>';
-    }).join(' ');
-    return '<div class="card" style="cursor:pointer" onclick="openOrgDetailModal(\'' + org.id + '\')">' +
-      '<div class="flex items-center gap-2 mb-3">' +
-        '<div style="width:40px;height:40px;border-radius:8px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);border:1px solid var(--gold-border)">' + (org.acronym || '??') + '</div>' +
-        '<div><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.name || 'Unknown') + '</div>' +
-        '<div style="font-size:10px;color:var(--text-tertiary)">' + (org.location || '—') + '</div></div>' +
-      '</div>' +
-      '<div style="font-size:10px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (org.summary || 'No summary.') + '</div>' +
-      '<div class="flex gap-1" style="flex-wrap:wrap">' + domainsHtml + '</div>' +
-      '<div class="flex gap-2 mt-3" style="border-top:1px solid var(--border);padding-top:8px">' +
-        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + fmt(org.memberCount || 0) + '</div><div style="font-size:9px;color:var(--text-tertiary)">Members</div></div>' +
-        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.knowledgeDomains || []).length + '</div><div style="font-size:9px;color:var(--text-tertiary)">Domains</div></div>' +
-        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.foundingCell ? 'Active' : 'None') + '</div><div style="font-size:9px;color:var(--text-tertiary)">Founding</div></div>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-  var countEl = document.getElementById('orgs-count');
-  if (countEl) countEl.textContent = filtered.length + ' organisation' + (filtered.length !== 1 ? 's' : '');
-}
-
-function filterOrgs() { renderOrganisations(); }
-
-// ─── Content Type Selector ───
-function selectContentType(btn, type) {
-  document.querySelectorAll('.compose-type-btn').forEach(function(b) { b.classList.remove('active'); });
-  btn.classList.add('active');
-  var pubSubtype = document.getElementById('compose-pub-subtype');
-  var textarea = document.querySelector('#view-commons .post-compose textarea');
-  var extraFields = document.getElementById('compose-extra-fields');
-  if (pubSubtype) pubSubtype.style.display = (type === 'publication') ? 'block' : 'none';
-  var placeholders = {
-    discussion: 'Start a discussion...',
-    proposal: 'Describe your proposal...',
-    event: 'Event title and details...',
-    article: 'Write your article...',
-    opportunity: 'Describe the opportunity...',
-    publication: 'Publication abstract...'
-  };
-  if (textarea) textarea.placeholder = placeholders[type] || 'Start a discussion...';
-  if (extraFields) {
-    var html = '';
-    if (type === 'event') {
-      html = '<div class="g2" style="margin-top:10px"><div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" style="font-size:11px"></div><div class="form-group"><label class="form-label">Location</label><input class="form-input" placeholder="Online / Venue" style="font-size:11px"></div></div>';
-    } else if (type === 'opportunity') {
-      html = '<div class="g2" style="margin-top:10px"><div class="form-group"><label class="form-label">Deadline</label><input type="date" class="form-input" style="font-size:11px"></div><div class="form-group"><label class="form-label">Type</label><select class="form-input" style="font-size:11px"><option>Grant</option><option>Fellowship</option><option>Job</option><option>Call for Papers</option><option>Workshop</option></select></div></div><div class="form-group" style="margin-top:6px"><label class="form-label">Link</label><input class="form-input" placeholder="https://..." style="font-size:11px"></div>';
-    } else if (type === 'article') {
-      html = '<div class="form-group" style="margin-top:10px"><label class="form-label">Title</label><input class="form-input" placeholder="Article title..." style="font-size:11px"></div>';
-    } else if (type === 'publication') {
-      html = '<div class="form-group" style="margin-top:10px"><label class="form-label">Abstract</label><textarea class="form-input" rows="2" placeholder="Brief abstract..." style="font-size:11px"></textarea></div><div class="form-group" style="margin-top:6px"><label class="form-label">Co-authors</label><input class="form-input" placeholder="Comma-separated names" style="font-size:11px"></div>';
-    }
-    extraFields.innerHTML = html;
-  }
-}
-
-// ─── Governance / Resolutions View ───
-var resolutionsData = [
-  { id: 'R-001', title: 'ITU Coordination Guide Publication', status: 'enacted', date: 'Jul 10, 2026', circles: ['Space Law'], visibility: 'public', text: 'Commission xSTF to produce and publish an ITU frequency coordination guide for emerging space nations.', forPublication: true },
-  { id: 'R-002', title: 'Proportional Liability Framework for Debris', status: 'pending', date: 'Jul 25, 2026', circles: ['Space Law', 'Remote Sensing'], visibility: 'internal', text: 'Establish proportional liability framework for manoeuvre-induced orbital debris.', forPublication: false },
-  { id: 'R-003', title: 'Artemis Accords Ratification Recommendation', status: 'pending', date: 'Jul 22, 2026', circles: ['Space Law'], visibility: 'internal', text: 'Recommend East African nations pursue coordinated ratification of the Artemis Accords.', forPublication: false },
-  { id: 'R-004', title: 'Space Debris Tracking Standards', status: 'failed', date: 'Jun 30, 2026', circles: ['Remote Sensing'], visibility: 'internal', text: 'Mandate adoption of international space debris tracking standards for all LEO operators.', forPublication: false },
-  { id: 'R-005', title: 'Weighted Vote Decay Parameter Revision', status: 'pending', date: 'Jul 20, 2026', circles: ['Space Law', 'Policy'], visibility: 'internal', text: 'Revise the vote decay parameter to better reflect sustained engagement versus one-time participation.', forPublication: false }
-];
-
-function renderResolutionsList(filter) {
-  var list = document.getElementById('resolutions-list');
-  if (!list) return;
-  filter = filter || 'all';
-  var filtered = resolutionsData.filter(function(r) { return filter === 'all' || r.status === filter; });
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No resolutions match this filter.</div></div>';
-    return;
-  }
-  list.innerHTML = filtered.map(function(r) {
-    var badgeClass = r.status === 'enacted' ? 'b-enacted' : r.status === 'pending' ? 'b-pending' : 'b-failed';
-    var statusLabel = r.status.charAt(0).toUpperCase() + r.status.slice(1);
-    var circlesHtml = r.circles.map(function(c) { return '<span class="tag tag-purple" style="font-size:8px">' + c + '</span>'; }).join(' ');
-    var pubBadge = r.forPublication ? '<span class="tag" style="font-size:7px;margin-left:4px;background:var(--purple-soft);color:var(--purple)">For Publication</span>' : '';
-    var visIcon = r.visibility === 'public' ? '&#9673; Public' : '&#9678; Internal';
-    return '<div class="card" style="margin-bottom:8px">'
-      + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + statusLabel + '</span>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + r.id + ' &middot; ' + r.date + '</span></div>'
-      + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.title + '</div>'
-      + '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">' + r.text + '</div>'
-      + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' + circlesHtml
-      + '<span style="font-size:9px;color:var(--text-tertiary);margin-left:auto">' + visIcon + '</span>' + pubBadge
-      + '</div></div>';
-  }).join('');
-  var total = resolutionsData.length;
-  var enacted = resolutionsData.filter(function(r) { return r.status === 'enacted'; }).length;
-  var pending = resolutionsData.filter(function(r) { return r.status === 'pending'; }).length;
-  var totalEl = document.getElementById('res-total');
-  var enactedEl = document.getElementById('res-enacted-count');
-  var pendingEl = document.getElementById('res-pending-count');
-  if (totalEl) totalEl.textContent = total;
-  if (enactedEl) enactedEl.textContent = enacted;
-  if (pendingEl) pendingEl.textContent = pending;
-}
-
-function filterResolutions(filter, btn) {
-  document.querySelectorAll('#resolutions-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  renderResolutionsList(filter);
-}
-
-// ─── Governance Tabs ───
-function switchGovTab(idx, el) {
-  document.querySelectorAll('#gov-tab-bar .settings-tab').forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
-  document.querySelectorAll('.gov-tab-content').forEach(function(c) { c.style.display = 'none'; });
-  document.getElementById('gov-tab-' + idx).style.display = '';
-}
-
-// ─── Integrity Records ───
-var integrityData = [];
-function renderIntegrityList(filter) {
-  var list = document.getElementById('integrity-list');
-  if (!list) return;
-  filter = filter || 'all';
-  var filtered = integrityData.filter(function(r) { return filter === 'all' || r.type === filter; });
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No integrity records match this filter.</div></div>';
-    return;
-  }
-  var typeColors = { 'vSTF': 'var(--purple)', 'aSTF': 'var(--red)', 'jSTF': 'var(--teal)', 'p-aSTF': 'var(--gold)' };
-  var verdictColors = { 'Approved': 'var(--green)', 'Passed': 'var(--green)', 'Exonerated': 'var(--green)', 'Healthy': 'var(--green)', 'Failed': 'var(--red)', 'Denied': 'var(--red)', 'Guilty': 'var(--red)', 'Probation': 'var(--amber)' };
-  list.innerHTML = filtered.map(function(r) {
-    var tc = typeColors[r.type] || 'var(--text-secondary)';
-    var vc = verdictColors[r.verdict] || 'var(--text-secondary)';
-    return '<div class="card" style="margin-bottom:8px">'
-      + '<div class="flex justify-between mb-2"><div class="flex gap-1" style="align-items:center"><span class="tag" style="font-size:8px;background:' + tc + '18;color:' + tc + ';border:1px solid ' + tc + '44">' + r.type + '</span><span class="tag" style="font-size:8px;background:' + vc + '18;color:' + vc + ';border:1px solid ' + vc + '44">' + r.verdict + '</span></div>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + r.id + ' &middot; ' + r.date + '</span></div>'
-      + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.subject + '</div>'
-      + '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px">' + r.purpose + ' &middot; <span class="tag tag-purple" style="font-size:8px">' + r.circle + '</span></div>'
-      + '<div style="font-size:12px;color:var(--text-secondary);line-height:1.4">' + r.text + '</div>'
-      + '</div>';
-  }).join('');
-  var total = integrityData.length;
-  var approved = integrityData.filter(function(r) { return ['Approved','Passed','Exonerated','Healthy'].indexOf(r.verdict) !== -1; }).length;
-  var denied = integrityData.filter(function(r) { return ['Failed','Denied','Guilty'].indexOf(r.verdict) !== -1; }).length;
-  var totalEl = document.getElementById('ir-total');
-  var approvedEl = document.getElementById('ir-approved');
-  var deniedEl = document.getElementById('ir-denied');
-  if (totalEl) totalEl.textContent = total;
-  if (approvedEl) approvedEl.textContent = approved;
-  if (deniedEl) deniedEl.textContent = denied;
-}
-function filterIntegrity(filter, btn) {
-  document.querySelectorAll('#integrity-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  renderIntegrityList(filter);
-}
-
-// ─── Governance Events (Circles & Stewardship) ───
-var eventsData = [];
-function renderEventsList(filter) {
-  var list = document.getElementById('events-list');
-  if (!list) return;
-  filter = filter || 'all';
-  var filtered = eventsData.filter(function(e) {
-    if (filter === 'all') return true;
-    if (filter === 'circle') return e.type.indexOf('circle') !== -1 || e.type === 'member-joined';
-    if (filter === 'steward') return e.type.indexOf('steward') !== -1;
-    return true;
-  });
-  if (filtered.length === 0) {
-    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No events match this filter.</div></div>';
-    return;
-  }
-  var typeIcons = {
-    'circle-created': '<i class="fa-solid fa-circle-plus"></i>', 'circle-suggested': '<i class="fa-regular fa-circle"></i>', 'circle-archived': '<i class="fa-solid fa-circle-minus"></i>',
-    'steward-confirmed': '<i class="fa-solid fa-star"></i>', 'steward-resigned': '<i class="fa-regular fa-star"></i>',
-    'member-joined': '<i class="fa-solid fa-user-plus"></i>'
-  };
-  var typeLabels = {
-    'circle-created': 'Circle Created', 'circle-suggested': 'Circle Suggested', 'circle-archived': 'Circle Archived',
-    'steward-confirmed': 'Steward Confirmed', 'steward-resigned': 'Steward Resigned',
-    'member-joined': 'Member Joined'
-  };
-  var typeColors = {
-    'circle-created': 'var(--green)', 'circle-suggested': 'var(--gold)', 'circle-archived': 'var(--text-tertiary)',
-    'steward-confirmed': 'var(--purple)', 'steward-resigned': 'var(--amber)',
-    'member-joined': 'var(--teal)'
-  };
-  list.innerHTML = filtered.map(function(e) {
-    var ic = typeColors[e.type] || 'var(--text-secondary)';
-    var icon = typeIcons[e.type] || '&#8226;';
-    var label = typeLabels[e.type] || e.type;
-    return '<div class="card" style="margin-bottom:8px">'
-      + '<div class="flex justify-between mb-2"><div class="flex gap-1" style="align-items:center"><span style="font-size:14px;color:' + ic + '">' + icon + '</span><span class="tag" style="font-size:8px;background:' + ic + '18;color:' + ic + ';border:1px solid ' + ic + '44">' + label + '</span></div>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + e.id + ' &middot; ' + e.date + '</span></div>'
-      + '<div style="font-size:13px;color:var(--text);margin-bottom:4px">' + e.text + '</div>'
-      + '<div class="flex gap-1" style="align-items:center"><span class="tag tag-purple" style="font-size:8px">' + e.circle + '</span>'
-      + (e.participant ? '<span style="font-size:10px;color:var(--text-tertiary)"> &middot; ' + e.participant + '</span>' : '')
-      + '</div></div>';
-  }).join('');
-  var circles = MOCK.circles || [];
-  var active = circles.filter(function(c) { return c.status === 'Active'; }).length;
-  var suggested = circles.filter(function(c) { return c.status === 'Suggested'; }).length;
-  var archived = circles.filter(function(c) { return c.status === 'Archived'; }).length;
-  var geActive = document.getElementById('ge-active');
-  var geSuggested = document.getElementById('ge-suggested');
-  var geArchived = document.getElementById('ge-archived');
-  if (geActive) geActive.textContent = active;
-  if (geSuggested) geSuggested.textContent = suggested;
-  if (geArchived) geArchived.textContent = archived;
-}
-function filterEvents(filter, btn) {
-  document.querySelectorAll('#events-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
-  if (btn) btn.classList.add('active');
-  renderEventsList(filter);
-}
-
-// ─── Observatory Publications ───
-function renderObservatoryPublications(filter) {
-  var el = document.getElementById('observatory-publications-list');
-  if (!el) return;
-  var pubs = [
-    { title: 'Why East Africa Needs a Coordinated Space Debris Policy', type: 'essay', author: 'Okello R., Kimani A.', date: 'Jun 2026', domains: ['Space Law', 'Policy'] },
-    { title: 'Understanding the Outer Space Treaty — A Plain Language Guide', type: 'guide', author: 'Akello Jane', date: 'May 2026', domains: ['Space Law'] },
-    { title: 'AfricaSpace 2026 — What the Summit Means for East Africa', type: 'report', author: 'Solis Observatory', date: 'Apr 2026', domains: ['Policy', 'Education'] },
-    { title: 'Orbital Mechanics 101', type: 'guide', author: 'Mensah Naa', date: 'Mar 2026', domains: ['Astrophysics'] },
-    { title: 'Remote Sensing Data Handbook', type: 'guide', author: 'Mwenda Thomas', date: 'Feb 2026', domains: ['Remote Sensing'] }
-  ];
-  resolutionsData.filter(function(r) { return r.status === 'enacted' && r.forPublication; }).forEach(function(r) {
-    pubs.push({ title: r.title, type: 'resolution', author: 'Governance', date: r.date, domains: r.circles });
-  });
-  if (filter && filter !== 'all') {
-    pubs = pubs.filter(function(p) { return p.type === filter; });
-  }
-  if (pubs.length === 0) {
-    el.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No publications found.</div></div>';
-    return;
-  }
-  el.innerHTML = pubs.map(function(p) {
-    var typeColors = { essay: 'tag-blue', guide: 'tag-green', report: 'tag-amber', resolution: 'tag-purple' };
-    var typeLabels = { essay: 'Essay', guide: 'Guide', report: 'Report', resolution: 'Resolution' };
-    var domainsHtml = (p.domains || []).map(function(d) { return '<span class="tag tag-default" style="font-size:8px">' + d + '</span>'; }).join(' ');
-    return '<div class="card" style="margin-bottom:8px">'
-      + '<div class="flex justify-between mb-1"><span style="font-size:13px;font-weight:500;color:var(--text)">' + p.title + '</span>'
-      + '<span class="tag ' + (typeColors[p.type] || 'tag-default') + '" style="font-size:8px">' + (typeLabels[p.type] || p.type) + '</span></div>'
-      + '<div style="font-size:11px;color:var(--text-tertiary)">' + p.author + ' &middot; ' + p.date + '</div>'
-      + '<div style="margin-top:6px;display:flex;gap:4px">' + domainsHtml + '</div></div>';
-  }).join('');
-}
-
-function filterPubType(type, btn) {
-  document.querySelectorAll('#view-observatory-publications .btn').forEach(function(b) { b.classList.remove('btn-primary'); });
-  if (btn) btn.classList.add('btn-primary');
-  renderObservatoryPublications(type);
-}
-
-// ─── Member Roster Modal ───
-var membersData = [];
-var reasonLabels = {};
-var activeMembers = [];
-var formerMembers = [];
-var successionCandidates = [];
-
-function openMembersModal() {
-  var circleId = 'space-law';
-  var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] || {};
-  successionCandidates = (MOCK.circleApplications || []).filter(function(a){ return a.circleId === circleId && a.status === 'pending'; });
-  var mandateText = 'Mandate: ' + (circle.domains || []).join(', ');
-  var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-    '<div><span class="page-title" style="font-size:16px">' + (circle.name || 'Circle') + ' · Co-Stewards</span>' +
-    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · ' + successionCandidates.length + ' in succession queue · ' + mandateText + '</div></div>' +
-    '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">' + mandateText + '</span></div>' +
-    '<div class="mm-layout">' +
-      '<div class="mm-list" id="mm-list"></div>' +
-      '<div class="mm-detail" id="mm-detail"></div>' +
-    '</div>';
-
-  openModal(html, { size: 'full', closeBtn: true, onOpen: function() {
-    renderMemberList();
-  }});
-}
-
-function renderMemberList() {
-  var list = document.getElementById('mm-list');
-  if (!list) return;
-
-  var activeHtml = activeMembers.map(function(m, i) {
-    var dot = m.status === 'candidate' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
-    var label = m.status === 'candidate' ? 'Candidate' : '';
-    var lastOrDot = m.status === 'candidate' ? (dot + ' ' + label) : m.lastActive;
-    return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '">' +
-      '<div class="mm-avatar" style="background:' + m.color + '">' + m.initials + '</div>' +
-      '<div class="mm-info"><div class="mm-name">' + m.name + '</div>' +
-      '<div class="mm-meta">' + m.topDomain + ' · ' + lastOrDot + '</div></div>' +
-      '<div class="mm-ws">' + m.ws.toLocaleString() + '</div>' +
-    '</div>';
-  }).join('');
-
-  var formerHtml = formerMembers.length ? formerMembers.map(function(m) {
-    return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '" style="opacity:0.55">' +
-      '<div class="mm-avatar" style="background:' + m.color + ';font-size:10px">' + m.initials + '</div>' +
-      '<div class="mm-info"><div class="mm-name" style="text-decoration:line-through">' + m.name + '</div>' +
-      '<div class="mm-meta">' + (reasonLabels[m.leftReason] || 'Left') + ' · ' + m.left + '</div></div>' +
-    '</div>';
-  }).join('') : '';
-
-  var successHtml = successionCandidates.length ? successionCandidates.map(function(a) {
-    return '<div class="mm-card" onclick="selectSuccessionCandidate(\'' + a.id + '\')" id="mm-card-' + a.id + '">' +
-      '<div class="mm-avatar" style="background:var(--amber-soft);color:var(--amber)">' + a.initials + '</div>' +
-      '<div class="mm-info"><div class="mm-name">' + a.applicant + '</div>' +
-      '<div class="mm-meta">Applied ' + a.appliedDate + ' · ' + (a.motivation || '').substring(0, 40) + '…</div></div>' +
-      (a.queuePosition ? '<div class="mm-ws">#' + a.queuePosition + '</div>' : '') +
-    '</div>';
-  }).join('') : '';
-
-  var activeSection = '<div class="mm-section-title" style="margin:0 0 4px 4px">Active (' + activeMembers.length + ')</div>' + activeHtml;
-  var successSection = successHtml ? '<div class="mm-section-title" style="margin:12px 0 4px 4px">Succession Queue (' + successionCandidates.length + ')</div>' + successHtml : '';
-  var formerSection = formerHtml ? '<div class="mm-section-title" style="margin:12px 0 4px 4px">Former (' + formerMembers.length + ')</div>' + formerHtml : '';
-
-  list.innerHTML = activeSection + successSection + formerSection;
-  if (activeMembers.length) selectMember(activeMembers[0].id);
-  else if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
-}
-
-function selectMember(id) {
-  document.querySelectorAll('.mm-card').forEach(function(c){c.classList.remove('active')});
-  var card = document.getElementById('mm-card-' + id);
-  if (card) card.classList.add('active');
-  renderMemberDetail(id);
-}
-
-function selectSuccessionCandidate(appId) {
-  document.querySelectorAll('.mm-card').forEach(function(c){c.classList.remove('active')});
-  var card = document.getElementById('mm-card-' + appId);
-  if (card) card.classList.add('active');
-  renderSuccessionCandidateDetail(appId);
-}
-
-function renderSuccessionCandidateDetail(appId) {
-  var detail = document.getElementById('mm-detail');
-  if (!detail) return;
-  var a = (MOCK.circleApplications || []).filter(function(x){return x.id===appId})[0];
-  if (!a) return;
-  var isSelf = MOCK.currentUser && a.applicant === MOCK.currentUser.name;
-  detail.innerHTML =
-    '<div>' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' + a.initials + '</div>' +
-        '<div><div style="font-size:15px;font-weight:600;color:var(--text)">' + a.applicant + '</div>' +
-        '<div style="font-size:11px;color:var(--text-tertiary)">Applied ' + a.appliedDate + '</div></div>' +
-      '</div>' +
-      '<div class="mm-section-title">Motivation</div>' +
-      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation || '') + '</div>' +
-      (a.notes ? '<div class="mm-section-title">Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
-      (isSelf ? '<button onclick="withdrawFromQueue(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Withdraw</button>' : '') +
-    '</div>';
-}
-
-function withdrawFromQueue(appId) {
-  var apps = MOCK.circleApplications || [];
-  var a = apps.find(function(x){return x.id===appId;});
-  if (!a) return;
-  if (!confirm('Withdraw your application to join the circle?')) return;
-  a.status = 'withdrawn';
-  successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
-  renderMemberList();
-}
-
-function renderMemberDetail(id) {
-  var detail = document.getElementById('mm-detail');
-  if (!detail) return;
-  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
-  var m = membersData.filter(function(d){return d.id===id})[0];
-  if (!m) return;
-
-  var isFormer = m.status === 'former';
-  var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
-    (m.status === 'candidate' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Candidate</span>' : '');
-  var primaryMandate = (rosterCircle.mandate && rosterCircle.mandate.primary) || [];
-  var secondaryMandate = (rosterCircle.mandate && rosterCircle.mandate.secondary) || [];
-  var desiredWs = rosterCircle.desiredWs || {};
-  var period = isFormer ? ('<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Served ' + m.joined + ' – ' + m.left + (m.leftReason ? ' · <span style="color:var(--amber)">' + (reasonLabels[m.leftReason] || m.leftReason) + '</span>' : '') + '</div>') : '';
-
-  var mandateOverlap = m.domains.filter(function(d){return primaryMandate.indexOf(d)>-1}).length;
-  var mandateChips = m.domains.map(function(d) {
-    var inMandate = primaryMandate.indexOf(d) > -1;
-    return '<span style="background:' + (inMandate ? 'var(--gold-soft)' : 'var(--surface-raised)') + ';color:' + (inMandate ? 'var(--gold)' : 'var(--text-tertiary)') + ';padding:2px 8px;border-radius:999px;font-size:10px;font-weight:500">' + d + '</span>';
-  }).join('');
-
-  var memberWs = {}; // per-domain Ws lookup from member data
-  m.domains.forEach(function(d,i){ memberWs[d] = m.domainWs ? m.domainWs[i] : m.ws; });
-
-  var competenceBars = primaryMandate.map(function(domain) {
-    var desired = desiredWs[domain] || 1000;
-    var actual = memberWs[domain] || 0;
-    var pct = Math.min(100, Math.round(actual / desired * 100));
-    var over = actual >= desired;
-    return '<div class="comp-bar" style="padding:3px 0"><span class="comp-label" style="font-size:9px;min-width:80px">' + domain + '</span><div class="comp-track" style="height:12px"><div class="comp-desired" style="width:100%"></div><div class="comp-actual' + (over?' over':'') + '" style="width:' + pct + '%;top:1px;height:calc(100% - 2px)"></div></div><span class="comp-val" style="min-width:70px;font-size:8px"><span style="color:var(--text-tertiary)">' + (actual||'—') + '</span> / <span style="color:var(--gold)">' + desired + '</span></span></div>';
-  }).join('');
-
-  detail.innerHTML =
-    '<div><div style="display:flex;align-items:center;margin-bottom:2px">' +
-      '<span style="font-size:16px;font-weight:600;color:var(--text)">' + m.name + '</span>' + statusBadge +
-    '</div>' + period +
-    '<div class="mm-stat-row" style="margin-top:12px">' +
-      (!isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + mandateOverlap + '/' + m.domains.length + '</div><div class="mm-stat-label">Primary Overlap</div></div>' : '') +
-      '<div class="mm-stat"><div class="mm-stat-val">' + m.domains.length + '</div><div class="mm-stat-label">Domains</div></div>' +
-      '<div class="mm-stat"><div class="mm-stat-val">' + m.joined + '</div><div class="mm-stat-label">Joined</div></div>' +
-      (isFormer ? '<div class="mm-stat"><div class="mm-stat-val">' + m.left + '</div><div class="mm-stat-label">Left</div></div>' : '<div class="mm-stat"><div class="mm-stat-val">' + m.lastActive + '</div><div class="mm-stat-label">Last Active</div></div>') +
-    '</div>' +
-    '<div class="mm-section-title">Domains</div>' +
-    '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">' + mandateChips + '</div>' +
-    (!isFormer ? '<div class="mm-section-title">Competence (Primary Mandate)</div><div style="margin-bottom:14px">' + competenceBars + '</div>' : '') +
-    (isFormer ? '<div class="mm-section-title">Departure</div><div class="mm-timeline">' +
-        '<div class="mm-event mm-event-join"><div>Joined ' + (rosterCircle.name || 'the Circle') + '</div><div class="mm-event-date">' + m.joined + '</div></div>' +
-        '<div class="mm-event mm-event-leave"><div>' + (reasonLabels[m.leftReason] || 'Left') + '</div><div class="mm-event-date">' + m.left + '</div></div>' +
-      '</div>' :
-      '<div class="mm-section-title">History</div>' +
-      '<div class="mm-timeline">' +
-        '<div class="mm-event mm-event-join"><div>Joined ' + (rosterCircle.name || 'the Circle') + '</div><div class="mm-event-date">' + m.joined + '</div></div>' +
-        '<div class="mm-event"><div>Currently serving</div><div class="mm-event-date">Present</div></div>' +
-      '</div>');
-}
-
-function switchSettingsTab(idx, el) {
-  document.querySelectorAll('.settings-tab').forEach(function(t) { t.classList.remove('active'); });
-  el.classList.add('active');
-  document.querySelectorAll('.settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
-  document.getElementById('settings-tab-' + idx).style.display = '';
-}
-
-function submitSystemProposal() {
-  closeSettingsModal();
-  alert('System settings submitted as a system-bound proposal to this deliberation cell.');
-}
-
-function toggleImplementingCircle(el) {
-  var isActive = el.classList.contains('active');
-  var check = el.querySelector('span');
-  if (isActive) {
-    el.classList.remove('active');
-    el.style.background = 'var(--surface-raised)';
-    el.style.color = 'var(--text-tertiary)';
-    el.style.borderColor = 'var(--border)';
-    if (check) { check.style.opacity = '.3'; }
-  } else {
-    el.classList.add('active');
-    el.style.background = 'var(--green-soft)';
-    el.style.color = 'var(--green)';
-    el.style.borderColor = 'var(--green-border)';
-    if (check) { check.style.opacity = '1'; }
-  }
-}
-
-function escapeHtml(s) {
-  var d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-var esc = escapeHtml;
-
-function isStewardOfCircle(userId, circleId) {
-  if (!MOCK || !MOCK.circles || !MOCK.currentUser) return false;
-  var circle = MOCK.circles.find(function(c) { return c.id === circleId; });
-  if (!circle || !circle.roster || !circle.roster.active) return false;
-  return circle.roster.active.some(function(m) { return m.id === userId; });
-}
-
-function isStewardOfAnyCircle() {
-  if (!MOCK || !MOCK.circles) return false;
-  return MOCK.circles.some(function(c) {
-    return c.status === 'Active' && c.roster && c.roster.active &&
-      c.roster.active.some(function(m) { return m.id === MOCK.currentUser.id; });
-  });
-}
-
-window.addEventListener('hashchange', function() {
-  var key = window.location.hash.replace('#', '') || 'personal';
-  if (views[key]) nav(key);
-});
-loadMockData().then(function() {
-  // ─── Derive all view-state from MOCK (single source of truth) ───
-  var spaceLawCircle = (MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
-  var roster = spaceLawCircle.roster || { active: [], former: [] };
-  membersData = roster.active.concat(roster.former);
-  reasonLabels = MOCK.exitReasonLabels || {};
-  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='candidate'});
-  formerMembers = membersData.filter(function(m){return m.status==='former'});
-
-  var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
-  delibResolutions = (delibCell.draftResolutions || []).map(function(r){ return r; });
-  // Ensure domainShares and aiDraftMeta exist on existing resolutions
-  delibResolutions.forEach(function(r) {
-    if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
-    if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
-  });
-  updateResolutionSlot();
-
-  REG_DOMAINS = (MOCK.registration && MOCK.registration.domains) || [];
-  REG_ELO_MAP = (MOCK.registration && MOCK.registration.eloMap) || {};
-  REG_KNOWLEDGE_LEVELS = (MOCK.registration && MOCK.registration.knowledgeLevels) || [];
-  REG_EXPERIENTIAL_LEVELS = (MOCK.registration && MOCK.registration.experientialLevels) || [];
-
-  DM_IDS = Object.keys(MOCK.domains || {});
-  DM_META = {};
-  DM_IDS.forEach(function(id){
-    var d = MOCK.domains[id];
-    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle, type: d.type || 'knowledge', taxonomy: d.taxonomy || '' };
-  });
-  renderDefaultInterestRows();
-  dmReinit();
-
-  var participantsGrid = document.getElementById('participants-grid');
-  if (participantsGrid) participantsGrid.innerHTML = renderParticipantCards();
-  var inboxList = document.getElementById('inbox-list');
-  if (inboxList) inboxList.innerHTML = renderInboxItems();
-  var threadsFeed = document.getElementById('threads-feed');
-  if (threadsFeed) threadsFeed.innerHTML = renderDiscussionThreads();
-  var circlesGrid = document.getElementById('circles-grid');
-  if (circlesGrid) circlesGrid.innerHTML = renderCircleCards();
-  var projectsBody = document.getElementById('projects-body');
-  if (projectsBody) projectsBody.innerHTML = renderProjectRows();
-  var cellsGrid = document.getElementById('cells-grid');
-  if (cellsGrid) cellsGrid.innerHTML = renderCellCards();
-  var stfBody = document.getElementById('stf-body');
-  if (stfBody) stfBody.innerHTML = renderSTFRows();
-  layoutParticipantCards();
-  renderResolutionsList();
-  integrityData = MOCK.integrityRecords || [];
-  eventsData = MOCK.governanceEvents || [];
-  renderIntegrityList();
-  renderEventsList();
-  renderObservatoryPublications();
-  orgs = MOCK.organisations || [];
-  renderOrganisations();
-  var initial = window.location.hash.replace('#', '') || 'personal';
-  nav(views[initial] ? initial : 'personal');
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// REGISTRATION
-// ─────────────────────────────────────────────────────────────────────────────
-var regStep=1;
-var regStepLabels={1:'About You',2:'Your Background',3:'Your Domains'};
-var regIsEdit=false;
-
-function openParticipantModal(name,bio,location,joined,avatar){
-  document.getElementById('pd-name').textContent=name||'Okello Robert';
-  document.getElementById('pd-bio').textContent=bio||'Space law researcher focused on African space policy frameworks.';
-  document.getElementById('pd-meta').textContent=(location||'Kampala, Uganda')+' · Joined '+(joined||'Mar 2025');
-  if(avatar) document.getElementById('pd-avatar').textContent=avatar;
-  document.getElementById('pd-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-}
-function closeParticipantModal(){
-  document.getElementById('pd-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-
-function openRegModal(editMode){
-  regIsEdit=!!editMode;
-  document.getElementById('reg-modal').classList.add('active');
-  document.body.classList.add('modal-open');
-  var titleEl=document.querySelector('.reg-modal-title');
-  if(regIsEdit){
-    titleEl.textContent='Edit Profile';
-    regPrefill();
-  }else{
-    titleEl.textContent='Join the Commons';
-  }
-  regResetSteps();
-}
-function closeRegModal(){
-  document.getElementById('reg-modal').classList.remove('active');
-  document.body.classList.remove('modal-open');
-}
-function regPrefill(){
-  var n=document.getElementById('reg-name');
-  var l=document.getElementById('reg-location');
-  var b=document.getElementById('reg-bio');
-  var e=document.getElementById('reg-essay');
-  var profile=(MOCK && MOCK.currentUser) || {};
-  if(n) n.value=profile.name||'';
-  if(l) l.value=profile.location||'';
-  if(b) b.value=profile.bio||'';
-  if(e) e.value=profile.essay||'';
-}
-document.getElementById('reg-modal').addEventListener('click',function(e){
-  if(e.target===this) closeRegModal();
-});
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'&&document.getElementById('reg-modal').classList.contains('active')) closeRegModal();
-  if(e.key==='Escape'&&document.getElementById('pd-modal').classList.contains('active')) closeParticipantModal();
-});
-function regResetSteps(){
-  regStep=1;
-  document.getElementById('reg-s1').style.display='block';
-  document.getElementById('reg-s2').style.display='none';
-  document.getElementById('reg-s3').style.display='none';
-  document.getElementById('reg-p1').className='reg-pip active';
-  document.getElementById('reg-p2').className='reg-pip';
-  document.getElementById('reg-p3').className='reg-pip';
-  document.getElementById('reg-step-num').textContent='1';
-  document.getElementById('reg-step-label').textContent=regStepLabels[1];
-}
-
-// Domain registry — existing domains with types (from MOCK.registration.domains)
-var REG_DOMAINS=[];
-
-function regNext(step){
-  document.getElementById('reg-s'+regStep).style.display='none';
-  document.getElementById('reg-s'+step).style.display='block';
-  document.getElementById('reg-p'+regStep).classList.remove('active');
-  document.getElementById('reg-p'+regStep).classList.add('done');
-  document.getElementById('reg-p'+step).classList.add('active');
-  document.getElementById('reg-step-num').textContent=step;
-  document.getElementById('reg-step-label').textContent=regStepLabels[step];
-  regStep=step;
-  if(step===3) regAutofillCompetences();
-}
-
-function regSubmit(){
-  closeRegModal();
-  if(regIsEdit){
-    alert('Profile updated! Competences will go through vSTF verification.');
-  }else{
-    alert('Profile submitted! Competences will go through vSTF verification. Welcome to the Commons.');
+  if (!check.ok) { toast(check.reason,'error'); return; }
+    toast('You have already confirmed this redraft.','warn');
+    toast('Confirmation recorded (' + got + '/' + needed + '). ' + (needed - got) + ' more participants must confirm before redraft proceeds.','success');
+    toast('Resolution #' + (delibSelectedRes + 1) + ' submitted to aSTF.','success');
+    toast('Cell crystallised. Resolution recorded.','success');
+  toast('Circle settings submitted as a proposal to the Circle cell.','success');
+  toast('Organisation settings for ' + id + ' submitted as a proposal.','success');
+  toast('System settings submitted as a system-bound proposal to this deliberation cell.','success');
+    toast('Profile updated! Competences will go through vSTF verification.','success');
+    toast('Profile submitted! Competences will go through vSTF verification. Welcome to the Commons.','success');
   }
   nav('personal');
 }
@@ -4464,7 +3444,7 @@ function submitProposal(){
     var term=document.getElementById('propose-circle-term').value;
     var expiry=document.getElementById('propose-circle-expiry').value;
     var intent=document.getElementById('propose-circle-intent').value;
-    if(!name){alert('Please enter a circle name.');return;}
+    if(!name){toast('Please enter a circle name.','warn');return;}
     var cellId='cell-'+Date.now().toString(36);
     var delibId='cell-'+Date.now().toString(36)+'d';
     MOCK.cells.push({
@@ -4478,7 +3458,7 @@ function submitProposal(){
     });
     cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert('Circle Formation proposal "'+name+'" submitted! Deliberation cell created.');
+     toast('Circle Formation proposal "'+name+'" submitted! Deliberation cell created.','success');
   } else if(type==='org'){
     var name=document.getElementById('propose-org-name').value;
     var acronym=document.getElementById('propose-org-acronym').value;
@@ -4487,7 +3467,7 @@ function submitProposal(){
     var summary=document.getElementById('propose-org-summary').value;
     var website=document.getElementById('propose-org-website').value;
     var intent=document.getElementById('propose-org-intent').value;
-    if(!name){alert('Please enter an organisation name.');return;}
+    if(!name){toast('Please enter an organisation name.','warn');return;}
     if(!acronym){acronym=extractAcronym(name);if(acronym)document.getElementById('propose-org-acronym').value=acronym;}
     var delibId='cell-'+Date.now().toString(36);
     MOCK.cells.push({
@@ -4501,7 +3481,7 @@ function submitProposal(){
     });
     cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert('Organisation Affiliation proposal "'+name+'" submitted! Deliberation cell created.');
+     toast('Organisation Affiliation proposal "'+name+'" submitted! Deliberation cell created.','success');
   } else if(type==='project'){
     var title=document.getElementById('propose-proj-title').value;
     var desc=document.getElementById('propose-proj-desc').value;
@@ -4512,7 +3492,7 @@ function submitProposal(){
     var openApply=document.getElementById('propose-proj-open').checked;
     var team=document.getElementById('propose-proj-team').value;
     var circle=document.getElementById('propose-proj-circle').value;
-    if(!title){alert('Please enter a project title.');return;}
+    if(!title){toast('Please enter a project title.','warn');return;}
     var fileInputs=document.querySelectorAll('#propose-proj-files input[type="file"]');
     var urlInputs=document.querySelectorAll('#propose-proj-urls input');
     var files=[];fileInputs.forEach(function(f){if(f.files&&f.files[0])files.push(f.files[0].name);});
@@ -4543,12 +3523,12 @@ function submitProposal(){
     });
     cellsById[cellId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert('Project "'+title+'" submitted! Deliberation cell created. Project cell will activate after approval.');
+     toast('Project "'+title+'" submitted! Deliberation cell created. Project cell will activate after approval.','success');
   } else {
     var title=document.getElementById('propose-title').value;
-    if(!title){alert('Please enter a title.');return;}
+    if(!title){toast('Please enter a title.','warn');return;}
     closeModal();
-    alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
+     toast('Proposal "'+title+'" submitted! It will appear in Discussions after review.','success');
   }
 }
 
@@ -4609,7 +3589,7 @@ function modalCuriosityMatch(){
 
 function submitThreadForPublication() {
   if (!isStewardOfAnyCircle()) {
-    alert('Only circle stewards can submit threads for publication.');
+     toast('Only circle stewards can submit threads for publication.','error');
     return;
   }
   var titleEl = document.getElementById('td-title');
@@ -5534,7 +4514,7 @@ function selectInboxItem(itemId) {
   var icon = typeIcons[item.type] || '<i class="fa-solid fa-circle"></i>';
   var color = typeColors[item.type] || 'var(--text-secondary)';
 
-  var html = '<div style="margin-bottom:16px">';
+  var html = '<div class="inbox-back" onclick="backToInboxList()"><i class="fa-solid fa-arrow-left"></i> Back to Inbox</div><div style="margin-bottom:16px">';
   html += '<div class="flex items-center gap-2 mb-3"><span style="color:' + color + ';font-size:16px">' + icon + '</span><span class="tag" style="font-size:9px;background:' + color + '18;color:' + color + ';border:1px solid ' + color + '44">' + esc(item.type) + '</span></div>';
   html += '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">' + esc(item.title) + '</div>';
   html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">' + esc(item.time) + '</div>';
@@ -5608,7 +4588,7 @@ function closeXstfCreateModal() {
 
 function xstfCreateNext() {
   var title = document.getElementById('xstf-create-title').value.trim();
-  if (!title) { alert('Please enter a task title.'); return; }
+  if (!title) { toast('Please enter a task title.','warn'); return; }
   document.getElementById('xstf-create-step1').style.display = 'none';
   document.getElementById('xstf-create-step2').style.display = '';
   generateXstfCandidates();
@@ -5672,7 +4652,7 @@ function generateXstfCandidates() {
 
 function xstfCreateSubmit() {
   var checked = document.querySelectorAll('.xstf-cand-check:checked');
-  if (checked.length === 0) { alert('Please select at least one team member.'); return; }
+  if (checked.length === 0) { toast('Please select at least one team member.','warn'); return; }
   var invitees = [];
   checked.forEach(function(cb) {
     invitees.push({ name: cb.dataset.name, initials: cb.dataset.initials });
@@ -5723,7 +4703,7 @@ function xstfCreateSubmit() {
   });
 
   closeXstfCreateModal();
-  alert('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.');
+  toast('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.','success');
 }
 
 // -- Circle Apply --
@@ -5745,7 +4725,7 @@ function submitCircleApplication() {
   var modal = document.getElementById('circle-apply-modal');
   var circleId = modal._circleId;
   var motivation = document.getElementById('apply-motivation').value.trim();
-  if (!motivation) { alert('Please describe your motivation.'); return; }
+  if (!motivation) { toast('Please describe your motivation.','warn'); return; }
   var circle = MOCK.circles.find(function(c) { return c.name === document.getElementById('apply-circle-name').textContent; });
   var apps = MOCK.circleApplications || [];
   apps.push({
@@ -5762,7 +4742,7 @@ function submitCircleApplication() {
   });
   MOCK.circleApplications = apps;
   modal.classList.remove('active');
-  alert('Added to the succession queue! You are #' + apps.length + ' in position.');
+  toast('Added to the succession queue! You are #' + apps.length + ' in position.','success');
 }
 
 // -- xSTF Candidate Invite --
@@ -5792,7 +4772,7 @@ function acceptXstfInvite() {
   var cand = MOCK.stfCandidates.find(function(c) { return c.id === candId; });
   if (cand) cand.status = 'accepted';
   modal.classList.remove('active');
-  alert('You have accepted the xSTF invitation! You will be added to the execution team.');
+  toast('You have accepted the xSTF invitation! You will be added to the execution team.','success');
 }
 
 function declineXstfInvite() {
@@ -5817,7 +4797,7 @@ function submitProjectApplication() {
   var cellId = modal._cellId;
   var motivation = document.getElementById('apply-project-motivation').value.trim();
   var role = document.getElementById('apply-project-role').value.trim();
-  if (!motivation || !role) { alert('Please fill in all fields.'); return; }
+  if (!motivation || !role) { toast('Please fill in all fields.','warn'); return; }
   MOCK.projectApplications = MOCK.projectApplications || [];
   MOCK.projectApplications.push({
     id: 'papp-' + Date.now(),
@@ -5831,7 +4811,7 @@ function submitProjectApplication() {
     proposedRole: role
   });
   modal.classList.remove('active');
-  alert('Application submitted! The project lead will review your application.');
+  toast('Application submitted! The project lead will review your application.','success');
 }
 
 // ═══ TASK MANAGEMENT ═══
@@ -6387,12 +5367,61 @@ function renderDelibCircles(cell, container) {
 var currentNav = 'personal';
 var _dmInited=false;
 var _origNav=nav;
-nav=function(key){
+ nav=function(key){
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
-};
+  if(key==='commons'){var tf=document.getElementById('threads-feed');if(tf)tf.innerHTML=renderDiscussionThreads();}
+ };
+
+function backToInboxList() {
+  _inboxSelected = null;
+  document.getElementById('inbox-detail').innerHTML = '<div style="padding:20px;text-align:center;font-size:13px;color:var(--text-tertiary)">Select an item from the list.</div>';
+  renderInboxList(_inboxFilter || 'all');
+}
+
+// ─── Toast Notification System ───
+function toast(msg, type) {
+  var container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  var el = document.createElement('div');
+  el.className = 'toast' + (type ? ' toast-' + type : '');
+  el.textContent = msg;
+  el.onclick = function() { el.classList.add('fade-out'); setTimeout(function(){ el.remove(); }, 200); };
+  container.appendChild(el);
+  setTimeout(function() {
+    el.classList.add('fade-out');
+    setTimeout(function(){ el.remove(); }, 200);
+  }, 3000);
+}
+
+// ─── Global Escape handler for all modals ───
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  // Dynamic modals (created by openModal)
+  var dyn = document.querySelector('.modal-overlay.active');
+  if (dyn) { dyn.classList.remove('active'); document.body.classList.remove('modal-open'); return; }
+  // Static modals
+  [
+    'reg-modal', 'pd-modal', 'resolution-modal', 'settings-modal',
+    'circle-settings-modal', 'org-settings-modal', 'org-detail-modal',
+    'task-modal', 'xstf-create-modal', 'proposal-modal'
+  ].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.classList.contains('active')) {
+      el.classList.remove('active');
+      document.body.classList.remove('modal-open');
+    }
+  });
+});
+
+
 </script>
 </body>
 </html>

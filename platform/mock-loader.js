@@ -95,6 +95,9 @@ function renderInboxItems() {
 
 function renderDiscussionThreads() {
   if (!MOCK) return '';
+  if (!MOCK.threads || !MOCK.threads.length) {
+    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No discussions yet. Start a thread above.</div></div>';
+  }
   return MOCK.threads.map(function(t) {
     var avatarBg = 'background:var(--navy-light)';
     if (t.avatar && t.avatar.gradient) avatarBg = 'background:' + t.avatar.gradient;
@@ -132,6 +135,9 @@ function renderDiscussionThreads() {
 
 function renderProjectRows() {
   if (!MOCK) return '';
+  if (!MOCK.projects || !MOCK.projects.length) {
+    return '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-tertiary);font-size:12px">No projects yet. Propose one from Discussions.</td></tr>';
+  }
   return MOCK.projects.map(function(p) {
     return '<tr class="click" onclick="nav(\'undertaking\')">'
       + '<td class="s">' + p.title + '</td>'
