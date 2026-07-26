@@ -555,7 +555,7 @@
           <div class="htk" style="width:100%;margin-bottom:4px"><div class="hfill" style="width:45%;background:var(--gold)"></div></div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">45% complete · 3 team members</div>
         </div>
-        <button class="btn btn-sm" style="margin-bottom:20px">+ Create xSTF</button>
+        <button class="btn btn-sm" style="margin-bottom:20px" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
 
         <!-- Deliverables -->
         <div class="sec">Deliverables</div>
@@ -596,7 +596,7 @@
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-delib')">+ Submit Proposal</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">+ Create xSTF</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Circle Home</button>
           </div>
         </div>
@@ -2725,6 +2725,76 @@
     <div class="modal-footerbar">
       <button class="btn btn-primary" onclick="saveTask()">Save</button>
       <button class="btn btn-sm" onclick="closeTaskModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ xSTF CREATE MODAL ═══ -->
+<div class="reg-modal-overlay" id="xstf-create-modal">
+  <div class="reg-modal" style="max-width:600px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeXstfCreateModal()">&times;</button>
+        <span class="modal-titlebar-title">Create xSTF</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <!-- Step 1: Task Spec -->
+      <div id="xstf-create-step1">
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Task Specification</div>
+          <div style="margin-bottom:10px"><label class="form-label">Task Title</label>
+            <input class="form-input" id="xstf-create-title" placeholder="e.g. ITU Frequency Coordination Guide"></div>
+          <div style="margin-bottom:10px"><label class="form-label">Description</label>
+            <textarea class="form-input" rows="3" id="xstf-create-desc" placeholder="What will this xSTF produce? What is the expected outcome?"></textarea></div>
+          <div style="margin-bottom:10px"><label class="form-label">Required Domains</label>
+            <input class="form-input" id="xstf-create-domains" placeholder="Space Law, Policy... or leave blank to auto-infer from circle mandate">
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Leave blank to auto-infer from circle mandate domains</div></div>
+          <div style="margin-bottom:10px"><label class="form-label">Deadline</label>
+            <input class="form-input" type="date" id="xstf-create-deadline"></div>
+          <div style="margin-bottom:10px"><label class="form-label">Blind Execution</label>
+            <div style="font-size:11px;color:var(--text-secondary)">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                <input type="checkbox" id="xstf-create-blind" checked> Team members collaborate anonymously
+              </label>
+            </div></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Deliverable Specs</div>
+          <div style="margin-bottom:10px"><label class="form-label">Deliverable Name</label>
+            <input class="form-input" id="xstf-create-delname" placeholder="e.g. ITU Frequency Coordination Guide"></div>
+          <div style="margin-bottom:10px"><label class="form-label">Description</label>
+            <textarea class="form-input" rows="2" id="xstf-create-deldesc" placeholder="What should the deliverable contain?"></textarea></div>
+          <div class="g2">
+            <div style="margin-bottom:10px"><label class="form-label">Sections</label>
+              <input class="form-input" type="number" id="xstf-create-sections" value="4" min="1"></div>
+            <div style="margin-bottom:10px"><label class="form-label">Word Count</label>
+              <input class="form-input" id="xstf-create-wordcount" placeholder="8,000–12,000"></div>
+          </div>
+          <div class="g2">
+            <div style="margin-bottom:10px"><label class="form-label">Language</label>
+              <input class="form-input" id="xstf-create-lang" value="Plain English"></div>
+            <div style="margin-bottom:10px"><label class="form-label">Review Process</label>
+              <select class="form-input" id="xstf-create-review">
+                <option value="draft-circle-final">Draft → Circle → Final</option>
+                <option value="draft-direct">Draft → Direct</option>
+              </select></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="xstfCreateNext()">Next: Select Team →</button>
+      </div>
+      <!-- Step 2: Ranked Candidates -->
+      <div id="xstf-create-step2" style="display:none">
+        <div style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Suggested Candidates</div>
+          <div style="font-size:11px;color:var(--text-tertiary)">Ranked by interest alignment + competence fit. Select members to invite.</div>
+        </div>
+        <div id="xstf-create-candidates"></div>
+        <div style="margin-top:16px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="xstfCreateSubmit()">Create &amp; Send Invitations</button>
+          <button class="btn btn-sm" onclick="xstfCreateBack()">← Back</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -5246,6 +5316,150 @@ function filterInbox(filter, btn) {
 }
 
 // ═══ JOIN FLOWS ═══
+
+// -- xSTF Creation --
+var _xstfCreateCircleId = null;
+
+function openXstfCreateModal(circleId) {
+  _xstfCreateCircleId = circleId;
+  var circle = MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === circleId || c.id === circleId; });
+  if (circle) {
+    document.getElementById('xstf-create-domains').placeholder = circle.domains.join(', ') + ' (or leave blank to auto-infer)';
+  }
+  document.getElementById('xstf-create-step1').style.display = '';
+  document.getElementById('xstf-create-step2').style.display = 'none';
+  document.getElementById('xstf-create-title').value = '';
+  document.getElementById('xstf-create-desc').value = '';
+  document.getElementById('xstf-create-domains').value = '';
+  document.getElementById('xstf-create-deadline').value = '';
+  document.getElementById('xstf-create-delname').value = '';
+  document.getElementById('xstf-create-deldesc').value = '';
+  document.getElementById('xstf-create-modal').classList.add('active');
+}
+
+function closeXstfCreateModal() {
+  document.getElementById('xstf-create-modal').classList.remove('active');
+}
+
+function xstfCreateNext() {
+  var title = document.getElementById('xstf-create-title').value.trim();
+  if (!title) { alert('Please enter a task title.'); return; }
+  document.getElementById('xstf-create-step1').style.display = 'none';
+  document.getElementById('xstf-create-step2').style.display = '';
+  generateXstfCandidates();
+}
+
+function xstfCreateBack() {
+  document.getElementById('xstf-create-step1').style.display = '';
+  document.getElementById('xstf-create-step2').style.display = 'none';
+}
+
+function generateXstfCandidates() {
+  var domains = document.getElementById('xstf-create-domains').value.trim();
+  var circle = MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === _xstfCreateCircleId || c.id === _xstfCreateCircleId; });
+  var requiredDomains = domains ? domains.split(',').map(function(d) { return d.trim(); }) : (circle ? circle.domains : []);
+
+  var candidates = MOCK.participants.map(function(p) {
+    var interestMatch = 0;
+    var competenceMatch = 0;
+    var pDomains = p.domains || [];
+    pDomains.forEach(function(d) {
+      if (requiredDomains.indexOf(d.name) >= 0) {
+        interestMatch += d.ws || 0;
+        competenceMatch += d.wh || 0;
+      }
+    });
+    var maxWs = requiredDomains.length * 2000;
+    var maxWh = requiredDomains.length * 1500;
+    var interestScore = maxWs > 0 ? Math.round((interestMatch / maxWs) * 100) : 0;
+    var competenceScore = maxWh > 0 ? Math.round((competenceMatch / maxWh) * 100) : 0;
+    var matchScore = Math.round((interestScore * 0.5 + competenceScore * 0.5));
+    return {
+      name: p.name,
+      initials: p.initials,
+      interestScore: interestScore,
+      competenceScore: competenceScore,
+      matchScore: matchScore,
+      matchedDomains: requiredDomains.filter(function(d) {
+        return pDomains.some(function(pd) { return pd.name === d && pd.ws > 0; });
+      })
+    };
+  }).filter(function(c) { return c.matchScore > 0; })
+    .sort(function(a, b) { return b.matchScore - a.matchScore; })
+    .slice(0, 8);
+
+  var el = document.getElementById('xstf-create-candidates');
+  el.innerHTML = candidates.map(function(c, i) {
+    var barColor = c.matchScore >= 70 ? 'var(--green)' : c.matchScore >= 40 ? 'var(--gold)' : 'var(--text-tertiary)';
+    return '<div class="flex items-center gap-3" style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">'
+      + '<input type="checkbox" class="xstf-cand-check" data-name="' + esc(c.name) + '" data-initials="' + esc(c.initials) + '" ' + (i < 3 ? 'checked' : '') + '>'
+      + '<div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:28px;height:28px;font-size:9px">' + c.initials + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(c.name) + '</div>'
+      + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Matched: ' + c.matchedDomains.join(', ') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0">'
+      + '<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:' + barColor + '">' + c.matchScore + '%</div>'
+      + '<div class="htk" style="width:60px;margin-top:2px"><div class="hfill" style="width:' + c.matchScore + '%;background:' + barColor + '"></div></div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function xstfCreateSubmit() {
+  var checked = document.querySelectorAll('.xstf-cand-check:checked');
+  if (checked.length === 0) { alert('Please select at least one team member.'); return; }
+  var invitees = [];
+  checked.forEach(function(cb) {
+    invitees.push({ name: cb.dataset.name, initials: cb.dataset.initials });
+  });
+  var title = document.getElementById('xstf-create-title').value.trim();
+  var desc = document.getElementById('xstf-create-desc').value.trim();
+  var deadline = document.getElementById('xstf-create-deadline').value;
+  var blind = document.getElementById('xstf-create-blind').checked;
+  var delName = document.getElementById('xstf-create-delname').value.trim();
+  var delDesc = document.getElementById('xstf-create-deldesc').value.trim();
+  var sections = parseInt(document.getElementById('xstf-create-sections').value) || 4;
+  var wordcount = document.getElementById('xstf-create-wordcount').value.trim();
+  var lang = document.getElementById('xstf-create-lang').value.trim();
+  var review = document.getElementById('xstf-create-review').value;
+
+  var cellId = 'cell-' + Date.now();
+  MOCK.cells.push({
+    id: cellId,
+    type: 'xSTF Cell',
+    title: title,
+    progress: 0,
+    deadline: deadline,
+    status: 'Active',
+    blind: blind,
+    commissionedBy: MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === _xstfCreateCircleId; })?.name || 'Circle',
+    resolutionRef: null,
+    deliverableSpecs: {
+      name: delName || title,
+      description: delDesc || desc,
+      sections: sections,
+      wordCount: wordcount || 'TBD',
+      language: lang || 'Plain English',
+      reviewProcess: review
+    },
+    tasks: [
+      { id: 't0', label: 'STF formulation', status: 'pending', locked: true },
+      { id: 't1', label: 'Mandate comprehension', status: 'pending', locked: false },
+      { id: 't2', label: 'Research & drafting', status: 'pending', locked: false },
+      { id: 't3', label: 'Internal review', status: 'pending', locked: false },
+      { id: 't4', label: 'Circle review cycle', status: 'pending', locked: false },
+      { id: 't5', label: 'Finalisation', status: 'pending', locked: false },
+      { id: 't6', label: 'Dissolve STF', status: 'pending', locked: true }
+    ],
+    objectives: [],
+    team: invitees.map(function(inv) { return { name: inv.name, initials: inv.initials, role: 'Team Member' }; }),
+    deliverables: [],
+    messages: []
+  });
+
+  closeXstfCreateModal();
+  alert('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.');
+}
 
 // -- Circle Apply --
 function openCircleApplyModal(circleName, circleId) {
