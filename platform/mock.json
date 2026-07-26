@@ -169,6 +169,8 @@
       "desiredWs": { "Space Law": 2500, "Liability": 1800, "Policy": 1500 },
       "description": "Stewards space law analysis, liability frameworks, and regulatory compliance.",
       "founded": "Mar 2026",
+      "termOverride": null,
+      "expiryOverride": null,
       "proposals": [
         { "id": "prop-01", "title": "Debris liability framework — proportional model", "status": "In Deliberation", "date": "Jul 21" },
         { "id": "prop-02", "title": "Artemis Accords ratification recommendation", "status": "Drafted", "date": "Jul 18" }
@@ -209,6 +211,8 @@
       "domains": ["Remote Sensing", "Satellite", "Data"],
       "description": "Satellite data analysis, Earth observation, and remote sensing methodologies.",
       "founded": "Jan 2026",
+      "termOverride": null,
+      "expiryOverride": null,
       "proposals": [
         { "id": "prop-03", "title": "East Africa SAR data sharing protocol", "status": "Active", "date": "Jul 15" }
       ],
@@ -227,6 +231,8 @@
       "domains": ["Mars", "Habitability"],
       "description": "Life support systems, habitat design, and Mars colonisation research.",
       "founded": "Jun 2026",
+      "termOverride": null,
+      "expiryOverride": { "months": 18 },
       "proposals": [],
       "resolutions": [],
       "activity": [
@@ -242,6 +248,25 @@
       "domains": ["Policy", "Advocacy"],
       "description": "Policy analysis, advocacy strategies, and institutional partnerships.",
       "founded": "May 2026",
+      "termOverride": null,
+      "expiryOverride": null,
+      "proposals": [],
+      "resolutions": [],
+      "activity": []
+    },
+    {
+      "id": "freq",
+      "name": "Frequency Allocation Circle",
+      "status": "Archived",
+      "members": 3,
+      "motions": 0,
+      "domains": ["Telecom"],
+      "description": "Dissolved after scope overlap with Space Law Circle.",
+      "founded": "Jan 2026",
+      "archivedDate": "Apr 2026",
+      "archiveReason": "Scope overlap with Space Law",
+      "termOverride": null,
+      "expiryOverride": { "never": true },
       "proposals": [],
       "resolutions": [],
       "activity": []
@@ -660,6 +685,49 @@
           ]
         }
       ]
+    },
+    {
+      "id": "cell-31",
+      "type": "Founding Cell",
+      "entityType": "circle",
+      "title": "Circle: Mars Habitability Circle",
+      "participants": 4,
+      "status": "Active",
+      "daysActive": 5,
+      "domains": ["Mars", "Habitability"],
+      "circles": [],
+      "draftResolutions": [
+        {
+          "id": 1,
+          "title": "Founding Declaration — Mars Habitability Circle",
+          "text": "DECLARE: The Solarian Commons formally establishes the Mars Habitability Circle.\n\n1. The Mars Habitability Circle is recognised as a steward circle of the Commons\n2. Primary mandate domains: Mars, Habitability\n3. The circle shall steward research and deliberation on life support systems, habitat design, and Mars colonisation\n4. Founding members: Namugga Claire, Osei Kwame, plus 2 additional members\n5. Circle governance is subject to periodic p-aSTF health reviews",
+          "action": "Declaration",
+          "implementingCircles": [],
+          "domainShares": { "Mars": 0.55, "Habitability": 0.45 },
+          "votesNullified": false,
+          "aiDraftMeta": { "draftCount": 1, "maxDrafts": 3, "cooldownMs": 300000, "lastDraftTs": null, "confirmations": [], "confirmQuorum": 2 },
+          "versions": [
+            { "title": "Founding Declaration — Mars Habitability Circle", "text": "Initial AI draft", "action": "Declaration", "author": "AI Drafter", "ts": "Jul 22, 2026 09:00" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cell-09",
+      "type": "Project Cell",
+      "title": "Lunar Regolith Study",
+      "participants": 4,
+      "progress": 100,
+      "status": "Archived",
+      "archivedDate": "May 2026"
+    },
+    {
+      "id": "cell-11",
+      "type": "Deliberation Cell",
+      "title": "Frequency allocation dispute",
+      "participants": 6,
+      "status": "Archived",
+      "archivedDate": "Apr 2026"
     }
   ],
 
@@ -875,5 +943,34 @@
       "memberCount": 40,
       "website": null
     }
+  ],
+
+  "systemSettings": {
+    "stewardTermMonths": 12,
+    "maxConsecutiveTerms": 2,
+    "cooloffMonths": 6,
+    "pAstfCycleMonths": 6,
+    "autoExpireCircles": false,
+    "defaultCircleExpiryMonths": 24
+  },
+
+  "integrityRecords": [
+    { "id": "IR-001", "type": "vSTF", "subject": "Ssempa David", "purpose": "Steward Candidacy", "circle": "Space Law", "date": "Jul 12, 2026", "verdict": "Approved", "text": "Candidate verified as qualified steward for Space Law Circle. Competence in Space Law confirmed at Ws 1800." },
+    { "id": "IR-002", "type": "aSTF", "subject": "Debris Liability Framework", "purpose": "Motion Adjudication", "circle": "Space Law", "date": "Jul 10, 2026", "verdict": "Passed", "text": "Proportional liability framework adopted by blind assessment of 3 assessors. Enacted as Resolution R-002." },
+    { "id": "IR-003", "type": "jSTF", "subject": "Credential Misrepresentation", "purpose": "Investigation", "circle": "Commons", "date": "Jun 28, 2026", "verdict": "Exonerated", "text": "Investigation found insufficient evidence of deliberate misrepresentation. No sanctions applied." },
+    { "id": "IR-004", "type": "p-aSTF", "subject": "Space Law Circle", "purpose": "Periodic Health Review", "circle": "Space Law", "date": "Jun 15, 2026", "verdict": "Healthy", "text": "Circle assessed at 26/30 across 5 rubric dimensions. Strong cohesion and delivery metrics." },
+    { "id": "IR-005", "type": "aSTF", "subject": "Artemis Accords Ratification", "purpose": "Motion Adjudication", "circle": "Space Law", "date": "Jun 20, 2026", "verdict": "Failed", "text": "Recommendation did not achieve required competence-weighted majority. Motion archived." },
+    { "id": "IR-006", "type": "vSTF", "subject": "Akello Jane", "purpose": "Competence Claims", "circle": "Space Law", "date": "Jul 14, 2026", "verdict": "Approved", "text": "Competence claims for Space Law and Astrophysics domains verified. Ws confirmed." }
+  ],
+
+  "governanceEvents": [
+    { "id": "GE-001", "type": "circle-created", "circle": "Space Law Circle", "date": "Mar 2026", "text": "Circle founded with 5 founding members. Primary mandate: Space Law, Liability." },
+    { "id": "GE-002", "type": "circle-created", "circle": "Remote Sensing Circle", "date": "Jan 2026", "text": "Circle founded with 4 founding members. Primary mandate: Remote Sensing, Satellite." },
+    { "id": "GE-003", "type": "steward-confirmed", "circle": "Space Law Circle", "date": "Jul 12, 2026", "text": "Ssempa David confirmed as steward via vSTF verification.", "participant": "Ssempa David" },
+    { "id": "GE-004", "type": "steward-resigned", "circle": "Space Law Circle", "date": "May 2026", "text": "Esi Kojo stepped down due to term expiry.", "participant": "Esi Kojo" },
+    { "id": "GE-005", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Mensah Naa joined the circle.", "participant": "Mensah Naa" },
+    { "id": "GE-006", "type": "circle-suggested", "circle": "Mars Habitability Circle", "date": "Jun 2026", "text": "Circle suggested, awaiting founding members." },
+    { "id": "GE-007", "type": "circle-archived", "circle": "Frequency Allocation Circle", "date": "Apr 2026", "text": "Circle archived due to scope overlap with Space Law Circle." },
+    { "id": "GE-008", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Diallo Mamadou invited to the circle.", "participant": "Diallo Mamadou" }
   ]
 }

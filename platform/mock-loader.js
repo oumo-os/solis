@@ -32,17 +32,33 @@ function renderParticipantCards() {
   }).join('');
 }
 
-function renderCircleCards() {
+function renderCircleCards(filter) {
   if (!MOCK) return '';
-  return MOCK.circles.map(function(c) {
-    return '<div class="card click" onclick="nav(\'circle-detail\')">'
-      + '<div class="flex justify-between mb-2"><span class="badge b-' + (c.status === 'Active' ? 'active' : 'pending') + '">' + c.status + '</span>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.members + ' members</span></div>'
+  filter = filter || 'all';
+  var circles = MOCK.circles.filter(function(c) { return filter === 'all' || c.status === filter; });
+  if (circles.length === 0) {
+    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No circles match this filter.</div></div>';
+  }
+  return circles.map(function(c) {
+    var isArchived = c.status === 'Archived';
+    var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
+    var cardStyle = isArchived ? 'opacity:0.65' : '';
+    return '<div class="card click" style="' + cardStyle + '" onclick="nav(\'circle-detail\')">'
+      + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.status + '</span>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.members + ' members' + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.name + '</div>'
       + '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">' + c.description + '</div>'
       + '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.domains.join(' · ') + '</div>'
+      + (isArchived && c.archiveReason ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;font-style:italic">Reason: ' + c.archiveReason + '</div>' : '')
       + '</div>';
   }).join('');
+}
+
+function filterCircles(filter, btn) {
+  document.querySelectorAll('#circles-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var grid = document.getElementById('circles-grid');
+  if (grid) grid.innerHTML = renderCircleCards(filter);
 }
 
 function renderSTFRows() {
@@ -121,17 +137,33 @@ function renderProjectRows() {
   }).join('');
 }
 
-function renderCellCards() {
+function renderCellCards(filter) {
   if (!MOCK) return '';
-  return MOCK.cells.map(function(c) {
+  filter = filter || 'all';
+  var cells = MOCK.cells.filter(function(c) { return filter === 'all' || c.status === filter; });
+  if (cells.length === 0) {
+    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No cells match this filter.</div></div>';
+  }
+  return cells.map(function(c) {
+    var isArchived = c.status === 'Archived';
     var icon = c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : c.type === 'Founding Cell' ? 'organisations' : '';
-    return '<div class="card click" onclick="nav(\'' + (c.type === 'Founding Cell' ? 'organisations' : 'cell-' + icon) + '\')">'
-      + '<div class="flex justify-between mb-2"><span class="badge b-' + (c.status === 'Active' ? 'active' : 'pending') + '">' + c.type + '</span>'
-      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + '</span></div>'
+    var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
+    var cardStyle = isArchived ? 'opacity:0.65' : '';
+    var navTarget = c.type === 'Founding Cell' ? 'organisations' : c.type === 'Project Cell' ? 'cell-undertaking' : c.type === 'Circle Cell' ? 'cell-circle' : c.type === 'Deliberation Cell' ? 'cell-delib' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells';
+    return '<div class="card click" style="' + cardStyle + '" onclick="nav(\'' + navTarget + '\')">'
+      + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.type + '</span>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.title + '</div>'
       + '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + (c.participants ? c.participants + ' participants' : c.members ? c.members + ' members' : '') + (c.progress ? ' · ' + c.progress + '% complete' : '') + '</div>'
       + '</div>';
   }).join('');
+}
+
+function filterCells(filter, btn) {
+  document.querySelectorAll('#cells-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var grid = document.getElementById('cells-grid');
+  if (grid) grid.innerHTML = renderCellCards(filter);
 }
 
 function renderNewsCards() {

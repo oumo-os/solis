@@ -456,33 +456,13 @@
     <div class="page-sub">Mandate-defined deliberation bodies</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="flex gap-2" style="margin-bottom:16px"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">My Circles</button></div>
-        <div class="g3">
-          <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">8 members</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Stewards space law analysis, liability frameworks, and regulatory compliance.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Liability · Policy</div>
-          </div>
-          <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">6 members</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Remote Sensing Circle</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Satellite data analysis, Earth observation, and remote sensing methodologies.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Remote Sensing · Satellite · Data</div>
-          </div>
-          <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-pending">Suggested</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">4 members</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Mars Habitability Circle</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Life support systems, habitat design, and Mars colonisation research.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Mars · Habitability</div>
-          </div>
-          <div class="card click" onclick="nav('circle-detail')">
-            <div class="flex justify-between mb-2"><span class="badge b-pending">Suggested</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">5 members</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Policy & Advocacy Circle</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Policy analysis, advocacy strategies, and institutional partnerships.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy · Advocacy</div>
-          </div>
+        <div class="feed-filters" id="circles-filters" style="margin-bottom:16px">
+          <button class="feed-filter active" onclick="filterCircles('all',this)">All</button>
+          <button class="feed-filter" onclick="filterCircles('Active',this)">Active</button>
+          <button class="feed-filter" onclick="filterCircles('Suggested',this)">Suggested</button>
+          <button class="feed-filter" onclick="filterCircles('Archived',this)">Archived</button>
         </div>
+        <div id="circles-grid" class="g3"></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -510,38 +490,12 @@
     <div class="page-sub">Your active contextual workspaces</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div class="g3">
-          <div class="card click" onclick="nav('cell-undertaking')">
-            <div class="flex justify-between mb-2"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-14</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">East Africa Space Sector Mapping</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Collaborative research cell. 7 participants. Producing sector mapping report.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Policy + Remote Sensing · 7 members · 60% complete</div>
-          </div>
-          <div class="card click" onclick="nav('cell-circle')">
-            <div class="flex justify-between mb-2"><span class="badge b-review">Circle Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-18 · Restricted</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Space Law Circle — Restricted Cell</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Proposals, xSTFs, and deliverables. 2 proposals active, 1 xSTF executing.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 8 members · Proposals + xSTFs</div>
-          </div>
-          <div class="card click" onclick="nav('cell-delib')">
-            <div class="flex justify-between mb-2"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-21</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris liability framework — who bears responsibility?</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Sponsored by Akello J. (Space Law steward). Motion crystallising.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · 12 participants · 3d active</div>
-          </div>
-          <div class="card click" onclick="nav('stf-astf')">
-            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--red-soft);color:var(--red)">aSTF Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-23</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Motion: Debris liability framework</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Blind adjudication. 3 assessors. Verdict pending.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Blind · Due Jul 28</div>
-          </div>
-          <div class="card click" onclick="nav('stf-xstf')">
-            <div class="flex justify-between mb-2"><span class="badge" style="background:var(--blue-soft);color:var(--blue)">xSTF Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">#Cell-19</span></div>
-            <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Resolution: ITU coordination guide</div>
-            <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:10px">Blind execution. Deliverable due Aug 15. Commissioned by Space Law Circle.</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Space Law · Blind · 45% complete</div>
-          </div>
+        <div class="feed-filters" id="cells-filters" style="margin-bottom:16px">
+          <button class="feed-filter active" onclick="filterCells('all',this)">All</button>
+          <button class="feed-filter" onclick="filterCells('Active',this)">Active</button>
+          <button class="feed-filter" onclick="filterCells('Archived',this)">Archived</button>
         </div>
+        <div id="cells-grid" class="g3"></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1988,47 +1942,119 @@
   <!-- ═══ GOVERNANCE: RESOLUTIONS ═══ -->
   <div class="view" id="view-resolutions">
     <div class="page-title">Governance</div>
-    <div class="page-sub">Resolutions, policies, and enacted decisions</div>
-    <div class="layout-split">
-      <div class="layout-main">
-        <div class="feed-filters" id="resolutions-filters">
-          <button class="feed-filter active" onclick="filterResolutions('all',this)">All</button>
-          <button class="feed-filter" onclick="filterResolutions('enacted',this)">Enacted</button>
-          <button class="feed-filter" onclick="filterResolutions('pending',this)">Pending</button>
-          <button class="feed-filter" onclick="filterResolutions('failed',this)">Failed</button>
+    <div class="page-sub">Resolutions, integrity records, and stewardship tracking</div>
+    <div class="settings-tab-bar" id="gov-tab-bar" style="margin-bottom:16px">
+      <div class="settings-tab active" onclick="switchGovTab(0,this)">Resolutions</div>
+      <div class="settings-tab" onclick="switchGovTab(1,this)">Integrity Records</div>
+      <div class="settings-tab" onclick="switchGovTab(2,this)">Circles & Stewardship</div>
+    </div>
+
+    <!-- Tab 0: Resolutions -->
+    <div class="gov-tab-content" id="gov-tab-0">
+      <div class="layout-split">
+        <div class="layout-main">
+          <div class="feed-filters" id="resolutions-filters">
+            <button class="feed-filter active" onclick="filterResolutions('all',this)">All</button>
+            <button class="feed-filter" onclick="filterResolutions('enacted',this)">Enacted</button>
+            <button class="feed-filter" onclick="filterResolutions('pending',this)">Pending</button>
+            <button class="feed-filter" onclick="filterResolutions('failed',this)">Failed</button>
+          </div>
+          <div id="resolutions-list"></div>
         </div>
-        <div id="resolutions-list"></div>
+        <div class="layout-aside">
+          <div class="aside-card">
+            <div class="aside-title">Governance Stats</div>
+            <div class="aside-stat">
+              <div class="aside-stat-item"><div class="aside-stat-val" id="res-total">0</div><div class="aside-stat-lbl">Total</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="res-enacted-count" style="color:var(--green)">0</div><div class="aside-stat-lbl">Enacted</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="res-pending-count" style="color:var(--gold)">0</div><div class="aside-stat-lbl">Pending</div></div>
+            </div>
+          </div>
+          <div class="aside-card">
+            <div class="aside-title">Resolution Lifecycle</div>
+            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
+              <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
+              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
+              <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
+              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
+              <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
+              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
+              <div><span style="color:var(--green)">&#9679;</span> Enacted Resolution</div>
+            </div>
+          </div>
+          <div class="aside-card">
+            <div class="aside-title">By Circle</div>
+            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
+            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
+            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
+          </div>
+        </div>
       </div>
-      <div class="layout-aside">
-        <div class="aside-card">
-          <div class="aside-title">Governance Stats</div>
-          <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val" id="res-total">0</div><div class="aside-stat-lbl">Total</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val" id="res-enacted-count" style="color:var(--green)">0</div><div class="aside-stat-lbl">Enacted</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val" id="res-pending-count" style="color:var(--gold)">0</div><div class="aside-stat-lbl">Pending</div></div>
+    </div>
+
+    <!-- Tab 1: Integrity Records -->
+    <div class="gov-tab-content" id="gov-tab-1" style="display:none">
+      <div class="layout-split">
+        <div class="layout-main">
+          <div class="feed-filters" id="integrity-filters">
+            <button class="feed-filter active" onclick="filterIntegrity('all',this)">All</button>
+            <button class="feed-filter" onclick="filterIntegrity('vSTF',this)">vSTF</button>
+            <button class="feed-filter" onclick="filterIntegrity('aSTF',this)">aSTF</button>
+            <button class="feed-filter" onclick="filterIntegrity('jSTF',this)">jSTF</button>
+            <button class="feed-filter" onclick="filterIntegrity('p-aSTF',this)">p-aSTF</button>
+          </div>
+          <div id="integrity-list"></div>
+        </div>
+        <div class="layout-aside">
+          <div class="aside-card">
+            <div class="aside-title">Integrity Stats</div>
+            <div class="aside-stat">
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ir-total">0</div><div class="aside-stat-lbl">Total</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ir-approved" style="color:var(--green)">0</div><div class="aside-stat-lbl">Approved</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ir-denied" style="color:var(--red)">0</div><div class="aside-stat-lbl">Denied</div></div>
+            </div>
+          </div>
+          <div class="aside-card">
+            <div class="aside-title">STF Types</div>
+            <div style="font-size:10px;color:var(--text-secondary);line-height:1.6">
+              <div style="margin-bottom:4px"><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of candidacies and competence claims</div>
+              <div style="margin-bottom:4px"><span style="color:var(--red);font-weight:600">aSTF</span> — Blind adjudication of motions</div>
+              <div style="margin-bottom:4px"><span style="color:var(--teal);font-weight:600">jSTF</span> — Judicial investigations</div>
+              <div><span style="color:var(--gold);font-weight:600">p-aSTF</span> — Periodic circle health reviews</div>
+            </div>
           </div>
         </div>
-        <div class="aside-card">
-          <div class="aside-title">Resolution Lifecycle</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
-            <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
-            <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
-            <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
-            <div><span style="color:var(--green)">&#9679;</span> Enacted Resolution</div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Circles & Stewardship -->
+    <div class="gov-tab-content" id="gov-tab-2" style="display:none">
+      <div class="layout-split">
+        <div class="layout-main">
+          <div class="feed-filters" id="events-filters">
+            <button class="feed-filter active" onclick="filterEvents('all',this)">All</button>
+            <button class="feed-filter" onclick="filterEvents('circle',this)">Circle Events</button>
+            <button class="feed-filter" onclick="filterEvents('steward',this)">Steward Events</button>
           </div>
+          <div id="events-list"></div>
         </div>
-        <div class="aside-card">
-          <div class="aside-title">By Circle</div>
-          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
-          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
-          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Publication</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Resolutions marked "for publication" appear in Observatory Publications. Internal resolutions are visible only to circle members.</div>
+        <div class="layout-aside">
+          <div class="aside-card">
+            <div class="aside-title">Circle Health</div>
+            <div class="aside-stat">
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ge-active">0</div><div class="aside-stat-lbl">Active</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ge-suggested">0</div><div class="aside-stat-lbl">Suggested</div></div>
+              <div class="aside-stat-item"><div class="aside-stat-val" id="ge-archived" style="color:var(--text-tertiary)">0</div><div class="aside-stat-lbl">Archived</div></div>
+            </div>
+          </div>
+          <div class="aside-card">
+            <div class="aside-title">Stewardship</div>
+            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6">
+              <div style="margin-bottom:4px"><span style="font-weight:600">Term:</span> 12 months (global default)</div>
+              <div style="margin-bottom:4px"><span style="font-weight:600">Max consecutive:</span> 2 terms</div>
+              <div><span style="font-weight:600">Cool-off:</span> 6 months</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -2465,11 +2491,12 @@
       </div>
     </div>
     <div class="reg-modal-body">
-      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">STF composition, quorum thresholds, and deliberation defaults.</div>
+      <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">STF composition, quorum thresholds, circle governance, and deliberation defaults.</div>
       <div class="settings-tab-bar">
         <div class="settings-tab active" onclick="switchSettingsTab(0,this)">STF</div>
         <div class="settings-tab" onclick="switchSettingsTab(1,this)">Quorum</div>
-        <div class="settings-tab" onclick="switchSettingsTab(2,this)">Deliberation</div>
+        <div class="settings-tab" onclick="switchSettingsTab(2,this)">Circles</div>
+        <div class="settings-tab" onclick="switchSettingsTab(3,this)">Deliberation</div>
       </div>
       <div class="settings-tab-content" id="settings-tab-0">
         <div class="card" style="margin-bottom:12px">
@@ -2480,7 +2507,7 @@
             <div class="form-group"><label class="form-label">aSTF Assessors</label><input class="form-input" type="number" value="3"></div>
             <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14"></div>
             <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10"></div>
-            <div class="form-group"><label class="form-label">xSTF Duration (days)</label><input class="form-input" type="number" value="21"></div>
+            <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
           </div>
         </div>
       </div>
@@ -2496,6 +2523,26 @@
         </div>
       </div>
       <div class="settings-tab-content" id="settings-tab-2" style="display:none">
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Circle Governance</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Steward Term Length (months)</label><input class="form-input" type="number" value="12"><span style="font-size:10px;color:var(--text-tertiary)">Global default, overridable per circle</span></div>
+            <div class="form-group"><label class="form-label">Max Consecutive Terms</label><input class="form-input" type="number" value="2"><span style="font-size:10px;color:var(--text-tertiary)">Before mandatory rotation</span></div>
+            <div class="form-group"><label class="form-label">Cool-off Period (months)</label><input class="form-input" type="number" value="6"><span style="font-size:10px;color:var(--text-tertiary)">Gap before re-running after max terms</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Circle Lifecycle</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Auto-Expire Circles</label><select class="form-input"><option>No</option><option>Yes</option></select><span style="font-size:10px;color:var(--text-tertiary)">Circles auto-disband after expiry period</span></div>
+            <div class="form-group"><label class="form-label">Default Circle Expiry (months)</label><input class="form-input" type="number" value="24"><span style="font-size:10px;color:var(--text-tertiary)">Only applies when auto-expire is enabled</span></div>
+          </div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;line-height:1.5">
+            Circles with no expiry override inherit this default. Setting a circle's expiry to 0 (never) prevents auto-disbandment. Expired circles are archived and their members are released.
+          </div>
+        </div>
+      </div>
+      <div class="settings-tab-content" id="settings-tab-3" style="display:none">
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Defaults</div>
           <div class="form-grid">
@@ -2549,6 +2596,16 @@
           </div>
           <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
           <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15"></div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Steward Term Override</label>
+              <select class="form-input"><option selected>Use Global Default</option><option>3 months</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option></select>
+              <span style="font-size:10px;color:var(--text-tertiary)">Override global default for this circle</span>
+            </div>
+            <div class="form-group"><label class="form-label">Circle Expiry Override</label>
+              <select class="form-input"><option selected>Use Global Default</option><option>Never (no expiry)</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option><option>36 months</option></select>
+              <span style="font-size:10px;color:var(--text-tertiary)">Override global lifecycle default</span>
+            </div>
+          </div>
         </div>
       </div>
       <!-- Tab 1: Mandate Domains -->
@@ -3570,6 +3627,114 @@ function filterResolutions(filter, btn) {
   renderResolutionsList(filter);
 }
 
+// ─── Governance Tabs ───
+function switchGovTab(idx, el) {
+  document.querySelectorAll('#gov-tab-bar .settings-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.querySelectorAll('.gov-tab-content').forEach(function(c) { c.style.display = 'none'; });
+  document.getElementById('gov-tab-' + idx).style.display = '';
+}
+
+// ─── Integrity Records ───
+var integrityData = [];
+function renderIntegrityList(filter) {
+  var list = document.getElementById('integrity-list');
+  if (!list) return;
+  filter = filter || 'all';
+  var filtered = integrityData.filter(function(r) { return filter === 'all' || r.type === filter; });
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No integrity records match this filter.</div></div>';
+    return;
+  }
+  var typeColors = { 'vSTF': 'var(--purple)', 'aSTF': 'var(--red)', 'jSTF': 'var(--teal)', 'p-aSTF': 'var(--gold)' };
+  var verdictColors = { 'Approved': 'var(--green)', 'Passed': 'var(--green)', 'Exonerated': 'var(--green)', 'Healthy': 'var(--green)', 'Failed': 'var(--red)', 'Denied': 'var(--red)', 'Guilty': 'var(--red)', 'Probation': 'var(--amber)' };
+  list.innerHTML = filtered.map(function(r) {
+    var tc = typeColors[r.type] || 'var(--text-secondary)';
+    var vc = verdictColors[r.verdict] || 'var(--text-secondary)';
+    return '<div class="card" style="margin-bottom:8px">'
+      + '<div class="flex justify-between mb-2"><div class="flex gap-1" style="align-items:center"><span class="tag" style="font-size:8px;background:' + tc + '18;color:' + tc + ';border:1px solid ' + tc + '44">' + r.type + '</span><span class="tag" style="font-size:8px;background:' + vc + '18;color:' + vc + ';border:1px solid ' + vc + '44">' + r.verdict + '</span></div>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + r.id + ' &middot; ' + r.date + '</span></div>'
+      + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.subject + '</div>'
+      + '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:4px">' + r.purpose + ' &middot; <span class="tag tag-purple" style="font-size:8px">' + r.circle + '</span></div>'
+      + '<div style="font-size:12px;color:var(--text-secondary);line-height:1.4">' + r.text + '</div>'
+      + '</div>';
+  }).join('');
+  var total = integrityData.length;
+  var approved = integrityData.filter(function(r) { return ['Approved','Passed','Exonerated','Healthy'].indexOf(r.verdict) !== -1; }).length;
+  var denied = integrityData.filter(function(r) { return ['Failed','Denied','Guilty'].indexOf(r.verdict) !== -1; }).length;
+  var totalEl = document.getElementById('ir-total');
+  var approvedEl = document.getElementById('ir-approved');
+  var deniedEl = document.getElementById('ir-denied');
+  if (totalEl) totalEl.textContent = total;
+  if (approvedEl) approvedEl.textContent = approved;
+  if (deniedEl) deniedEl.textContent = denied;
+}
+function filterIntegrity(filter, btn) {
+  document.querySelectorAll('#integrity-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderIntegrityList(filter);
+}
+
+// ─── Governance Events (Circles & Stewardship) ───
+var eventsData = [];
+function renderEventsList(filter) {
+  var list = document.getElementById('events-list');
+  if (!list) return;
+  filter = filter || 'all';
+  var filtered = eventsData.filter(function(e) {
+    if (filter === 'all') return true;
+    if (filter === 'circle') return e.type.indexOf('circle') !== -1 || e.type === 'member-joined';
+    if (filter === 'steward') return e.type.indexOf('steward') !== -1;
+    return true;
+  });
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No events match this filter.</div></div>';
+    return;
+  }
+  var typeIcons = {
+    'circle-created': '&#9670;', 'circle-suggested': '&#9671;', 'circle-archived': '&#9674;',
+    'steward-confirmed': '&#9733;', 'steward-resigned': '&#9734;',
+    'member-joined': '&#10010;'
+  };
+  var typeLabels = {
+    'circle-created': 'Circle Created', 'circle-suggested': 'Circle Suggested', 'circle-archived': 'Circle Archived',
+    'steward-confirmed': 'Steward Confirmed', 'steward-resigned': 'Steward Resigned',
+    'member-joined': 'Member Joined'
+  };
+  var typeColors = {
+    'circle-created': 'var(--green)', 'circle-suggested': 'var(--gold)', 'circle-archived': 'var(--text-tertiary)',
+    'steward-confirmed': 'var(--purple)', 'steward-resigned': 'var(--amber)',
+    'member-joined': 'var(--teal)'
+  };
+  list.innerHTML = filtered.map(function(e) {
+    var ic = typeColors[e.type] || 'var(--text-secondary)';
+    var icon = typeIcons[e.type] || '&#8226;';
+    var label = typeLabels[e.type] || e.type;
+    return '<div class="card" style="margin-bottom:8px">'
+      + '<div class="flex justify-between mb-2"><div class="flex gap-1" style="align-items:center"><span style="font-size:14px;color:' + ic + '">' + icon + '</span><span class="tag" style="font-size:8px;background:' + ic + '18;color:' + ic + ';border:1px solid ' + ic + '44">' + label + '</span></div>'
+      + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + e.id + ' &middot; ' + e.date + '</span></div>'
+      + '<div style="font-size:13px;color:var(--text);margin-bottom:4px">' + e.text + '</div>'
+      + '<div class="flex gap-1" style="align-items:center"><span class="tag tag-purple" style="font-size:8px">' + e.circle + '</span>'
+      + (e.participant ? '<span style="font-size:10px;color:var(--text-tertiary)"> &middot; ' + e.participant + '</span>' : '')
+      + '</div></div>';
+  }).join('');
+  var circles = MOCK.circles || [];
+  var active = circles.filter(function(c) { return c.status === 'Active'; }).length;
+  var suggested = circles.filter(function(c) { return c.status === 'Suggested'; }).length;
+  var archived = circles.filter(function(c) { return c.status === 'Archived'; }).length;
+  var geActive = document.getElementById('ge-active');
+  var geSuggested = document.getElementById('ge-suggested');
+  var geArchived = document.getElementById('ge-archived');
+  if (geActive) geActive.textContent = active;
+  if (geSuggested) geSuggested.textContent = suggested;
+  if (geArchived) geArchived.textContent = archived;
+}
+function filterEvents(filter, btn) {
+  document.querySelectorAll('#events-filters .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderEventsList(filter);
+}
+
 // ─── Observatory Publications ───
 function renderObservatoryPublications(filter) {
   var el = document.getElementById('observatory-publications-list');
@@ -3814,6 +3979,10 @@ loadMockData().then(function() {
   if (stfBody) stfBody.innerHTML = renderSTFRows();
   layoutParticipantCards();
   renderResolutionsList();
+  integrityData = MOCK.integrityRecords || [];
+  eventsData = MOCK.governanceEvents || [];
+  renderIntegrityList();
+  renderEventsList();
   renderObservatoryPublications();
   orgs = MOCK.organisations || [];
   renderOrganisations();
@@ -3935,22 +4104,105 @@ function regAddEntry(containerId,type){
 function openProposalModal(){
   var html='<div class="modal-header">New Proposal</div>'+
     '<div style="margin-bottom:12px"><label class="form-label">Type</label>'+
-    '<select class="form-input" id="propose-type"><option>Discussion Thread</option><option>Project</option><option>Circle Formation</option><option>Organisation Affiliation</option></select></div>'+
-    '<div style="margin-bottom:12px"><label class="form-label">Title</label>'+
-    '<input class="form-input" id="propose-title" placeholder="What do you want to propose?"></div>'+
-    '<div style="margin-bottom:12px"><label class="form-label">Description</label>'+
-    '<textarea class="form-input" rows="4" id="propose-desc" placeholder="Describe your proposal..."></textarea></div>'+
-    '<div style="margin-bottom:12px"><label class="form-label">Domains</label>'+
-    '<input class="form-input" id="propose-domains" placeholder="Space Law, Remote Sensing..."></div>'+
+    '<select class="form-input" id="propose-type" onchange="onProposalTypeChange()">'+
+      '<option value="discussion">Discussion Thread</option>'+
+      '<option value="project">Project</option>'+
+      '<option value="circle">Circle Formation</option>'+
+      '<option value="org">Organisation Affiliation</option>'+
+    '</select></div>'+
+    '<div id="propose-fields">'+
+      '<div style="margin-bottom:12px"><label class="form-label">Title</label>'+
+      '<input class="form-input" id="propose-title" placeholder="What do you want to propose?"></div>'+
+      '<div style="margin-bottom:12px"><label class="form-label">Description</label>'+
+      '<textarea class="form-input" rows="4" id="propose-desc" placeholder="Describe your proposal..."></textarea></div>'+
+      '<div style="margin-bottom:12px"><label class="form-label">Domains</label>'+
+      '<input class="form-input" id="propose-domains" placeholder="Space Law, Remote Sensing..."></div>'+
+    '</div>'+
+    '<div id="propose-extra" style="display:none"></div>'+
     '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Cancel</button>'+
     '<button class="btn btn-primary" onclick="submitProposal()">Submit Proposal</button></div>';
   openModal(html,{size:'md'});
 }
+
+function onProposalTypeChange(){
+  var type=document.getElementById('propose-type').value;
+  var extra=document.getElementById('propose-extra');
+  var fields=document.getElementById('propose-fields');
+  if(type==='circle'){
+    fields.style.display='none';
+    extra.style.display='';
+    extra.innerHTML=
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Circle Formation Settings</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Circle Name</label>'+
+        '<input class="form-input" id="propose-circle-name" placeholder="e.g. Mars Habitability Circle"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
+        '<textarea class="form-input" rows="2" id="propose-circle-desc" placeholder="What does this circle steward?"></textarea></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Primary Domains</label>'+
+        '<input class="form-input" id="propose-circle-domains" placeholder="Space Law, Liability..."></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Max Members</label>'+
+        '<input class="form-input" type="number" value="15" id="propose-circle-max"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Steward Term (months)</label>'+
+        '<input class="form-input" type="number" value="12" id="propose-circle-term"><span style="font-size:10px;color:var(--text-tertiary);margin-left:4px">or leave blank for global default</span></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Circle Expiry (months)</label>'+
+        '<input class="form-input" type="number" value="" id="propose-circle-expiry" placeholder="Global default"><span style="font-size:10px;color:var(--text-tertiary);margin-left:4px">blank = global default, 0 = never</span></div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Founding Resolution</div>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">The AI drafter will generate a founding declaration from these details. A deliberation cell will be created for the founding process.</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Founding Intent</label>'+
+        '<textarea class="form-input" rows="3" id="propose-circle-intent" placeholder="Describe why this circle should exist, what it will steward, and its founding goals..."></textarea></div>'+
+      '</div>';
+  } else if(type==='org'){
+    fields.style.display='none';
+    extra.style.display='';
+    extra.innerHTML=
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Organisation Details</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Full Name</label>'+
+        '<input class="form-input" id="propose-org-name" placeholder="e.g. Senegal Space Agency"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Acronym</label>'+
+        '<input class="form-input" id="propose-org-acronym" placeholder="e.g. ASE"><span style="font-size:10px;color:var(--text-tertiary);margin-left:4px">Extracted from [brackets] in title if provided</span></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Location</label>'+
+        '<input class="form-input" id="propose-org-location" placeholder="City, Country"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Knowledge Domains</label>'+
+        '<input class="form-input" id="propose-org-domains" placeholder="Aerospace Engineering, Remote Sensing..."></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Summary</label>'+
+        '<textarea class="form-input" rows="2" id="propose-org-summary" placeholder="What does this organisation do?"></textarea></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Website</label>'+
+        '<input class="form-input" id="propose-org-website" placeholder="https://..."></div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Founding Resolution</div>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">The AI drafter will generate a founding declaration and organisation settings. A founding cell will be created for the affiliation process.</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Affiliation Intent</label>'+
+        '<textarea class="form-input" rows="3" id="propose-org-intent" placeholder="Describe why this organisation should affiliate with the Commons..."></textarea></div>'+
+      '</div>';
+  } else {
+    fields.style.display='';
+    extra.style.display='none';
+    extra.innerHTML='';
+  }
+}
+
 function submitProposal(){
-  var title=document.getElementById('propose-title').value;
-  if(!title){alert('Please enter a title.');return;}
-  closeModal();
-  alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
+  var type=document.getElementById('propose-type').value;
+  if(type==='circle'){
+    var name=document.getElementById('propose-circle-name').value;
+    if(!name){alert('Please enter a circle name.');return;}
+    closeModal();
+    alert('Circle Formation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
+  } else if(type==='org'){
+    var name=document.getElementById('propose-org-name').value;
+    if(!name){alert('Please enter an organisation name.');return;}
+    closeModal();
+    alert('Organisation Affiliation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
+  } else {
+    var title=document.getElementById('propose-title').value;
+    if(!title){alert('Please enter a title.');return;}
+    closeModal();
+    alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
+  }
 }
 
 // ─── Acronym Extraction + Auto-linking ───
