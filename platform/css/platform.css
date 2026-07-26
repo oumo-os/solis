@@ -52,6 +52,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .nav-item:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.05)}
 .nav-item.active{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--gold)}
 .nav-icon{width:16px;text-align:center;font-size:13px;opacity:.7}
+.nav-icon i{width:16px;text-align:center}
 .nav-badge{margin-left:auto;background:var(--gold);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center}
 
 /* ── Main ── */

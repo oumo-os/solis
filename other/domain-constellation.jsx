@@ -10,6 +10,14 @@ const DOMAIN_IDS = [
   "robotics-automation","remote-sensing","space-architecture",
   "space-finance-economics","science-communication",
   "philosophy-ethics-space","art-culture-space",
+  "chemistry","mathematics","environmental-studies",
+  "geology","atmospheric-science","astrobiology","genetics",
+  "statistics","data-science","systems-science","quantum-computing",
+  "mechanical-engineering","electrical-engineering","nuclear-engineering",
+  "chemical-engineering","civil-engineering","nanotechnology",
+  "transportation","urban-planning","military-defence",
+  "psychology","sociology","anthropology","international-relations",
+  "education","geography","entrepreneurship","history","linguistics",
 ];
 
 const DOMAIN_META = {
@@ -29,6 +37,35 @@ const DOMAIN_META = {
   "science-communication":   { label:"Science Communication",     short:"SCICOMM",  color:"#FF90B0" },
   "philosophy-ethics-space": { label:"Philosophy & Ethics",       short:"PHIL",     color:"#D0C0A0" },
   "art-culture-space":       { label:"Art & Culture of Space",    short:"ART",      color:"#E0B0C0" },
+  "chemistry":               { label:"Chemistry",                 short:"CHEM",     color:"#E8A87C" },
+  "mathematics":             { label:"Mathematics",               short:"MATH",     color:"#8FB8DE" },
+  "environmental-studies":   { label:"Environmental Studies",     short:"ENV",      color:"#78C878" },
+  "geology":                 { label:"Geology",                   short:"GEO",      color:"#C4A882" },
+  "atmospheric-science":     { label:"Atmospheric Science",       short:"ATMOS",    color:"#A0C8E0" },
+  "astrobiology":            { label:"Astrobiology",              short:"ASTROBIO", color:"#90D090" },
+  "genetics":                { label:"Genetics & Genomics",       short:"GENE",     color:"#E0A0C0" },
+  "statistics":              { label:"Statistics",                short:"STAT",     color:"#B0B0E0" },
+  "data-science":            { label:"Data Science",              short:"DATA",     color:"#60C0C0" },
+  "systems-science":         { label:"Systems Science",           short:"SYS",      color:"#A0D0A0" },
+  "quantum-computing":       { label:"Quantum Computing",         short:"QC",       color:"#70E0E0" },
+  "mechanical-engineering":  { label:"Mechanical Engineering",    short:"MECH",     color:"#D0B080" },
+  "electrical-engineering":  { label:"Electrical Engineering",    short:"ELEC",     color:"#E0C060" },
+  "nuclear-engineering":     { label:"Nuclear Engineering",       short:"NUC",      color:"#F0A0A0" },
+  "chemical-engineering":    { label:"Chemical Engineering",      short:"CHEMENG",  color:"#D0C0A0" },
+  "civil-engineering":       { label:"Civil Engineering",         short:"CIVIL",    color:"#C0B090" },
+  "nanotechnology":          { label:"Nanotechnology",            short:"NANO",     color:"#D0D0E0" },
+  "transportation":          { label:"Transportation",            short:"TRANS",    color:"#A0B0C0" },
+  "urban-planning":          { label:"Urban & Settlement Planning", short:"URBAN",  color:"#C0C0A0" },
+  "military-defence":        { label:"Military & Defence Sciences", short:"MIL",   color:"#809080" },
+  "psychology":              { label:"Psychology",                short:"PSYCH",    color:"#E0B0D0" },
+  "sociology":               { label:"Sociology",                 short:"SOC",      color:"#D0C0B0" },
+  "anthropology":            { label:"Anthropology",              short:"ANTHRO",   color:"#C0B0A0" },
+  "international-relations": { label:"International Relations",   short:"IR",       color:"#B0C0D0" },
+  "education":               { label:"Education",                 short:"EDUC",     color:"#A0C0B0" },
+  "geography":               { label:"Geography",                 short:"GEOG",     color:"#90B090" },
+  "entrepreneurship":        { label:"Entrepreneurship & Business", short:"BIZ",   color:"#E0C080" },
+  "history":                 { label:"History",                   short:"HIST",     color:"#C0A090" },
+  "linguistics":             { label:"Linguistics",               short:"LING",     color:"#B0A0C0" },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,12 +77,14 @@ function generateMembers(){
   const rng=mkRng(42);
   const pick=(arr,n)=>{ const a=[...arr],out=[]; for(let i=0;i<n&&a.length;i++){ const idx=Math.floor(rng()*a.length); out.push(a.splice(idx,1)[0]); } return out; };
   const clusters=[
-    {core:["astronomy-astrophysics","earth-planetary-science","physics","remote-sensing"],size:8},
-    {core:["space-law-policy","philosophy-ethics-space","space-finance-economics","science-communication"],size:7},
-    {core:["aerospace-engineering","robotics-automation","materials-science","space-architecture"],size:6},
-    {core:["computer-science-software","telecommunications-signals","physics","robotics-automation"],size:6},
-    {core:["space-medicine-biology","earth-planetary-science","philosophy-ethics-space"],size:4},
-    {core:["art-culture-space","science-communication","philosophy-ethics-space"],size:4},
+    {core:["astronomy-astrophysics","earth-planetary-science","physics","remote-sensing","chemistry","geology","atmospheric-science"],size:8},
+    {core:["space-law-policy","philosophy-ethics-space","space-finance-economics","science-communication","international-relations"],size:7},
+    {core:["aerospace-engineering","robotics-automation","materials-science","space-architecture","mechanical-engineering","nanotechnology"],size:6},
+    {core:["computer-science-software","telecommunications-signals","physics","robotics-automation","mathematics","data-science","quantum-computing"],size:6},
+    {core:["space-medicine-biology","earth-planetary-science","philosophy-ethics-space","environmental-studies","astrobiology","genetics"],size:4},
+    {core:["art-culture-space","science-communication","philosophy-ethics-space","history","linguistics"],size:4},
+    {core:["psychology","sociology","anthropology","education"],size:4},
+    {core:["electrical-engineering","nuclear-engineering","chemical-engineering","civil-engineering"],size:3},
   ];
   const members=[];
   clusters.forEach((cl,ci)=>{
@@ -102,12 +141,19 @@ const WORLD=2400;
 function computeLayout(){
   const rng=mkRng(99);
   const seeds={
-    "astronomy-astrophysics":[380,380],"earth-planetary-science":[460,330],"remote-sensing":[420,460],
+    "astronomy-astrophysics":[280,280],"earth-planetary-science":[460,330],"remote-sensing":[420,460],
     "physics":[340,440],"computer-science-software":[880,480],"telecommunications-signals":[960,400],
     "robotics-automation":[840,560],"space-law-policy":[1380,480],"philosophy-ethics-space":[1480,560],
     "space-finance-economics":[1360,620],"science-communication":[1480,420],"art-culture-space":[1080,780],
     "space-medicine-biology":[1030,900],"materials-science":[930,840],"space-architecture":[1280,280],
-    "aerospace-engineering":[1200,380],
+    "aerospace-engineering":[1200,380],"chemistry":[500,120],"mathematics":[1150,150],"environmental-studies":[650,680],
+    "geology":[200,500],"atmospheric-science":[350,650],"astrobiology":[550,400],"genetics":[650,250],
+    "statistics":[1050,100],"data-science":[1300,100],"systems-science":[1100,250],"quantum-computing":[1350,250],
+    "mechanical-engineering":[750,600],"electrical-engineering":[850,420],"nuclear-engineering":[680,500],
+    "chemical-engineering":[700,350],"civil-engineering":[900,650],"nanotechnology":[950,480],
+    "transportation":[1050,700],"urban-planning":[1200,750],"military-defence":[1300,650],
+    "psychology":[1250,320],"sociology":[1350,500],"anthropology":[1450,400],"international-relations":[1500,300],
+    "education":[1550,450],"geography":[1400,550],"entrepreneurship":[1500,550],"history":[300,800],"linguistics":[450,850],
   };
   const pos={};
   DOMAIN_IDS.forEach(d=>{

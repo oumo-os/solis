@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="../shared/favicon.png">
   <link rel="icon" type="image/x-icon" href="../shared/favicon.ico">
   <link rel="stylesheet" href="../shared/fonts.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="css/platform.css">
 </head>
 <body>
@@ -23,32 +24,32 @@
     </div>
     <div class="nav-section">
       <div class="nav-label">Personal</div>
-      <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon">⌂</span> Personal</div>
-      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon">◫</span> Inbox <span class="nav-badge">3</span></div>
-      <div class="nav-item" data-v="registration" onclick="openRegModal(true)"><span class="nav-icon">✎</span> Edit Profile</div>
+      <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon"><i class="fa-solid fa-user"></i></span> Personal</div>
+      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Inbox <span class="nav-badge">3</span></div>
+      <div class="nav-item" data-v="registration" onclick="openRegModal(true)"><span class="nav-icon"><i class="fa-solid fa-pen-to-square"></i></span> Edit Profile</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Commons</div>
-      <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon">◎</span> Discussions</div>
-      <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon">◈</span> Projects</div>
-      <div class="nav-item" data-v="resolutions" onclick="nav('resolutions')"><span class="nav-icon">&#11041;</span> Governance</div>
-      <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon">◉</span> Observatory</div>
-      <div class="nav-item" data-v="domain-map" onclick="nav('domain-map')"><span class="nav-icon">✦</span> Domain Map</div>
+      <div class="nav-item" data-v="commons" onclick="nav('commons')"><span class="nav-icon"><i class="fa-solid fa-comments"></i></span> Discussions</div>
+      <div class="nav-item" data-v="undertakings" onclick="nav('undertakings')"><span class="nav-icon"><i class="fa-solid fa-diagram-project"></i></span> Projects</div>
+      <div class="nav-item" data-v="resolutions" onclick="nav('resolutions')"><span class="nav-icon"><i class="fa-solid fa-landmark"></i></span> Governance</div>
+      <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon"><i class="fa-solid fa-eye"></i></span> Observatory</div>
+      <div class="nav-item" data-v="domain-map" onclick="nav('domain-map')"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Domain Map</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Spaces</div>
-      <div class="nav-item" data-v="circles" onclick="nav('circles')"><span class="nav-icon">⬡</span> Circles</div>
-      <div class="nav-item" data-v="cells" onclick="nav('cells')"><span class="nav-icon">◇</span> Cells</div>
+      <div class="nav-item" data-v="circles" onclick="nav('circles')"><span class="nav-icon"><i class="fa-solid fa-circle-nodes"></i></span> Circles</div>
+      <div class="nav-item" data-v="cells" onclick="nav('cells')"><span class="nav-icon"><i class="fa-solid fa-cubes"></i></span> Cells</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Oversight</div>
-      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon">◆</span> STF Dash <span class="nav-badge">1</span></div>
-      <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon">◷</span> Participants</div>
-      <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon">◎</span> Organisations</div>
-      <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon">◌</span> Profile</div>
+      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge">1</span></div>
+      <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Participants</div>
+      <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon"><i class="fa-solid fa-building"></i></span> Organisations</div>
+      <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> Profile</div>
     </div>
     <div class="nav-section">
-      <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon">⚙</span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
+      <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
     </div>
   </nav>
 
@@ -71,7 +72,7 @@
   <div class="view active" id="view-personal">
     <div class="page-title">Oumo Samuel</div>
     <div class="page-sub">Participant · Kampala, Uganda · Member since Jul 2026 · Active</div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong. A deliberation cell you're watching has crystallised a motion — it's now heading to aSTF for blind adjudication. <span style="color:var(--gold)">Cell #Cell-21 → aSTF #Cell-23</span></div></div>
+    <div class="insight"><div class="iicon"><i class="fa-solid fa-bolt"></i></div><div class="itext"><strong>Insight Engine:</strong> Your Space Law competence is strong. A deliberation cell you're watching has crystallised a motion — it's now heading to aSTF for blind adjudication. <span style="color:var(--gold)">Cell #Cell-21 → aSTF #Cell-23</span></div></div>
     <div class="g4">
       <div class="card metric-card"><div class="mc-label">Standing</div><div class="mc-val">847</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift mc-up">↑ 42 this cycle</div></div>
       <div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">1,200</div><div class="mc-sub">Declared + verified</div><div class="mc-drift mc-flat">MSc Space Studies</div></div>
@@ -170,12 +171,12 @@
           <div class="post-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px">OS</div>
           <div style="flex:1">
             <div class="compose-type-selector" id="compose-type-selector">
-              <button class="compose-type-btn active" data-type="discussion" onclick="selectContentType(this,'discussion')"><span class="compose-type-icon">&#9678;</span><span class="compose-type-label">Discussion</span></button>
-              <button class="compose-type-btn" data-type="proposal" onclick="selectContentType(this,'proposal')"><span class="compose-type-icon">&#9674;</span><span class="compose-type-label">Proposal</span></button>
-              <button class="compose-type-btn" data-type="event" onclick="selectContentType(this,'event')"><span class="compose-type-icon">&#9782;</span><span class="compose-type-label">Event</span></button>
-              <button class="compose-type-btn" data-type="article" onclick="selectContentType(this,'article')"><span class="compose-type-icon">&#9998;</span><span class="compose-type-label">Article</span></button>
-              <button class="compose-type-btn" data-type="opportunity" onclick="selectContentType(this,'opportunity')"><span class="compose-type-icon">&#10022;</span><span class="compose-type-label">Opportunity</span></button>
-              <button class="compose-type-btn" data-type="publication" onclick="selectContentType(this,'publication')"><span class="compose-type-icon">&#9673;</span><span class="compose-type-label">Publication</span></button>
+              <button class="compose-type-btn active" data-type="discussion" onclick="selectContentType(this,'discussion')"><span class="compose-type-icon"><i class="fa-solid fa-comment"></i></span><span class="compose-type-label">Discussion</span></button>
+              <button class="compose-type-btn" data-type="proposal" onclick="selectContentType(this,'proposal')"><span class="compose-type-icon"><i class="fa-solid fa-file-lines"></i></span><span class="compose-type-label">Proposal</span></button>
+              <button class="compose-type-btn" data-type="event" onclick="selectContentType(this,'event')"><span class="compose-type-icon"><i class="fa-solid fa-calendar"></i></span><span class="compose-type-label">Event</span></button>
+              <button class="compose-type-btn" data-type="article" onclick="selectContentType(this,'article')"><span class="compose-type-icon"><i class="fa-solid fa-newspaper"></i></span><span class="compose-type-label">Article</span></button>
+              <button class="compose-type-btn" data-type="opportunity" onclick="selectContentType(this,'opportunity')"><span class="compose-type-icon"><i class="fa-solid fa-award"></i></span><span class="compose-type-label">Opportunity</span></button>
+              <button class="compose-type-btn" data-type="publication" onclick="selectContentType(this,'publication')"><span class="compose-type-icon"><i class="fa-solid fa-book"></i></span><span class="compose-type-label">Publication</span></button>
             </div>
             <div class="compose-pub-subtype" id="compose-pub-subtype" style="display:none">
               <select class="form-input" id="compose-pub-type-select" style="font-size:11px;padding:4px 8px;margin-bottom:8px">
@@ -190,9 +191,9 @@
             <div id="compose-extra-fields"></div>
             <div class="post-compose-actions">
               <div class="post-compose-tools">
-                <button title="Attach file">&#128206;</button>
-                <button title="Add domain tag">&#9881;</button>
-                <button title="Add link">&#128279;</button>
+                <button title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+                <button title="Add domain tag"><i class="fa-solid fa-tag"></i></button>
+                <button title="Add link"><i class="fa-solid fa-link"></i></button>
               </div>
               <button class="btn btn-primary btn-sm">Post</button>
             </div>
@@ -218,13 +219,13 @@
         <div class="aside-card">
           <div class="aside-title">From Discussion to Action</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
-            <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
-            <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
-            <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
-            <div><span style="color:var(--green)">&#9679;</span> Resolution &#8594; xSTF &#8594; Deliverable</div>
+            <div style="margin-bottom:4px"><span style="color:var(--teal)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Discussion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> steward sponsors</div>
+            <div style="margin-bottom:4px"><span style="color:var(--gold)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Proposal</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> circle deliberates</div>
+            <div style="margin-bottom:4px"><span style="color:var(--purple)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Motion</div>
+            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> aSTF adjudicates (blind)</div>
+            <div><span style="color:var(--green)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Resolution <i class="fa-solid fa-arrow-right" style="font-size:8px"></i> xSTF <i class="fa-solid fa-arrow-right" style="font-size:8px"></i> Deliverable</div>
           </div>
         </div>
         <div class="aside-card">
@@ -721,7 +722,7 @@
           <tr class="click" onclick="nav('stf-vstf-competence')"><td><span class="tag tag-purple" style="font-size:8px">vSTF</span></td><td class="s">Competence claims: Akello J. — 5 domains</td><td>Space Law</td><td class="m">Jul 19</td><td><span class="badge b-pending">Invitation</span></td></tr>
           <tr class="click" onclick="nav('stf-astf')"><td><span class="tag tag-blue" style="font-size:8px">aSTF</span></td><td class="s">Motion adjudication: Debris liability framework</td><td>Space Law</td><td class="m">Jul 28</td><td><span class="badge b-active">Active</span></td></tr>
           <tr class="click" onclick="nav('stf-pastf')"><td><span class="tag tag-blue" style="font-size:8px">p-aSTF</span></td><td class="s">Periodic review: Space Law Circle health</td><td>Commons</td><td class="m">Aug 05</td><td><span class="badge b-pending">Selecting</span></td></tr>
-          <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial">🔒 Closed</span></td></tr>
+          <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial"><i class="fa-solid fa-lock"></i> Closed</span></td></tr>
           <tr class="click" onclick="nav('stf-xstf')"><td><span class="tag tag-green" style="font-size:8px">xSTF</span></td><td class="s">Execution: ITU coordination guide deliverable</td><td>Space Law</td><td class="m">Aug 15</td><td><span class="badge b-active">Active</span></td></tr>
         </table>
       </div>
@@ -756,7 +757,7 @@
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Steward Candidacy Assessment</div>
-        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
+        <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div class="sec">Candidate Profile</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
@@ -773,9 +774,9 @@
         </div>
         <div class="sec">Evidence Package</div>
         <div class="evidence-shelf" style="margin-bottom:16px">
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — Policy Brief Publication</div><div class="ev-meta">Submitted Jul 11 · PDF · 340KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Ssempa D. — UAS Membership Letter</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Policy Brief Publication</div><div class="ev-meta">Submitted Jul 11 · PDF · 340KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — UAS Membership Letter</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
         </div>
         <div class="sec">Your Approval Verdict</div>
         <div class="card" style="margin-bottom:16px">
@@ -826,12 +827,12 @@
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Competence Claims Assessment</div>
-        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
+        <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div class="sec">Evidence Package</div>
         <div class="evidence-shelf" style="margin-bottom:16px">
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
-          <div class="evidence-item"><div class="ev-icon">📄</div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
+          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
         </div>
         <div class="sec">Wh Assessment Table</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Investigate, evaluate, and assess whether claims are acceptable. Adjust where necessary. Leave non-evaluated claims unmarked with reason.</div>
@@ -909,7 +910,7 @@
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">■ jSTF — Judicial Investigation</div>
-        <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center">🔒 &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
+        <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center"><i class="fa-solid fa-lock"></i> &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
 
         <!-- Anonymous Report -->
         <div class="card" style="margin-bottom:16px;border-left:3px solid var(--red)">
@@ -957,7 +958,7 @@
           <div class="sec">Activity Restriction During Investigation</div>
           <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">The jSTF can restrict the reported member's activity during deliberation to prevent potential harm or interference.</div>
           <div class="flex gap-3 mb-3" style="align-items:center;padding:8px 12px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius)">
-            <span style="font-size:14px">⚠</span>
+            <span style="font-size:14px;color:var(--amber)"><i class="fa-solid fa-triangle-exclamation"></i></span>
             <div style="flex:1">
               <div style="font-size:12px;font-weight:500;color:var(--amber)">Steward privileges suspended</div>
               <div style="font-size:11px;color:var(--text-tertiary)">Daniel J. cannot participate in Circle deliberations or vote on motions during this investigation.</div>
@@ -1030,7 +1031,7 @@
           <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Judicial</span></div>
           <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 01, 2026</span></div>
           <div class="aside-row"><span class="aside-label">Team</span><span style="font-size:11px;color:var(--text)">3 investigators</span></div>
-          <div class="aside-row"><span class="aside-label">Access</span><span style="font-size:11px;color:var(--red)">🔒 Sealed</span></div>
+          <div class="aside-row"><span class="aside-label">Access</span><span style="font-size:11px;color:var(--red)"><i class="fa-solid fa-lock"></i> Sealed</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Accused</div>
@@ -1075,7 +1076,7 @@
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
-        <div class="blind-wall">🔒 &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
+        <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
         <div class="sec">Motion Record</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">From Cell #Cell-21 · Crystallised Jul 21</span></div>
@@ -1197,7 +1198,7 @@
     <div class="layout-split">
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ p-aSTF — Periodic Circle Health Review</div>
-        <div class="blind-wall">🔒 &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
+        <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
 
         <!-- Layer 1: Circle Rubric -->
         <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 1 — Circle Rubric (30 pts)</div>
@@ -3649,9 +3650,9 @@ function renderEventsList(filter) {
     return;
   }
   var typeIcons = {
-    'circle-created': '&#9670;', 'circle-suggested': '&#9671;', 'circle-archived': '&#9674;',
-    'steward-confirmed': '&#9733;', 'steward-resigned': '&#9734;',
-    'member-joined': '&#10010;'
+    'circle-created': '<i class="fa-solid fa-circle-plus"></i>', 'circle-suggested': '<i class="fa-regular fa-circle"></i>', 'circle-archived': '<i class="fa-solid fa-circle-minus"></i>',
+    'steward-confirmed': '<i class="fa-solid fa-star"></i>', 'steward-resigned': '<i class="fa-regular fa-star"></i>',
+    'member-joined': '<i class="fa-solid fa-user-plus"></i>'
   };
   var typeLabels = {
     'circle-created': 'Circle Created', 'circle-suggested': 'Circle Suggested', 'circle-archived': 'Circle Archived',
@@ -3916,7 +3917,7 @@ loadMockData().then(function() {
   DM_META = {};
   DM_IDS.forEach(function(id){
     var d = MOCK.domains[id];
-    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle, type: d.type || 'knowledge' };
+    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle, type: d.type || 'knowledge', taxonomy: d.taxonomy || '' };
   });
   renderDefaultInterestRows();
   dmReinit();
@@ -4566,7 +4567,15 @@ var DM_IDS=[
   "computer-science-software","physics","materials-science",
   "robotics-automation","remote-sensing","space-architecture",
   "space-finance-economics","science-communication",
-  "philosophy-ethics-space","art-culture-space"
+  "philosophy-ethics-space","art-culture-space",
+  "chemistry","mathematics","environmental-studies",
+  "geology","atmospheric-science","astrobiology","genetics",
+  "statistics","data-science","systems-science","quantum-computing",
+  "mechanical-engineering","electrical-engineering","nuclear-engineering",
+  "chemical-engineering","civil-engineering","nanotechnology",
+  "transportation","urban-planning","military-defence",
+  "psychology","sociology","anthropology","international-relations",
+  "education","geography","entrepreneurship","history","linguistics"
 ];
 var DM_META={
   "astronomy-astrophysics":{label:"Astronomy & Astrophysics",short:"ASTRO",color:"#6EB8FF",steward:true},
@@ -4584,7 +4593,36 @@ var DM_META={
   "space-finance-economics":{label:"Space Finance & Economics",short:"FIN",color:"#FFD060",steward:false},
   "science-communication":{label:"Science Communication",short:"SCICOMM",color:"#FF90B0",steward:false},
   "philosophy-ethics-space":{label:"Philosophy & Ethics",short:"PHIL",color:"#D0C0A0",steward:true},
-  "art-culture-space":{label:"Art & Culture of Space",short:"ART",color:"#E0B0C0",steward:false}
+  "art-culture-space":{label:"Art & Culture of Space",short:"ART",color:"#E0B0C0",steward:false},
+  "chemistry":{label:"Chemistry",short:"CHEM",color:"#E8A87C",steward:false},
+  "mathematics":{label:"Mathematics",short:"MATH",color:"#8FB8DE",steward:false},
+  "environmental-studies":{label:"Environmental Studies",short:"ENV",color:"#78C878",steward:false},
+  "geology":{label:"Geology",short:"GEO",color:"#C4A882",steward:false},
+  "atmospheric-science":{label:"Atmospheric Science",short:"ATMOS",color:"#A0C8E0",steward:false},
+  "astrobiology":{label:"Astrobiology",short:"ASTROBIO",color:"#90D090",steward:false},
+  "genetics":{label:"Genetics & Genomics",short:"GENE",color:"#E0A0C0",steward:false},
+  "statistics":{label:"Statistics",short:"STAT",color:"#B0B0E0",steward:false},
+  "data-science":{label:"Data Science",short:"DATA",color:"#60C0C0",steward:false},
+  "systems-science":{label:"Systems Science",short:"SYS",color:"#A0D0A0",steward:false},
+  "quantum-computing":{label:"Quantum Computing",short:"QC",color:"#70E0E0",steward:false},
+  "mechanical-engineering":{label:"Mechanical Engineering",short:"MECH",color:"#D0B080",steward:false},
+  "electrical-engineering":{label:"Electrical Engineering",short:"ELEC",color:"#E0C060",steward:false},
+  "nuclear-engineering":{label:"Nuclear Engineering",short:"NUC",color:"#F0A0A0",steward:false},
+  "chemical-engineering":{label:"Chemical Engineering",short:"CHEMENG",color:"#D0C0A0",steward:false},
+  "civil-engineering":{label:"Civil Engineering",short:"CIVIL",color:"#C0B090",steward:false},
+  "nanotechnology":{label:"Nanotechnology",short:"NANO",color:"#D0D0E0",steward:false},
+  "transportation":{label:"Transportation",short:"TRANS",color:"#A0B0C0",steward:false},
+  "urban-planning":{label:"Urban & Settlement Planning",short:"URBAN",color:"#C0C0A0",steward:false},
+  "military-defence":{label:"Military & Defence Sciences",short:"MIL",color:"#809080",steward:false},
+  "psychology":{label:"Psychology",short:"PSYCH",color:"#E0B0D0",steward:false},
+  "sociology":{label:"Sociology",short:"SOC",color:"#D0C0B0",steward:false},
+  "anthropology":{label:"Anthropology",short:"ANTHRO",color:"#C0B0A0",steward:false},
+  "international-relations":{label:"International Relations",short:"IR",color:"#B0C0D0",steward:false},
+  "education":{label:"Education",short:"EDUC",color:"#A0C0B0",steward:false},
+  "geography":{label:"Geography",short:"GEOG",color:"#90B090",steward:false},
+  "entrepreneurship":{label:"Entrepreneurship & Business",short:"BIZ",color:"#E0C080",steward:false},
+  "history":{label:"History",short:"HIST",color:"#C0A090",steward:false},
+  "linguistics":{label:"Linguistics",short:"LING",color:"#B0A0C0",steward:false}
 };
 
 function dmMkRng(seed){var s=seed>>>0;return function(){s=(s*1664525+1013904223)>>>0;return s/0xffffffff;};}
@@ -4592,12 +4630,14 @@ function dmGenMembers(){
   var rng=dmMkRng(42);
   var pick=function(arr,n){var a=arr.slice(),out=[];for(var i=0;i<n&&a.length;i++){var idx=Math.floor(rng()*a.length);out.push(a.splice(idx,1)[0]);}return out;};
   var clusters=[
-    {core:["astronomy-astrophysics","earth-planetary-science","physics","remote-sensing"],size:8},
-    {core:["space-law-policy","philosophy-ethics-space","space-finance-economics","science-communication"],size:7},
-    {core:["aerospace-engineering","robotics-automation","materials-science","space-architecture"],size:6},
-    {core:["computer-science-software","telecommunications-signals","physics","robotics-automation"],size:6},
-    {core:["space-medicine-biology","earth-planetary-science","philosophy-ethics-space"],size:4},
-    {core:["art-culture-space","science-communication","philosophy-ethics-space"],size:4}
+    {core:["astronomy-astrophysics","earth-planetary-science","physics","remote-sensing","chemistry","geology","atmospheric-science"],size:8},
+    {core:["space-law-policy","philosophy-ethics-space","space-finance-economics","science-communication","international-relations"],size:7},
+    {core:["aerospace-engineering","robotics-automation","materials-science","space-architecture","mechanical-engineering","nanotechnology"],size:6},
+    {core:["computer-science-software","telecommunications-signals","physics","robotics-automation","mathematics","data-science","quantum-computing"],size:6},
+    {core:["space-medicine-biology","earth-planetary-science","philosophy-ethics-space","environmental-studies","astrobiology","genetics"],size:4},
+    {core:["art-culture-space","science-communication","philosophy-ethics-space","history","linguistics"],size:4},
+    {core:["psychology","sociology","anthropology","education"],size:4},
+    {core:["electrical-engineering","nuclear-engineering","chemical-engineering","civil-engineering"],size:3}
   ];
   var members=[];
   clusters.forEach(function(cl,ci){
@@ -4667,7 +4707,15 @@ function dmLayout(){
     "robotics-automation":[640,460],"space-law-policy":[1080,380],"philosophy-ethics-space":[1180,460],
     "space-finance-economics":[1060,520],"science-communication":[1180,320],"art-culture-space":[880,680],
     "space-medicine-biology":[830,700],"materials-science":[730,640],"space-architecture":[980,180],
-    "aerospace-engineering":[900,280],"uas":[380,180],"sgac":[1100,280],"gss":[300,130]
+    "aerospace-engineering":[900,280],"uas":[380,180],"sgac":[1100,280],"gss":[300,130],
+    "chemistry":[500,120],"mathematics":[1150,150],"environmental-studies":[650,680],
+    "geology":[200,500],"atmospheric-science":[350,650],"astrobiology":[550,400],"genetics":[650,250],
+    "statistics":[1050,100],"data-science":[1300,100],"systems-science":[1100,250],"quantum-computing":[1350,250],
+    "mechanical-engineering":[750,600],"electrical-engineering":[850,420],"nuclear-engineering":[680,500],
+    "chemical-engineering":[700,350],"civil-engineering":[900,650],"nanotechnology":[950,480],
+    "transportation":[1050,700],"urban-planning":[1200,750],"military-defence":[1300,650],
+    "psychology":[1250,320],"sociology":[1350,500],"anthropology":[1450,400],"international-relations":[1500,300],
+    "education":[1550,450],"geography":[1400,550],"entrepreneurship":[1500,550],"history":[300,800],"linguistics":[450,850]
   };
   var pos={};
   DM_IDS.forEach(function(d){
@@ -4998,9 +5046,9 @@ function computeProgress(cell) {
 }
 
 function statusIcon(status) {
-  if (status === 'complete') return '<span class="task-status-complete">✓</span>';
-  if (status === 'in-progress') return '<span class="task-status-in-progress">△</span>';
-  return '<span class="task-status-pending">—</span>';
+  if (status === 'complete') return '<span class="task-status-complete"><i class="fa-solid fa-circle-check"></i></span>';
+  if (status === 'in-progress') return '<span class="task-status-in-progress"><i class="fa-solid fa-spinner"></i></span>';
+  return '<span class="task-status-pending"><i class="fa-regular fa-circle"></i></span>';
 }
 
 function renderTaskList(cellId, containerId, addContainerId) {
@@ -5015,7 +5063,7 @@ function renderTaskList(cellId, containerId, addContainerId) {
     var locked = t.locked;
     var actions = '';
     if (!locked) {
-      actions = '<div class="task-actions"><button class="task-action-btn" title="Edit" onclick="event.stopPropagation();openTaskModal(\'' + cellId + '\',' + i + ')">✎</button><button class="task-action-btn" title="Delete" onclick="event.stopPropagation();deleteTask(\'' + cellId + '\',' + i + ')">×</button></div>';
+      actions = '<div class="task-actions"><button class="task-action-btn" title="Edit" onclick="event.stopPropagation();openTaskModal(\'' + cellId + '\',' + i + ')"><i class="fa-solid fa-pen"></i></button><button class="task-action-btn" title="Delete" onclick="event.stopPropagation();deleteTask(\'' + cellId + '\',' + i + ')"><i class="fa-solid fa-xmark"></i></button></div>';
     }
     html += '<div class="task-item" onclick="toggleTaskStatus(\'' + cellId + '\',' + i + ')">';
     html += '<span class="task-icon">' + statusIcon(t.status) + '</span>';
@@ -5086,7 +5134,7 @@ function renderDeliverables(cellId, containerId) {
   if (delivs.length) {
     html += '<div class="flex gap-2 flex-wrap" style="margin-top:4px">';
     delivs.forEach(function(d) {
-      html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px">📄 ' + esc(d.name) + (d.detail ? ' (' + esc(d.detail) + ')' : '') + '</span>';
+      html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px"><i class="fa-solid fa-file" style="margin-right:3px"></i>' + esc(d.name) + (d.detail ? ' (' + esc(d.detail) + ')' : '') + '</span>';
     });
     html += '</div>';
   }
@@ -5186,7 +5234,7 @@ function renderXstf(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
   var blind = document.getElementById('xstf-blind');
-  if (blind) blind.innerHTML = cell.blind ? '🔒 &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; 🔒' : '';
+  if (blind) blind.innerHTML = cell.blind ? '<i class="fa-solid fa-lock"></i> &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; <i class="fa-solid fa-lock"></i>' : '';
   var meta = document.getElementById('xstf-meta');
   if (meta) {
     meta.innerHTML = '<div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>' +
@@ -5211,7 +5259,7 @@ function renderXstf(cellId) {
     if (delivs.length) {
       html += '<div><strong style="color:var(--text)">Attachments:</strong></div><div class="flex gap-2" style="margin-top:4px">';
       delivs.forEach(function(d) {
-        html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px">📄 ' + esc(d.name) + '</span>';
+        html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px"><i class="fa-solid fa-file" style="margin-right:3px"></i>' + esc(d.name) + '</span>';
       });
       html += '</div>';
     }
