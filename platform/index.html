@@ -3056,7 +3056,56 @@ function updateVoteSummary() {
       var val = d.voters[v];
       if (val === undefined) {
         rows += '<td style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">—</td>';
-      } else {
+  } else if(type==='project'){
+    fields.style.display='none';
+    extra.style.display='';
+    extra.innerHTML=
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Project Details</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Title</label>'+
+        '<input class="form-input" id="propose-proj-title" placeholder="e.g. East Africa Space Sector Mapping"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
+        '<textarea class="form-input" rows="3" id="propose-proj-desc" placeholder="What will this project produce? What is the goal?"></textarea></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Required Domains</label>'+
+        '<input class="form-input" id="propose-proj-domains" placeholder="Policy, Remote Sensing..."></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Deadline</label>'+
+        '<input class="form-input" type="date" id="propose-proj-deadline"></div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Deliverable Specs</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Deliverable Name</label>'+
+        '<input class="form-input" id="propose-proj-delname" placeholder="e.g. East Africa Sector Mapping Report"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
+        '<textarea class="form-input" rows="2" id="propose-proj-deldesc" placeholder="What should the deliverable contain?"></textarea></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+
+          '<div><label class="form-label">Sections</label>'+
+          '<input class="form-input" type="number" id="propose-proj-sections" value="4" min="1"></div>'+
+          '<div><label class="form-label">Word Count</label>'+
+          '<input class="form-input" id="propose-proj-wordcount" placeholder="8,000–12,000"></div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
+          '<div><label class="form-label">Language</label>'+
+          '<input class="form-input" id="propose-proj-lang" value="Plain English"></div>'+
+          '<div><label class="form-label">Review Process</label>'+
+          '<select class="form-input" id="propose-proj-review">'+
+            '<option value="draft-circle-final">Draft → Circle → Final</option>'+
+            '<option value="draft-direct">Draft → Direct</option>'+
+          '</select></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Team &amp; Sponsorship</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Team Members</label>'+
+        '<input class="form-input" id="propose-proj-team" placeholder="Comma-separated names, or leave blank for open apply">'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Leave blank to allow anyone to apply</div></div>'+
+        '<div><label class="form-label">Sponsoring Circle</label>'+
+        '<select class="form-input" id="propose-proj-circle">'+
+          '<option value="">None — Common project</option>'+
+          '<option value="space-law">Space Law Circle</option>'+
+          '<option value="remote-sensing">Remote Sensing Circle</option>'+
+        '</select></div>'+
+      '</div>';
+  } else {
         var color = val > 0 ? 'var(--green)' : 'var(--red)';
         rows += '<td style="text-align:right;font-family:var(--mono);font-size:11px;font-weight:500;color:' + color + '">' + (val > 0 ? '+' : '') + fmt(val) + '</td>';
       }
@@ -4362,8 +4411,12 @@ function submitProposal(){
     if(!name){alert('Please enter an organisation name.');return;}
     closeModal();
     alert('Organisation Affiliation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
+  } else if(type==='project'){
+    var title=document.getElementById('propose-proj-title').value;
+    if(!title){alert('Please enter a project title.');return;}
+    closeModal();
+    alert('Project proposal "'+title+'" submitted! A project cell will be created after deliberation.');
   } else {
-    var title=document.getElementById('propose-title').value;
     if(!title){alert('Please enter a title.');return;}
     closeModal();
     alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
