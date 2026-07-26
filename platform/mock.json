@@ -1575,7 +1575,7 @@
     { "id": "GE-005", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Mensah Naa joined the circle.", "participant": "Mensah Naa" },
     { "id": "GE-006", "type": "circle-suggested", "circle": "Mars Habitability Circle", "date": "Jun 2026", "text": "Circle suggested, awaiting founding members." },
     { "id": "GE-007", "type": "circle-archived", "circle": "Frequency Allocation Circle", "date": "Apr 2026", "text": "Circle archived due to scope overlap with Space Law Circle." },
-    { "id": "GE-008", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Diallo Mamadou invited to the circle.", "participant": "Diallo Mamadou" }
+    { "id": "GE-008", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Diallo Mamadou accepted into the circle.", "participant": "Diallo Mamadou" }
   ],
 
   "circleApplications": [
@@ -1615,8 +1615,8 @@
       "matchedDomains": ["Space Law", "Policy"],
       "interestScore": 92,
       "competenceScore": 82,
-      "status": "invited",
-      "invitedDate": "Jul 18, 2026"
+      "status": "selected",
+      "selectedDate": "Jul 18, 2026"
     },
     {
       "id": "cand-2",
@@ -1628,7 +1628,7 @@
       "interestScore": 70,
       "competenceScore": 78,
       "status": "pending",
-      "invitedDate": null
+      "selectedDate": null
     },
     {
       "id": "cand-3",
@@ -1640,7 +1640,7 @@
       "interestScore": 65,
       "competenceScore": 71,
       "status": "pending",
-      "invitedDate": null
+      "selectedDate": null
     }
   ],
 

@@ -4603,7 +4603,7 @@ function autoLinkOrgs(text) {
 // Inbox modals
 function modalInvitation(){
   openModal('<div class="modal-header">vSTF Invitation</div>'+
-    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">You have been invited to serve as a vSTF assessor for <strong>Candidate Verification — Policy &amp; Advocacy</strong>.</div>'+
+    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">You have been selected to serve as a vSTF assessor for <strong>Candidate Verification — Policy &amp; Advocacy</strong>.</div>'+
     '<div style="margin:12px 0;font-size:12px"><strong>Estimated time:</strong> 4–6 hours<br><strong>Expires:</strong> Jul 19, 2026<br><strong>Blind parallel:</strong> Each assessor sees the same evidence independently</div>'+
     '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Decline</button>'+
     '<button class="btn btn-primary" onclick="closeModal();nav(\'stf-vstf\')">Accept</button></div>',{size:'sm'});
@@ -5789,7 +5789,7 @@ function openXstfInviteModal(candidateId) {
   document.getElementById('xstf-invite-title').textContent = 'xSTF Task Invitation';
   var body = document.getElementById('xstf-invite-body');
   body.innerHTML = '<div style="margin-bottom:16px">'
-    + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">You have been invited to join an xSTF execution team based on your domain match and competence profile.</div>'
+    + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">You have been selected to join an xSTF execution team based on your domain match and competence profile.</div>'
     + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px">' + esc(stf.title || 'ITU Coordination Guide') + '</div>'
     + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px">' + esc(stf.purpose || 'Execution') + ' · Commissioned by ' + esc(stf.circle || 'Space Law Circle') + '</div>'
     + '<div style="margin-bottom:12px"><span style="font-size:11px;color:var(--text-tertiary)">Match Score: </span><span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--green)">' + cand.matchScore + '%</span></div>'
