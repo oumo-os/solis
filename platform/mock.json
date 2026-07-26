@@ -743,15 +743,28 @@
     {
       "id": "cell-21",
       "type": "Deliberation Cell",
+      "delibType": "general",
       "title": "Debris liability framework — who bears responsibility?",
       "participants": 12,
       "status": "Active",
       "daysActive": 3,
       "domains": ["Space Law", "Liability", "Remote Sensing"],
+      "source": { "type": "commons-thread", "proposer": "Akello J." },
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
+        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 3 }
+      ],
       "circles": [
         { "name": "Space Law Circle", "initials": "SL", "gradient": "linear-gradient(135deg,var(--purple),#3a1860)", "status": "active", "role": "Lead" },
         { "name": "Remote Sensing Circle", "initials": "RS", "gradient": "linear-gradient(135deg,var(--teal),#0d4040)", "status": "active", "role": "Contributing" },
         { "name": "Mars Habitability Circle", "initials": "MH", "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)", "status": "self-disqualified", "role": "Withdrew" }
+      ],
+      "resolution": { "status": "Ready" },
+      "messages": [
+        { "author": "Akello J.", "initials": "AJ", "text": "The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.", "time": "3d ago", "color": "var(--purple)" },
+        { "author": "Osei Kwame", "initials": "OK", "text": "What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?", "time": "2d ago", "color": "var(--amber)" },
+        { "author": "Mwenda Thomas", "initials": "MT", "text": "From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.", "time": "2d ago", "color": "var(--navy-light)" },
+        { "author": "Namugga Claire", "initials": "NC", "text": "I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.", "time": "1d ago", "color": "var(--teal)" }
       ],
       "draftResolutions": [
         {
@@ -925,6 +938,264 @@
       "participants": 6,
       "status": "Archived",
       "archivedDate": "Apr 2026"
+    },
+    {
+      "id": "cell-35",
+      "type": "Deliberation Cell",
+      "delibType": "org-creation",
+      "title": "Org: Senegal Space Agency [ASE] Affiliation",
+      "participants": 6,
+      "domains": ["Aerospace Engineering", "Remote Sensing"],
+      "status": "Active",
+      "source": { "type": "org-proposal", "proposer": "Diallo Mamadou" },
+      "orgDetails": {
+        "name": "Senegal Space Agency",
+        "acronym": "ASE",
+        "location": "Dakar, Senegal",
+        "domains": "Aerospace Engineering, Remote Sensing",
+        "summary": "National space agency responsible for coordinating Senegal's space programme, satellite operations, and earth observation data distribution.",
+        "website": "https://ase.sn"
+      },
+      "participatingCircles": [
+        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 4 },
+        { "name": "Space Law Circle", "role": "Contributing", "votes": 2 }
+      ],
+      "resolution": { "status": "Draft" },
+      "messages": [
+        { "author": "Diallo Mamadou", "initials": "DM", "text": "ASE has been operational for 3 years with strong earth observation capabilities. Affiliation would strengthen the Commons' data coverage across West Africa.", "time": "2d ago", "color": "var(--purple)" },
+        { "author": "Kimani A.", "initials": "KA", "text": "Their SAR data is excellent. We should check data quality standards and sharing protocols before approving.", "time": "1d ago", "color": "var(--teal)" },
+        { "author": "You", "initials": "OS", "text": "Agreed. What's their open data policy? We need to ensure Commons members can access their datasets.", "time": "18h ago", "gold": true }
+      ]
+    },
+    {
+      "id": "cell-36",
+      "type": "Deliberation Cell",
+      "delibType": "org-creation",
+      "title": "Org: Ghana Space Society [GSS] Affiliation",
+      "participants": 5,
+      "domains": ["Science Communication", "Education"],
+      "status": "Archived",
+      "archivedDate": "Jun 2026",
+      "source": { "type": "org-proposal", "proposer": "Osei Kwame" },
+      "orgDetails": {
+        "name": "Ghana Space Society",
+        "acronym": "GSS",
+        "location": "Accra, Ghana",
+        "domains": "Science Communication, Education",
+        "summary": "Non-profit promoting space science education and public engagement across Ghana through outreach programmes and school partnerships.",
+        "website": null
+      },
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Contributing", "votes": 3 }
+      ],
+      "resolution": { "status": "Approved" },
+      "messages": [
+        { "author": "Osei Kwame", "initials": "OK", "text": "GSS has strong community engagement but limited technical capacity. Their education focus complements our mission well.", "time": "2w ago", "color": "var(--amber)" },
+        { "author": "Akello J.", "initials": "AJ", "text": "Approved. Their education programmes align with Commons outreach goals.", "time": "1w ago", "color": "var(--green)" }
+      ]
+    },
+    {
+      "id": "cell-37",
+      "type": "Deliberation Cell",
+      "delibType": "circle-creation",
+      "title": "Circle: Mars Habitability Circle Founding",
+      "participants": 8,
+      "domains": ["Space Medicine", "Space Architecture", "Astrobiology"],
+      "status": "Active",
+      "source": { "type": "circle-proposal", "proposer": "Namugga C." },
+      "circleDetails": {
+        "name": "Mars Habitability Circle",
+        "description": "Stewards research and policy related to human Mars exploration, habitat design, life support, and planetary protection.",
+        "domains": "Space Medicine, Space Architecture, Astrobiology",
+        "maxMembers": 12,
+        "stewardTerm": 12,
+        "expiry": null,
+        "foundingIntent": "As interest in Mars exploration grows across African space agencies, we need a dedicated circle to coordinate habitability research, share life support knowledge, and develop policy frameworks for future human Mars missions."
+      },
+      "participatingCircles": [],
+      "resolution": { "status": "Draft" },
+      "messages": [
+        { "author": "Namugga C.", "initials": "NC", "text": "Mars habitability is an emerging field with no African-led circle. We should establish one to ensure African perspectives are represented in Mars exploration planning.", "time": "3d ago", "color": "var(--teal)" },
+        { "author": "Osei Kwame", "initials": "OK", "text": "Interesting proposal. How many active members do we have with relevant expertise? Space medicine and architecture are niche.", "time": "2d ago", "color": "var(--amber)" },
+        { "author": "Mensah N.", "initials": "MN", "text": "I have background in environmental engineering and would be interested. The life support angle is compelling.", "time": "1d ago", "color": "var(--blue)" }
+      ]
+    },
+    {
+      "id": "cell-38",
+      "type": "Deliberation Cell",
+      "delibType": "circle-creation",
+      "title": "Circle: Frequency Allocation Circle Founding",
+      "participants": 6,
+      "domains": ["Telecommunications", "Space Law"],
+      "status": "Archived",
+      "archivedDate": "Apr 2026",
+      "source": { "type": "circle-proposal", "proposer": "Ssempa D." },
+      "circleDetails": {
+        "name": "Frequency Allocation Circle",
+        "description": "Would steward radio frequency coordination and spectrum management for satellite operations.",
+        "domains": "Telecommunications, Space Law",
+        "maxMembers": 10,
+        "stewardTerm": 12,
+        "expiry": null,
+        "foundingIntent": "Frequency coordination is critical for African satellite operators. A dedicated circle would streamline spectrum management."
+      },
+      "participatingCircles": [],
+      "resolution": { "status": "Failed" },
+      "messages": [
+        { "author": "Ssempa D.", "initials": "SD", "text": "Frequency coordination overlaps significantly with Space Law Circle's mandate. We may not need a separate circle.", "time": "3w ago", "color": "var(--purple)" },
+        { "author": "Akello J.", "initials": "AJ", "text": "After review, scope overlap with Space Law Circle was confirmed. Circle archived.", "time": "2w ago", "color": "var(--red)" }
+      ]
+    },
+    {
+      "id": "cell-39",
+      "type": "Deliberation Cell",
+      "delibType": "project-creation",
+      "title": "Project: ITU Frequency Coordination Guide Approval",
+      "participants": 6,
+      "domains": ["Space Law", "Telecommunications"],
+      "status": "Active",
+      "source": { "type": "project-proposal", "proposer": "You" },
+      "projectDetails": {
+        "title": "ITU Frequency Coordination Guide",
+        "description": "A plain-language guide for emerging space nations explaining ITU frequency coordination processes, filing procedures, and best practices.",
+        "domains": "Space Law, Telecommunications",
+        "deadline": "Aug 15, 2026",
+        "deliverableSpecs": { "name": "ITU Coordination Guide", "description": "4-section guide with coordination flowcharts, filing templates, and case studies." },
+        "team": ["Nakamura Y.", "Diallo F.", "Kimani A."],
+        "supervisingCircle": "Space Law Circle"
+      },
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
+        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 2 }
+      ],
+      "resolution": { "status": "Ready" },
+      "messages": [
+        { "author": "You", "initials": "OS", "text": "This guide fills a critical gap. Many East African nations are launching satellites but struggle with ITU coordination.", "time": "4d ago", "gold": true },
+        { "author": "Nakamura Y.", "initials": "NY", "text": "I can draft Sections 1-2 covering ITU process basics and filing procedures.", "time": "3d ago", "color": "var(--blue)" },
+        { "author": "Akello J.", "initials": "AJ", "text": "Strong proposal. Space Law Circle supports this project. Resolution drafted.", "time": "2d ago", "color": "var(--green)" }
+      ]
+    },
+    {
+      "id": "cell-40",
+      "type": "Deliberation Cell",
+      "delibType": "project-creation",
+      "title": "Project: Lunar Regolith Study Approval",
+      "participants": 5,
+      "domains": ["Materials Science", "Earth & Planetary Science"],
+      "status": "Archived",
+      "archivedDate": "May 2026",
+      "source": { "type": "project-proposal", "proposer": "Kimani A." },
+      "projectDetails": {
+        "title": "Lunar Regolith Composition Study",
+        "description": "Comparative analysis of simulated lunar regolith compositions for construction material research.",
+        "domains": "Materials Science, Earth & Planetary Science",
+        "deadline": "May 2026",
+        "deliverableSpecs": { "name": "Regolith Analysis Report", "description": "Comparative dataset and analysis." },
+        "team": ["Kimani A.", "Ochieng P."],
+        "supervisingCircle": "Remote Sensing Circle"
+      },
+      "participatingCircles": [
+        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 3 }
+      ],
+      "resolution": { "status": "Approved" },
+      "messages": [
+        { "author": "Kimani A.", "initials": "KA", "text": "Study completed and archived. Results published as Commons resource.", "time": "May 2026", "color": "var(--green)" }
+      ]
+    },
+    {
+      "id": "cell-41",
+      "type": "Deliberation Cell",
+      "delibType": "system-settings",
+      "title": "System Settings: Steward Term Extension to 18 months",
+      "participants": 8,
+      "domains": ["Space Law", "Philosophy & Ethics"],
+      "status": "Active",
+      "source": { "type": "settings-proposal", "proposer": "Ssempa D." },
+      "settingsChanges": [
+        { "setting": "Steward Term Length", "from": "12 months", "to": "18 months", "rationale": "12 months is too short for stewards to build expertise and deliver meaningful results. Extension to 18 months allows for a full project cycle." },
+        { "setting": "Max Consecutive Terms", "from": "2", "to": "3", "rationale": "With longer terms, allowing a third consecutive term maintains continuity for complex governance areas." }
+      ],
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
+        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 3 }
+      ],
+      "resolution": { "status": "Draft" },
+      "messages": [
+        { "author": "Ssempa D.", "initials": "SD", "text": "Current 12-month terms create knowledge loss at transition points. An 18-month term better aligns with the project lifecycle.", "time": "5d ago", "color": "var(--purple)" },
+        { "author": "Akello J.", "initials": "AJ", "text": "I support the term extension but worry about stagnation. The cool-off mechanism should remain in place.", "time": "4d ago", "color": "var(--amber)" },
+        { "author": "You", "initials": "OS", "text": "What about accountability? Longer terms mean longer periods between elections. Should we add mid-term review?", "time": "3d ago", "gold": true }
+      ]
+    },
+    {
+      "id": "cell-42",
+      "type": "Deliberation Cell",
+      "delibType": "system-settings",
+      "title": "System Settings: p-aSTF Cycle Reduction to 4 months",
+      "participants": 7,
+      "domains": ["Space Law"],
+      "status": "Archived",
+      "archivedDate": "Jun 2026",
+      "source": { "type": "settings-proposal", "proposer": "Akello J." },
+      "settingsChanges": [
+        { "setting": "p-aSTF Cycle Duration", "from": "6 months", "to": "4 months", "rationale": "More frequent reviews catch health issues earlier and keep circles accountable." }
+      ],
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Lead", "votes": 4 }
+      ],
+      "resolution": { "status": "Approved" },
+      "messages": [
+        { "author": "Akello J.", "initials": "AJ", "text": "4-month cycles were approved. First round of p-aSTFs under new schedule begins next month.", "time": "Jun 2026", "color": "var(--green)" }
+      ]
+    },
+    {
+      "id": "cell-43",
+      "type": "Deliberation Cell",
+      "delibType": "publication-approval",
+      "title": "Publication: Liability Frameworks for Orbital Debris",
+      "participants": 5,
+      "domains": ["Space Law"],
+      "status": "Active",
+      "source": { "type": "publication-submission", "proposer": "Okello M." },
+      "publicationDetails": {
+        "title": "Liability Frameworks for Orbital Debris: An African Perspective",
+        "type": "Journal Article",
+        "author": "Okello M.",
+        "content": "Analysis of existing international liability frameworks for space debris and a proposed proportional liability model tailored to African space operations. Includes case studies from East African satellite programmes.",
+        "domains": "Space Law"
+      },
+      "participatingCircles": [
+        { "name": "Space Law Circle", "role": "Lead", "votes": 3 }
+      ],
+      "resolution": { "status": "Draft" },
+      "messages": [
+        { "author": "Okello M.", "initials": "OM", "text": "This article has been peer-reviewed externally. Requesting Commons publication for wider reach among African policy makers.", "time": "3d ago", "color": "var(--purple)" },
+        { "author": "Akello J.", "initials": "AJ", "text": "The quality is strong. I recommend approval for publication under the Commons journal.", "time": "2d ago", "color": "var(--green)" }
+      ]
+    },
+    {
+      "id": "cell-44",
+      "type": "Deliberation Cell",
+      "delibType": "publication-approval",
+      "title": "Publication: SAR Interferometry Data Protocol",
+      "participants": 4,
+      "domains": ["Remote Sensing"],
+      "status": "Archived",
+      "archivedDate": "Jul 2026",
+      "source": { "type": "publication-submission", "proposer": "Kimani A." },
+      "publicationDetails": {
+        "title": "SAR Interferometry Data Sharing Protocol for East African Research Institutions",
+        "type": "Technical Guide",
+        "author": "Kimani A.",
+        "content": "Standardised protocol for sharing SAR interferometry datasets between research institutions, including metadata standards, access controls, and citation formats.",
+        "domains": "Remote Sensing"
+      },
+      "participatingCircles": [
+        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 3 }
+      ],
+      "resolution": { "status": "Approved" },
+      "messages": [
+        { "author": "Kimani A.", "initials": "KA", "text": "Protocol published and adopted by 3 institutions. Available in Commons library.", "time": "Jul 2026", "color": "var(--green)" }
+      ]
     }
   ],
 

@@ -532,7 +532,7 @@
       <div class="layout-main">
         <!-- Proposals -->
         <div class="sec">Proposals</div>
-        <div class="card click" style="margin-bottom:8px" onclick="nav('cell-delib')">
+        <div class="card click" style="margin-bottom:8px" onclick="openDelibCell('cell-21')">
           <div class="flex justify-between mb-2"><span class="badge b-pending">In Deliberation</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Jul 21</span></div>
           <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Debris liability framework — proportional model</div>
           <div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">Proportional liability model for manoeuvre-induced debris. Multi-circle deliberation active.</div>
@@ -595,7 +595,7 @@
         <div class="aside-card">
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('cell-delib')">+ Submit Proposal</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openProposalModal()">+ Submit Proposal</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Circle Home</button>
           </div>
@@ -614,76 +614,37 @@
 
   <!-- ═══ CELL: DELIBERATION ═══ -->
   <div class="view" id="view-cell-delib">
-    <div class="back" onclick="nav('cells')">← Cells</div>
-    <div class="hero">
+    <div class="back" id="delib-back" onclick="nav('cells')">← Cells</div>
+    <div class="hero" id="delib-hero">
       <div class="hero-icon" style="background:var(--gold-soft);border:1px solid var(--gold-border);color:var(--gold);font-size:18px">◆</div>
       <div style="flex:1">
-        <div class="hero-title">Debris liability framework — who bears responsibility?</div>
-        <div class="hero-desc">Sponsored by Akello J. (Space Law steward). From Commons thread #Thread-042.</div>
-        <div class="hero-tags"><span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-21 · 3d active · One deliverable: resolution to aSTF</span></div>
+        <div class="hero-title" id="delib-title">Deliberation Cell</div>
+        <div class="hero-desc" id="delib-desc">Loading…</div>
+        <div class="hero-tags" id="delib-tags"></div>
       </div>
     </div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Insight Engine — Draft Proposal ready:</strong> Based on 3 days of deliberation, a proposal has been drafted from this Cell's record. <span style="color:var(--gold)">Review and confirm to crystallise resolution → then spawn aSTF for blind adjudication.</span></div></div>
+    <div id="delib-insight"></div>
 
     <div class="layout-split">
       <div class="layout-main">
-
-    <!-- Proposal Origin -->
-    <div class="card" style="margin-bottom:16px">
-      <div class="sec">Proposal Origin</div>
-      <div class="flex gap-3" style="align-items:flex-start">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:5px;flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Source: Commons Discussion Thread</div>
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">A user created a discussion thread in the Commons. Participants discussed the topic. A steward (Akello J.) created a proposal from that thread and sponsored it for deliberation.</div>
-          <div class="flex gap-2" style="align-items:center">
-            <span class="tag tag-purple" style="font-size:8px">Space Law</span>
-            <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Thread #Thread-042 · 8 replies · 24 likes</span>
-            <button class="btn btn-sm" onclick="nav('thread-detail')" style="margin-left:auto">View Source Thread</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Deliberation -->
+    <div id="delib-proposal-origin"></div>
     <div class="sec">Deliberation</div>
-    <div class="card" style="margin-bottom:16px;padding:12px">
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Akello Jane</span><span class="text-xs" style="color:var(--text-tertiary)">3d ago</span></div><p class="text-sm">The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.</p></div></div>
-        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--amber),#5a3a00)">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Osei Kwame</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?</p></div></div>
-        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:var(--navy-light)">MT</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Mwenda Thomas</span><span class="text-xs" style="color:var(--text-tertiary)">2d ago</span></div><p class="text-sm">From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.</p></div></div>
-        <div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--teal),#0d4040)">NC</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Namugga Claire</span><span class="text-xs" style="color:var(--text-tertiary)">1d ago</span></div><p class="text-sm">I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.</p></div></div>
-      </div>
-      <div class="divider" style="margin:var(--space-3) 0"></div>
-      <textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>
+    <div class="card" id="delib-discussion" style="margin-bottom:16px;padding:12px">
+      <div style="padding:16px;color:var(--text-tertiary);font-size:12px">Loading…</div>
     </div>
-
-    <!-- Decision Status Bar -->
-    <div class="decision-bar" id="decision-bar">
-      <div class="db-info"><span id="db-quorum">Quorum: 4/7</span> · <span id="db-result">Yea 4,960 · Nay 932 <span class="db-pass">(passes)</span></span></div>
+    <div class="decision-bar" id="delib-decision-bar">
+      <div class="db-info" id="delib-db-info"></div>
       <div class="db-actions">
-        <button class="btn btn-primary" id="btn-submit-resolution" onclick="submitResolution()">Submit Resolution → aSTF</button>
-        <button class="btn btn-danger" id="btn-close-debate" onclick="closeDebate()">Close Debate</button>
+        <button class="btn btn-primary" onclick="submitResolution()"><i class="fa-solid fa-gavel" style="margin-right:4px"></i>Submit Resolution → aSTF</button>
+        <button class="btn btn-danger" onclick="closeDebate()"><i class="fa-solid fa-xmark" style="margin-right:4px"></i>Close Debate</button>
       </div>
     </div>
-
       </div>
       <div class="layout-aside">
-
-    <!-- Participating Circles -->
     <div class="aside-card">
       <div class="aside-title">Participating Circles</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">SL</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Lead</div></div><span class="badge b-active">5</span></div>
-        <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--teal),#0d4040)">RS</div><div style="flex:1"><div style="font-size:12px;color:var(--text)">Remote Sensing Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Contributing</div></div><span class="badge b-active">3</span></div>
-        <div class="circle-scar" style="padding:6px;gap:6px">
-          <div style="font-size:10px;flex:1;color:var(--text-tertiary);font-style:italic">Mars Habitability Circle<span style="display:block;font-size:9px">withdrew by: Osei Kwame</span></div>
-          <span style="font-family:var(--mono);font-size:8px;color:var(--text-tertiary)">Jul 22</span>
-        </div>
-      </div>
+      <div id="delib-circles"></div>
     </div>
-
-    <!-- Deliberation Guide -->
     <div class="aside-card">
       <div class="aside-title">Deliberation Guide</div>
       <div style="font-size:10px;color:var(--text-secondary);line-height:1.6;margin-top:4px">
@@ -693,15 +654,10 @@
         <div style="font-size:9px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);padding-top:6px;margin-top:6px"><strong>Flow:</strong> Proposal → Deliberation → Draft Resolution(s) → Vote → aSTF / Record</div>
       </div>
     </div>
-
-    <!-- Resolution -->
     <div class="aside-card">
       <div class="aside-title">Resolution</div>
-      <div id="resolution-slot" style="margin-top:4px">
-        <!-- Rendered by updateResolutionSlot() -->
-      </div>
+      <div id="resolution-slot" style="margin-top:4px"></div>
     </div>
-
       </div>
     </div>
   </div>
@@ -1604,7 +1560,7 @@
           <button class="btn btn-sm" style="font-size:9px">+ New Cell</button>
         </div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Motions and special business under deliberation</div>
-        <div class="cell-card" onclick="nav('cell-delib')">
+        <div class="cell-card" onclick="openDelibCell('cell-21')">
           <div class="cell-card-top">
             <span class="cell-card-title">Debris liability framework — proportional model</span>
             <span class="status-pill status-deliberating"><span class="status-pill-dot"></span>Deliberating</span>
@@ -4387,6 +4343,50 @@ function onProposalTypeChange(){
         '<div style="margin-bottom:10px"><label class="form-label">Affiliation Intent</label>'+
         '<textarea class="form-input" rows="3" id="propose-org-intent" placeholder="Describe why this organisation should affiliate with the Commons..."></textarea></div>'+
       '</div>';
+  } else if(type==='project'){
+    fields.style.display='none';
+    extra.style.display='';
+    extra.innerHTML=
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Project Details</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Title</label>'+
+        '<input class="form-input" id="propose-proj-title" placeholder="e.g. East Africa Space Sector Mapping"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
+        '<textarea class="form-input" rows="3" id="propose-proj-desc" placeholder="What will this project produce? What is the goal?"></textarea></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Required Domains</label>'+
+        '<input class="form-input" id="propose-proj-domains" placeholder="Policy, Remote Sensing...">'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Comma-separated. These determine which circles vote on the resolution.</div></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Deadline</label>'+
+        '<input class="form-input" type="date" id="propose-proj-deadline"></div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Deliverable Specs</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Deliverable Name</label>'+
+        '<input class="form-input" id="propose-proj-delname" placeholder="e.g. East Africa Sector Mapping Report"></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
+        '<textarea class="form-input" rows="2" id="propose-proj-deldesc" placeholder="What should the deliverable contain?"></textarea></div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Attached Files</label>'+
+        '<div id="propose-proj-files" style="margin-bottom:6px"></div>'+
+        '<button class="btn btn-sm" onclick="addProjFileField()" style="font-size:10px"><i class="fa-solid fa-plus" style="margin-right:4px"></i>Add File</button></div>'+
+        '<div><label class="form-label">Attachment URLs</label>'+
+        '<div id="propose-proj-urls" style="margin-bottom:6px"></div>'+
+        '<button class="btn btn-sm" onclick="addProjUrlField()" style="font-size:10px"><i class="fa-solid fa-plus" style="margin-right:4px"></i>Add URL</button></div>'+
+      '</div>'+
+      '<div class="card" style="margin-bottom:12px">'+
+        '<div class="sec">Team &amp; Sponsorship</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Team Members</label>'+
+        '<div style="margin-bottom:6px"><label style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer">'+
+        '<input type="checkbox" id="propose-proj-open" onchange="toggleProjOpenApply()"> '+
+        '<span>Open to apply — anyone can join after deliberation</span></label></div>'+
+        '<input class="form-input" id="propose-proj-team" placeholder="Comma-separated names" disabled>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Uncheck "Open to apply" to specify team members.</div></div>'+
+        '<div><label class="form-label">Supervising Circle</label>'+
+        '<select class="form-input" id="propose-proj-circle">'+
+          '<option value="">None — assigned in deliberation</option>'+
+        '</select>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Select a circle to supervise, or leave blank for assignment during deliberation.</div></div>'+
+      '</div>';
+    populateProjCircles();
   } else {
     fields.style.display='';
     extra.style.display='none';
@@ -4439,14 +4439,50 @@ function submitProposal(){
   var type=document.getElementById('propose-type').value;
   if(type==='circle'){
     var name=document.getElementById('propose-circle-name').value;
+    var desc=document.getElementById('propose-circle-desc').value;
+    var domains=document.getElementById('propose-circle-domains').value;
+    var maxMembers=document.getElementById('propose-circle-max').value;
+    var term=document.getElementById('propose-circle-term').value;
+    var expiry=document.getElementById('propose-circle-expiry').value;
+    var intent=document.getElementById('propose-circle-intent').value;
     if(!name){alert('Please enter a circle name.');return;}
+    var cellId='cell-'+Date.now().toString(36);
+    var delibId='cell-'+Date.now().toString(36)+'d';
+    MOCK.cells.push({
+      id:delibId,type:'Deliberation Cell',delibType:'circle-creation',
+      title:'Circle: '+name+' Founding',participants:8,status:'Active',
+      domains:domains?domains.split(',').map(function(s){return s.trim();}):[],
+      source:{type:'circle-proposal',proposer:MOCK.currentUser.name,intent:intent},
+      circleDetails:{name:name,description:desc||'',domains:domains||'',maxMembers:maxMembers?parseInt(maxMembers):15,stewardTerm:term?parseInt(term):null,expiry:expiry?parseInt(expiry):null,foundingIntent:intent||''},
+      participatingCircles:[],resolution:{status:'Draft'},
+      messages:[{author:MOCK.currentUser.initials,text:'Proposed founding of '+name+'. Awaiting deliberation.',time:'Just now',gold:true}]
+    });
+    cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert('Circle Formation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
+    alert('Circle Formation proposal "'+name+'" submitted! Deliberation cell created.');
   } else if(type==='org'){
     var name=document.getElementById('propose-org-name').value;
+    var acronym=document.getElementById('propose-org-acronym').value;
+    var location=document.getElementById('propose-org-location').value;
+    var domains=document.getElementById('propose-org-domains').value;
+    var summary=document.getElementById('propose-org-summary').value;
+    var website=document.getElementById('propose-org-website').value;
+    var intent=document.getElementById('propose-org-intent').value;
     if(!name){alert('Please enter an organisation name.');return;}
+    if(!acronym){acronym=extractAcronym(name);if(acronym)document.getElementById('propose-org-acronym').value=acronym;}
+    var delibId='cell-'+Date.now().toString(36);
+    MOCK.cells.push({
+      id:delibId,type:'Deliberation Cell',delibType:'org-creation',
+      title:'Org: '+name+(acronym?' ['+acronym+']':'')+' Affiliation',participants:6,status:'Active',
+      domains:domains?domains.split(',').map(function(s){return s.trim();}):[],
+      source:{type:'org-proposal',proposer:MOCK.currentUser.name,intent:intent},
+      orgDetails:{name:name,acronym:acronym||'',location:location||'',domains:domains||'',summary:summary||'',website:website||''},
+      participatingCircles:[],resolution:{status:'Draft'},
+      messages:[{author:MOCK.currentUser.initials,text:'Proposed affiliation of '+name+'. Awaiting deliberation.',time:'Just now',gold:true}]
+    });
+    cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert('Organisation Affiliation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
+    alert('Organisation Affiliation proposal "'+name+'" submitted! Deliberation cell created.');
   } else if(type==='project'){
     var title=document.getElementById('propose-proj-title').value;
     var desc=document.getElementById('propose-proj-desc').value;
@@ -4462,21 +4498,35 @@ function submitProposal(){
     var urlInputs=document.querySelectorAll('#propose-proj-urls input');
     var files=[];fileInputs.forEach(function(f){if(f.files&&f.files[0])files.push(f.files[0].name);});
     var urls=[];urlInputs.forEach(function(u){if(u.value)urls.push(u.value);});
-    var teamList=openApply?'Open to apply':(team?team.split(',').map(function(s){return s.trim();}).filter(Boolean):'');
+    var teamList=openApply?'Open to apply':(team?team.split(',').map(function(s){return s.trim();}).filter(Boolean):[]);
     var circleName='';
     if(circle&&MOCK){var c=MOCK.circles.find(function(x){return x.id===circle;});if(c)circleName=c.name;}
-    var msg='Project "'+title+'" submitted!';
-    msg+='\n\nDomains: '+(domains||'TBD');
-    msg+='\nDeadline: '+(deadline||'TBD');
-    msg+='\nDeliverable: '+(delName||'TBD');
-    if(teamList)msg+='\nTeam: '+(typeof teamList==='string'?teamList:teamList.join(', '));
-    if(circleName)msg+='\nSupervising Circle: '+circleName;
-    if(files.length)msg+='\nFiles: '+files.join(', ');
-    if(urls.length)msg+='\nURLs: '+urls.join(', ');
-    msg+='\n\nA project cell will be created after deliberation.';
+    var cellId='cell-'+Date.now().toString(36);
+    var delibId='cell-'+Date.now().toString(36)+'d';
+    MOCK.cells.push({
+      id:delibId,type:'Deliberation Cell',delibType:'project-creation',
+      title:'Project: '+title+' Approval',participants:6,status:'Active',
+      domains:domains?domains.split(',').map(function(s){return s.trim();}):[],
+      source:{type:'project-proposal',proposer:MOCK.currentUser.name},
+      projectDetails:{title:title,description:desc||'',domains:domains||'',deadline:deadline||'',deliverableSpecs:{name:delName||'',description:delDesc||''},team:teamList,supervisingCircle:circleName||''},
+      participatingCircles:circleName?[{name:circleName}]:[],resolution:{status:'Draft'},
+      messages:[{author:MOCK.currentUser.initials,text:'Proposed project "'+title+'". Awaiting deliberation.',time:'Just now',gold:true}]
+    });
+    cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
+    MOCK.cells.push({
+      id:cellId,type:'Project Cell',title:title,participants:0,progress:0,
+      status:'Active',blind:false,lead:MOCK.currentUser.name,
+      domains:domains?domains.split(',').map(function(s){return s.trim();}):[],
+      created:new Date().toLocaleDateString('en-US',{month:'short',year:'numeric'}),
+      tasks:[],objectives:[],
+      team:Array.isArray(teamList)?teamList.map(function(n){return{name:n,initials:n.split(' ').map(function(w){return w[0];}).join(''),role:'Member',focus:''};}):[],
+      messages:[],deliverableSpecs:{name:delName||'',description:delDesc||''}
+    });
+    cellsById[cellId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
-    alert(msg);
+    alert('Project "'+title+'" submitted! Deliberation cell created. Project cell will activate after approval.');
   } else {
+    var title=document.getElementById('propose-title').value;
     if(!title){alert('Please enter a title.');return;}
     closeModal();
     alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
@@ -5989,6 +6039,181 @@ function renderProjectCell(cellId) {
   renderDeliverables(cellId, 'projcell-deliverables');
   renderTeam(cellId, 'projcell-team');
   renderMessages(cellId, 'projcell-messages');
+}
+
+function openDelibCell(cellId) {
+  _cellBackNav = navMap[currentNav] || 'cells';
+  nav('cell-delib');
+  var backEl = document.getElementById('delib-back');
+  if (backEl) backEl.textContent = '← ' + (_cellBackNav === 'undertakings' ? 'Projects' : 'Cells');
+  renderDelibCell(cellId);
+}
+
+function renderDelibCell(cellId) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  var title = document.getElementById('delib-title');
+  var desc = document.getElementById('delib-desc');
+  var tags = document.getElementById('delib-tags');
+  var insight = document.getElementById('delib-insight');
+  var origin = document.getElementById('delib-proposal-origin');
+  var disc = document.getElementById('delib-discussion');
+  var circles = document.getElementById('delib-circles');
+  var dbInfo = document.getElementById('delib-db-info');
+  if (title) title.textContent = cell.title || 'Deliberation Cell';
+  if (desc) {
+    var src = cell.source || {};
+    var srcText = src.type === 'org-proposal' ? 'Organisation Affiliation Proposal' :
+      src.type === 'circle-proposal' ? 'Circle Formation Proposal' :
+      src.type === 'project-proposal' ? 'Project Proposal' :
+      src.type === 'settings-proposal' ? 'System Settings Change' :
+      src.type === 'publication-submission' ? 'Publication Submission' :
+      'Commons Discussion';
+    desc.textContent = 'Proposed by ' + (src.proposer || 'Unknown') + '. Source: ' + srcText + '.';
+  }
+  if (tags) tags.innerHTML = '<span class="badge b-pending">Deliberation Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#' + cell.id + ' · ' + (cell.domains || []).join(', ') + '</span>';
+
+  var status = cell.resolution ? cell.resolution.status : 'Draft';
+  if (insight) {
+    if (status === 'Draft') {
+      insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-lightbulb"></i></div><div class="itext"><strong>Insight Engine — Drafting:</strong> Deliberation is underway. A resolution will be drafted once discussion matures. <span style="color:var(--gold)">Review and confirm to crystallise → then spawn aSTF for blind adjudication.</span></div></div>';
+    } else if (status === 'Ready') {
+      insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-check-circle"></i></div><div class="itext"><strong>Insight Engine — Resolution ready:</strong> A proposal has been drafted from this Cell\'s record. <span style="color:var(--gold)">Review and confirm to crystallise resolution → then spawn aSTF for blind adjudication.</span></div></div>';
+    } else {
+      insight.innerHTML = '';
+    }
+  }
+
+  renderDelibOrigin(cell, origin);
+  renderDelibDiscussion(cell, disc);
+  renderDelibCircles(cell, circles);
+  if (dbInfo) dbInfo.innerHTML = 'Quorum: ' + (cell.participants ? Math.ceil(cell.participants / 2) : 0) + '/' + (cell.participants || 0) + ' · Status: ' + status;
+}
+
+function renderDelibOrigin(cell, container) {
+  if (!container) return;
+  var src = cell.source || {};
+  var html = '';
+  if (cell.delibType === 'org-creation') {
+    var o = cell.orgDetails || {};
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Organisation Affiliation Proposal</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--purple);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(o.name || '') + (o.acronym ? ' [' + esc(o.acronym) + ']' : '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(o.summary || '') + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' +
+      (o.location ? '<span style="font-size:10px;color:var(--text-tertiary)"><i class="fa-solid fa-location-dot" style="margin-right:3px"></i>' + esc(o.location) + '</span>' : '') +
+      (o.domains ? o.domains.split(',').map(function(d) { return '<span class="tag tag-purple" style="font-size:8px">' + esc(d.trim()) + '</span>'; }).join('') : '') +
+      (o.website ? '<span style="font-size:10px;color:var(--text-tertiary)"><i class="fa-solid fa-globe" style="margin-right:3px"></i>' + esc(o.website) + '</span>' : '') +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      (src.intent ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;font-style:italic">"' + esc(src.intent) + '"</div>' : '') +
+      '</div></div></div>';
+  } else if (cell.delibType === 'circle-creation') {
+    var c = cell.circleDetails || {};
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Circle Formation Proposal</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(c.name || '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(c.description || '') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Domains:</strong> ' + esc(c.domains || 'TBD') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Max Members:</strong> ' + (c.maxMembers || 15) + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Steward Term:</strong> ' + (c.stewardTerm ? c.stewardTerm + ' mo' : 'Global default') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Expiry:</strong> ' + (c.expiry ? c.expiry + ' mo' : 'Global default') + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      (c.foundingIntent ? '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px;font-style:italic">"' + esc(c.foundingIntent) + '"</div>' : '') +
+      '</div></div></div>';
+  } else if (cell.delibType === 'project-creation') {
+    var p = cell.projectDetails || {};
+    var specs = p.deliverableSpecs || {};
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Project Proposal</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(p.title || '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(p.description || '') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Domains:</strong> ' + esc(p.domains || 'TBD') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Deadline:</strong> ' + esc(p.deadline || 'TBD') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Deliverable:</strong> ' + esc(specs.name || 'TBD') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Team:</strong> ' + (Array.isArray(p.team) ? p.team.join(', ') : (p.team || 'Open to apply')) + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)"><strong>Supervising Circle:</strong> ' + esc(p.supervisingCircle || 'None — to be assigned') + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      '</div></div></div>';
+  } else if (cell.delibType === 'system-settings') {
+    var changes = cell.settingsChanges || [];
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">System Settings Change</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Proposed changes to global system settings. These affect all circles and governance processes.</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      changes.map(function(ch) {
+        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 8px;background:var(--bg-secondary);border-radius:var(--radius)">' +
+          '<span style="font-size:11px;color:var(--text);font-weight:500;min-width:120px">' + esc(ch.setting) + '</span>' +
+          '<span style="font-size:11px;color:var(--red);text-decoration:line-through">' + esc(ch.from) + '</span>' +
+          '<i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--text-tertiary)"></i>' +
+          '<span style="font-size:11px;color:var(--green);font-weight:500">' + esc(ch.to) + '</span>' +
+          '</div>' +
+          (ch.rationale ? '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px;padding-left:8px">Rationale: ' + esc(ch.rationale) + '</div>' : '');
+      }).join('') +
+      '</div></div></div>';
+  } else if (cell.delibType === 'publication-approval') {
+    var pub = cell.publicationDetails || {};
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Publication Submission</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(pub.title || '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(pub.content || '') + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' +
+      (pub.type ? '<span class="tag tag-blue" style="font-size:8px"><i class="fa-solid fa-file-lines" style="margin-right:3px"></i>' + esc(pub.type) + '</span>' : '') +
+      (pub.author ? '<span style="font-size:10px;color:var(--text-tertiary)"><i class="fa-solid fa-user" style="margin-right:3px"></i>' + esc(pub.author) + '</span>' : '') +
+      (pub.domains ? pub.domains.split(',').map(function(d) { return '<span class="tag tag-purple" style="font-size:8px">' + esc(d.trim()) + '</span>'; }).join('') : '') +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Submitted by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      '</div></div></div>';
+  } else {
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Proposal Origin</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary)">Proposed by ' + esc(src.proposer || 'Unknown') + '. Awaiting deliberation.</div></div>';
+  }
+  container.innerHTML = html;
+}
+
+function renderDelibDiscussion(cell, container) {
+  if (!container) return;
+  var msgs = cell.messages || [];
+  var html = '<div style="display:flex;flex-direction:column;gap:12px">';
+  msgs.forEach(function(m) {
+    var avatarBg = m.gold ? 'background:var(--gold)' : (m.color ? 'background:' + m.color : 'background:var(--navy-light)');
+    html += '<div style="display:flex;gap:10px"><div class="avatar avatar-md" style="' + avatarBg + '">' + esc(m.initials || '??') + '</div>' +
+      '<div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">' + esc(m.author || 'Unknown') + '</span>' +
+      '<span class="text-xs" style="color:var(--text-tertiary)">' + esc(m.time || '') + '</span></div>' +
+      '<p class="text-sm">' + esc(m.text || '') + '</p></div></div>';
+  });
+  html += '</div>';
+  html += '<div class="divider" style="margin:var(--space-3) 0"></div>';
+  html += '<textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>';
+  container.innerHTML = html;
+}
+
+function renderDelibCircles(cell, container) {
+  if (!container) return;
+  var pcs = cell.participatingCircles || [];
+  if (pcs.length === 0) {
+    container.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No circles assigned yet. Circles will be assigned based on domain relevance during deliberation.</div>';
+    return;
+  }
+  container.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">' +
+    pcs.map(function(pc) {
+      var initials = pc.name.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 2).toUpperCase();
+      var colors = ['var(--purple)', 'var(--teal)', 'var(--blue)', 'var(--amber)', 'var(--green)'];
+      var color = colors[pcs.indexOf(pc) % colors.length];
+      return '<div class="hrow"><div class="hav" style="background:' + color + '">' + initials + '</div>' +
+        '<div style="flex:1"><div style="font-size:12px;color:var(--text)">' + esc(pc.name) + '</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary)">' + esc(pc.role || 'Contributing') + '</div></div>' +
+        (pc.votes ? '<span class="badge b-active">' + pc.votes + '</span>' : '') + '</div>';
+    }).join('') + '</div>';
 }
 
 // Init domain map when view is shown
