@@ -1,11 +1,16 @@
 // mock-loader.js — Fetches mock.json and provides render functions
 var MOCK = null;
+var cellsById = {};
 
 function loadMockData() {
   return fetch('mock.json')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       MOCK = data;
+      cellsById = {};
+      if (data.cells) {
+        data.cells.forEach(function(c) { cellsById[c.id] = c; });
+      }
       return data;
     });
 }

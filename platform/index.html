@@ -533,22 +533,43 @@
   <!-- ═══ CELL: UNDERTAKING ═══ -->
   <div class="view" id="view-cell-undertaking">
     <div class="back" onclick="nav('cells')">← Cells</div>
-    <div class="hero">
-      <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:18px">◈</div>
-      <div style="flex:1">
-        <div class="hero-title">East Africa Space Sector Mapping</div>
-        <div class="hero-desc">Collaborative research cell. 7 participants. Producing sector mapping report for Solis Commons.</div>
-        <div class="hero-tags"><span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#Cell-14 · Policy + Remote Sensing</span></div>
+    <div class="layout-split">
+      <div class="layout-main" id="projcell-main">
+        <div class="hero">
+          <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:18px">◈</div>
+          <div style="flex:1">
+            <div class="hero-title" id="projcell-title">Project Cell</div>
+            <div class="hero-desc" id="projcell-desc">Loading…</div>
+            <div class="hero-tags" id="projcell-tags"></div>
+          </div>
+        </div>
+        <div class="sec">Cell Messages</div>
+        <div class="card" id="projcell-messages" style="margin-bottom:16px">
+          <div style="padding:16px;color:var(--text-tertiary);font-size:12px">Loading…</div>
+        </div>
+        <div class="divider" style="margin:var(--space-3) 0"></div>
+        <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
       </div>
-    </div>
-    <div class="sec">Cell Messages</div>
-    <div class="card">
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">OR</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div></div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">KA</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today.</p></div></div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md avatar-gold">OS</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete.</p></div></div>
-      <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">OR</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema.</p></div></div>
-      <div class="divider" style="margin:var(--space-3) 0"></div>
-      <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
+      <div class="layout-aside" id="projcell-aside">
+        <div class="aside-card">
+          <div class="aside-title">Objectives</div>
+          <div id="projcell-objectives"></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Progress</div>
+          <div id="projcell-progress"></div>
+          <div class="task-list" id="projcell-tasks"></div>
+          <div id="projcell-task-add"></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Deliverables</div>
+          <div id="projcell-deliverables"></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Team</div>
+          <div id="projcell-team"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1198,75 +1219,42 @@
   <div class="view" id="view-stf-xstf">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="layout-split">
-      <div class="layout-main">
+      <div class="layout-main" id="xstf-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ xSTF — Execution Cell</div>
-        <div class="blind-wall">🔒 &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; 🔒</div>
+        <div class="blind-wall" id="xstf-blind"></div>
         <div class="sec">Deliberations</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member A</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member B</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">On it. Also started Section 3 — frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">TM</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Team Member C</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision — the ITU history paragraph is too detailed for the target audience.</p></div></div>
+        <div class="card" id="xstf-messages" style="margin-bottom:16px">
+          <div style="padding:16px;color:var(--text-tertiary);font-size:12px">Loading…</div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
           <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
         </div>
       </div>
-      <div class="layout-aside">
+      <div class="layout-aside" id="xstf-aside">
         <div class="aside-card">
           <div class="aside-title">Mandate &amp; Requirements</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>
-          <div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">Collaborative</span></div>
-          <div class="aside-row"><span class="aside-label">Commissioned</span><span style="font-size:11px;color:var(--text)">Space Law Circle</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 15, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Resolution</span><span style="font-size:11px;color:var(--green)">Approved Jul 25</span></div>
+          <div id="xstf-meta"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Deliverable Specs</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
-            <div class="mb-2"><strong style="color:var(--text)">ITU Frequency Coordination Guide</strong></div>
-            <div class="mb-2">Plain-language guide for emerging space nations. Target: policy makers and technical leads in East African space agencies.</div>
-            <div class="flex justify-between mb-1"><span>Sections:</span><span style="color:var(--text)">4</span></div>
-            <div class="flex justify-between mb-1"><span>Length:</span><span style="color:var(--text)">8,000–12,000 words</span></div>
-            <div class="flex justify-between mb-1"><span>Language:</span><span style="color:var(--text)">Plain English</span></div>
-            <div class="flex justify-between"><span>Review:</span><span style="color:var(--text)">Draft → Circle → Final</span></div>
-          </div>
+          <div id="xstf-specs"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Progress</div>
-          <div class="flex justify-between items-center mb-2"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Overall</span><span style="font-family:var(--mono);font-size:12px;color:var(--green)">45%</span></div>
-          <div class="htk mb-3"><div class="hfill" style="width:45%;background:var(--green)"></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
-            <div class="flex justify-between"><span>Task 0 — STF formulation</span><span style="color:var(--green)">✓</span></div>
-            <div class="flex justify-between"><span>Task 1 — Mandate comprehension</span><span style="color:var(--green)">✓</span></div>
-            <div class="flex justify-between"><span>Task 2 — Research &amp; drafting</span><span style="color:var(--gold)">△</span></div>
-            <div class="flex justify-between"><span>Task 3 — Internal review</span><span style="color:var(--text-tertiary)">—</span></div>
-            <div class="flex justify-between"><span>Task 4 — Circle review cycle</span><span style="color:var(--text-tertiary)">—</span></div>
-            <div class="flex justify-between"><span>Task 5 — Finalisation</span><span style="color:var(--text-tertiary)">—</span></div>
-            <div class="flex justify-between"><span>Task 6 — Dissolve STF</span><span style="color:var(--text-tertiary)">—</span></div>
-          </div>
+          <div id="xstf-progress"></div>
+          <div class="task-list" id="xstf-tasks"></div>
+          <div id="xstf-task-add"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Objectives</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
-            <div class="flex justify-between"><span>Clarity of ITU process explanation</span><span style="color:var(--green)">✓</span></div>
-            <div class="flex justify-between"><span>Accuracy of coordination steps</span><span style="color:var(--gold)">△</span></div>
-            <div class="flex justify-between"><span>East Africa relevance</span><span style="color:var(--text-tertiary)">—</span></div>
-            <div class="flex justify-between"><span>Policy maker accessibility</span><span style="color:var(--text-tertiary)">—</span></div>
-          </div>
+          <div id="xstf-objectives"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Deliverables</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
-            <div class="mb-2"><strong style="color:var(--text)">Report:</strong></div>
-            <div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Draft v2 — ITU Frequency Coordination Guide (4,200 words so far)</div>
-            <div><strong style="color:var(--text)">Attachments:</strong></div>
-            <div class="flex gap-2" style="margin-top:4px"><span class="tag tag-purple" style="font-size:8px">📄 ITU reference doc</span><span class="tag tag-green" style="font-size:8px">📄 Coordination flowchart</span></div>
-          </div>
+          <div id="xstf-deliverables"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Team</div>
-          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member A</div><div style="font-size:9px;color:var(--text-tertiary)">Sections 1–2</div></div></div>
-          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--blue),#0a1e34);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member B</div><div style="font-size:9px;color:var(--text-tertiary)">Sections 3–4</div></div></div>
-          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--amber),#5a3a00);width:24px;height:24px;font-size:9px">TM</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">Team Member C</div><div style="font-size:9px;color:var(--text-tertiary)">Review &amp; formatting</div></div></div>
+          <div id="xstf-team"></div>
         </div>
       </div>
     </div>
@@ -2700,6 +2688,34 @@
   </div>
 </div>
 
+<!-- ═══ TASK MODAL ═══ -->
+<div class="reg-modal-overlay" id="task-modal">
+  <div class="reg-modal" style="max-width:480px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeTaskModal()">&times;</button>
+        <span class="modal-titlebar-title" id="task-modal-title">Edit Task</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <div style="margin-bottom:12px"><label class="form-label">Task Label</label>
+        <input class="form-input" id="task-modal-label" placeholder="What needs to be done?"></div>
+      <div style="margin-bottom:12px"><label class="form-label">Status</label>
+        <select class="form-input" id="task-modal-status">
+          <option value="pending">Pending</option>
+          <option value="in-progress">In Progress</option>
+          <option value="complete">Complete</option>
+        </select></div>
+      <div><label class="form-label">Assignee (optional)</label>
+        <input class="form-input" id="task-modal-assignee" placeholder="Who is responsible?"></div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="saveTask()">Save</button>
+      <button class="btn btn-sm" onclick="closeTaskModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
   <script src="../shared/colors.js"></script>
   <script src="../shared/solmark.js"></script>
   <script src="../shared/modal.js"></script>
@@ -3926,6 +3942,7 @@ function escapeHtml(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+var esc = escapeHtml;
 
 window.addEventListener('hashchange', function() {
   var key = window.location.hash.replace('#', '') || 'personal';
@@ -5030,12 +5047,265 @@ function dmInit(){
   requestAnimationFrame(frame);
 }
 
+// ═══ TASK MANAGEMENT ═══
+var _taskTarget = null; // {cellId, taskIdx}
+
+function computeProgress(cell) {
+  if (!cell.tasks || !cell.tasks.length) return 0;
+  var done = cell.tasks.filter(function(t) { return t.status === 'complete'; }).length;
+  return Math.round((done / cell.tasks.length) * 100);
+}
+
+function statusIcon(status) {
+  if (status === 'complete') return '<span class="task-status-complete">✓</span>';
+  if (status === 'in-progress') return '<span class="task-status-in-progress">△</span>';
+  return '<span class="task-status-pending">—</span>';
+}
+
+function renderTaskList(cellId, containerId, addContainerId) {
+  var cell = cellsById[cellId];
+  var el = document.getElementById(containerId);
+  var addEl = document.getElementById(addContainerId);
+  if (!cell || !el) return;
+  var tasks = cell.tasks || [];
+  var isXstf = cell.type === 'xSTF';
+  var html = '';
+  tasks.forEach(function(t, i) {
+    var locked = t.locked;
+    var actions = '';
+    if (!locked) {
+      actions = '<div class="task-actions"><button class="task-action-btn" title="Edit" onclick="event.stopPropagation();openTaskModal(\'' + cellId + '\',' + i + ')">✎</button><button class="task-action-btn" title="Delete" onclick="event.stopPropagation();deleteTask(\'' + cellId + '\',' + i + ')">×</button></div>';
+    }
+    html += '<div class="task-item" onclick="toggleTaskStatus(\'' + cellId + '\',' + i + ')">';
+    html += '<span class="task-icon">' + statusIcon(t.status) + '</span>';
+    html += '<span class="task-label' + (locked ? ' locked' : '') + '">' + esc(t.label) + '</span>';
+    if (locked) html += '<span class="task-locked-badge">system</span>';
+    html += actions;
+    html += '</div>';
+  });
+  el.innerHTML = html;
+  if (addEl) {
+    addEl.innerHTML = '<div class="task-add" onclick="openTaskModal(\'' + cellId + '\',-1)"><span class="task-add-icon">+</span><span>Add task</span></div>';
+  }
+}
+
+function renderObjectives(cellId, containerId) {
+  var cell = cellsById[cellId];
+  var el = document.getElementById(containerId);
+  if (!cell || !el) return;
+  var objs = cell.objectives || [];
+  var html = '';
+  objs.forEach(function(o) {
+    var cls = o.status === 'met' ? 'color:var(--green)' : o.status === 'at-risk' ? 'color:var(--gold)' : 'color:var(--text-tertiary)';
+    var sym = o.status === 'met' ? '✓' : o.status === 'at-risk' ? '△' : '—';
+    html += '<div class="flex justify-between" style="padding:2px 0"><span style="font-size:11px;color:var(--text-secondary)">' + esc(o.label) + '</span><span style="' + cls + '">' + sym + '</span></div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderProgress(cellId, progressId, tasksId) {
+  var cell = cellsById[cellId];
+  var pEl = document.getElementById(progressId);
+  if (!cell || !pEl) return;
+  var pct = computeProgress(cell);
+  var color = pct >= 80 ? 'var(--green)' : pct >= 40 ? 'var(--gold)' : 'var(--blue)';
+  pEl.innerHTML = '<div class="flex justify-between items-center mb-2"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Overall</span><span style="font-family:var(--mono);font-size:12px;color:' + color + '">' + pct + '%</span></div><div class="htk mb-3"><div class="hfill" style="width:' + pct + '%;background:' + color + '"></div></div>';
+}
+
+function renderTeam(cellId, containerId) {
+  var cell = cellsById[cellId];
+  var el = document.getElementById(containerId);
+  if (!cell || !el) return;
+  var team = cell.team || [];
+  var html = '';
+  team.forEach(function(m) {
+    var ini = m.name.split(' ').map(function(w) { return w[0]; }).join('');
+    html += '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:24px;height:24px;font-size:9px">' + ini + '</div><div style="flex:1"><div style="font-size:11px;color:var(--text)">' + esc(m.name) + '</div><div style="font-size:9px;color:var(--text-tertiary)">' + esc(m.role) + '</div></div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function renderDeliverables(cellId, containerId) {
+  var cell = cellsById[cellId];
+  var el = document.getElementById(containerId);
+  if (!cell || !el) return;
+  var specs = cell.deliverableSpecs;
+  var delivs = cell.deliverables || [];
+  if (!specs && !delivs.length) { el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No deliverables specified.</div>'; return; }
+  var html = '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">';
+  if (specs) {
+    html += '<div class="mb-2"><strong style="color:var(--text)">' + esc(specs.name) + '</strong></div>';
+    if (specs.description) html += '<div class="mb-2">' + esc(specs.description) + '</div>';
+    if (specs.details) {
+      Object.keys(specs.details).forEach(function(k) {
+        html += '<div class="flex justify-between mb-1"><span>' + esc(k) + ':</span><span style="color:var(--text)">' + esc(specs.details[k]) + '</span></div>';
+      });
+    }
+  }
+  if (delivs.length) {
+    html += '<div class="flex gap-2 flex-wrap" style="margin-top:4px">';
+    delivs.forEach(function(d) {
+      html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px">📄 ' + esc(d.name) + (d.detail ? ' (' + esc(d.detail) + ')' : '') + '</span>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+function renderMessages(cellId, containerId) {
+  var cell = cellsById[cellId];
+  var el = document.getElementById(containerId);
+  if (!cell || !el) return;
+  var msgs = cell.messages || [];
+  var html = '';
+  msgs.forEach(function(m) {
+    var from = m.from || m.author || 'Unknown';
+    var ini = m.initials || from.split(' ').map(function(w) { return w[0]; }).join('');
+    var youClass = m.gold ? ' avatar-gold' : '';
+    var nameStyle = m.gold ? ' style="color:var(--gold)"' : '';
+    html += '<div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md' + youClass + '">' + ini + '</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600"' + nameStyle + '>' + esc(from) + '</span><span class="text-xs" style="color:var(--text-tertiary)">' + esc(m.time) + '</span></div><p class="text-sm">' + esc(m.text) + '</p></div></div>';
+  });
+  el.innerHTML = html;
+}
+
+function openTaskModal(cellId, taskIdx) {
+  _taskTarget = { cellId: cellId, taskIdx: taskIdx };
+  var cell = cellsById[cellId];
+  var modal = document.getElementById('task-modal');
+  var titleEl = document.getElementById('task-modal-title');
+  var labelEl = document.getElementById('task-modal-label');
+  var statusEl = document.getElementById('task-modal-status');
+  var assigneeEl = document.getElementById('task-modal-assignee');
+  if (taskIdx >= 0 && cell.tasks[taskIdx]) {
+    var t = cell.tasks[taskIdx];
+    titleEl.textContent = 'Edit Task';
+    labelEl.value = t.label;
+    statusEl.value = t.status;
+    assigneeEl.value = t.assignee || '';
+  } else {
+    titleEl.textContent = 'New Task';
+    labelEl.value = '';
+    statusEl.value = 'pending';
+    assigneeEl.value = '';
+  }
+  modal.classList.add('active');
+}
+
+function closeTaskModal() {
+  document.getElementById('task-modal').classList.remove('active');
+  _taskTarget = null;
+}
+
+function saveTask() {
+  if (!_taskTarget) return;
+  var cell = cellsById[_taskTarget.cellId];
+  var label = document.getElementById('task-modal-label').value.trim();
+  if (!label) return;
+  var status = document.getElementById('task-modal-status').value;
+  var assignee = document.getElementById('task-modal-assignee').value.trim();
+  if (_taskTarget.taskIdx >= 0) {
+    cell.tasks[_taskTarget.taskIdx].label = label;
+    cell.tasks[_taskTarget.taskIdx].status = status;
+    cell.tasks[_taskTarget.taskIdx].assignee = assignee || undefined;
+  } else {
+    cell.tasks.push({ id: 'task-' + Date.now(), label: label, status: status, assignee: assignee || undefined });
+  }
+  closeTaskModal();
+  renderCellView(_taskTarget.cellId);
+}
+
+function toggleTaskStatus(cellId, taskIdx) {
+  var cell = cellsById[cellId];
+  var t = cell.tasks[taskIdx];
+  if (t.locked) return;
+  var cycle = { 'pending': 'in-progress', 'in-progress': 'complete', 'complete': 'pending' };
+  t.status = cycle[t.status] || 'pending';
+  renderCellView(cellId);
+}
+
+function deleteTask(cellId, taskIdx) {
+  var cell = cellsById[cellId];
+  if (cell.tasks[taskIdx].locked) return;
+  cell.tasks.splice(taskIdx, 1);
+  renderCellView(cellId);
+}
+
+function renderCellView(cellId) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  if (cell.type === 'xSTF Cell') {
+    renderXstf(cellId);
+  } else {
+    renderProjectCell(cellId);
+  }
+}
+
+function renderXstf(cellId) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  var blind = document.getElementById('xstf-blind');
+  if (blind) blind.innerHTML = cell.blind ? '🔒 &nbsp; BLIND EXECUTION — TEAM COLLABORATES ANONYMOUSLY, DELIVERABLE GOES TO COMMISSIONING CIRCLE &nbsp; 🔒' : '';
+  var meta = document.getElementById('xstf-meta');
+  if (meta) {
+    meta.innerHTML = '<div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">Collaborative</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Commissioned</span><span style="font-size:11px;color:var(--text)">' + esc(cell.commissionedBy || 'Unknown') + '</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">' + esc(cell.deadline || 'TBD') + '</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Resolution</span><span style="font-size:11px;color:var(--green)">' + esc(cell.resolutionRef || 'Approved') + '</span></div>';
+  }
+  renderDeliverables(cellId, 'xstf-specs');
+  renderProgress(cellId, 'xstf-progress', 'xstf-tasks');
+  renderTaskList(cellId, 'xstf-tasks', 'xstf-task-add');
+  renderObjectives(cellId, 'xstf-objectives');
+  var deliv = document.getElementById('xstf-deliverables');
+  if (deliv) {
+    var specs = cell.deliverableSpecs;
+    var delivs = cell.deliverables || [];
+    var html = '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">';
+    html += '<div class="mb-2"><strong style="color:var(--text)">Report:</strong></div>';
+    if (specs) {
+      html += '<div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">' + esc(specs.name) + ' (' + (specs.wordCount || '') + ')</div>';
+    }
+    if (delivs.length) {
+      html += '<div><strong style="color:var(--text)">Attachments:</strong></div><div class="flex gap-2" style="margin-top:4px">';
+      delivs.forEach(function(d) {
+        html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px">📄 ' + esc(d.name) + '</span>';
+      });
+      html += '</div>';
+    }
+    html += '</div>';
+    deliv.innerHTML = html;
+  }
+  renderTeam(cellId, 'xstf-team');
+  renderMessages(cellId, 'xstf-messages');
+}
+
+function renderProjectCell(cellId) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  var title = document.getElementById('projcell-title');
+  var desc = document.getElementById('projcell-desc');
+  var tags = document.getElementById('projcell-tags');
+  if (title) title.textContent = cell.title || cell.name;
+  if (desc) desc.textContent = cell.desc || '';
+  if (tags) tags.innerHTML = '<span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#' + cell.id + ' · ' + esc((cell.domains || []).join(', ')) + '</span>';
+  renderObjectives(cellId, 'projcell-objectives');
+  renderProgress(cellId, 'projcell-progress', 'projcell-tasks');
+  renderTaskList(cellId, 'projcell-tasks', 'projcell-task-add');
+  renderDeliverables(cellId, 'projcell-deliverables');
+  renderTeam(cellId, 'projcell-team');
+  renderMessages(cellId, 'projcell-messages');
+}
+
 // Init domain map when view is shown
 var _dmInited=false;
 var _origNav=nav;
 nav=function(key){
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
+  if(key==='stf-xstf'){renderXstf('cell-19');}
+  if(key==='cell-undertaking'){renderProjectCell('cell-14');}
 };
 </script>
 </body>

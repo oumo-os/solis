@@ -563,7 +563,37 @@
       "title": "East Africa Mapping",
       "participants": 7,
       "progress": 60,
-      "status": "Active"
+      "status": "Active",
+      "blind": false,
+      "lead": "Okello R.",
+      "domains": ["Policy", "Remote Sensing"],
+      "created": "Jun 2026",
+      "tasks": [
+        { "id": "t1", "label": "Define mapping scope & methodology", "status": "complete", "locked": false },
+        { "id": "t2", "label": "Uganda data collection", "status": "complete", "locked": false },
+        { "id": "t3", "label": "Kenya data collection", "status": "in-progress", "locked": false },
+        { "id": "t4", "label": "Tanzania data collection", "status": "pending", "locked": false },
+        { "id": "t5", "label": "Cross-country analysis & synthesis", "status": "pending", "locked": false },
+        { "id": "t6", "label": "Draft report", "status": "pending", "locked": false },
+        { "id": "t7", "label": "Peer review & finalisation", "status": "pending", "locked": false }
+      ],
+      "objectives": [
+        { "id": "o1", "label": "All 3 countries covered", "status": "in-progress" },
+        { "id": "o2", "label": "Government + academic + private sectors included", "status": "pending" },
+        { "id": "o3", "label": "Data quality gaps flagged explicitly", "status": "pending" }
+      ],
+      "team": [
+        { "name": "Okello R.", "initials": "OR", "role": "Lead", "focus": "Coordination" },
+        { "name": "Kimani A.", "initials": "KA", "role": "Member", "focus": "Kenya" },
+        { "name": "Mwenda T.", "initials": "MT", "role": "Member", "focus": "Uganda" },
+        { "name": "Namugga C.", "initials": "NC", "role": "Member", "focus": "Tanzania" }
+      ],
+      "messages": [
+        { "author": "Okello R.", "initials": "OR", "text": "Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?", "time": "3h ago", "color": "var(--teal)" },
+        { "author": "Kimani A.", "initials": "KA", "text": "I have a contact. Will reach out today.", "time": "2h ago", "color": "var(--purple)" },
+        { "author": "You", "initials": "OS", "text": "Both. The private sector data is thin but worth capturing even if incomplete.", "time": "1h ago", "gold": true },
+        { "author": "Okello R.", "initials": "OR", "text": "Agreed. I'll add a 'data quality' field to the schema.", "time": "45m ago", "color": "var(--teal)" }
+      ]
     },
     {
       "id": "cell-18",
@@ -658,7 +688,47 @@
       "title": "Resolution: ITU coordination guide",
       "progress": 45,
       "deadline": "Aug 15",
-      "status": "Active"
+      "status": "Active",
+      "blind": true,
+      "commissionedBy": "Space Law Circle",
+      "resolutionRef": "R-001",
+      "deliverableSpecs": {
+        "name": "ITU Frequency Coordination Guide",
+        "description": "Plain-language guide for emerging space nations. Target: policy makers and technical leads in East African space agencies.",
+        "sections": 4,
+        "wordCount": "8,000–12,000",
+        "language": "Plain English"
+      },
+      "tasks": [
+        { "id": "t0", "label": "STF formulation", "status": "complete", "locked": true },
+        { "id": "t1", "label": "Mandate comprehension", "status": "complete", "locked": false },
+        { "id": "t2", "label": "Research & drafting", "status": "in-progress", "locked": false },
+        { "id": "t3", "label": "Internal review", "status": "pending", "locked": false },
+        { "id": "t4", "label": "Circle review cycle", "status": "pending", "locked": false },
+        { "id": "t5", "label": "Finalisation", "status": "pending", "locked": false },
+        { "id": "t6", "label": "Dissolve STF", "status": "pending", "locked": true }
+      ],
+      "objectives": [
+        { "id": "o1", "label": "Clarity of ITU process explanation", "status": "complete" },
+        { "id": "o2", "label": "Accuracy of coordination steps", "status": "in-progress" },
+        { "id": "o3", "label": "East Africa relevance", "status": "pending" },
+        { "id": "o4", "label": "Policy maker accessibility", "status": "pending" }
+      ],
+      "team": [
+        { "name": "Team Member A", "initials": "TA", "role": "Sections 1–2", "color": "linear-gradient(135deg,var(--green),#0d3a20)" },
+        { "name": "Team Member B", "initials": "TB", "role": "Sections 3–4", "color": "linear-gradient(135deg,var(--blue),#0a1e34)" },
+        { "name": "Team Member C", "initials": "TC", "role": "Review & formatting", "color": "linear-gradient(135deg,var(--amber),#5a3a00)" }
+      ],
+      "deliverables": [
+        { "name": "Draft v2 — ITU Frequency Coordination Guide", "detail": "4,200 words so far" },
+        { "name": "ITU reference doc", "type": "attachment" },
+        { "name": "Coordination flowchart", "type": "attachment" }
+      ],
+      "messages": [
+        { "author": "Team Member A", "initials": "TA", "text": "Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?", "time": "2h ago", "color": "linear-gradient(135deg,var(--green),#0d3a20)" },
+        { "author": "Team Member B", "initials": "TB", "text": "On it. Also started Section 3 — frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?", "time": "1h ago", "color": "linear-gradient(135deg,var(--blue),#0a1e34)" },
+        { "author": "Team Member C", "initials": "TC", "text": "Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision — the ITU history paragraph is too detailed for the target audience.", "time": "45m ago", "color": "linear-gradient(135deg,var(--amber),#5a3a00)" }
+      ]
     },
     {
       "id": "cell-30",

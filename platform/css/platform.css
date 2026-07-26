@@ -842,3 +842,26 @@ body.modal-open{overflow:hidden}
 .voter-chip.nay{background:var(--red-soft);color:var(--red)}
 .voter-ini{font-weight:600}
 .voter-ws{font-size:8px;opacity:.7}
+
+/* ─── Task List ─── */
+.task-list{display:flex;flex-direction:column;gap:2px}
+.task-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:background .15s;position:relative}
+.task-item:hover{background:var(--surface-raised)}
+.task-icon{width:18px;text-align:center;font-size:12px;flex-shrink:0;cursor:pointer;user-select:none}
+.task-label{font-size:12px;color:var(--text);flex:1;line-height:1.4}
+.task-label.locked{color:var(--text-secondary);font-style:italic}
+.task-actions{display:none;gap:2px;align-items:center}
+.task-item:hover .task-actions{display:flex}
+.task-action-btn{font-size:10px;color:var(--text-tertiary);cursor:pointer;padding:2px 4px;border-radius:3px;border:none;background:none;line-height:1}
+.task-action-btn:hover{background:var(--surface);color:var(--text)}
+.task-add{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:11px;color:var(--gold);cursor:pointer;border:1px dashed var(--gold-border);border-radius:6px;transition:background .15s}
+.task-add:hover{background:var(--gold-soft)}
+.task-add-icon{width:18px;text-align:center;font-size:12px;flex-shrink:0}
+.task-status-pending{color:var(--text-tertiary)}
+.task-status-in-progress{color:var(--gold)}
+.task-status-complete{color:var(--green)}
+.task-locked-badge{font-size:8px;color:var(--text-tertiary);background:var(--surface);padding:1px 5px;border-radius:3px;border:1px solid var(--border)}
+.task-input-row{display:flex;gap:6px;padding:4px 10px;align-items:center}
+.task-input{flex:1;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);outline:none}
+.task-input:focus{border-color:var(--gold)}
+.task-input-actions{display:flex;gap:4px}
