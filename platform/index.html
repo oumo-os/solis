@@ -3797,6 +3797,7 @@ loadMockData().then(function() {
     DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle, type: d.type || 'knowledge' };
   });
   renderDefaultInterestRows();
+  dmReinit();
 
   var participantsGrid = document.getElementById('participants-grid');
   if (participantsGrid) participantsGrid.innerHTML = renderParticipantCards();
@@ -3983,13 +3984,6 @@ function autoLinkOrgs(text) {
     });
   });
   return result;
-}
-
-function submitProposal(){
-  var title=document.getElementById('propose-title').value;
-  if(!title){alert('Please enter a title.');return;}
-  closeModal();
-  alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
 }
 
 // Inbox modals
@@ -4497,6 +4491,17 @@ var DM_drift={};
 DM_IDS.forEach(function(id){DM_drift[id]={x:DM_LAYOUT[id].x,y:DM_LAYOUT[id].y};});
 var DM_vel={};
 (function(){var rng=dmMkRng(7);DM_IDS.forEach(function(id){DM_vel[id]={vx:(rng()-0.5)*0.02,vy:(rng()-0.5)*0.02};});})();
+
+function dmReinit(){
+  DM_LAYOUT=dmLayout();
+  DM_STATS=dmStats();
+  DM_IDS.forEach(function(id){
+    DM_drift[id]={x:DM_LAYOUT[id].x,y:DM_LAYOUT[id].y};
+    DM_vel[id]={vx:(Math.random()-0.5)*0.02,vy:(Math.random()-0.5)*0.02};
+  });
+  DM_EDGES=dmEdges(DM.mode);
+  dmRender();
+}
 
 // State
 var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2};
