@@ -654,6 +654,75 @@
       ]
     },
     {
+      "id": "cell-22",
+      "type": "Project Cell",
+      "title": "Space Debris Liability Framework Review",
+      "participants": 4,
+      "progress": 30,
+      "status": "Active",
+      "blind": false,
+      "lead": "Oumo Samuel",
+      "domains": ["Space Law"],
+      "created": "Jul 2026",
+      "tasks": [
+        { "id": "t1", "label": "Literature review of existing liability frameworks", "status": "complete", "locked": false },
+        { "id": "t2", "label": "Comparative analysis: UN vs national models", "status": "in-progress", "locked": false },
+        { "id": "t3", "label": "Draft proportional liability model", "status": "pending", "locked": false },
+        { "id": "t4", "label": "Expert review & feedback", "status": "pending", "locked": false },
+        { "id": "t5", "label": "Finalise framework document", "status": "pending", "locked": false }
+      ],
+      "objectives": [
+        { "id": "o1", "label": "Clear liability allocation model defined", "status": "in-progress" },
+        { "id": "o2", "label": "East African context addressed", "status": "pending" },
+        { "id": "o3", "label": "Published as Commons resource", "status": "pending" }
+      ],
+      "team": [
+        { "name": "Oumo Samuel", "initials": "OS", "role": "Lead", "focus": "Framework design" },
+        { "name": "Nakamura Y.", "initials": "NY", "role": "Member", "focus": "Comparative law" },
+        { "name": "Diallo F.", "initials": "DF", "role": "Member", "focus": "UN treaties" }
+      ],
+      "messages": [
+        { "author": "You", "initials": "OS", "text": "Started the comparative analysis. Found 3 national models that are relevant.", "time": "1d ago", "gold": true },
+        { "author": "Nakamura Y.", "initials": "NY", "text": "Japan's Space Activities Act has a proportional model — I can summarise it.", "time": "20h ago", "color": "var(--blue)" },
+        { "author": "Diallo F.", "initials": "DF", "text": "UN COPUOS has draft guidelines on debris liability. I'll pull the latest version.", "time": "12h ago", "color": "var(--amber)" }
+      ]
+    },
+    {
+      "id": "cell-23",
+      "type": "Project Cell",
+      "title": "Swahili Space Terminology",
+      "participants": 5,
+      "progress": 75,
+      "status": "Active",
+      "blind": false,
+      "lead": "Kimani A.",
+      "domains": ["Education", "Communications"],
+      "created": "Jun 2026",
+      "tasks": [
+        { "id": "t1", "label": "Gather existing Swahili space terms", "status": "complete", "locked": false },
+        { "id": "t2", "label": "Translate core terminology (50 terms)", "status": "complete", "locked": false },
+        { "id": "t3", "label": "Review by Swahili linguists", "status": "in-progress", "locked": false },
+        { "id": "t4", "label": "Community feedback round", "status": "pending", "locked": false },
+        { "id": "t5", "label": "Publish terminology glossary", "status": "pending", "locked": false }
+      ],
+      "objectives": [
+        { "id": "o1", "label": "50 core terms translated", "status": "in-progress" },
+        { "id": "o2", "label": "Linguist review complete", "status": "pending" },
+        { "id": "o3", "label": "Glossary published publicly", "status": "pending" }
+      ],
+      "team": [
+        { "name": "Kimani A.", "initials": "KA", "role": "Lead", "focus": "Translation coordination" },
+        { "name": "Mwenda T.", "initials": "MT", "role": "Member", "focus": "Uganda review" },
+        { "name": "Namugga C.", "initials": "NC", "role": "Member", "focus": "Tanzania review" },
+        { "name": "Ochieng P.", "initials": "OP", "role": "Member", "focus": "Linguistics" }
+      ],
+      "messages": [
+        { "author": "Kimani A.", "initials": "KA", "text": "First 50 terms drafted. Sending to linguists for review this week.", "time": "2d ago", "color": "var(--purple)" },
+        { "author": "Ochieng P.", "initials": "OP", "text": "Received the list. Some terms need context — 'satellite' has different meanings in technical vs everyday usage.", "time": "1d ago", "color": "var(--teal)" },
+        { "author": "Mwenda T.", "initials": "MT", "text": "Uganda side looks good. A few terms differ from Kenyan Swahili — we should note regional variations.", "time": "6h ago", "color": "var(--green)" }
+      ]
+    },
+    {
       "id": "cell-18",
       "type": "Circle Cell",
       "title": "Space Law Circle — Internal",
@@ -733,7 +802,7 @@
       }
     },
     {
-      "id": "cell-23",
+      "id": "cell-24",
       "type": "aSTF Cell",
       "title": "Motion: Debris liability",
       "assessors": 3,

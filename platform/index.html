@@ -258,8 +258,8 @@
         <table class="tbl">
           <tr><th>Project</th><th>Domains</th><th>Lead</th><th>Progress</th><th>Your Role</th><th></th></tr>
           <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-          <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-          <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="openProjectCell('cell-22')"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="openProjectCell('cell-23')"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
         </table>
       </div>
       <div class="layout-aside">
@@ -280,7 +280,7 @@
         <div class="aside-card">
           <div class="aside-title">Suggested Projects</div>
           <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">Based on your domains:</div>
-          <div class="aside-link" onclick="openProjectCell('cell-14')">Space Debris Tracking — East Africa</div>
+          <div class="aside-link" onclick="openProjectCell('cell-22')">Space Debris Tracking — East Africa</div>
           <div class="aside-link" onclick="openProjectCell('cell-14')">ITU Frequency Coordination Guide</div>
         </div>
       </div>
@@ -484,7 +484,7 @@
             <div class="hero-desc" id="projcell-desc">Loading…</div>
             <div class="hero-tags" id="projcell-tags"></div>
           </div>
-          <button class="btn btn-primary" style="font-size:12px" onclick="openProjectApplyModal('East Africa Mapping','cell-14')">Apply to Join</button>
+          <button class="btn btn-primary" style="font-size:12px" id="projcell-apply-btn">Apply to Join</button>
         </div>
         <div class="sec">Cell Messages</div>
         <div class="card" id="projcell-messages" style="margin-bottom:16px">
@@ -5918,9 +5918,11 @@ function renderProjectCell(cellId) {
   var title = document.getElementById('projcell-title');
   var desc = document.getElementById('projcell-desc');
   var tags = document.getElementById('projcell-tags');
+  var applyBtn = document.getElementById('projcell-apply-btn');
   if (title) title.textContent = cell.title || cell.name;
   if (desc) desc.textContent = cell.desc || '';
   if (tags) tags.innerHTML = '<span class="badge b-active">Project Cell</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#' + cell.id + ' · ' + esc((cell.domains || []).join(', ')) + '</span>';
+  if (applyBtn) applyBtn.onclick = function() { openProjectApplyModal(cell.title || cell.name, cellId); };
   renderObjectives(cellId, 'projcell-objectives');
   renderProgress(cellId, 'projcell-progress', 'projcell-tasks');
   renderTaskList(cellId, 'projcell-tasks', 'projcell-task-add');
@@ -5937,7 +5939,6 @@ nav=function(key){
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){renderXstf('cell-19');}
-  if(key==='cell-undertaking'){renderProjectCell('cell-14');}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
 };
 </script>
