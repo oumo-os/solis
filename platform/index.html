@@ -3067,7 +3067,8 @@ function updateVoteSummary() {
         '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
         '<textarea class="form-input" rows="3" id="propose-proj-desc" placeholder="What will this project produce? What is the goal?"></textarea></div>'+
         '<div style="margin-bottom:10px"><label class="form-label">Required Domains</label>'+
-        '<input class="form-input" id="propose-proj-domains" placeholder="Policy, Remote Sensing..."></div>'+
+        '<input class="form-input" id="propose-proj-domains" placeholder="Policy, Remote Sensing...">'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Comma-separated. These determine which circles vote on the resolution.</div></div>'+
         '<div style="margin-bottom:10px"><label class="form-label">Deadline</label>'+
         '<input class="form-input" type="date" id="propose-proj-deadline"></div>'+
       '</div>'+
@@ -3077,34 +3078,28 @@ function updateVoteSummary() {
         '<input class="form-input" id="propose-proj-delname" placeholder="e.g. East Africa Sector Mapping Report"></div>'+
         '<div style="margin-bottom:10px"><label class="form-label">Description</label>'+
         '<textarea class="form-input" rows="2" id="propose-proj-deldesc" placeholder="What should the deliverable contain?"></textarea></div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'+
-          '<div><label class="form-label">Sections</label>'+
-          '<input class="form-input" type="number" id="propose-proj-sections" value="4" min="1"></div>'+
-          '<div><label class="form-label">Word Count</label>'+
-          '<input class="form-input" id="propose-proj-wordcount" placeholder="8,000–12,000"></div>'+
-        '</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-          '<div><label class="form-label">Language</label>'+
-          '<input class="form-input" id="propose-proj-lang" value="Plain English"></div>'+
-          '<div><label class="form-label">Review Process</label>'+
-          '<select class="form-input" id="propose-proj-review">'+
-            '<option value="draft-circle-final">Draft → Circle → Final</option>'+
-            '<option value="draft-direct">Draft → Direct</option>'+
-          '</select></div>'+
-        '</div>'+
+        '<div style="margin-bottom:10px"><label class="form-label">Attached Files</label>'+
+        '<div id="propose-proj-files" style="margin-bottom:6px"></div>'+
+        '<button class="btn btn-sm" onclick="addProjFileField()" style="font-size:10px"><i class="fa-solid fa-plus" style="margin-right:4px"></i>Add File</button></div>'+
+        '<div><label class="form-label">Attachment URLs</label>'+
+        '<div id="propose-proj-urls" style="margin-bottom:6px"></div>'+
+        '<button class="btn btn-sm" onclick="addProjUrlField()" style="font-size:10px"><i class="fa-solid fa-plus" style="margin-right:4px"></i>Add URL</button></div>'+
       '</div>'+
       '<div class="card" style="margin-bottom:12px">'+
         '<div class="sec">Team &amp; Sponsorship</div>'+
         '<div style="margin-bottom:10px"><label class="form-label">Team Members</label>'+
-        '<input class="form-input" id="propose-proj-team" placeholder="Comma-separated names, or leave blank for open apply">'+
-        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Leave blank to allow anyone to apply</div></div>'+
-        '<div><label class="form-label">Sponsoring Circle</label>'+
+        '<div style="margin-bottom:6px"><label style="font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer">'+
+        '<input type="checkbox" id="propose-proj-open" onchange="toggleProjOpenApply()"> '+
+        '<span>Open to apply — anyone can join after deliberation</span></label></div>'+
+        '<input class="form-input" id="propose-proj-team" placeholder="Comma-separated names" disabled>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Uncheck "Open to apply" to specify team members.</div></div>'+
+        '<div><label class="form-label">Supervising Circle</label>'+
         '<select class="form-input" id="propose-proj-circle">'+
-          '<option value="">None — Common project</option>'+
-          '<option value="space-law">Space Law Circle</option>'+
-          '<option value="remote-sensing">Remote Sensing Circle</option>'+
-        '</select></div>'+
+          '<option value="">None — assigned in deliberation</option>'+
+        '</select>'+
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">Select a circle to supervise, or leave blank for assignment during deliberation.</div></div>'+
       '</div>';
+    populateProjCircles();
   } else {
         var color = val > 0 ? 'var(--green)' : 'var(--red)';
         rows += '<td style="text-align:right;font-family:var(--mono);font-size:11px;font-weight:500;color:' + color + '">' + (val > 0 ? '+' : '') + fmt(val) + '</td>';
@@ -4399,6 +4394,47 @@ function onProposalTypeChange(){
   }
 }
 
+function populateProjCircles(){
+  var sel=document.getElementById('propose-proj-circle');
+  if(!sel||!MOCK)return;
+  sel.innerHTML='<option value="">None — assigned in deliberation</option>';
+  MOCK.circles.forEach(function(c){
+    if(c.status==='Active'){
+      sel.innerHTML+='<option value="'+c.id+'">'+c.name+'</option>';
+    }
+  });
+}
+
+function toggleProjOpenApply(){
+  var open=document.getElementById('propose-proj-open');
+  var team=document.getElementById('propose-proj-team');
+  if(!open||!team)return;
+  team.disabled=open.checked;
+  if(open.checked)team.value='';
+}
+
+function addProjFileField(){
+  var container=document.getElementById('propose-proj-files');
+  if(!container)return;
+  var div=document.createElement('div');
+  div.className='flex gap-2';
+  div.style.marginBottom='6px';
+  div.innerHTML='<input type="file" class="form-input" style="flex:1;font-size:10px" accept=".pdf,.doc,.docx,.txt,.csv,.xlsx">'+
+    '<button class="btn btn-sm" style="font-size:9px;color:var(--red);padding:4px 8px" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>';
+  container.appendChild(div);
+}
+
+function addProjUrlField(){
+  var container=document.getElementById('propose-proj-urls');
+  if(!container)return;
+  var div=document.createElement('div');
+  div.className='flex gap-2';
+  div.style.marginBottom='6px';
+  div.innerHTML='<input class="form-input" style="flex:1;font-size:11px" placeholder="https://...">'+
+    '<button class="btn btn-sm" style="font-size:9px;color:var(--red);padding:4px 8px" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>';
+  container.appendChild(div);
+}
+
 function submitProposal(){
   var type=document.getElementById('propose-type').value;
   if(type==='circle'){
@@ -4413,9 +4449,33 @@ function submitProposal(){
     alert('Organisation Affiliation proposal "'+name+'" submitted! A founding cell will be created after deliberation.');
   } else if(type==='project'){
     var title=document.getElementById('propose-proj-title').value;
+    var desc=document.getElementById('propose-proj-desc').value;
+    var domains=document.getElementById('propose-proj-domains').value;
+    var deadline=document.getElementById('propose-proj-deadline').value;
+    var delName=document.getElementById('propose-proj-delname').value;
+    var delDesc=document.getElementById('propose-proj-deldesc').value;
+    var openApply=document.getElementById('propose-proj-open').checked;
+    var team=document.getElementById('propose-proj-team').value;
+    var circle=document.getElementById('propose-proj-circle').value;
     if(!title){alert('Please enter a project title.');return;}
+    var fileInputs=document.querySelectorAll('#propose-proj-files input[type="file"]');
+    var urlInputs=document.querySelectorAll('#propose-proj-urls input');
+    var files=[];fileInputs.forEach(function(f){if(f.files&&f.files[0])files.push(f.files[0].name);});
+    var urls=[];urlInputs.forEach(function(u){if(u.value)urls.push(u.value);});
+    var teamList=openApply?'Open to apply':(team?team.split(',').map(function(s){return s.trim();}).filter(Boolean):'');
+    var circleName='';
+    if(circle&&MOCK){var c=MOCK.circles.find(function(x){return x.id===circle;});if(c)circleName=c.name;}
+    var msg='Project "'+title+'" submitted!';
+    msg+='\n\nDomains: '+(domains||'TBD');
+    msg+='\nDeadline: '+(deadline||'TBD');
+    msg+='\nDeliverable: '+(delName||'TBD');
+    if(teamList)msg+='\nTeam: '+(typeof teamList==='string'?teamList:teamList.join(', '));
+    if(circleName)msg+='\nSupervising Circle: '+circleName;
+    if(files.length)msg+='\nFiles: '+files.join(', ');
+    if(urls.length)msg+='\nURLs: '+urls.join(', ');
+    msg+='\n\nA project cell will be created after deliberation.';
     closeModal();
-    alert('Project proposal "'+title+'" submitted! A project cell will be created after deliberation.');
+    alert(msg);
   } else {
     if(!title){alert('Please enter a title.');return;}
     closeModal();

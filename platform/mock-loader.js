@@ -154,8 +154,8 @@ function renderCellCards(filter) {
     var icon = c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : c.type === 'Founding Cell' ? 'organisations' : '';
     var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
     var cardStyle = isArchived ? 'opacity:0.65' : '';
-    var navTarget = c.type === 'Founding Cell' ? 'organisations' : c.type === 'Project Cell' ? 'cell-undertaking' : c.type === 'Circle Cell' ? 'cell-circle' : c.type === 'Deliberation Cell' ? 'cell-delib' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells';
-    return '<div class="card click" style="' + cardStyle + '" onclick="nav(\'' + navTarget + '\')">'
+    var onclick = c.type === 'Project Cell' ? "openProjectCell('" + c.id + "')" : "nav('" + (c.type === 'Founding Cell' ? 'organisations' : c.type === 'Circle Cell' ? 'cell-circle' : c.type === 'Deliberation Cell' ? 'cell-delib' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells') + "')";
+    return '<div class="card click" style="' + cardStyle + '" onclick="' + onclick + '">'
       + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.type + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.title + '</div>'
