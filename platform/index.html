@@ -735,13 +735,6 @@
           <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial"><i class="fa-solid fa-lock"></i> Closed</span></td></tr>
           <tr class="click" onclick="nav('stf-xstf')"><td><span class="tag tag-green" style="font-size:8px">xSTF</span></td><td class="s">Execution: ITU coordination guide deliverable</td><td>Space Law</td><td class="m">Aug 15</td><td><span class="badge b-active">Active</span></td></tr>
         </table>
-
-        <div class="sec" style="margin-top:16px"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--gold);margin-right:4px"></i> xSTF Auto-Evaluation</div>
-        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">System-matched candidates for active xSTFs based on interest + competence fit.</div>
-        <div class="card" style="margin-bottom:8px">
-          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px">ITU Coordination Guide Execution</div>
-          <div id="xstf-candidates"></div>
-        </div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -5254,30 +5247,6 @@ function filterInbox(filter, btn) {
 
 // ═══ JOIN FLOWS ═══
 
-// -- xSTF Candidate Auto-Evaluation --
-function renderXstfCandidates() {
-  var el = document.getElementById('xstf-candidates');
-  if (!el || !MOCK.stfCandidates) return;
-  el.innerHTML = MOCK.stfCandidates.map(function(c) {
-    var statusBadge = c.status === 'invited' ? '<span class="badge b-active" style="font-size:7px">Invited</span>'
-      : c.status === 'accepted' ? '<span class="badge" style="font-size:7px;background:var(--green-soft);color:var(--green)">Accepted</span>'
-      : '<span class="badge b-review" style="font-size:7px">Pending</span>';
-    var barColor = c.matchScore >= 80 ? 'var(--green)' : c.matchScore >= 60 ? 'var(--gold)' : 'var(--text-tertiary)';
-    return '<div class="flex items-center gap-3" style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">'
-      + '<div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:28px;height:28px;font-size:9px">' + c.initials + '</div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="flex items-center gap-2"><span style="font-size:12px;font-weight:500;color:var(--text)">' + esc(c.name) + '</span>' + statusBadge + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Matched: ' + c.matchedDomains.join(', ') + '</div>'
-      + '</div>'
-      + '<div style="text-align:right;flex-shrink:0">'
-      + '<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:' + barColor + '">' + c.matchScore + '%</div>'
-      + '<div class="htk" style="width:60px;margin-top:2px"><div class="hfill" style="width:' + c.matchScore + '%;background:' + barColor + '"></div></div>'
-      + '</div>'
-      + (c.status === 'pending' ? '<button class="btn btn-sm" style="font-size:9px;padding:3px 8px" onclick="openXstfInviteModal(\'' + c.id + '\')">Invite</button>' : '')
-      + '</div>';
-  }).join('');
-}
-
 // -- Circle Apply --
 function openCircleApplyModal(circleName, circleId) {
   document.getElementById('apply-circle-name').textContent = circleName;
@@ -5647,7 +5616,6 @@ nav=function(key){
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='cell-undertaking'){renderProjectCell('cell-14');}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
-  if(key==='stf'){renderXstfCandidates();}
 };
 </script>
 </body>
