@@ -95,6 +95,63 @@ Each deliberation cell has exactly one resolution slot. This ensures clear owner
 
 ---
 
+## Settings-State Resolutions
+
+When a settings change is proposed (e.g. "change steward term to 18 months"), the deliberation cell shows:
+
+### Origin Section
+
+1. **Current Settings (Snapshot)** — the system settings at the time the proposal was created, stored as `settingsSnapshot` on the cell
+2. **Proposed Changes** — the proposer's submitted changes with:
+   - Setting name
+   - Old value (struck through, red)
+   - Arrow → New value (green, bold)
+   - Rationale text (italic)
+3. **Info note** — "If this resolution passes, stewards must manually update these values in System Settings."
+
+### Key Difference from Standard Resolutions
+
+- The resolution text is **freeform** — it documents the discussion and final agreed changes, which may differ from the original proposal
+- Example: Steward proposes "change steward term to 2 years" → after deliberation, resolution says "change STF quorum to 9" → all mutations documented in the final resolution
+- After resolution passes, stewards **manually apply** the changes in System Settings
+- No automated settings mutation — the resolution text is the source of truth
+
+### Resolution Outcomes
+
+- **Approved** → stewards update system settings manually, document changes
+- **Failed** → no changes applied, proposal recorded as rejected
+
+---
+
+## Publication Deliberations
+
+Publication deliberations use a different voting model than standard deliberations.
+
+### Vote Labels
+
+| Standard | Publication |
+|----------|------------|
+| Yea | Approve |
+| Nay | Not Approve |
+| Abstain | Abstain (same) |
+
+### Semantic Difference
+
+- **Standard vote**: "I second this resolution" (consensus on a statement)
+- **Publication vote**: "I approve this action" (authorization to publish)
+
+### Outcomes
+
+- **Approved** → publication proceeds to aSTF for formal review → if aSTF approves → published
+- **Not Approved** → no aSTF spawned → publication does not happen
+- **Abstained** → counted as a number, not factored into weight
+
+### Resolution Text
+
+The resolution text documents the discussion and deliberation outcome — even if the vote fails. This creates a record of what was discussed and why the publication was or wasn't approved.
+
+---
+
 ## Publication Flow
 
 ### Thread → Publication

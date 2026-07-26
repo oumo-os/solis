@@ -12,28 +12,83 @@
     "interestScore": 34,
     "interestDrift": "+6 from last cycle",
     "activeRoles": 3,
-    "rolesBreakdown": "1 Circle · 2 Projects",
-    "bio": "Space law and remote sensing practitioner. Building the African space commons — open identity, shared competence, collective stewardship.",
+    "rolesBreakdown": "1 Circle \u00b7 2 Projects",
+    "bio": "Space law and remote sensing practitioner. Building the African space commons \u2014 open identity, shared competence, collective stewardship.",
     "essay": "I believe Africa's space future should be commons-governed. Not owned by any single institution, but built collectively by those who contribute. Solis is my attempt to make that tangible.",
     "domains": {
-      "space-law": { "ws": 1800, "wh": 1200, "interest": 1, "barWs": 72, "barWh": 100, "members": 24 },
-      "remote-sensing": { "ws": 1200, "wh": 800, "interest": 2, "barWs": 58, "barWh": 90, "members": 18 },
-      "policy": { "ws": 640, "wh": null, "interest": 3, "barWs": 20, "barWh": 70, "members": 11 },
-      "mars": { "ws": 600, "wh": null, "interest": 4, "barWs": 16, "barWh": 50, "members": 9 }
+      "space-law": {
+        "ws": 1800,
+        "wh": 1200,
+        "interest": 1,
+        "barWs": 72,
+        "barWh": 100,
+        "members": 24
+      },
+      "remote-sensing": {
+        "ws": 1200,
+        "wh": 800,
+        "interest": 2,
+        "barWs": 58,
+        "barWh": 90,
+        "members": 18
+      },
+      "policy": {
+        "ws": 640,
+        "wh": null,
+        "interest": 3,
+        "barWs": 20,
+        "barWh": 70,
+        "members": 11
+      },
+      "mars": {
+        "ws": 600,
+        "wh": null,
+        "interest": 4,
+        "barWs": 16,
+        "barWh": 50,
+        "members": 9
+      }
     },
     "circles": [
-      { "name": "Space Law Circle", "status": "Active", "since": "Jul 2026" },
-      { "name": "Remote Sensing Circle", "status": "Active", "since": "Aug 2026" }
+      {
+        "name": "Space Law Circle",
+        "status": "Active",
+        "since": "Jul 2026"
+      },
+      {
+        "name": "Remote Sensing Circle",
+        "status": "Active",
+        "since": "Aug 2026"
+      }
     ],
     "activity": [
-      { "text": "Submitted evidence for vSTF Competence Claims review", "time": "2h ago", "type": "stf" },
-      { "text": "Replied to thread 'Liability frameworks for debris-generating manoeuvres'", "time": "1d ago", "type": "discussion" },
-      { "text": "Updated deliverable draft for ITU Coordination Guide", "time": "3d ago", "type": "project" },
-      { "text": "Endorsed Okello R.'s Space Law analysis", "time": "5d ago", "type": "endorsed" },
-      { "text": "Joined Remote Sensing Circle", "time": "1w ago", "type": "circle" }
+      {
+        "text": "Submitted evidence for vSTF Competence Claims review",
+        "time": "2h ago",
+        "type": "stf"
+      },
+      {
+        "text": "Replied to thread 'Liability frameworks for debris-generating manoeuvres'",
+        "time": "1d ago",
+        "type": "discussion"
+      },
+      {
+        "text": "Updated deliverable draft for ITU Coordination Guide",
+        "time": "3d ago",
+        "type": "project"
+      },
+      {
+        "text": "Endorsed Okello R.'s Space Law analysis",
+        "time": "5d ago",
+        "type": "endorsed"
+      },
+      {
+        "text": "Joined Remote Sensing Circle",
+        "time": "1w ago",
+        "type": "circle"
+      }
     ]
   },
-
   "participants": [
     {
       "id": "aj",
@@ -43,11 +98,23 @@
       "joined": "Feb 2025",
       "avatar": {},
       "domains": [
-        { "name": "Space Law", "ws": 1800, "color": "tag-purple" },
-        { "name": "Astrophysics", "ws": 1240, "color": "tag-blue" }
+        {
+          "name": "Space Law",
+          "ws": 1800,
+          "color": "tag-purple"
+        },
+        {
+          "name": "Astrophysics",
+          "ws": 1240,
+          "color": "tag-blue"
+        }
       ],
-      "circles": ["SL Circle"],
-      "orgs": ["UAS"],
+      "circles": [
+        "SL Circle"
+      ],
+      "orgs": [
+        "UAS"
+      ],
       "bio": "Astrophysics researcher specialising in exoplanet detection."
     },
     {
@@ -56,13 +123,25 @@
       "initials": "OK",
       "location": "Accra",
       "joined": "Jun 2025",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
+      },
       "domains": [
-        { "name": "Propulsion", "ws": 2000, "color": "tag-default" },
-        { "name": "Launch Sys", "ws": 1380, "color": "tag-default" }
+        {
+          "name": "Propulsion",
+          "ws": 2000,
+          "color": "tag-default"
+        },
+        {
+          "name": "Launch Sys",
+          "ws": 1380,
+          "color": "tag-default"
+        }
       ],
       "circles": [],
-      "orgs": ["GSS"],
+      "orgs": [
+        "GSS"
+      ],
       "bio": "Propulsion engineer developing next-generation launch systems for small satellites."
     },
     {
@@ -71,12 +150,24 @@
       "initials": "NC",
       "location": "Entebbe",
       "joined": "Jan 2025",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
+      },
       "domains": [
-        { "name": "Publications", "ws": 1400, "color": "tag-purple" },
-        { "name": "Space Med", "ws": 1050, "color": "tag-amber" }
+        {
+          "name": "Publications",
+          "ws": 1400,
+          "color": "tag-purple"
+        },
+        {
+          "name": "Space Med",
+          "ws": 1050,
+          "color": "tag-amber"
+        }
       ],
-      "circles": ["SL Circle"],
+      "circles": [
+        "SL Circle"
+      ],
       "orgs": [],
       "bio": "Space medicine researcher exploring bioastronautics for long-duration missions."
     },
@@ -88,10 +179,20 @@
       "joined": "May 2025",
       "avatar": {},
       "domains": [
-        { "name": "Remote Sensing", "ws": 1200, "color": "tag-green" },
-        { "name": "Events", "ws": 890, "color": "tag-blue" }
+        {
+          "name": "Remote Sensing",
+          "ws": 1200,
+          "color": "tag-green"
+        },
+        {
+          "name": "Events",
+          "ws": 890,
+          "color": "tag-blue"
+        }
       ],
-      "circles": ["RS Circle"],
+      "circles": [
+        "RS Circle"
+      ],
       "orgs": [],
       "bio": "Remote sensing specialist with focus on East African agricultural monitoring."
     },
@@ -103,11 +204,21 @@
       "joined": "Mar 2025",
       "avatar": {},
       "domains": [
-        { "name": "Education", "ws": 1100, "color": "tag-green" },
-        { "name": "Comms", "ws": 980, "color": "tag-amber" }
+        {
+          "name": "Education",
+          "ws": 1100,
+          "color": "tag-green"
+        },
+        {
+          "name": "Comms",
+          "ws": 980,
+          "color": "tag-amber"
+        }
       ],
       "circles": [],
-      "orgs": ["SGAC"],
+      "orgs": [
+        "SGAC"
+      ],
       "bio": "Science communicator bridging space research and public understanding across East Africa."
     },
     {
@@ -116,13 +227,26 @@
       "initials": "SD",
       "location": "Kampala",
       "joined": "Apr 2025",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--purple),#3a1860)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--purple),#3a1860)"
+      },
       "domains": [
-        { "name": "Space Law", "ws": 900, "color": "tag-purple" },
-        { "name": "Policy", "ws": 760, "color": "tag-blue" }
+        {
+          "name": "Space Law",
+          "ws": 900,
+          "color": "tag-purple"
+        },
+        {
+          "name": "Policy",
+          "ws": 760,
+          "color": "tag-blue"
+        }
       ],
       "circles": [],
-      "orgs": ["UAS", "SGAC"],
+      "orgs": [
+        "UAS",
+        "SGAC"
+      ],
       "bio": "Policy analyst working on national space legislation for Uganda."
     },
     {
@@ -131,12 +255,25 @@
       "initials": "OS",
       "location": "Kampala",
       "joined": "Sep 2024",
-      "avatar": { "gold": true },
+      "avatar": {
+        "gold": true
+      },
       "domains": [
-        { "name": "Space Law", "ws": 1200, "color": "tag-purple" },
-        { "name": "Remote Sensing", "ws": 847, "color": "tag-green" }
+        {
+          "name": "Space Law",
+          "ws": 1200,
+          "color": "tag-purple"
+        },
+        {
+          "name": "Remote Sensing",
+          "ws": 847,
+          "color": "tag-green"
+        }
       ],
-      "circles": ["SL Circle", "RS Circle"],
+      "circles": [
+        "SL Circle",
+        "RS Circle"
+      ],
       "orgs": [],
       "bio": "Founder of Solis. Space law and remote sensing, building the African space commons."
     },
@@ -148,15 +285,24 @@
       "joined": "Jul 2025",
       "avatar": {},
       "domains": [
-        { "name": "Space Finance", "ws": 800, "color": "tag-amber" },
-        { "name": "Entrepreneurship", "ws": 720, "color": "tag-green" }
+        {
+          "name": "Space Finance",
+          "ws": 800,
+          "color": "tag-amber"
+        },
+        {
+          "name": "Entrepreneurship",
+          "ws": 720,
+          "color": "tag-green"
+        }
       ],
       "circles": [],
-      "orgs": ["Sen. Space Agency"],
+      "orgs": [
+        "Sen. Space Agency"
+      ],
       "bio": "Space finance specialist advising on investment frameworks for African space ventures."
     }
   ],
-
   "circles": [
     {
       "id": "space-law",
@@ -164,41 +310,287 @@
       "status": "Active",
       "members": 8,
       "motions": 2,
-      "domains": ["Space Law", "Liability", "Policy"],
-      "mandate": { "primary": ["Space Law", "Liability"], "secondary": ["Policy"] },
-      "desiredWs": { "Space Law": 2500, "Liability": 1800, "Policy": 1500 },
+      "domains": [
+        "Space Law",
+        "Liability",
+        "Policy"
+      ],
+      "mandate": {
+        "primary": [
+          "Space Law",
+          "Liability"
+        ],
+        "secondary": [
+          "Policy"
+        ]
+      },
+      "desiredWs": {
+        "Space Law": 2500,
+        "Liability": 1800,
+        "Policy": 1500
+      },
       "description": "Stewards space law analysis, liability frameworks, and regulatory compliance.",
       "founded": "Mar 2026",
       "termOverride": null,
       "expiryOverride": null,
       "proposals": [
-        { "id": "prop-01", "title": "Debris liability framework — proportional model", "status": "In Deliberation", "date": "Jul 21" },
-        { "id": "prop-02", "title": "Artemis Accords ratification recommendation", "status": "Drafted", "date": "Jul 18" }
+        {
+          "id": "prop-01",
+          "title": "Debris liability framework \u2014 proportional model",
+          "status": "In Deliberation",
+          "date": "Jul 21"
+        },
+        {
+          "id": "prop-02",
+          "title": "Artemis Accords ratification recommendation",
+          "status": "Drafted",
+          "date": "Jul 18"
+        }
       ],
       "resolutions": [
-        { "id": "res-01", "title": "ITU coordination guide publication", "date": "Jul 10", "type": "non_system" }
+        {
+          "id": "res-01",
+          "title": "ITU coordination guide publication",
+          "date": "Jul 10",
+          "type": "non_system"
+        }
       ],
       "activity": [
-        { "text": "Akello J. created proposal 'Debris liability framework'", "time": "3d ago", "type": "proposal" },
-        { "text": "xSTF spawned for ITU coordination guide execution", "time": "1w ago", "type": "xstf" },
-        { "text": "Resolution passed: ITU coordination guide publication", "time": "1w ago", "type": "resolution" },
-        { "text": "Mensah N. joined the circle", "time": "2w ago", "type": "member" }
+        {
+          "text": "Akello J. created proposal 'Debris liability framework'",
+          "time": "3d ago",
+          "type": "proposal"
+        },
+        {
+          "text": "xSTF spawned for ITU coordination guide execution",
+          "time": "1w ago",
+          "type": "xstf"
+        },
+        {
+          "text": "Resolution passed: ITU coordination guide publication",
+          "time": "1w ago",
+          "type": "resolution"
+        },
+        {
+          "text": "Mensah N. joined the circle",
+          "time": "2w ago",
+          "type": "member"
+        }
       ],
       "roster": {
         "active": [
-          { "id": "aj", "name": "Akello Jane", "initials": "AJ", "color": "linear-gradient(135deg,var(--purple),#3a1860)", "ws": 1800, "domains": ["Space Law", "Astrophysics"], "domainWs": [1800, 1240], "joined": "Feb 2025", "lastActive": "3h ago", "status": "active", "topDomain": "Space Law" },
-          { "id": "ok", "name": "Osei Kwame", "initials": "OK", "color": "linear-gradient(135deg,var(--amber),#5a3a00)", "ws": 2000, "domains": ["Propulsion", "Launch Sys"], "domainWs": [2000, 1380], "joined": "Jun 2025", "lastActive": "1d ago", "status": "active", "topDomain": "Propulsion" },
-          { "id": "nc", "name": "Namugga Claire", "initials": "NC", "color": "linear-gradient(135deg,var(--amber),#5a3a00)", "ws": 1400, "domains": ["Publications", "Space Med"], "domainWs": [1400, 1050], "joined": "Jan 2025", "lastActive": "2d ago", "status": "active", "topDomain": "Publications" },
-          { "id": "mt", "name": "Mwenda Thomas", "initials": "MT", "color": "linear-gradient(135deg,var(--teal),#0d4040)", "ws": 1200, "domains": ["Remote Sensing", "Events"], "domainWs": [1200, 890], "joined": "May 2025", "lastActive": "4d ago", "status": "active", "topDomain": "Remote Sensing" },
-          { "id": "mn", "name": "Mensah Naa", "initials": "MN", "color": "var(--navy-light)", "ws": 1040, "domains": ["Astronomy", "Education"], "domainWs": [1040, 980], "joined": "Apr 2025", "lastActive": "4d ago", "status": "active", "topDomain": "Astronomy" },
-          { "id": "ao", "name": "Aisha Omondi", "initials": "AO", "color": "linear-gradient(135deg,var(--green),#0d3a20)", "ws": 980, "domains": ["Comms", "Education"], "domainWs": [980, 920], "joined": "Mar 2025", "lastActive": "5d ago", "status": "active", "topDomain": "Comms" },
-          { "id": "sd", "name": "Ssempa David", "initials": "SD", "color": "linear-gradient(135deg,var(--purple),#3a1860)", "ws": 900, "domains": ["Space Law", "Policy"], "domainWs": [900, 760], "joined": "Apr 2025", "lastActive": "6d ago", "status": "active", "topDomain": "Space Law" },
-          { "id": "dm", "name": "Diallo Mamadou", "initials": "DM", "color": "var(--border)", "ws": 800, "domains": ["Space Finance", "Entrepreneurship"], "domainWs": [800, 720], "joined": "Jul 2025", "lastActive": "2w ago", "status": "candidate", "topDomain": "Space Finance" }
+          {
+            "id": "aj",
+            "name": "Akello Jane",
+            "initials": "AJ",
+            "color": "linear-gradient(135deg,var(--purple),#3a1860)",
+            "ws": 1800,
+            "domains": [
+              "Space Law",
+              "Astrophysics"
+            ],
+            "domainWs": [
+              1800,
+              1240
+            ],
+            "joined": "Feb 2025",
+            "lastActive": "3h ago",
+            "status": "active",
+            "topDomain": "Space Law"
+          },
+          {
+            "id": "ok",
+            "name": "Osei Kwame",
+            "initials": "OK",
+            "color": "linear-gradient(135deg,var(--amber),#5a3a00)",
+            "ws": 2000,
+            "domains": [
+              "Propulsion",
+              "Launch Sys"
+            ],
+            "domainWs": [
+              2000,
+              1380
+            ],
+            "joined": "Jun 2025",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Propulsion"
+          },
+          {
+            "id": "nc",
+            "name": "Namugga Claire",
+            "initials": "NC",
+            "color": "linear-gradient(135deg,var(--amber),#5a3a00)",
+            "ws": 1400,
+            "domains": [
+              "Publications",
+              "Space Med"
+            ],
+            "domainWs": [
+              1400,
+              1050
+            ],
+            "joined": "Jan 2025",
+            "lastActive": "2d ago",
+            "status": "active",
+            "topDomain": "Publications"
+          },
+          {
+            "id": "mt",
+            "name": "Mwenda Thomas",
+            "initials": "MT",
+            "color": "linear-gradient(135deg,var(--teal),#0d4040)",
+            "ws": 1200,
+            "domains": [
+              "Remote Sensing",
+              "Events"
+            ],
+            "domainWs": [
+              1200,
+              890
+            ],
+            "joined": "May 2025",
+            "lastActive": "4d ago",
+            "status": "active",
+            "topDomain": "Remote Sensing"
+          },
+          {
+            "id": "mn",
+            "name": "Mensah Naa",
+            "initials": "MN",
+            "color": "var(--navy-light)",
+            "ws": 1040,
+            "domains": [
+              "Astronomy",
+              "Education"
+            ],
+            "domainWs": [
+              1040,
+              980
+            ],
+            "joined": "Apr 2025",
+            "lastActive": "4d ago",
+            "status": "active",
+            "topDomain": "Astronomy"
+          },
+          {
+            "id": "ao",
+            "name": "Aisha Omondi",
+            "initials": "AO",
+            "color": "linear-gradient(135deg,var(--green),#0d3a20)",
+            "ws": 980,
+            "domains": [
+              "Comms",
+              "Education"
+            ],
+            "domainWs": [
+              980,
+              920
+            ],
+            "joined": "Mar 2025",
+            "lastActive": "5d ago",
+            "status": "active",
+            "topDomain": "Comms"
+          },
+          {
+            "id": "sd",
+            "name": "Ssempa David",
+            "initials": "SD",
+            "color": "linear-gradient(135deg,var(--purple),#3a1860)",
+            "ws": 900,
+            "domains": [
+              "Space Law",
+              "Policy"
+            ],
+            "domainWs": [
+              900,
+              760
+            ],
+            "joined": "Apr 2025",
+            "lastActive": "6d ago",
+            "status": "active",
+            "topDomain": "Space Law"
+          },
+          {
+            "id": "dm",
+            "name": "Diallo Mamadou",
+            "initials": "DM",
+            "color": "var(--border)",
+            "ws": 800,
+            "domains": [
+              "Space Finance",
+              "Entrepreneurship"
+            ],
+            "domainWs": [
+              800,
+              720
+            ],
+            "joined": "Jul 2025",
+            "lastActive": "2w ago",
+            "status": "candidate",
+            "topDomain": "Space Finance"
+          }
         ],
         "former": [
-          { "id": "ek", "name": "Esi Kojo", "initials": "EK", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Policy", "Astronomy"], "domainWs": [700, 500], "joined": "Jan 2025", "left": "May 2026", "status": "former", "topDomain": "Policy", "leftReason": "term-expiry" },
-          { "id": "nl", "name": "Nadia Lubega", "initials": "NL", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Space Med", "Education"], "domainWs": [800, 600], "joined": "Mar 2025", "left": "Apr 2026", "status": "former", "topDomain": "Space Med", "leftReason": "resignation" },
-          { "id": "tb", "name": "Thabo Banda", "initials": "TB", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Space Law"], "domainWs": [600], "joined": "Feb 2026", "left": "Jun 2026", "status": "former", "topDomain": "Space Law", "leftReason": "competence-drift" }
+          {
+            "id": "ek",
+            "name": "Esi Kojo",
+            "initials": "EK",
+            "color": "var(--text-tertiary)",
+            "ws": 0,
+            "domains": [
+              "Policy",
+              "Astronomy"
+            ],
+            "domainWs": [
+              700,
+              500
+            ],
+            "joined": "Jan 2025",
+            "left": "May 2026",
+            "status": "former",
+            "topDomain": "Policy",
+            "leftReason": "term-expiry"
+          },
+          {
+            "id": "nl",
+            "name": "Nadia Lubega",
+            "initials": "NL",
+            "color": "var(--text-tertiary)",
+            "ws": 0,
+            "domains": [
+              "Space Med",
+              "Education"
+            ],
+            "domainWs": [
+              800,
+              600
+            ],
+            "joined": "Mar 2025",
+            "left": "Apr 2026",
+            "status": "former",
+            "topDomain": "Space Med",
+            "leftReason": "resignation"
+          },
+          {
+            "id": "tb",
+            "name": "Thabo Banda",
+            "initials": "TB",
+            "color": "var(--text-tertiary)",
+            "ws": 0,
+            "domains": [
+              "Space Law"
+            ],
+            "domainWs": [
+              600
+            ],
+            "joined": "Feb 2026",
+            "left": "Jun 2026",
+            "status": "former",
+            "topDomain": "Space Law",
+            "leftReason": "competence-drift"
+          }
         ]
       }
     },
@@ -208,19 +600,40 @@
       "status": "Active",
       "members": 6,
       "motions": 1,
-      "domains": ["Remote Sensing", "Satellite", "Data"],
+      "domains": [
+        "Remote Sensing",
+        "Satellite",
+        "Data"
+      ],
       "description": "Satellite data analysis, Earth observation, and remote sensing methodologies.",
       "founded": "Jan 2026",
       "termOverride": null,
       "expiryOverride": null,
       "proposals": [
-        { "id": "prop-03", "title": "East Africa SAR data sharing protocol", "status": "Active", "date": "Jul 15" }
+        {
+          "id": "prop-03",
+          "title": "East Africa SAR data sharing protocol",
+          "status": "Active",
+          "date": "Jul 15"
+        }
       ],
       "resolutions": [],
       "activity": [
-        { "text": "Kimani A. submitted SAR interferometry data", "time": "4d ago", "type": "discussion" },
-        { "text": "Proposal 'SAR data sharing protocol' entered deliberation", "time": "1w ago", "type": "proposal" }
-      ]
+        {
+          "text": "Kimani A. submitted SAR interferometry data",
+          "time": "4d ago",
+          "type": "discussion"
+        },
+        {
+          "text": "Proposal 'SAR data sharing protocol' entered deliberation",
+          "time": "1w ago",
+          "type": "proposal"
+        }
+      ],
+      "mandate": {
+        "primary": [],
+        "secondary": []
+      }
     },
     {
       "id": "mars",
@@ -228,16 +641,29 @@
       "status": "Suggested",
       "members": 4,
       "motions": 0,
-      "domains": ["Mars", "Habitability"],
+      "domains": [
+        "Mars",
+        "Habitability"
+      ],
       "description": "Life support systems, habitat design, and Mars colonisation research.",
       "founded": "Jun 2026",
       "termOverride": null,
-      "expiryOverride": { "months": 18 },
+      "expiryOverride": {
+        "months": 18
+      },
       "proposals": [],
       "resolutions": [],
       "activity": [
-        { "text": "Namugga C. posted confined habitats discussion", "time": "3d ago", "type": "discussion" }
-      ]
+        {
+          "text": "Namugga C. posted confined habitats discussion",
+          "time": "3d ago",
+          "type": "discussion"
+        }
+      ],
+      "mandate": {
+        "primary": [],
+        "secondary": []
+      }
     },
     {
       "id": "policy",
@@ -245,14 +671,21 @@
       "status": "Suggested",
       "members": 5,
       "motions": 0,
-      "domains": ["Policy", "Advocacy"],
+      "domains": [
+        "Policy",
+        "Advocacy"
+      ],
       "description": "Policy analysis, advocacy strategies, and institutional partnerships.",
       "founded": "May 2026",
       "termOverride": null,
       "expiryOverride": null,
       "proposals": [],
       "resolutions": [],
-      "activity": []
+      "activity": [],
+      "mandate": {
+        "primary": [],
+        "secondary": []
+      }
     },
     {
       "id": "freq",
@@ -260,19 +693,26 @@
       "status": "Archived",
       "members": 3,
       "motions": 0,
-      "domains": ["Telecom"],
+      "domains": [
+        "Telecom"
+      ],
       "description": "Dissolved after scope overlap with Space Law Circle.",
       "founded": "Jan 2026",
       "archivedDate": "Apr 2026",
       "archiveReason": "Scope overlap with Space Law",
       "termOverride": null,
-      "expiryOverride": { "never": true },
+      "expiryOverride": {
+        "never": true
+      },
       "proposals": [],
       "resolutions": [],
-      "activity": []
+      "activity": [],
+      "mandate": {
+        "primary": [],
+        "secondary": []
+      }
     }
   ],
-
   "exitReasonLabels": {
     "term-expiry": "Term expired",
     "resignation": "Resigned",
@@ -281,110 +721,579 @@
     "circle-dissolved": "Circle disbanded",
     "competence-drift": "Competence drift"
   },
-
   "domains": {
-    "astronomy-astrophysics": { "label": "Astronomy & Astrophysics", "short": "ASTRO", "color": "#6EB8FF", "hasCircle": true, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "aerospace-engineering": { "label": "Aerospace Engineering", "short": "AERO", "color": "#4ACCA8", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "earth-planetary-science": { "label": "Earth & Planetary Science", "short": "EARTH", "color": "#7AACDA", "hasCircle": true, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "space-medicine-biology": { "label": "Space Medicine & Biology", "short": "MED", "color": "#FF8080", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Life Science" },
-    "space-law-policy": { "label": "Space Law & Policy", "short": "LAW", "color": "#FFB84D", "hasCircle": true, "type": "knowledge", "taxonomy": "Social Science > Political Science" },
-    "telecommunications-signals": { "label": "Telecom & Signals", "short": "COMMS", "color": "#B088F0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "computer-science-software": { "label": "CS & Software", "short": "CODE", "color": "#50E0C0", "hasCircle": true, "type": "knowledge", "taxonomy": "Formal Science > Computer Science" },
-    "physics": { "label": "Physics", "short": "PHYS", "color": "#AACCEE", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "materials-science": { "label": "Materials Science", "short": "MAT", "color": "#E0A060", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "robotics-automation": { "label": "Robotics & Automation", "short": "ROBO", "color": "#80D0FF", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "remote-sensing": { "label": "Remote Sensing", "short": "RS", "color": "#40C090", "hasCircle": true, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "space-architecture": { "label": "Space Architecture", "short": "ARCH", "color": "#C0A0E0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Architecture & Design" },
-    "space-finance-economics": { "label": "Space Finance & Economics", "short": "FIN", "color": "#FFD060", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Economics" },
-    "science-communication": { "label": "Science Communication", "short": "SCICOMM", "color": "#FF90B0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Communication Studies" },
-    "philosophy-ethics-space": { "label": "Philosophy & Ethics", "short": "PHIL", "color": "#D0C0A0", "hasCircle": true, "type": "knowledge", "taxonomy": "Humanities > Philosophy" },
-    "art-culture-space": { "label": "Art & Culture of Space", "short": "ART", "color": "#E0B0C0", "hasCircle": false, "type": "knowledge", "taxonomy": "Humanities > Visual & Performing Arts" },
-    "chemistry": { "label": "Chemistry", "short": "CHEM", "color": "#E8A87C", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "mathematics": { "label": "Mathematics", "short": "MATH", "color": "#8FB8DE", "hasCircle": false, "type": "knowledge", "taxonomy": "Formal Science > Mathematics" },
-    "environmental-studies": { "label": "Environmental Studies", "short": "ENV", "color": "#78C878", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Environmental Studies" },
-    "geology": { "label": "Geology", "short": "GEO", "color": "#C4A882", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "atmospheric-science": { "label": "Atmospheric Science", "short": "ATMOS", "color": "#A0C8E0", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Physical Science" },
-    "astrobiology": { "label": "Astrobiology", "short": "ASTROBIO", "color": "#90D090", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Life Science" },
-    "genetics": { "label": "Genetics & Genomics", "short": "GENE", "color": "#E0A0C0", "hasCircle": false, "type": "knowledge", "taxonomy": "Natural Science > Life Science" },
-    "statistics": { "label": "Statistics", "short": "STAT", "color": "#B0B0E0", "hasCircle": false, "type": "knowledge", "taxonomy": "Formal Science > Statistics" },
-    "data-science": { "label": "Data Science", "short": "DATA", "color": "#60C0C0", "hasCircle": false, "type": "knowledge", "taxonomy": "Formal Science > Data Science" },
-    "systems-science": { "label": "Systems Science", "short": "SYS", "color": "#A0D0A0", "hasCircle": false, "type": "knowledge", "taxonomy": "Formal Science > Systems Science" },
-    "quantum-computing": { "label": "Quantum Computing", "short": "QC", "color": "#70E0E0", "hasCircle": false, "type": "knowledge", "taxonomy": "Formal Science > Computer Science" },
-    "mechanical-engineering": { "label": "Mechanical Engineering", "short": "MECH", "color": "#D0B080", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "electrical-engineering": { "label": "Electrical Engineering", "short": "ELEC", "color": "#E0C060", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "nuclear-engineering": { "label": "Nuclear Engineering", "short": "NUC", "color": "#F0A0A0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "chemical-engineering": { "label": "Chemical Engineering", "short": "CHEMENG", "color": "#D0C0A0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "civil-engineering": { "label": "Civil Engineering", "short": "CIVIL", "color": "#C0B090", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "nanotechnology": { "label": "Nanotechnology", "short": "NANO", "color": "#D0D0E0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Engineering & Technology" },
-    "transportation": { "label": "Transportation", "short": "TRANS", "color": "#A0B0C0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Transportation" },
-    "urban-planning": { "label": "Urban & Settlement Planning", "short": "URBAN", "color": "#C0C0A0", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Urban Planning" },
-    "military-defence": { "label": "Military & Defence Sciences", "short": "MIL", "color": "#809080", "hasCircle": false, "type": "knowledge", "taxonomy": "Applied Science > Military Sciences" },
-    "psychology": { "label": "Psychology", "short": "PSYCH", "color": "#E0B0D0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Psychology" },
-    "sociology": { "label": "Sociology", "short": "SOC", "color": "#D0C0B0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Sociology" },
-    "anthropology": { "label": "Anthropology", "short": "ANTHRO", "color": "#C0B0A0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Anthropology" },
-    "international-relations": { "label": "International Relations", "short": "IR", "color": "#B0C0D0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > International Relations" },
-    "education": { "label": "Education", "short": "EDUC", "color": "#A0C0B0", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Education" },
-    "geography": { "label": "Geography", "short": "GEOG", "color": "#90B090", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Geography" },
-    "entrepreneurship": { "label": "Entrepreneurship & Business", "short": "BIZ", "color": "#E0C080", "hasCircle": false, "type": "knowledge", "taxonomy": "Social Science > Business & Management" },
-    "history": { "label": "History", "short": "HIST", "color": "#C0A090", "hasCircle": false, "type": "knowledge", "taxonomy": "Humanities > History" },
-    "linguistics": { "label": "Linguistics", "short": "LING", "color": "#B0A0C0", "hasCircle": false, "type": "knowledge", "taxonomy": "Humanities > Linguistics" },
-    "uas": { "label": "Uganda Astronomical Society", "short": "UAS", "color": "#C0A0E0", "hasCircle": false, "type": "affiliate" },
-    "sgac": { "label": "Space Generation Advisory Council", "short": "SGAC", "color": "#B088F0", "hasCircle": false, "type": "affiliate" },
-    "gss": { "label": "Ghana Space Society", "short": "GSS", "color": "#40C090", "hasCircle": false, "type": "affiliate" }
+    "astronomy-astrophysics": {
+      "label": "Astronomy & Astrophysics",
+      "short": "ASTRO",
+      "color": "#6EB8FF",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "aerospace-engineering": {
+      "label": "Aerospace Engineering",
+      "short": "AERO",
+      "color": "#4ACCA8",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "earth-planetary-science": {
+      "label": "Earth & Planetary Science",
+      "short": "EARTH",
+      "color": "#7AACDA",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "space-medicine-biology": {
+      "label": "Space Medicine & Biology",
+      "short": "MED",
+      "color": "#FF8080",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Life Science"
+    },
+    "space-law-policy": {
+      "label": "Space Law & Policy",
+      "short": "LAW",
+      "color": "#FFB84D",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Political Science"
+    },
+    "telecommunications-signals": {
+      "label": "Telecom & Signals",
+      "short": "COMMS",
+      "color": "#B088F0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "computer-science-software": {
+      "label": "CS & Software",
+      "short": "CODE",
+      "color": "#50E0C0",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Computer Science"
+    },
+    "physics": {
+      "label": "Physics",
+      "short": "PHYS",
+      "color": "#AACCEE",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "materials-science": {
+      "label": "Materials Science",
+      "short": "MAT",
+      "color": "#E0A060",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "robotics-automation": {
+      "label": "Robotics & Automation",
+      "short": "ROBO",
+      "color": "#80D0FF",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "remote-sensing": {
+      "label": "Remote Sensing",
+      "short": "RS",
+      "color": "#40C090",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "space-architecture": {
+      "label": "Space Architecture",
+      "short": "ARCH",
+      "color": "#C0A0E0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Architecture & Design"
+    },
+    "space-finance-economics": {
+      "label": "Space Finance & Economics",
+      "short": "FIN",
+      "color": "#FFD060",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Economics"
+    },
+    "science-communication": {
+      "label": "Science Communication",
+      "short": "SCICOMM",
+      "color": "#FF90B0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Communication Studies"
+    },
+    "philosophy-ethics-space": {
+      "label": "Philosophy & Ethics",
+      "short": "PHIL",
+      "color": "#D0C0A0",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Humanities > Philosophy"
+    },
+    "art-culture-space": {
+      "label": "Art & Culture of Space",
+      "short": "ART",
+      "color": "#E0B0C0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Humanities > Visual & Performing Arts"
+    },
+    "chemistry": {
+      "label": "Chemistry",
+      "short": "CHEM",
+      "color": "#E8A87C",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "mathematics": {
+      "label": "Mathematics",
+      "short": "MATH",
+      "color": "#8FB8DE",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Mathematics"
+    },
+    "environmental-studies": {
+      "label": "Environmental Studies",
+      "short": "ENV",
+      "color": "#78C878",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Environmental Studies"
+    },
+    "geology": {
+      "label": "Geology",
+      "short": "GEO",
+      "color": "#C4A882",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "atmospheric-science": {
+      "label": "Atmospheric Science",
+      "short": "ATMOS",
+      "color": "#A0C8E0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "astrobiology": {
+      "label": "Astrobiology",
+      "short": "ASTROBIO",
+      "color": "#90D090",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Life Science"
+    },
+    "genetics": {
+      "label": "Genetics & Genomics",
+      "short": "GENE",
+      "color": "#E0A0C0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Life Science"
+    },
+    "statistics": {
+      "label": "Statistics",
+      "short": "STAT",
+      "color": "#B0B0E0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Statistics"
+    },
+    "data-science": {
+      "label": "Data Science",
+      "short": "DATA",
+      "color": "#60C0C0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Data Science"
+    },
+    "systems-science": {
+      "label": "Systems Science",
+      "short": "SYS",
+      "color": "#A0D0A0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Systems Science"
+    },
+    "quantum-computing": {
+      "label": "Quantum Computing",
+      "short": "QC",
+      "color": "#70E0E0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Formal Science > Computer Science"
+    },
+    "mechanical-engineering": {
+      "label": "Mechanical Engineering",
+      "short": "MECH",
+      "color": "#D0B080",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "electrical-engineering": {
+      "label": "Electrical Engineering",
+      "short": "ELEC",
+      "color": "#E0C060",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "nuclear-engineering": {
+      "label": "Nuclear Engineering",
+      "short": "NUC",
+      "color": "#F0A0A0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "chemical-engineering": {
+      "label": "Chemical Engineering",
+      "short": "CHEMENG",
+      "color": "#D0C0A0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "civil-engineering": {
+      "label": "Civil Engineering",
+      "short": "CIVIL",
+      "color": "#C0B090",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "nanotechnology": {
+      "label": "Nanotechnology",
+      "short": "NANO",
+      "color": "#D0D0E0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
+    },
+    "transportation": {
+      "label": "Transportation",
+      "short": "TRANS",
+      "color": "#A0B0C0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Transportation"
+    },
+    "urban-planning": {
+      "label": "Urban & Settlement Planning",
+      "short": "URBAN",
+      "color": "#C0C0A0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Urban Planning"
+    },
+    "military-defence": {
+      "label": "Military & Defence Sciences",
+      "short": "MIL",
+      "color": "#809080",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Military Sciences"
+    },
+    "psychology": {
+      "label": "Psychology",
+      "short": "PSYCH",
+      "color": "#E0B0D0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Psychology"
+    },
+    "sociology": {
+      "label": "Sociology",
+      "short": "SOC",
+      "color": "#D0C0B0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Sociology"
+    },
+    "anthropology": {
+      "label": "Anthropology",
+      "short": "ANTHRO",
+      "color": "#C0B0A0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Anthropology"
+    },
+    "international-relations": {
+      "label": "International Relations",
+      "short": "IR",
+      "color": "#B0C0D0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > International Relations"
+    },
+    "education": {
+      "label": "Education",
+      "short": "EDUC",
+      "color": "#A0C0B0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Education"
+    },
+    "geography": {
+      "label": "Geography",
+      "short": "GEOG",
+      "color": "#90B090",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Geography"
+    },
+    "entrepreneurship": {
+      "label": "Entrepreneurship & Business",
+      "short": "BIZ",
+      "color": "#E0C080",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Business & Management"
+    },
+    "history": {
+      "label": "History",
+      "short": "HIST",
+      "color": "#C0A090",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Humanities > History"
+    },
+    "linguistics": {
+      "label": "Linguistics",
+      "short": "LING",
+      "color": "#B0A0C0",
+      "hasCircle": false,
+      "type": "knowledge",
+      "taxonomy": "Humanities > Linguistics"
+    },
+    "uas": {
+      "label": "Uganda Astronomical Society",
+      "short": "UAS",
+      "color": "#C0A0E0",
+      "hasCircle": false,
+      "type": "affiliate"
+    },
+    "sgac": {
+      "label": "Space Generation Advisory Council",
+      "short": "SGAC",
+      "color": "#B088F0",
+      "hasCircle": false,
+      "type": "affiliate"
+    },
+    "gss": {
+      "label": "Ghana Space Society",
+      "short": "GSS",
+      "color": "#40C090",
+      "hasCircle": false,
+      "type": "affiliate"
+    }
   },
-
   "domainLayout": {
     "worldSize": 1800,
     "seeds": {
-      "astronomy-astrophysics": [280, 280],
-      "aerospace-engineering": [520, 180],
-      "earth-planetary-science": [380, 480],
-      "space-medicine-biology": [700, 350],
-      "space-law-policy": [1080, 380],
-      "telecommunications-signals": [900, 200],
-      "computer-science-software": [1200, 160],
-      "physics": [600, 550],
-      "materials-science": [800, 500],
-      "robotics-automation": [1000, 550],
-      "remote-sensing": [450, 650],
-      "space-architecture": [1100, 600],
-      "space-finance-economics": [1300, 400],
-      "science-communication": [1400, 250],
-      "philosophy-ethics-space": [750, 150],
-      "art-culture-space": [1350, 600],
-      "chemistry": [500, 120],
-      "mathematics": [1150, 150],
-      "environmental-studies": [650, 680],
-      "geology": [200, 500],
-      "atmospheric-science": [350, 650],
-      "astrobiology": [550, 400],
-      "genetics": [650, 250],
-      "statistics": [1050, 100],
-      "data-science": [1300, 100],
-      "systems-science": [1100, 250],
-      "quantum-computing": [1350, 250],
-      "mechanical-engineering": [750, 600],
-      "electrical-engineering": [850, 420],
-      "nuclear-engineering": [680, 500],
-      "chemical-engineering": [700, 350],
-      "civil-engineering": [900, 650],
-      "nanotechnology": [950, 480],
-      "transportation": [1050, 700],
-      "urban-planning": [1200, 750],
-      "military-defence": [1300, 650],
-      "psychology": [1250, 320],
-      "sociology": [1350, 500],
-      "anthropology": [1450, 400],
-      "international-relations": [1500, 300],
-      "education": [1550, 450],
-      "geography": [1400, 550],
-      "entrepreneurship": [1500, 550],
-      "history": [300, 800],
-      "linguistics": [450, 850]
+      "astronomy-astrophysics": [
+        280,
+        280
+      ],
+      "aerospace-engineering": [
+        520,
+        180
+      ],
+      "earth-planetary-science": [
+        380,
+        480
+      ],
+      "space-medicine-biology": [
+        700,
+        350
+      ],
+      "space-law-policy": [
+        1080,
+        380
+      ],
+      "telecommunications-signals": [
+        900,
+        200
+      ],
+      "computer-science-software": [
+        1200,
+        160
+      ],
+      "physics": [
+        600,
+        550
+      ],
+      "materials-science": [
+        800,
+        500
+      ],
+      "robotics-automation": [
+        1000,
+        550
+      ],
+      "remote-sensing": [
+        450,
+        650
+      ],
+      "space-architecture": [
+        1100,
+        600
+      ],
+      "space-finance-economics": [
+        1300,
+        400
+      ],
+      "science-communication": [
+        1400,
+        250
+      ],
+      "philosophy-ethics-space": [
+        750,
+        150
+      ],
+      "art-culture-space": [
+        1350,
+        600
+      ],
+      "chemistry": [
+        500,
+        120
+      ],
+      "mathematics": [
+        1150,
+        150
+      ],
+      "environmental-studies": [
+        650,
+        680
+      ],
+      "geology": [
+        200,
+        500
+      ],
+      "atmospheric-science": [
+        350,
+        650
+      ],
+      "astrobiology": [
+        550,
+        400
+      ],
+      "genetics": [
+        650,
+        250
+      ],
+      "statistics": [
+        1050,
+        100
+      ],
+      "data-science": [
+        1300,
+        100
+      ],
+      "systems-science": [
+        1100,
+        250
+      ],
+      "quantum-computing": [
+        1350,
+        250
+      ],
+      "mechanical-engineering": [
+        750,
+        600
+      ],
+      "electrical-engineering": [
+        850,
+        420
+      ],
+      "nuclear-engineering": [
+        680,
+        500
+      ],
+      "chemical-engineering": [
+        700,
+        350
+      ],
+      "civil-engineering": [
+        900,
+        650
+      ],
+      "nanotechnology": [
+        950,
+        480
+      ],
+      "transportation": [
+        1050,
+        700
+      ],
+      "urban-planning": [
+        1200,
+        750
+      ],
+      "military-defence": [
+        1300,
+        650
+      ],
+      "psychology": [
+        1250,
+        320
+      ],
+      "sociology": [
+        1350,
+        500
+      ],
+      "anthropology": [
+        1450,
+        400
+      ],
+      "international-relations": [
+        1500,
+        300
+      ],
+      "education": [
+        1550,
+        450
+      ],
+      "geography": [
+        1400,
+        550
+      ],
+      "entrepreneurship": [
+        1500,
+        550
+      ],
+      "history": [
+        300,
+        800
+      ],
+      "linguistics": [
+        450,
+        850
+      ]
     },
-    "camera": { "x": 900, "y": 900, "scale": 0.5 }
+    "camera": {
+      "x": 900,
+      "y": 900,
+      "scale": 0.5
+    }
   },
-
   "stfs": {
     "pending": [
       {
@@ -447,12 +1356,11 @@
       }
     ]
   },
-
   "threads": [
     {
       "id": "thread-042",
       "title": "Liability frameworks for debris-generating manoeuvres",
-      "body": "Who bears responsibility when avoidance manoeuvres fail and generate debris? Current international space law is silent on this — the Outer Space Treaty assigns liability for damage but doesn't address the scenario where a state actor attempts compliance and inadvertently creates a new hazard. I've been drafting a framework that assigns proportional liability based on manoeuvre intent and outcome. Would value input from the Circle before I formalise this as a proposal.",
+      "body": "Who bears responsibility when avoidance manoeuvres fail and generate debris? Current international space law is silent on this \u2014 the Outer Space Treaty assigns liability for damage but doesn't address the scenario where a state actor attempts compliance and inadvertently creates a new hazard. I've been drafting a framework that assigns proportional liability based on manoeuvre intent and outcome. Would value input from the Circle before I formalise this as a proposal.",
       "author": "Akello Jane",
       "initials": "AJ",
       "avatar": {},
@@ -469,10 +1377,12 @@
     {
       "id": "thread-038",
       "title": "Psychological design in confined habitats",
-      "body": "Lessons from Antarctic stations for Mars habitat design. After reviewing 14 months of winterover data from Concordia and Halley VI, I'm seeing consistent patterns in crew psychological deterioration around months 4–6. Key factors: loss of circadian cues, reduced spatial variety, and social fatigue from fixed small-group interaction. These map directly to long-duration transit scenarios. Proposal: can we form a cross-domain working group to translate Antarctic habitability data into Mars transit design constraints?",
+      "body": "Lessons from Antarctic stations for Mars habitat design. After reviewing 14 months of winterover data from Concordia and Halley VI, I'm seeing consistent patterns in crew psychological deterioration around months 4\u20136. Key factors: loss of circadian cues, reduced spatial variety, and social fatigue from fixed small-group interaction. These map directly to long-duration transit scenarios. Proposal: can we form a cross-domain working group to translate Antarctic habitability data into Mars transit design constraints?",
       "author": "Namugga Claire",
       "initials": "NC",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
+      },
       "domain": "Mars Habitability",
       "domainColor": "tag-amber",
       "badge": "New",
@@ -486,7 +1396,7 @@
     {
       "id": "thread-035",
       "title": "Sentinel-2 data access for East Africa",
-      "body": "Current limitations and workarounds for remote sensing data access. The Copernicus Open Access Hub is reliable but throughput for East African users is poor — average download times for L2A tiles are 3–5x longer than for European endpoints. I've been testing a mirror setup via Kenya's KEPSA network that cuts this to parity. Sharing my config and benchmark results here. If anyone wants to test the mirror, ping me.",
+      "body": "Current limitations and workarounds for remote sensing data access. The Copernicus Open Access Hub is reliable but throughput for East African users is poor \u2014 average download times for L2A tiles are 3\u20135x longer than for European endpoints. I've been testing a mirror setup via Kenya's KEPSA network that cuts this to parity. Sharing my config and benchmark results here. If anyone wants to test the mirror, ping me.",
       "author": "Mwenda Thomas",
       "initials": "MT",
       "avatar": {},
@@ -502,8 +1412,8 @@
     },
     {
       "id": "thread-029",
-      "title": "ITU coordination procedures — a plain language walkthrough",
-      "body": "Step-by-step guide to ITU frequency coordination for emerging space nations. I've written this as a practical walkthrough based on our experience coordinating the Ugandan ground station allocation. Covers: filing requirements, coordination simulation, objection windows, and the hidden pitfalls that trip up first-time filers. This is meant to be a living document — please suggest corrections or additions.",
+      "title": "ITU coordination procedures \u2014 a plain language walkthrough",
+      "body": "Step-by-step guide to ITU frequency coordination for emerging space nations. I've written this as a practical walkthrough based on our experience coordinating the Ugandan ground station allocation. Covers: filing requirements, coordination simulation, objection windows, and the hidden pitfalls that trip up first-time filers. This is meant to be a living document \u2014 please suggest corrections or additions.",
       "author": "Akello Jane",
       "initials": "AJ",
       "avatar": {},
@@ -519,11 +1429,13 @@
     },
     {
       "id": "thread-031",
-      "title": "Artemis Accords — East African perspective",
-      "body": "The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing. Article 10 on resource extraction could conflict with our existing mineral rights frameworks. However, the cooperation benefits for capacity building are significant. What's the collective view — should we push for an East African consensus position?",
+      "title": "Artemis Accords \u2014 East African perspective",
+      "body": "The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing. Article 10 on resource extraction could conflict with our existing mineral rights frameworks. However, the cooperation benefits for capacity building are significant. What's the collective view \u2014 should we push for an East African consensus position?",
       "author": "Osei Kwame",
       "initials": "OK",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
+      },
       "domain": "Space Law",
       "domainColor": "tag-purple",
       "badge": null,
@@ -537,10 +1449,12 @@
     {
       "id": "thread-036",
       "title": "SAR interferometry for ground subsidence mapping",
-      "body": "I've been processing Sentinel-1 SAR data over the Kampala metropolitan area using InSAR time-series analysis. The results show subsidence rates of 5–12 mm/year in several built-up areas, consistent with groundwater extraction patterns. This has implications for infrastructure planning and could feed into our East Africa mapping project. Sharing preliminary interferograms — would appreciate remote sensing circle members reviewing the processing chain.",
+      "body": "I've been processing Sentinel-1 SAR data over the Kampala metropolitan area using InSAR time-series analysis. The results show subsidence rates of 5\u201312 mm/year in several built-up areas, consistent with groundwater extraction patterns. This has implications for infrastructure planning and could feed into our East Africa mapping project. Sharing preliminary interferograms \u2014 would appreciate remote sensing circle members reviewing the processing chain.",
       "author": "Kimani Aisha",
       "initials": "KA",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--teal),#0a3a3a)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--teal),#0a3a3a)"
+      },
       "domain": "Remote Sensing",
       "domainColor": "tag-green",
       "badge": null,
@@ -553,11 +1467,13 @@
     },
     {
       "id": "thread-040",
-      "title": "Microgravity fluid dynamics — open dataset",
-      "body": "I've compiled a dataset of fluid behaviour experiments from ISS research (2018–2025) that's been processed into a format suitable for machine learning training. Covers capillary flow, Marangoni convection, and boiling dynamics. 14 GB total, CC-BY licensed. Looking for collaborators to help annotate the实验 conditions and build a prediction model. Any physics or CS members interested?",
+      "title": "Microgravity fluid dynamics \u2014 open dataset",
+      "body": "I've compiled a dataset of fluid behaviour experiments from ISS research (2018\u20132025) that's been processed into a format suitable for machine learning training. Covers capillary flow, Marangoni convection, and boiling dynamics. 14 GB total, CC-BY licensed. Looking for collaborators to help annotate the\u5b9e\u9a8c conditions and build a prediction model. Any physics or CS members interested?",
       "author": "Okello Robert",
       "initials": "OR",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--blue),#0a2a5a)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--blue),#0a2a5a)"
+      },
       "domain": "Physics",
       "domainColor": "tag-blue",
       "badge": "New",
@@ -574,7 +1490,9 @@
       "body": "As LEO becomes more congested, the question of who bears the cost of deorbiting defunct satellites is becoming urgent. Current IADC guidelines recommend deorbit within 25 years, but there's no enforcement mechanism and no funding model. I'm working on a proposal for a commons-managed deorbiting fund that would pool contributions from satellite operators proportional to their orbital footprint. Thoughts on the incentive structure?",
       "author": "Mensah Nii",
       "initials": "MN",
-      "avatar": { "gradient": "linear-gradient(135deg,var(--green),#0a3a1a)" },
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--green),#0a3a1a)"
+      },
       "domain": "Space Law",
       "domainColor": "tag-purple",
       "badge": null,
@@ -586,12 +1504,14 @@
       "pinned": false
     }
   ],
-
   "projects": [
     {
       "id": "proj-001",
       "title": "East Africa Space Sector Mapping",
-      "domains": ["Policy", "Remote Sensing"],
+      "domains": [
+        "Policy",
+        "Remote Sensing"
+      ],
       "lead": "Okello R.",
       "progress": 60,
       "role": "Contributor"
@@ -599,7 +1519,9 @@
     {
       "id": "proj-002",
       "title": "Space Debris Liability Framework Review",
-      "domains": ["Space Law"],
+      "domains": [
+        "Space Law"
+      ],
       "lead": "You",
       "progress": 30,
       "role": "Lead"
@@ -607,13 +1529,15 @@
     {
       "id": "proj-003",
       "title": "Swahili Space Terminology",
-      "domains": ["Education", "Communications"],
+      "domains": [
+        "Education",
+        "Communications"
+      ],
       "lead": "Kimani A.",
       "progress": 75,
       "role": "Observer"
     }
   ],
-
   "cells": [
     {
       "id": "cell-14",
@@ -624,33 +1548,127 @@
       "status": "Active",
       "blind": false,
       "lead": "Okello R.",
-      "domains": ["Policy", "Remote Sensing"],
+      "domains": [
+        "Policy",
+        "Remote Sensing"
+      ],
       "created": "Jun 2026",
       "tasks": [
-        { "id": "t1", "label": "Define mapping scope & methodology", "status": "complete", "locked": false },
-        { "id": "t2", "label": "Uganda data collection", "status": "complete", "locked": false },
-        { "id": "t3", "label": "Kenya data collection", "status": "in-progress", "locked": false },
-        { "id": "t4", "label": "Tanzania data collection", "status": "pending", "locked": false },
-        { "id": "t5", "label": "Cross-country analysis & synthesis", "status": "pending", "locked": false },
-        { "id": "t6", "label": "Draft report", "status": "pending", "locked": false },
-        { "id": "t7", "label": "Peer review & finalisation", "status": "pending", "locked": false }
+        {
+          "id": "t1",
+          "label": "Define mapping scope & methodology",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t2",
+          "label": "Uganda data collection",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t3",
+          "label": "Kenya data collection",
+          "status": "in-progress",
+          "locked": false
+        },
+        {
+          "id": "t4",
+          "label": "Tanzania data collection",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t5",
+          "label": "Cross-country analysis & synthesis",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t6",
+          "label": "Draft report",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t7",
+          "label": "Peer review & finalisation",
+          "status": "pending",
+          "locked": false
+        }
       ],
       "objectives": [
-        { "id": "o1", "label": "All 3 countries covered", "status": "in-progress" },
-        { "id": "o2", "label": "Government + academic + private sectors included", "status": "pending" },
-        { "id": "o3", "label": "Data quality gaps flagged explicitly", "status": "pending" }
+        {
+          "id": "o1",
+          "label": "All 3 countries covered",
+          "status": "in-progress"
+        },
+        {
+          "id": "o2",
+          "label": "Government + academic + private sectors included",
+          "status": "pending"
+        },
+        {
+          "id": "o3",
+          "label": "Data quality gaps flagged explicitly",
+          "status": "pending"
+        }
       ],
       "team": [
-        { "name": "Okello R.", "initials": "OR", "role": "Lead", "focus": "Coordination" },
-        { "name": "Kimani A.", "initials": "KA", "role": "Member", "focus": "Kenya" },
-        { "name": "Mwenda T.", "initials": "MT", "role": "Member", "focus": "Uganda" },
-        { "name": "Namugga C.", "initials": "NC", "role": "Member", "focus": "Tanzania" }
+        {
+          "name": "Okello R.",
+          "initials": "OR",
+          "role": "Lead",
+          "focus": "Coordination"
+        },
+        {
+          "name": "Kimani A.",
+          "initials": "KA",
+          "role": "Member",
+          "focus": "Kenya"
+        },
+        {
+          "name": "Mwenda T.",
+          "initials": "MT",
+          "role": "Member",
+          "focus": "Uganda"
+        },
+        {
+          "name": "Namugga C.",
+          "initials": "NC",
+          "role": "Member",
+          "focus": "Tanzania"
+        }
       ],
       "messages": [
-        { "author": "Okello R.", "initials": "OR", "text": "Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?", "time": "3h ago", "color": "var(--teal)" },
-        { "author": "Kimani A.", "initials": "KA", "text": "I have a contact. Will reach out today.", "time": "2h ago", "color": "var(--purple)" },
-        { "author": "You", "initials": "OS", "text": "Both. The private sector data is thin but worth capturing even if incomplete.", "time": "1h ago", "gold": true },
-        { "author": "Okello R.", "initials": "OR", "text": "Agreed. I'll add a 'data quality' field to the schema.", "time": "45m ago", "color": "var(--teal)" }
+        {
+          "author": "Okello R.",
+          "initials": "OR",
+          "text": "Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?",
+          "time": "3h ago",
+          "color": "var(--teal)"
+        },
+        {
+          "author": "Kimani A.",
+          "initials": "KA",
+          "text": "I have a contact. Will reach out today.",
+          "time": "2h ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "Both. The private sector data is thin but worth capturing even if incomplete.",
+          "time": "1h ago",
+          "gold": true
+        },
+        {
+          "author": "Okello R.",
+          "initials": "OR",
+          "text": "Agreed. I'll add a 'data quality' field to the schema.",
+          "time": "45m ago",
+          "color": "var(--teal)"
+        }
       ]
     },
     {
@@ -662,30 +1680,102 @@
       "status": "Active",
       "blind": false,
       "lead": "Oumo Samuel",
-      "domains": ["Space Law"],
+      "domains": [
+        "Space Law"
+      ],
       "supervisingCircleId": "space-law",
       "created": "Jul 2026",
       "tasks": [
-        { "id": "t1", "label": "Literature review of existing liability frameworks", "status": "complete", "locked": false },
-        { "id": "t2", "label": "Comparative analysis: UN vs national models", "status": "in-progress", "locked": false },
-        { "id": "t3", "label": "Draft proportional liability model", "status": "pending", "locked": false },
-        { "id": "t4", "label": "Expert review & feedback", "status": "pending", "locked": false },
-        { "id": "t5", "label": "Finalise framework document", "status": "pending", "locked": false }
+        {
+          "id": "t1",
+          "label": "Literature review of existing liability frameworks",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t2",
+          "label": "Comparative analysis: UN vs national models",
+          "status": "in-progress",
+          "locked": false
+        },
+        {
+          "id": "t3",
+          "label": "Draft proportional liability model",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t4",
+          "label": "Expert review & feedback",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t5",
+          "label": "Finalise framework document",
+          "status": "pending",
+          "locked": false
+        }
       ],
       "objectives": [
-        { "id": "o1", "label": "Clear liability allocation model defined", "status": "in-progress" },
-        { "id": "o2", "label": "East African context addressed", "status": "pending" },
-        { "id": "o3", "label": "Published as Commons resource", "status": "pending" }
+        {
+          "id": "o1",
+          "label": "Clear liability allocation model defined",
+          "status": "in-progress"
+        },
+        {
+          "id": "o2",
+          "label": "East African context addressed",
+          "status": "pending"
+        },
+        {
+          "id": "o3",
+          "label": "Published as Commons resource",
+          "status": "pending"
+        }
       ],
       "team": [
-        { "name": "Oumo Samuel", "initials": "OS", "role": "Lead", "focus": "Framework design" },
-        { "name": "Nakamura Y.", "initials": "NY", "role": "Member", "focus": "Comparative law" },
-        { "name": "Diallo F.", "initials": "DF", "role": "Member", "focus": "UN treaties" }
+        {
+          "name": "Oumo Samuel",
+          "initials": "OS",
+          "role": "Lead",
+          "focus": "Framework design"
+        },
+        {
+          "name": "Nakamura Y.",
+          "initials": "NY",
+          "role": "Member",
+          "focus": "Comparative law"
+        },
+        {
+          "name": "Diallo F.",
+          "initials": "DF",
+          "role": "Member",
+          "focus": "UN treaties"
+        }
       ],
       "messages": [
-        { "author": "You", "initials": "OS", "text": "Started the comparative analysis. Found 3 national models that are relevant.", "time": "1d ago", "gold": true },
-        { "author": "Nakamura Y.", "initials": "NY", "text": "Japan's Space Activities Act has a proportional model — I can summarise it.", "time": "20h ago", "color": "var(--blue)" },
-        { "author": "Diallo F.", "initials": "DF", "text": "UN COPUOS has draft guidelines on debris liability. I'll pull the latest version.", "time": "12h ago", "color": "var(--amber)" }
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "Started the comparative analysis. Found 3 national models that are relevant.",
+          "time": "1d ago",
+          "gold": true
+        },
+        {
+          "author": "Nakamura Y.",
+          "initials": "NY",
+          "text": "Japan's Space Activities Act has a proportional model \u2014 I can summarise it.",
+          "time": "20h ago",
+          "color": "var(--blue)"
+        },
+        {
+          "author": "Diallo F.",
+          "initials": "DF",
+          "text": "UN COPUOS has draft guidelines on debris liability. I'll pull the latest version.",
+          "time": "12h ago",
+          "color": "var(--amber)"
+        }
       ]
     },
     {
@@ -697,85 +1787,255 @@
       "status": "Active",
       "blind": false,
       "lead": "Kimani A.",
-      "domains": ["Education", "Communications"],
+      "domains": [
+        "Education",
+        "Communications"
+      ],
       "created": "Jun 2026",
       "tasks": [
-        { "id": "t1", "label": "Gather existing Swahili space terms", "status": "complete", "locked": false },
-        { "id": "t2", "label": "Translate core terminology (50 terms)", "status": "complete", "locked": false },
-        { "id": "t3", "label": "Review by Swahili linguists", "status": "in-progress", "locked": false },
-        { "id": "t4", "label": "Community feedback round", "status": "pending", "locked": false },
-        { "id": "t5", "label": "Publish terminology glossary", "status": "pending", "locked": false }
+        {
+          "id": "t1",
+          "label": "Gather existing Swahili space terms",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t2",
+          "label": "Translate core terminology (50 terms)",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t3",
+          "label": "Review by Swahili linguists",
+          "status": "in-progress",
+          "locked": false
+        },
+        {
+          "id": "t4",
+          "label": "Community feedback round",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t5",
+          "label": "Publish terminology glossary",
+          "status": "pending",
+          "locked": false
+        }
       ],
       "objectives": [
-        { "id": "o1", "label": "50 core terms translated", "status": "in-progress" },
-        { "id": "o2", "label": "Linguist review complete", "status": "pending" },
-        { "id": "o3", "label": "Glossary published publicly", "status": "pending" }
+        {
+          "id": "o1",
+          "label": "50 core terms translated",
+          "status": "in-progress"
+        },
+        {
+          "id": "o2",
+          "label": "Linguist review complete",
+          "status": "pending"
+        },
+        {
+          "id": "o3",
+          "label": "Glossary published publicly",
+          "status": "pending"
+        }
       ],
       "team": [
-        { "name": "Kimani A.", "initials": "KA", "role": "Lead", "focus": "Translation coordination" },
-        { "name": "Mwenda T.", "initials": "MT", "role": "Member", "focus": "Uganda review" },
-        { "name": "Namugga C.", "initials": "NC", "role": "Member", "focus": "Tanzania review" },
-        { "name": "Ochieng P.", "initials": "OP", "role": "Member", "focus": "Linguistics" }
+        {
+          "name": "Kimani A.",
+          "initials": "KA",
+          "role": "Lead",
+          "focus": "Translation coordination"
+        },
+        {
+          "name": "Mwenda T.",
+          "initials": "MT",
+          "role": "Member",
+          "focus": "Uganda review"
+        },
+        {
+          "name": "Namugga C.",
+          "initials": "NC",
+          "role": "Member",
+          "focus": "Tanzania review"
+        },
+        {
+          "name": "Ochieng P.",
+          "initials": "OP",
+          "role": "Member",
+          "focus": "Linguistics"
+        }
       ],
       "messages": [
-        { "author": "Kimani A.", "initials": "KA", "text": "First 50 terms drafted. Sending to linguists for review this week.", "time": "2d ago", "color": "var(--purple)" },
-        { "author": "Ochieng P.", "initials": "OP", "text": "Received the list. Some terms need context — 'satellite' has different meanings in technical vs everyday usage.", "time": "1d ago", "color": "var(--teal)" },
-        { "author": "Mwenda T.", "initials": "MT", "text": "Uganda side looks good. A few terms differ from Kenyan Swahili — we should note regional variations.", "time": "6h ago", "color": "var(--green)" }
+        {
+          "author": "Kimani A.",
+          "initials": "KA",
+          "text": "First 50 terms drafted. Sending to linguists for review this week.",
+          "time": "2d ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Ochieng P.",
+          "initials": "OP",
+          "text": "Received the list. Some terms need context \u2014 'satellite' has different meanings in technical vs everyday usage.",
+          "time": "1d ago",
+          "color": "var(--teal)"
+        },
+        {
+          "author": "Mwenda T.",
+          "initials": "MT",
+          "text": "Uganda side looks good. A few terms differ from Kenyan Swahili \u2014 we should note regional variations.",
+          "time": "6h ago",
+          "color": "var(--green)"
+        }
       ]
     },
     {
       "id": "cell-18",
       "type": "Circle Cell",
-      "title": "Space Law Circle — Internal",
+      "title": "Space Law Circle \u2014 Internal",
       "members": 8,
       "status": "Active",
       "circle": "Space Law",
       "proposals": [
-        { "id": "prop-01", "title": "Debris liability framework — proportional model", "status": "In Deliberation", "date": "Jul 21" },
-        { "id": "prop-02", "title": "Artemis Accords ratification recommendation", "status": "Drafted", "date": "Jul 18" }
+        {
+          "id": "prop-01",
+          "title": "Debris liability framework \u2014 proportional model",
+          "status": "In Deliberation",
+          "date": "Jul 21"
+        },
+        {
+          "id": "prop-02",
+          "title": "Artemis Accords ratification recommendation",
+          "status": "Drafted",
+          "date": "Jul 18"
+        }
       ],
       "xstfs": [
-        { "id": "xstf-itu", "title": "ITU coordination guide execution", "progress": 45, "deadline": "Aug 15" }
+        {
+          "id": "xstf-itu",
+          "title": "ITU coordination guide execution",
+          "progress": 45,
+          "deadline": "Aug 15"
+        }
       ],
       "deliverables": [
-        { "id": "del-01", "title": "ITU Coordination Guide — Final Draft", "status": "Complete", "date": "Aug 10" }
+        {
+          "id": "del-01",
+          "title": "ITU Coordination Guide \u2014 Final Draft",
+          "status": "Complete",
+          "date": "Aug 10"
+        }
       ]
     },
     {
       "id": "cell-21",
       "type": "Deliberation Cell",
       "delibType": "general",
-      "title": "Debris liability framework — who bears responsibility?",
+      "title": "Debris liability framework \u2014 who bears responsibility?",
       "participants": 12,
       "status": "Active",
       "daysActive": 3,
-      "domains": ["Space Law", "Liability", "Remote Sensing"],
-      "source": { "type": "commons-thread", "proposer": "Akello J." },
+      "domains": [
+        "Space Law",
+        "Liability",
+        "Remote Sensing"
+      ],
+      "source": {
+        "type": "commons-thread",
+        "proposer": "Akello J."
+      },
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
-        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 3 }
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 5,
+          "id": "space-law"
+        },
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Contributing",
+          "votes": 3,
+          "id": "remote-sensing"
+        }
       ],
       "circles": [
-        { "name": "Space Law Circle", "initials": "SL", "gradient": "linear-gradient(135deg,var(--purple),#3a1860)", "status": "active", "role": "Lead" },
-        { "name": "Remote Sensing Circle", "initials": "RS", "gradient": "linear-gradient(135deg,var(--teal),#0d4040)", "status": "active", "role": "Contributing" },
-        { "name": "Mars Habitability Circle", "initials": "MH", "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)", "status": "self-disqualified", "role": "Withdrew" }
+        {
+          "name": "Space Law Circle",
+          "initials": "SL",
+          "gradient": "linear-gradient(135deg,var(--purple),#3a1860)",
+          "status": "active",
+          "role": "Lead"
+        },
+        {
+          "name": "Remote Sensing Circle",
+          "initials": "RS",
+          "gradient": "linear-gradient(135deg,var(--teal),#0d4040)",
+          "status": "active",
+          "role": "Contributing"
+        },
+        {
+          "name": "Mars Habitability Circle",
+          "initials": "MH",
+          "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)",
+          "status": "self-disqualified",
+          "role": "Withdrew"
+        }
       ],
-      "resolution": { "status": "Ready" },
+      "resolution": {
+        "status": "Ready"
+      },
       "messages": [
-        { "author": "Akello J.", "initials": "AJ", "text": "The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.", "time": "3d ago", "color": "var(--purple)" },
-        { "author": "Osei Kwame", "initials": "OK", "text": "What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?", "time": "2d ago", "color": "var(--amber)" },
-        { "author": "Mwenda Thomas", "initials": "MT", "text": "From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.", "time": "2d ago", "color": "var(--navy-light)" },
-        { "author": "Namugga Claire", "initials": "NC", "text": "I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.", "time": "1d ago", "color": "var(--teal)" }
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different \u2014 the actor was attempting compliance. We need a proportional liability model based on intent and outcome.",
+          "time": "3d ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Osei Kwame",
+          "initials": "OK",
+          "text": "What about the precedent from maritime law? The COLREGS framework assigns proportional liability in collision avoidance scenarios. Could we adapt that model for orbital manoeuvres?",
+          "time": "2d ago",
+          "color": "var(--amber)"
+        },
+        {
+          "author": "Mwenda Thomas",
+          "initials": "MT",
+          "text": "From a remote sensing perspective \u2014 tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.",
+          "time": "2d ago",
+          "color": "var(--navy-light)"
+        },
+        {
+          "author": "Namugga Claire",
+          "initials": "NC",
+          "text": "I'd support a graduated liability model: good-faith manoeuvres with debris generation \u2192 reduced liability; negligent manoeuvres \u2192 standard liability; intentional debris creation \u2192 enhanced liability. The intent filing would distinguish these.",
+          "time": "1d ago",
+          "color": "var(--teal)"
+        }
       ],
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Debris liability framework — proportional model",
+          "title": "Debris liability framework \u2014 proportional model",
           "text": "MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms",
           "action": "",
-          "implementingCircles": ["Space Law Circle", "Remote Sensing Circle"],
+          "implementingCircles": [
+            "Space Law Circle",
+            "Remote Sensing Circle"
+          ],
           "votesNullified": false,
-          "versions": [{ "title": "Debris liability framework — proportional model", "text": "Initial draft", "action": "", "author": "Akello Jane", "ts": "Jul 21, 2026 14:30" }]
+          "versions": [
+            {
+              "title": "Debris liability framework \u2014 proportional model",
+              "text": "Initial draft",
+              "action": "",
+              "author": "Akello Jane",
+              "ts": "Jul 21, 2026 14:30"
+            }
+          ]
         }
       ],
       "votes": {
@@ -786,9 +2046,24 @@
             "nay": 620,
             "total": 3460,
             "voters": [
-              { "name": "Akello Jane", "initials": "AJ", "ws": 1800, "vote": "yea" },
-              { "name": "Osei Kwame", "initials": "OK", "ws": 1040, "vote": "yea" },
-              { "name": "Namugga Claire", "initials": "NC", "ws": 620, "vote": "nay" }
+              {
+                "name": "Akello Jane",
+                "initials": "AJ",
+                "ws": 1800,
+                "vote": "yea"
+              },
+              {
+                "name": "Osei Kwame",
+                "initials": "OK",
+                "ws": 1040,
+                "vote": "yea"
+              },
+              {
+                "name": "Namugga Claire",
+                "initials": "NC",
+                "ws": 620,
+                "vote": "nay"
+              }
             ]
           },
           {
@@ -797,9 +2072,24 @@
             "nay": 312,
             "total": 1512,
             "voters": [
-              { "name": "Akello Jane", "initials": "AJ", "ws": 800, "vote": "yea" },
-              { "name": "Osei Kwame", "initials": "OK", "ws": 400, "vote": "yea" },
-              { "name": "Namugga Claire", "initials": "NC", "ws": 312, "vote": "nay" }
+              {
+                "name": "Akello Jane",
+                "initials": "AJ",
+                "ws": 800,
+                "vote": "yea"
+              },
+              {
+                "name": "Osei Kwame",
+                "initials": "OK",
+                "ws": 400,
+                "vote": "yea"
+              },
+              {
+                "name": "Namugga Claire",
+                "initials": "NC",
+                "ws": 312,
+                "vote": "nay"
+              }
             ]
           },
           {
@@ -808,11 +2098,20 @@
             "nay": 0,
             "total": 920,
             "voters": [
-              { "name": "Mwenda Thomas", "initials": "MT", "ws": 920, "vote": "yea" }
+              {
+                "name": "Mwenda Thomas",
+                "initials": "MT",
+                "ws": 920,
+                "vote": "yea"
+              }
             ]
           }
         ],
-        "summary": { "yea": 4960, "nay": 932, "abstain": 340 }
+        "summary": {
+          "yea": 4960,
+          "nay": 932,
+          "abstain": 340
+        }
       }
     },
     {
@@ -837,38 +2136,131 @@
         "name": "ITU Frequency Coordination Guide",
         "description": "Plain-language guide for emerging space nations. Target: policy makers and technical leads in East African space agencies.",
         "sections": 4,
-        "wordCount": "8,000–12,000",
+        "wordCount": "8,000\u201312,000",
         "language": "Plain English"
       },
       "tasks": [
-        { "id": "t0", "label": "STF formulation", "status": "complete", "locked": true },
-        { "id": "t1", "label": "Mandate comprehension", "status": "complete", "locked": false },
-        { "id": "t2", "label": "Research & drafting", "status": "in-progress", "locked": false },
-        { "id": "t3", "label": "Internal review", "status": "pending", "locked": false },
-        { "id": "t4", "label": "Circle review cycle", "status": "pending", "locked": false },
-        { "id": "t5", "label": "Finalisation", "status": "pending", "locked": false },
-        { "id": "t6", "label": "Dissolve STF", "status": "pending", "locked": true }
+        {
+          "id": "t0",
+          "label": "STF formulation",
+          "status": "complete",
+          "locked": true
+        },
+        {
+          "id": "t1",
+          "label": "Mandate comprehension",
+          "status": "complete",
+          "locked": false
+        },
+        {
+          "id": "t2",
+          "label": "Research & drafting",
+          "status": "in-progress",
+          "locked": false
+        },
+        {
+          "id": "t3",
+          "label": "Internal review",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t4",
+          "label": "Circle review cycle",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t5",
+          "label": "Finalisation",
+          "status": "pending",
+          "locked": false
+        },
+        {
+          "id": "t6",
+          "label": "Dissolve STF",
+          "status": "pending",
+          "locked": true
+        }
       ],
       "objectives": [
-        { "id": "o1", "label": "Clarity of ITU process explanation", "status": "complete" },
-        { "id": "o2", "label": "Accuracy of coordination steps", "status": "in-progress" },
-        { "id": "o3", "label": "East Africa relevance", "status": "pending" },
-        { "id": "o4", "label": "Policy maker accessibility", "status": "pending" }
+        {
+          "id": "o1",
+          "label": "Clarity of ITU process explanation",
+          "status": "complete"
+        },
+        {
+          "id": "o2",
+          "label": "Accuracy of coordination steps",
+          "status": "in-progress"
+        },
+        {
+          "id": "o3",
+          "label": "East Africa relevance",
+          "status": "pending"
+        },
+        {
+          "id": "o4",
+          "label": "Policy maker accessibility",
+          "status": "pending"
+        }
       ],
       "team": [
-        { "name": "Team Member A", "initials": "TA", "role": "Sections 1–2", "color": "linear-gradient(135deg,var(--green),#0d3a20)" },
-        { "name": "Team Member B", "initials": "TB", "role": "Sections 3–4", "color": "linear-gradient(135deg,var(--blue),#0a1e34)" },
-        { "name": "Team Member C", "initials": "TC", "role": "Review & formatting", "color": "linear-gradient(135deg,var(--amber),#5a3a00)" }
+        {
+          "name": "Team Member A",
+          "initials": "TA",
+          "role": "Sections 1\u20132",
+          "color": "linear-gradient(135deg,var(--green),#0d3a20)"
+        },
+        {
+          "name": "Team Member B",
+          "initials": "TB",
+          "role": "Sections 3\u20134",
+          "color": "linear-gradient(135deg,var(--blue),#0a1e34)"
+        },
+        {
+          "name": "Team Member C",
+          "initials": "TC",
+          "role": "Review & formatting",
+          "color": "linear-gradient(135deg,var(--amber),#5a3a00)"
+        }
       ],
       "deliverables": [
-        { "name": "Draft v2 — ITU Frequency Coordination Guide", "detail": "4,200 words so far" },
-        { "name": "ITU reference doc", "type": "attachment" },
-        { "name": "Coordination flowchart", "type": "attachment" }
+        {
+          "name": "Draft v2 \u2014 ITU Frequency Coordination Guide",
+          "detail": "4,200 words so far"
+        },
+        {
+          "name": "ITU reference doc",
+          "type": "attachment"
+        },
+        {
+          "name": "Coordination flowchart",
+          "type": "attachment"
+        }
       ],
       "messages": [
-        { "author": "Team Member A", "initials": "TA", "text": "Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?", "time": "2h ago", "color": "linear-gradient(135deg,var(--green),#0d3a20)" },
-        { "author": "Team Member B", "initials": "TB", "text": "On it. Also started Section 3 — frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?", "time": "1h ago", "color": "linear-gradient(135deg,var(--blue),#0a1e34)" },
-        { "author": "Team Member C", "initials": "TC", "text": "Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision — the ITU history paragraph is too detailed for the target audience.", "time": "45m ago", "color": "linear-gradient(135deg,var(--amber),#5a3a00)" }
+        {
+          "author": "Team Member A",
+          "initials": "TA",
+          "text": "Section 2 draft is done. The ITU process diagram needs review \u2014 can someone check the coordination timeline is accurate?",
+          "time": "2h ago",
+          "color": "linear-gradient(135deg,var(--green),#0d3a20)"
+        },
+        {
+          "author": "Team Member B",
+          "initials": "TB",
+          "text": "On it. Also started Section 3 \u2014 frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?",
+          "time": "1h ago",
+          "color": "linear-gradient(135deg,var(--blue),#0a1e34)"
+        },
+        {
+          "author": "Team Member C",
+          "initials": "TC",
+          "text": "Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision \u2014 the ITU history paragraph is too detailed for the target audience.",
+          "time": "45m ago",
+          "color": "linear-gradient(135deg,var(--amber),#5a3a00)"
+        }
       ]
     },
     {
@@ -879,20 +2271,39 @@
       "participants": 8,
       "status": "Active",
       "daysActive": 2,
-      "domains": ["aerospace-engineering", "remote-sensing"],
+      "domains": [
+        "aerospace-engineering",
+        "remote-sensing"
+      ],
       "circles": [],
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Founding Declaration — Senegal Space Agency",
+          "title": "Founding Declaration \u2014 Senegal Space Agency",
           "text": "DECLARE: The Solarian Commons formally affiliates the Senegal Space Agency as a partner organisation.\n\n1. The Senegal Space Agency (ASE) is recognised as an affiliate of the Commons\n2. Knowledge domains: Aerospace Engineering, Remote Sensing\n3. Location: Dakar, Senegal\n4. The agency shall participate in Commons deliberations through its affiliate domain\n5. Partnership terms are governed by the founding resolution and may be amended through standard governance processes",
           "action": "Declaration",
           "implementingCircles": [],
-          "domainShares": { "aerospace-engineering": 0.55, "remote-sensing": 0.45 },
+          "domainShares": {
+            "aerospace-engineering": 0.55,
+            "remote-sensing": 0.45
+          },
           "votesNullified": false,
-          "aiDraftMeta": { "draftCount": 1, "maxDrafts": 3, "cooldownMs": 300000, "lastDraftTs": null, "confirmations": [], "confirmQuorum": 3 },
+          "aiDraftMeta": {
+            "draftCount": 1,
+            "maxDrafts": 3,
+            "cooldownMs": 300000,
+            "lastDraftTs": null,
+            "confirmations": [],
+            "confirmQuorum": 3
+          },
           "versions": [
-            { "title": "Founding Declaration — Senegal Space Agency", "text": "Initial AI draft", "action": "Declaration", "author": "AI Drafter", "ts": "Jul 24, 2026 10:00" }
+            {
+              "title": "Founding Declaration \u2014 Senegal Space Agency",
+              "text": "Initial AI draft",
+              "action": "Declaration",
+              "author": "AI Drafter",
+              "ts": "Jul 24, 2026 10:00"
+            }
           ]
         }
       ]
@@ -905,20 +2316,39 @@
       "participants": 4,
       "status": "Active",
       "daysActive": 5,
-      "domains": ["Mars", "Habitability"],
+      "domains": [
+        "Mars",
+        "Habitability"
+      ],
       "circles": [],
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Founding Declaration — Mars Habitability Circle",
+          "title": "Founding Declaration \u2014 Mars Habitability Circle",
           "text": "DECLARE: The Solarian Commons formally establishes the Mars Habitability Circle.\n\n1. The Mars Habitability Circle is recognised as a steward circle of the Commons\n2. Primary mandate domains: Mars, Habitability\n3. The circle shall steward research and deliberation on life support systems, habitat design, and Mars colonisation\n4. Founding members: Namugga Claire, Osei Kwame, plus 2 additional members\n5. Circle governance is subject to periodic p-aSTF health reviews",
           "action": "Declaration",
           "implementingCircles": [],
-          "domainShares": { "Mars": 0.55, "Habitability": 0.45 },
+          "domainShares": {
+            "Mars": 0.55,
+            "Habitability": 0.45
+          },
           "votesNullified": false,
-          "aiDraftMeta": { "draftCount": 1, "maxDrafts": 3, "cooldownMs": 300000, "lastDraftTs": null, "confirmations": [], "confirmQuorum": 2 },
+          "aiDraftMeta": {
+            "draftCount": 1,
+            "maxDrafts": 3,
+            "cooldownMs": 300000,
+            "lastDraftTs": null,
+            "confirmations": [],
+            "confirmQuorum": 2
+          },
           "versions": [
-            { "title": "Founding Declaration — Mars Habitability Circle", "text": "Initial AI draft", "action": "Declaration", "author": "AI Drafter", "ts": "Jul 22, 2026 09:00" }
+            {
+              "title": "Founding Declaration \u2014 Mars Habitability Circle",
+              "text": "Initial AI draft",
+              "action": "Declaration",
+              "author": "AI Drafter",
+              "ts": "Jul 22, 2026 09:00"
+            }
           ]
         }
       ]
@@ -946,9 +2376,15 @@
       "delibType": "org-creation",
       "title": "Org: Senegal Space Agency [ASE] Affiliation",
       "participants": 6,
-      "domains": ["Aerospace Engineering", "Remote Sensing"],
+      "domains": [
+        "Aerospace Engineering",
+        "Remote Sensing"
+      ],
       "status": "Active",
-      "source": { "type": "org-proposal", "proposer": "Diallo Mamadou" },
+      "source": {
+        "type": "org-proposal",
+        "proposer": "Diallo Mamadou"
+      },
       "orgDetails": {
         "name": "Senegal Space Agency",
         "acronym": "ASE",
@@ -958,14 +2394,44 @@
         "website": "https://ase.sn"
       },
       "participatingCircles": [
-        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 4 },
-        { "name": "Space Law Circle", "role": "Contributing", "votes": 2 }
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Lead",
+          "votes": 4,
+          "id": "remote-sensing"
+        },
+        {
+          "name": "Space Law Circle",
+          "role": "Contributing",
+          "votes": 2,
+          "id": "space-law"
+        }
       ],
-      "resolution": { "status": "Draft" },
+      "resolution": {
+        "status": "Draft"
+      },
       "messages": [
-        { "author": "Diallo Mamadou", "initials": "DM", "text": "ASE has been operational for 3 years with strong earth observation capabilities. Affiliation would strengthen the Commons' data coverage across West Africa.", "time": "2d ago", "color": "var(--purple)" },
-        { "author": "Kimani A.", "initials": "KA", "text": "Their SAR data is excellent. We should check data quality standards and sharing protocols before approving.", "time": "1d ago", "color": "var(--teal)" },
-        { "author": "You", "initials": "OS", "text": "Agreed. What's their open data policy? We need to ensure Commons members can access their datasets.", "time": "18h ago", "gold": true }
+        {
+          "author": "Diallo Mamadou",
+          "initials": "DM",
+          "text": "ASE has been operational for 3 years with strong earth observation capabilities. Affiliation would strengthen the Commons' data coverage across West Africa.",
+          "time": "2d ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Kimani A.",
+          "initials": "KA",
+          "text": "Their SAR data is excellent. We should check data quality standards and sharing protocols before approving.",
+          "time": "1d ago",
+          "color": "var(--teal)"
+        },
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "Agreed. What's their open data policy? We need to ensure Commons members can access their datasets.",
+          "time": "18h ago",
+          "gold": true
+        }
       ]
     },
     {
@@ -974,10 +2440,16 @@
       "delibType": "org-creation",
       "title": "Org: Ghana Space Society [GSS] Affiliation",
       "participants": 5,
-      "domains": ["Science Communication", "Education"],
+      "domains": [
+        "Science Communication",
+        "Education"
+      ],
       "status": "Archived",
       "archivedDate": "Jun 2026",
-      "source": { "type": "org-proposal", "proposer": "Osei Kwame" },
+      "source": {
+        "type": "org-proposal",
+        "proposer": "Osei Kwame"
+      },
       "orgDetails": {
         "name": "Ghana Space Society",
         "acronym": "GSS",
@@ -987,12 +2459,31 @@
         "website": null
       },
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Contributing", "votes": 3 }
+        {
+          "name": "Space Law Circle",
+          "role": "Contributing",
+          "votes": 3,
+          "id": "space-law"
+        }
       ],
-      "resolution": { "status": "Approved" },
+      "resolution": {
+        "status": "Approved"
+      },
       "messages": [
-        { "author": "Osei Kwame", "initials": "OK", "text": "GSS has strong community engagement but limited technical capacity. Their education focus complements our mission well.", "time": "2w ago", "color": "var(--amber)" },
-        { "author": "Akello J.", "initials": "AJ", "text": "Approved. Their education programmes align with Commons outreach goals.", "time": "1w ago", "color": "var(--green)" }
+        {
+          "author": "Osei Kwame",
+          "initials": "OK",
+          "text": "GSS has strong community engagement but limited technical capacity. Their education focus complements our mission well.",
+          "time": "2w ago",
+          "color": "var(--amber)"
+        },
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "Approved. Their education programmes align with Commons outreach goals.",
+          "time": "1w ago",
+          "color": "var(--green)"
+        }
       ]
     },
     {
@@ -1001,9 +2492,16 @@
       "delibType": "circle-creation",
       "title": "Circle: Mars Habitability Circle Founding",
       "participants": 8,
-      "domains": ["Space Medicine", "Space Architecture", "Astrobiology"],
+      "domains": [
+        "Space Medicine",
+        "Space Architecture",
+        "Astrobiology"
+      ],
       "status": "Active",
-      "source": { "type": "circle-proposal", "proposer": "Namugga C." },
+      "source": {
+        "type": "circle-proposal",
+        "proposer": "Namugga C."
+      },
       "circleDetails": {
         "name": "Mars Habitability Circle",
         "description": "Stewards research and policy related to human Mars exploration, habitat design, life support, and planetary protection.",
@@ -1014,11 +2512,31 @@
         "foundingIntent": "As interest in Mars exploration grows across African space agencies, we need a dedicated circle to coordinate habitability research, share life support knowledge, and develop policy frameworks for future human Mars missions."
       },
       "participatingCircles": [],
-      "resolution": { "status": "Draft" },
+      "resolution": {
+        "status": "Draft"
+      },
       "messages": [
-        { "author": "Namugga C.", "initials": "NC", "text": "Mars habitability is an emerging field with no African-led circle. We should establish one to ensure African perspectives are represented in Mars exploration planning.", "time": "3d ago", "color": "var(--teal)" },
-        { "author": "Osei Kwame", "initials": "OK", "text": "Interesting proposal. How many active members do we have with relevant expertise? Space medicine and architecture are niche.", "time": "2d ago", "color": "var(--amber)" },
-        { "author": "Mensah N.", "initials": "MN", "text": "I have background in environmental engineering and would be interested. The life support angle is compelling.", "time": "1d ago", "color": "var(--blue)" }
+        {
+          "author": "Namugga C.",
+          "initials": "NC",
+          "text": "Mars habitability is an emerging field with no African-led circle. We should establish one to ensure African perspectives are represented in Mars exploration planning.",
+          "time": "3d ago",
+          "color": "var(--teal)"
+        },
+        {
+          "author": "Osei Kwame",
+          "initials": "OK",
+          "text": "Interesting proposal. How many active members do we have with relevant expertise? Space medicine and architecture are niche.",
+          "time": "2d ago",
+          "color": "var(--amber)"
+        },
+        {
+          "author": "Mensah N.",
+          "initials": "MN",
+          "text": "I have background in environmental engineering and would be interested. The life support angle is compelling.",
+          "time": "1d ago",
+          "color": "var(--blue)"
+        }
       ]
     },
     {
@@ -1027,10 +2545,16 @@
       "delibType": "circle-creation",
       "title": "Circle: Frequency Allocation Circle Founding",
       "participants": 6,
-      "domains": ["Telecommunications", "Space Law"],
+      "domains": [
+        "Telecommunications",
+        "Space Law"
+      ],
       "status": "Archived",
       "archivedDate": "Apr 2026",
-      "source": { "type": "circle-proposal", "proposer": "Ssempa D." },
+      "source": {
+        "type": "circle-proposal",
+        "proposer": "Ssempa D."
+      },
       "circleDetails": {
         "name": "Frequency Allocation Circle",
         "description": "Would steward radio frequency coordination and spectrum management for satellite operations.",
@@ -1041,10 +2565,24 @@
         "foundingIntent": "Frequency coordination is critical for African satellite operators. A dedicated circle would streamline spectrum management."
       },
       "participatingCircles": [],
-      "resolution": { "status": "Failed" },
+      "resolution": {
+        "status": "Failed"
+      },
       "messages": [
-        { "author": "Ssempa D.", "initials": "SD", "text": "Frequency coordination overlaps significantly with Space Law Circle's mandate. We may not need a separate circle.", "time": "3w ago", "color": "var(--purple)" },
-        { "author": "Akello J.", "initials": "AJ", "text": "After review, scope overlap with Space Law Circle was confirmed. Circle archived.", "time": "2w ago", "color": "var(--red)" }
+        {
+          "author": "Ssempa D.",
+          "initials": "SD",
+          "text": "Frequency coordination overlaps significantly with Space Law Circle's mandate. We may not need a separate circle.",
+          "time": "3w ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "After review, scope overlap with Space Law Circle was confirmed. Circle archived.",
+          "time": "2w ago",
+          "color": "var(--red)"
+        }
       ]
     },
     {
@@ -1053,27 +2591,70 @@
       "delibType": "project-creation",
       "title": "Project: ITU Frequency Coordination Guide Approval",
       "participants": 6,
-      "domains": ["Space Law", "Telecommunications"],
+      "domains": [
+        "Space Law",
+        "Telecommunications"
+      ],
       "status": "Active",
-      "source": { "type": "project-proposal", "proposer": "You" },
+      "source": {
+        "type": "project-proposal",
+        "proposer": "You"
+      },
       "projectDetails": {
         "title": "ITU Frequency Coordination Guide",
         "description": "A plain-language guide for emerging space nations explaining ITU frequency coordination processes, filing procedures, and best practices.",
         "domains": "Space Law, Telecommunications",
         "deadline": "Aug 15, 2026",
-        "deliverableSpecs": { "name": "ITU Coordination Guide", "description": "4-section guide with coordination flowcharts, filing templates, and case studies." },
-        "team": ["Nakamura Y.", "Diallo F.", "Kimani A."],
+        "deliverableSpecs": {
+          "name": "ITU Coordination Guide",
+          "description": "4-section guide with coordination flowcharts, filing templates, and case studies."
+        },
+        "team": [
+          "Nakamura Y.",
+          "Diallo F.",
+          "Kimani A."
+        ],
         "supervisingCircle": "Space Law Circle"
       },
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
-        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 2 }
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 5,
+          "id": "space-law"
+        },
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Contributing",
+          "votes": 2,
+          "id": "remote-sensing"
+        }
       ],
-      "resolution": { "status": "Ready" },
+      "resolution": {
+        "status": "Ready"
+      },
       "messages": [
-        { "author": "You", "initials": "OS", "text": "This guide fills a critical gap. Many East African nations are launching satellites but struggle with ITU coordination.", "time": "4d ago", "gold": true },
-        { "author": "Nakamura Y.", "initials": "NY", "text": "I can draft Sections 1-2 covering ITU process basics and filing procedures.", "time": "3d ago", "color": "var(--blue)" },
-        { "author": "Akello J.", "initials": "AJ", "text": "Strong proposal. Space Law Circle supports this project. Resolution drafted.", "time": "2d ago", "color": "var(--green)" }
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "This guide fills a critical gap. Many East African nations are launching satellites but struggle with ITU coordination.",
+          "time": "4d ago",
+          "gold": true
+        },
+        {
+          "author": "Nakamura Y.",
+          "initials": "NY",
+          "text": "I can draft Sections 1-2 covering ITU process basics and filing procedures.",
+          "time": "3d ago",
+          "color": "var(--blue)"
+        },
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "Strong proposal. Space Law Circle supports this project. Resolution drafted.",
+          "time": "2d ago",
+          "color": "var(--green)"
+        }
       ]
     },
     {
@@ -1082,25 +2663,50 @@
       "delibType": "project-creation",
       "title": "Project: Lunar Regolith Study Approval",
       "participants": 5,
-      "domains": ["Materials Science", "Earth & Planetary Science"],
+      "domains": [
+        "Materials Science",
+        "Earth & Planetary Science"
+      ],
       "status": "Archived",
       "archivedDate": "May 2026",
-      "source": { "type": "project-proposal", "proposer": "Kimani A." },
+      "source": {
+        "type": "project-proposal",
+        "proposer": "Kimani A."
+      },
       "projectDetails": {
         "title": "Lunar Regolith Composition Study",
         "description": "Comparative analysis of simulated lunar regolith compositions for construction material research.",
         "domains": "Materials Science, Earth & Planetary Science",
         "deadline": "May 2026",
-        "deliverableSpecs": { "name": "Regolith Analysis Report", "description": "Comparative dataset and analysis." },
-        "team": ["Kimani A.", "Ochieng P."],
+        "deliverableSpecs": {
+          "name": "Regolith Analysis Report",
+          "description": "Comparative dataset and analysis."
+        },
+        "team": [
+          "Kimani A.",
+          "Ochieng P."
+        ],
         "supervisingCircle": "Remote Sensing Circle"
       },
       "participatingCircles": [
-        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 3 }
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Lead",
+          "votes": 3,
+          "id": "remote-sensing"
+        }
       ],
-      "resolution": { "status": "Approved" },
+      "resolution": {
+        "status": "Approved"
+      },
       "messages": [
-        { "author": "Kimani A.", "initials": "KA", "text": "Study completed and archived. Results published as Commons resource.", "time": "May 2026", "color": "var(--green)" }
+        {
+          "author": "Kimani A.",
+          "initials": "KA",
+          "text": "Study completed and archived. Results published as Commons resource.",
+          "time": "May 2026",
+          "color": "var(--green)"
+        }
       ]
     },
     {
@@ -1109,23 +2715,77 @@
       "delibType": "system-settings",
       "title": "System Settings: Steward Term Extension to 18 months",
       "participants": 8,
-      "domains": ["Space Law", "Philosophy & Ethics"],
+      "domains": [
+        "Space Law",
+        "Philosophy & Ethics"
+      ],
       "status": "Active",
-      "source": { "type": "settings-proposal", "proposer": "Ssempa D." },
+      "source": {
+        "type": "settings-proposal",
+        "proposer": "Ssempa D."
+      },
       "settingsChanges": [
-        { "setting": "Steward Term Length", "from": "12 months", "to": "18 months", "rationale": "12 months is too short for stewards to build expertise and deliver meaningful results. Extension to 18 months allows for a full project cycle." },
-        { "setting": "Max Consecutive Terms", "from": "2", "to": "3", "rationale": "With longer terms, allowing a third consecutive term maintains continuity for complex governance areas." }
+        {
+          "setting": "Steward Term Length",
+          "from": "12 months",
+          "to": "18 months",
+          "rationale": "12 months is too short for stewards to build expertise and deliver meaningful results. Extension to 18 months allows for a full project cycle."
+        },
+        {
+          "setting": "Max Consecutive Terms",
+          "from": "2",
+          "to": "3",
+          "rationale": "With longer terms, allowing a third consecutive term maintains continuity for complex governance areas."
+        }
       ],
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Lead", "votes": 5 },
-        { "name": "Remote Sensing Circle", "role": "Contributing", "votes": 3 }
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 5,
+          "id": "space-law"
+        },
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Contributing",
+          "votes": 3,
+          "id": "remote-sensing"
+        }
       ],
-      "resolution": { "status": "Draft" },
+      "resolution": {
+        "status": "Draft"
+      },
       "messages": [
-        { "author": "Ssempa D.", "initials": "SD", "text": "Current 12-month terms create knowledge loss at transition points. An 18-month term better aligns with the project lifecycle.", "time": "5d ago", "color": "var(--purple)" },
-        { "author": "Akello J.", "initials": "AJ", "text": "I support the term extension but worry about stagnation. The cool-off mechanism should remain in place.", "time": "4d ago", "color": "var(--amber)" },
-        { "author": "You", "initials": "OS", "text": "What about accountability? Longer terms mean longer periods between elections. Should we add mid-term review?", "time": "3d ago", "gold": true }
-      ]
+        {
+          "author": "Ssempa D.",
+          "initials": "SD",
+          "text": "Current 12-month terms create knowledge loss at transition points. An 18-month term better aligns with the project lifecycle.",
+          "time": "5d ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "I support the term extension but worry about stagnation. The cool-off mechanism should remain in place.",
+          "time": "4d ago",
+          "color": "var(--amber)"
+        },
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "What about accountability? Longer terms mean longer periods between elections. Should we add mid-term review?",
+          "time": "3d ago",
+          "gold": true
+        }
+      ],
+      "settingsSnapshot": {
+        "stewardTermMonths": 12,
+        "maxConsecutiveTerms": 2,
+        "cooloffMonths": 6,
+        "pAstfCycleMonths": 6,
+        "autoExpireCircles": false,
+        "defaultCircleExpiryMonths": 24
+      }
     },
     {
       "id": "cell-42",
@@ -1133,20 +2793,51 @@
       "delibType": "system-settings",
       "title": "System Settings: p-aSTF Cycle Reduction to 4 months",
       "participants": 7,
-      "domains": ["Space Law"],
+      "domains": [
+        "Space Law"
+      ],
       "status": "Archived",
       "archivedDate": "Jun 2026",
-      "source": { "type": "settings-proposal", "proposer": "Akello J." },
+      "source": {
+        "type": "settings-proposal",
+        "proposer": "Akello J."
+      },
       "settingsChanges": [
-        { "setting": "p-aSTF Cycle Duration", "from": "6 months", "to": "4 months", "rationale": "More frequent reviews catch health issues earlier and keep circles accountable." }
+        {
+          "setting": "p-aSTF Cycle Duration",
+          "from": "6 months",
+          "to": "4 months",
+          "rationale": "More frequent reviews catch health issues earlier and keep circles accountable."
+        }
       ],
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Lead", "votes": 4 }
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 4,
+          "id": "space-law"
+        }
       ],
-      "resolution": { "status": "Approved" },
+      "resolution": {
+        "status": "Approved"
+      },
       "messages": [
-        { "author": "Akello J.", "initials": "AJ", "text": "4-month cycles were approved. First round of p-aSTFs under new schedule begins next month.", "time": "Jun 2026", "color": "var(--green)" }
-      ]
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "4-month cycles were approved. First round of p-aSTFs under new schedule begins next month.",
+          "time": "Jun 2026",
+          "color": "var(--green)"
+        }
+      ],
+      "settingsSnapshot": {
+        "stewardTermMonths": 12,
+        "maxConsecutiveTerms": 2,
+        "cooloffMonths": 6,
+        "pAstfCycleMonths": 6,
+        "autoExpireCircles": false,
+        "defaultCircleExpiryMonths": 24
+      }
     },
     {
       "id": "cell-43",
@@ -1154,9 +2845,14 @@
       "delibType": "publication-approval",
       "title": "Publication: Liability Frameworks for Orbital Debris",
       "participants": 5,
-      "domains": ["Space Law"],
+      "domains": [
+        "Space Law"
+      ],
       "status": "Active",
-      "source": { "type": "publication-submission", "proposer": "Okello M." },
+      "source": {
+        "type": "publication-submission",
+        "proposer": "Okello M."
+      },
       "publicationDetails": {
         "title": "Liability Frameworks for Orbital Debris: An African Perspective",
         "type": "Journal Article",
@@ -1165,12 +2861,31 @@
         "domains": "Space Law"
       },
       "participatingCircles": [
-        { "name": "Space Law Circle", "role": "Lead", "votes": 3 }
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 3,
+          "id": "space-law"
+        }
       ],
-      "resolution": { "status": "Draft" },
+      "resolution": {
+        "status": "Draft"
+      },
       "messages": [
-        { "author": "Okello M.", "initials": "OM", "text": "This article has been peer-reviewed externally. Requesting Commons publication for wider reach among African policy makers.", "time": "3d ago", "color": "var(--purple)" },
-        { "author": "Akello J.", "initials": "AJ", "text": "The quality is strong. I recommend approval for publication under the Commons journal.", "time": "2d ago", "color": "var(--green)" }
+        {
+          "author": "Okello M.",
+          "initials": "OM",
+          "text": "This article has been peer-reviewed externally. Requesting Commons publication for wider reach among African policy makers.",
+          "time": "3d ago",
+          "color": "var(--purple)"
+        },
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "The quality is strong. I recommend approval for publication under the Commons journal.",
+          "time": "2d ago",
+          "color": "var(--green)"
+        }
       ]
     },
     {
@@ -1179,10 +2894,15 @@
       "delibType": "publication-approval",
       "title": "Publication: SAR Interferometry Data Protocol",
       "participants": 4,
-      "domains": ["Remote Sensing"],
+      "domains": [
+        "Remote Sensing"
+      ],
       "status": "Archived",
       "archivedDate": "Jul 2026",
-      "source": { "type": "publication-submission", "proposer": "Kimani A." },
+      "source": {
+        "type": "publication-submission",
+        "proposer": "Kimani A."
+      },
       "publicationDetails": {
         "title": "SAR Interferometry Data Sharing Protocol for East African Research Institutions",
         "type": "Technical Guide",
@@ -1191,177 +2911,370 @@
         "domains": "Remote Sensing"
       },
       "participatingCircles": [
-        { "name": "Remote Sensing Circle", "role": "Lead", "votes": 3 }
+        {
+          "name": "Remote Sensing Circle",
+          "role": "Lead",
+          "votes": 3,
+          "id": "remote-sensing"
+        }
       ],
-      "resolution": { "status": "Approved" },
+      "resolution": {
+        "status": "Approved"
+      },
       "messages": [
-        { "author": "Kimani A.", "initials": "KA", "text": "Protocol published and adopted by 3 institutions. Available in Commons library.", "time": "Jul 2026", "color": "var(--green)" }
+        {
+          "author": "Kimani A.",
+          "initials": "KA",
+          "text": "Protocol published and adopted by 3 institutions. Available in Commons library.",
+          "time": "Jul 2026",
+          "color": "var(--green)"
+        }
       ]
     }
   ],
-
   "inbox": [
     {
       "id": "ib-1",
       "type": "vSTF",
-      "title": "Candidate Verification — Ssempa D.",
+      "title": "Candidate Verification \u2014 Ssempa D.",
       "desc": "Steward candidacy assessment for Space Law Circle",
       "time": "Jul 12",
       "badge": "Invitation",
       "unread": true,
-      "detail": "You have been selected as an assessor for Ssempa David's steward candidacy. This is a vSTF process — you will evaluate their competence claims, investment evidence, and domain fit for Space Law stewardship.",
+      "detail": "You have been selected as an assessor for Ssempa David's steward candidacy. This is a vSTF process \u2014 you will evaluate their competence claims, investment evidence, and domain fit for Space Law stewardship.",
       "actions": [
-        { "label": "Accept Invitation", "style": "btn-primary", "action": "accept" },
-        { "label": "Decline", "style": "btn-sm", "action": "decline" }
+        {
+          "label": "Accept Invitation",
+          "style": "btn-primary",
+          "action": "accept"
+        },
+        {
+          "label": "Decline",
+          "style": "btn-sm",
+          "action": "decline"
+        }
       ],
       "meta": [
-        { "label": "Circle", "value": "Space Law" },
-        { "label": "Candidate", "value": "Ssempa David" },
-        { "label": "Expires", "value": "Jul 19, 2026" },
-        { "label": "Est. Time", "value": "4–6 hours" },
-        { "label": "Assessors", "value": "3 required" }
+        {
+          "label": "Circle",
+          "value": "Space Law"
+        },
+        {
+          "label": "Candidate",
+          "value": "Ssempa David"
+        },
+        {
+          "label": "Expires",
+          "value": "Jul 19, 2026"
+        },
+        {
+          "label": "Est. Time",
+          "value": "4\u20136 hours"
+        },
+        {
+          "label": "Assessors",
+          "value": "3 required"
+        }
       ],
       "nav": "stf-vstf-steward"
     },
     {
       "id": "ib-2",
       "type": "Deliberation",
-      "title": "Motion crystallising — Space Law",
+      "title": "Motion crystallising \u2014 Space Law",
       "desc": "Akello J. sponsored debris liability framework",
       "time": "Jul 11",
       "badge": "Active",
       "unread": true,
       "detail": "A motion you are participating in has crystallised and is heading to vote. The debris liability framework proposes a proportional liability model for manoeuvre-induced debris. Your circle deliberation input has been recorded.",
       "actions": [
-        { "label": "View Deliberation", "style": "btn-primary", "action": "nav" }
+        {
+          "label": "View Deliberation",
+          "style": "btn-primary",
+          "action": "nav"
+        }
       ],
       "meta": [
-        { "label": "Circle", "value": "Space Law" },
-        { "label": "Sponsor", "value": "Akello J." },
-        { "label": "Participants", "value": "12" },
-        { "label": "Domains", "value": "Space Law · Liability · Remote Sensing" }
+        {
+          "label": "Circle",
+          "value": "Space Law"
+        },
+        {
+          "label": "Sponsor",
+          "value": "Akello J."
+        },
+        {
+          "label": "Participants",
+          "value": "12"
+        },
+        {
+          "label": "Domains",
+          "value": "Space Law \u00b7 Liability \u00b7 Remote Sensing"
+        }
       ],
       "nav": "cell-delib"
     },
     {
       "id": "ib-3",
       "type": "aSTF",
-      "title": "Cell #Cell-23 — Motion adjudication",
-      "desc": "Debris liability framework — blind review",
+      "title": "Cell #Cell-23 \u2014 Motion adjudication",
+      "desc": "Debris liability framework \u2014 blind review",
       "time": "Jul 10",
       "badge": "Due Jul 28",
       "unread": true,
       "detail": "You have been assigned as a blind adjudicator for the debris liability framework motion. You will evaluate using the rubric: Alignment/Conflict (10 pts), Jurisdiction (9 pts), Competence (6 pts), Depth/Effort (5 pts). All adjudicators see the same evidence independently.",
       "actions": [
-        { "label": "Open Adjudication", "style": "btn-primary", "action": "nav" }
+        {
+          "label": "Open Adjudication",
+          "style": "btn-primary",
+          "action": "nav"
+        }
       ],
       "meta": [
-        { "label": "Type", "value": "aSTF — Blind Adjudication" },
-        { "label": "Cell", "value": "#Cell-23" },
-        { "label": "Adjudicators", "value": "3 (blind)" },
-        { "label": "Deadline", "value": "Jul 28, 2026" },
-        { "label": "Domains", "value": "Space Law · Liability" }
+        {
+          "label": "Type",
+          "value": "aSTF \u2014 Blind Adjudication"
+        },
+        {
+          "label": "Cell",
+          "value": "#Cell-23"
+        },
+        {
+          "label": "Adjudicators",
+          "value": "3 (blind)"
+        },
+        {
+          "label": "Deadline",
+          "value": "Jul 28, 2026"
+        },
+        {
+          "label": "Domains",
+          "value": "Space Law \u00b7 Liability"
+        }
       ],
       "nav": "stf-astf"
     },
     {
       "id": "ib-4",
       "type": "xSTF",
-      "title": "Cell #Cell-19 — ITU guide 45% complete",
+      "title": "Cell #Cell-19 \u2014 ITU guide 45% complete",
       "desc": "Execution deliverable on track",
       "time": "Jul 9",
       "badge": "Due Aug 15",
       "unread": false,
-      "detail": "The ITU Frequency Coordination Guide xSTF is progressing well. Current status: 45% complete. Team Members A and B have completed Sections 1–2 and are working on Section 3. Internal review is pending.",
+      "detail": "The ITU Frequency Coordination Guide xSTF is progressing well. Current status: 45% complete. Team Members A and B have completed Sections 1\u20132 and are working on Section 3. Internal review is pending.",
       "actions": [
-        { "label": "View xSTF Cell", "style": "btn-primary", "action": "nav" }
+        {
+          "label": "View xSTF Cell",
+          "style": "btn-primary",
+          "action": "nav"
+        }
       ],
       "meta": [
-        { "label": "Type", "value": "xSTF — Execution" },
-        { "label": "Cell", "value": "#Cell-19" },
-        { "label": "Team", "value": "3 members (blind)" },
-        { "label": "Commissioned by", "value": "Space Law Circle" },
-        { "label": "Deadline", "value": "Aug 15, 2026" }
+        {
+          "label": "Type",
+          "value": "xSTF \u2014 Execution"
+        },
+        {
+          "label": "Cell",
+          "value": "#Cell-19"
+        },
+        {
+          "label": "Team",
+          "value": "3 members (blind)"
+        },
+        {
+          "label": "Commissioned by",
+          "value": "Space Law Circle"
+        },
+        {
+          "label": "Deadline",
+          "value": "Aug 15, 2026"
+        }
       ],
       "nav": "stf-xstf"
     },
     {
       "id": "ib-5",
       "type": "Cell",
-      "title": "Cell update — Kenya section",
+      "title": "Cell update \u2014 Kenya section",
       "desc": "East Africa Mapping project: Kenya section 80% complete",
       "time": "Jul 8",
       "badge": "Update",
       "unread": false,
       "detail": "Okello R. reported that the Kenya section of the East Africa Space Sector Mapping project is 80% complete. Missing satellite programme funding data. Kimani A. has a contact at KSA and will reach out.",
       "actions": [
-        { "label": "View Project Cell", "style": "btn-primary", "action": "nav" }
+        {
+          "label": "View Project Cell",
+          "style": "btn-primary",
+          "action": "nav"
+        }
       ],
       "meta": [
-        { "label": "Project", "value": "East Africa Space Sector Mapping" },
-        { "label": "Lead", "value": "Okello R." },
-        { "label": "Progress", "value": "60% overall" },
-        { "label": "Domains", "value": "Policy · Remote Sensing" }
+        {
+          "label": "Project",
+          "value": "East Africa Space Sector Mapping"
+        },
+        {
+          "label": "Lead",
+          "value": "Okello R."
+        },
+        {
+          "label": "Progress",
+          "value": "60% overall"
+        },
+        {
+          "label": "Domains",
+          "value": "Policy \u00b7 Remote Sensing"
+        }
       ],
       "nav": "cell-undertaking"
     },
     {
       "id": "ib-6",
       "type": "Competence",
-      "title": "Competence verified — Space Law",
+      "title": "Competence verified \u2014 Space Law",
       "desc": "Your Space Law Wh increased by +50",
       "time": "Jul 7",
       "badge": "Verified",
       "unread": false,
       "detail": "Your Space Law competence claim has been verified through the vSTF process. Your Wh (held competence) has increased from 1200 to 1250. This was based on your submitted evidence: Space Law Certificate (Makerere) and ITU Workshop Attendance.",
       "actions": [
-        { "label": "View Profile", "style": "btn-primary", "action": "nav" }
+        {
+          "label": "View Profile",
+          "style": "btn-primary",
+          "action": "nav"
+        }
       ],
       "meta": [
-        { "label": "Domain", "value": "Space Law" },
-        { "label": "Previous Wh", "value": "1200" },
-        { "label": "New Wh", "value": "1250" },
-        { "label": "Change", "value": "+50" },
-        { "label": "Verified by", "value": "3 assessors" }
+        {
+          "label": "Domain",
+          "value": "Space Law"
+        },
+        {
+          "label": "Previous Wh",
+          "value": "1200"
+        },
+        {
+          "label": "New Wh",
+          "value": "1250"
+        },
+        {
+          "label": "Change",
+          "value": "+50"
+        },
+        {
+          "label": "Verified by",
+          "value": "3 assessors"
+        }
       ],
       "nav": "profile"
     }
   ],
-
   "stats": {
-    "discussions": { "threads": 4, "replies": 22, "endorsed": 3 },
-    "projects": { "active": 3, "lead": 1, "contributor": 2 },
-    "observatory": { "resources": "200+", "publications": 14, "events": 38 },
-    "cells": { "active": 5, "lead": 1, "member": 4 },
-    "stfs": { "pending": 2, "active": 1, "completed": 3 },
-    "participants": { "total": 8, "stewards": 2, "circles": 6 }
+    "discussions": {
+      "threads": 4,
+      "replies": 22,
+      "endorsed": 3
+    },
+    "projects": {
+      "active": 3,
+      "lead": 1,
+      "contributor": 2
+    },
+    "observatory": {
+      "resources": "200+",
+      "publications": 14,
+      "events": 38
+    },
+    "cells": {
+      "active": 5,
+      "lead": 1,
+      "member": 4
+    },
+    "stfs": {
+      "pending": 2,
+      "active": 1,
+      "completed": 3
+    },
+    "participants": {
+      "total": 8,
+      "stewards": 2,
+      "circles": 6
+    }
   },
-
   "news": [
-    { "title": "ESA confirms Lunar Gateway module delivery for 2027", "time": "2h ago", "source": "ESA" },
-    { "title": "Kenya launches first CubeSat from Malindi Space Centre", "time": "5h ago", "source": "BBC" },
-    { "title": "New space debris tracking protocol adopted by 12 nations", "time": "1d ago", "source": "UNOOSA" },
-    { "title": "African Space Policy Summit dates confirmed for August", "time": "2d ago", "source": "AU" }
+    {
+      "title": "ESA confirms Lunar Gateway module delivery for 2027",
+      "time": "2h ago",
+      "source": "ESA"
+    },
+    {
+      "title": "Kenya launches first CubeSat from Malindi Space Centre",
+      "time": "5h ago",
+      "source": "BBC"
+    },
+    {
+      "title": "New space debris tracking protocol adopted by 12 nations",
+      "time": "1d ago",
+      "source": "UNOOSA"
+    },
+    {
+      "title": "African Space Policy Summit dates confirmed for August",
+      "time": "2d ago",
+      "source": "AU"
+    }
   ],
-
   "events": [
-    { "title": "African Space Policy Summit", "date": "Aug 15", "location": "Nairobi" },
-    { "title": "Artemis Accords Webinar", "date": "Aug 22", "location": "Online" },
-    { "title": "Space Debris Workshop", "date": "Sep 5", "location": "Kampala" },
-    { "title": "IAF Congress", "date": "Sep 20", "location": "Milan" }
+    {
+      "title": "African Space Policy Summit",
+      "date": "Aug 15",
+      "location": "Nairobi"
+    },
+    {
+      "title": "Artemis Accords Webinar",
+      "date": "Aug 22",
+      "location": "Online"
+    },
+    {
+      "title": "Space Debris Workshop",
+      "date": "Sep 5",
+      "location": "Kampala"
+    },
+    {
+      "title": "IAF Congress",
+      "date": "Sep 20",
+      "location": "Milan"
+    }
   ],
-
   "opportunities": [
-    { "title": "ESA Trainee Programme", "deadline": "Sep 30", "type": "Traineeship" },
-    { "title": "AU Space Research Grant", "deadline": "Oct 15", "type": "Grant" },
-    { "title": "Remote Sensing Analyst — RCMRD", "deadline": "Aug 20", "type": "Position" },
-    { "title": "Call for Papers — African Space Law Journal", "deadline": "Nov 1", "type": "Publication" }
+    {
+      "title": "ESA Trainee Programme",
+      "deadline": "Sep 30",
+      "type": "Traineeship"
+    },
+    {
+      "title": "AU Space Research Grant",
+      "deadline": "Oct 15",
+      "type": "Grant"
+    },
+    {
+      "title": "Remote Sensing Analyst \u2014 RCMRD",
+      "deadline": "Aug 20",
+      "type": "Position"
+    },
+    {
+      "title": "Call for Papers \u2014 African Space Law Journal",
+      "deadline": "Nov 1",
+      "type": "Publication"
+    }
   ],
-
   "publications": [
     {
       "title": "Liability frameworks for orbital debris: An African perspective",
-      "authors": ["Okello M."],
+      "authors": [
+        "Okello M."
+      ],
       "journal": "African Space Law Journal",
       "date": "Jun 2026",
       "views": 142,
@@ -1369,7 +3282,9 @@
     },
     {
       "title": "Space policy harmonisation in East Africa",
-      "authors": ["Ssempa D."],
+      "authors": [
+        "Ssempa D."
+      ],
       "journal": "Policy Brief",
       "date": "May 2026",
       "views": 89,
@@ -1377,130 +3292,563 @@
     },
     {
       "title": "Remote sensing for agricultural monitoring in Uganda",
-      "authors": ["Nakabugo B."],
+      "authors": [
+        "Nakabugo B."
+      ],
       "journal": "Research Report",
       "date": "Apr 2026",
       "views": 67,
       "downloads": 15
     }
   ],
-
   "registration": {
     "domains": [
-      { "name": "Astronomy & Astrophysics", "type": "knowledge" },
-      { "name": "Aerospace Engineering", "type": "knowledge" },
-      { "name": "Earth & Planetary Science", "type": "knowledge" },
-      { "name": "Space Medicine & Biology", "type": "knowledge" },
-      { "name": "Space Law & Policy", "type": "knowledge" },
-      { "name": "Telecommunications & Signals", "type": "knowledge" },
-      { "name": "Computer Science & Software", "type": "knowledge" },
-      { "name": "Physics", "type": "knowledge" },
-      { "name": "Materials Science", "type": "knowledge" },
-      { "name": "Robotics & Automation", "type": "knowledge" },
-      { "name": "Remote Sensing", "type": "knowledge" },
-      { "name": "Space Architecture", "type": "knowledge" },
-      { "name": "Space Finance & Economics", "type": "knowledge" },
-      { "name": "Science Communication", "type": "knowledge" },
-      { "name": "Philosophy & Ethics", "type": "knowledge" },
-      { "name": "Art & Culture of Space", "type": "knowledge" },
-      { "name": "Chemistry", "type": "knowledge" },
-      { "name": "Mathematics", "type": "knowledge" },
-      { "name": "Environmental Studies", "type": "knowledge" },
-      { "name": "Geology", "type": "knowledge" },
-      { "name": "Atmospheric Science", "type": "knowledge" },
-      { "name": "Astrobiology", "type": "knowledge" },
-      { "name": "Genetics & Genomics", "type": "knowledge" },
-      { "name": "Statistics", "type": "knowledge" },
-      { "name": "Data Science", "type": "knowledge" },
-      { "name": "Systems Science", "type": "knowledge" },
-      { "name": "Quantum Computing", "type": "knowledge" },
-      { "name": "Mechanical Engineering", "type": "knowledge" },
-      { "name": "Electrical Engineering", "type": "knowledge" },
-      { "name": "Nuclear Engineering", "type": "knowledge" },
-      { "name": "Chemical Engineering", "type": "knowledge" },
-      { "name": "Civil Engineering", "type": "knowledge" },
-      { "name": "Nanotechnology", "type": "knowledge" },
-      { "name": "Transportation", "type": "knowledge" },
-      { "name": "Urban & Settlement Planning", "type": "knowledge" },
-      { "name": "Military & Defence Sciences", "type": "knowledge" },
-      { "name": "Psychology", "type": "knowledge" },
-      { "name": "Sociology", "type": "knowledge" },
-      { "name": "Anthropology", "type": "knowledge" },
-      { "name": "International Relations", "type": "knowledge" },
-      { "name": "Education", "type": "knowledge" },
-      { "name": "Geography", "type": "knowledge" },
-      { "name": "Entrepreneurship & Business", "type": "knowledge" },
-      { "name": "History", "type": "knowledge" },
-      { "name": "Linguistics", "type": "knowledge" },
-      { "name": "Uganda Astronomical Society", "type": "affiliation" },
-      { "name": "East African Astronomical Society", "type": "affiliation" },
-      { "name": "African Astronomical Society", "type": "affiliation" },
-      { "name": "Space Generation Advisory Council", "type": "affiliation" },
-      { "name": "Swahili", "type": "experiential" },
-      { "name": "English", "type": "experiential" },
-      { "name": "Luganda", "type": "experiential" },
-      { "name": "Python", "type": "experiential" },
-      { "name": "GIS", "type": "experiential" },
-      { "name": "Field Research", "type": "experiential" },
-      { "name": "Public Speaking", "type": "experiential" },
-      { "name": "Technical Writing", "type": "experiential" }
+      {
+        "name": "Astronomy & Astrophysics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Aerospace Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Earth & Planetary Science",
+        "type": "knowledge"
+      },
+      {
+        "name": "Space Medicine & Biology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Space Law & Policy",
+        "type": "knowledge"
+      },
+      {
+        "name": "Telecommunications & Signals",
+        "type": "knowledge"
+      },
+      {
+        "name": "Computer Science & Software",
+        "type": "knowledge"
+      },
+      {
+        "name": "Physics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Materials Science",
+        "type": "knowledge"
+      },
+      {
+        "name": "Robotics & Automation",
+        "type": "knowledge"
+      },
+      {
+        "name": "Remote Sensing",
+        "type": "knowledge"
+      },
+      {
+        "name": "Space Architecture",
+        "type": "knowledge"
+      },
+      {
+        "name": "Space Finance & Economics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Science Communication",
+        "type": "knowledge"
+      },
+      {
+        "name": "Philosophy & Ethics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Art & Culture of Space",
+        "type": "knowledge"
+      },
+      {
+        "name": "Chemistry",
+        "type": "knowledge"
+      },
+      {
+        "name": "Mathematics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Environmental Studies",
+        "type": "knowledge"
+      },
+      {
+        "name": "Geology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Atmospheric Science",
+        "type": "knowledge"
+      },
+      {
+        "name": "Astrobiology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Genetics & Genomics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Statistics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Data Science",
+        "type": "knowledge"
+      },
+      {
+        "name": "Systems Science",
+        "type": "knowledge"
+      },
+      {
+        "name": "Quantum Computing",
+        "type": "knowledge"
+      },
+      {
+        "name": "Mechanical Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Electrical Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Nuclear Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Chemical Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Civil Engineering",
+        "type": "knowledge"
+      },
+      {
+        "name": "Nanotechnology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Transportation",
+        "type": "knowledge"
+      },
+      {
+        "name": "Urban & Settlement Planning",
+        "type": "knowledge"
+      },
+      {
+        "name": "Military & Defence Sciences",
+        "type": "knowledge"
+      },
+      {
+        "name": "Psychology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Sociology",
+        "type": "knowledge"
+      },
+      {
+        "name": "Anthropology",
+        "type": "knowledge"
+      },
+      {
+        "name": "International Relations",
+        "type": "knowledge"
+      },
+      {
+        "name": "Education",
+        "type": "knowledge"
+      },
+      {
+        "name": "Geography",
+        "type": "knowledge"
+      },
+      {
+        "name": "Entrepreneurship & Business",
+        "type": "knowledge"
+      },
+      {
+        "name": "History",
+        "type": "knowledge"
+      },
+      {
+        "name": "Linguistics",
+        "type": "knowledge"
+      },
+      {
+        "name": "Uganda Astronomical Society",
+        "type": "affiliation"
+      },
+      {
+        "name": "East African Astronomical Society",
+        "type": "affiliation"
+      },
+      {
+        "name": "African Astronomical Society",
+        "type": "affiliation"
+      },
+      {
+        "name": "Space Generation Advisory Council",
+        "type": "affiliation"
+      },
+      {
+        "name": "Swahili",
+        "type": "experiential"
+      },
+      {
+        "name": "English",
+        "type": "experiential"
+      },
+      {
+        "name": "Luganda",
+        "type": "experiential"
+      },
+      {
+        "name": "Python",
+        "type": "experiential"
+      },
+      {
+        "name": "GIS",
+        "type": "experiential"
+      },
+      {
+        "name": "Field Research",
+        "type": "experiential"
+      },
+      {
+        "name": "Public Speaking",
+        "type": "experiential"
+      },
+      {
+        "name": "Technical Writing",
+        "type": "experiential"
+      }
     ],
     "eloMap": {
-      "affiliation": { "Affiliate": 500, "Member": 1000, "Representative": 1500, "Leadership": 2000 },
-      "knowledge": { "Enthusiast": 200, "Elementary": 400, "Highschool": 600, "Bachelors": 1000, "Masters": 1500, "PhD": 2000, "Professional": 2500, "Expert": 3000 },
-      "experiential": { "Explored": 300, "Familiar": 600, "Experienced": 1000, "Fluent": 1500, "Native": 2000, "Professional": 2500 }
+      "affiliation": {
+        "Affiliate": 500,
+        "Member": 1000,
+        "Representative": 1500,
+        "Leadership": 2000
+      },
+      "knowledge": {
+        "Enthusiast": 200,
+        "Elementary": 400,
+        "Highschool": 600,
+        "Bachelors": 1000,
+        "Masters": 1500,
+        "PhD": 2000,
+        "Professional": 2500,
+        "Expert": 3000
+      },
+      "experiential": {
+        "Explored": 300,
+        "Familiar": 600,
+        "Experienced": 1000,
+        "Fluent": 1500,
+        "Native": 2000,
+        "Professional": 2500
+      }
     },
-    "knowledgeLevels": ["Enthusiast", "Elementary", "Highschool", "Bachelors", "Masters", "PhD", "Professional", "Expert"],
-    "experientialLevels": ["Explored", "Familiar", "Experienced", "Fluent", "Native", "Professional"],
+    "knowledgeLevels": [
+      "Enthusiast",
+      "Elementary",
+      "Highschool",
+      "Bachelors",
+      "Masters",
+      "PhD",
+      "Professional",
+      "Expert"
+    ],
+    "experientialLevels": [
+      "Explored",
+      "Familiar",
+      "Experienced",
+      "Fluent",
+      "Native",
+      "Professional"
+    ],
     "defaultInterests": [
-      { "domain": "astronomy-astrophysics", "label": "Astronomy & Astrophysics", "rank": 1, "checked": true },
-      { "domain": "space-law-policy", "label": "Space Law & Policy", "rank": 2, "checked": true },
-      { "domain": "remote-sensing", "label": "Remote Sensing", "rank": 3, "checked": true },
-      { "domain": "earth-planetary-science", "label": "Earth & Planetary Science", "rank": 4, "checked": true },
-      { "domain": "computer-science-software", "label": "CS & Software", "rank": 5, "checked": true },
-      { "domain": "space-finance-economics", "label": "Space Finance & Economics", "rank": 6, "checked": false },
-      { "domain": "philosophy-ethics-space", "label": "Philosophy & Ethics", "rank": 7, "checked": false },
-      { "domain": "space-medicine-biology", "label": "Space Medicine & Biology", "rank": 8, "checked": false },
-      { "domain": "aerospace-engineering", "label": "Aerospace Engineering", "rank": 9, "checked": false },
-      { "domain": "science-communication", "label": "Science Communication", "rank": 10, "checked": false },
-      { "domain": "robotics-automation", "label": "Robotics & Automation", "rank": 11, "checked": false },
-      { "domain": "materials-science", "label": "Materials Science", "rank": 12, "checked": false },
-      { "domain": "telecommunications-signals", "label": "Telecom & Signals", "rank": 13, "checked": false },
-      { "domain": "space-architecture", "label": "Space Architecture", "rank": 14, "checked": false },
-      { "domain": "physics", "label": "Physics", "rank": 15, "checked": false },
-      { "domain": "art-culture-space", "label": "Art & Culture of Space", "rank": 16, "checked": false },
-      { "domain": "chemistry", "label": "Chemistry", "rank": 17, "checked": false },
-      { "domain": "mathematics", "label": "Mathematics", "rank": 18, "checked": false },
-      { "domain": "environmental-studies", "label": "Environmental Studies", "rank": 19, "checked": false },
-      { "domain": "geology", "label": "Geology", "rank": 20, "checked": false },
-      { "domain": "atmospheric-science", "label": "Atmospheric Science", "rank": 21, "checked": false },
-      { "domain": "astrobiology", "label": "Astrobiology", "rank": 22, "checked": false },
-      { "domain": "genetics", "label": "Genetics & Genomics", "rank": 23, "checked": false },
-      { "domain": "statistics", "label": "Statistics", "rank": 24, "checked": false },
-      { "domain": "data-science", "label": "Data Science", "rank": 25, "checked": false },
-      { "domain": "systems-science", "label": "Systems Science", "rank": 26, "checked": false },
-      { "domain": "quantum-computing", "label": "Quantum Computing", "rank": 27, "checked": false },
-      { "domain": "mechanical-engineering", "label": "Mechanical Engineering", "rank": 28, "checked": false },
-      { "domain": "electrical-engineering", "label": "Electrical Engineering", "rank": 29, "checked": false },
-      { "domain": "nuclear-engineering", "label": "Nuclear Engineering", "rank": 30, "checked": false },
-      { "domain": "chemical-engineering", "label": "Chemical Engineering", "rank": 31, "checked": false },
-      { "domain": "civil-engineering", "label": "Civil Engineering", "rank": 32, "checked": false },
-      { "domain": "nanotechnology", "label": "Nanotechnology", "rank": 33, "checked": false },
-      { "domain": "transportation", "label": "Transportation", "rank": 34, "checked": false },
-      { "domain": "urban-planning", "label": "Urban & Settlement Planning", "rank": 35, "checked": false },
-      { "domain": "military-defence", "label": "Military & Defence Sciences", "rank": 36, "checked": false },
-      { "domain": "psychology", "label": "Psychology", "rank": 37, "checked": false },
-      { "domain": "sociology", "label": "Sociology", "rank": 38, "checked": false },
-      { "domain": "anthropology", "label": "Anthropology", "rank": 39, "checked": false },
-      { "domain": "international-relations", "label": "International Relations", "rank": 40, "checked": false },
-      { "domain": "education", "label": "Education", "rank": 41, "checked": false },
-      { "domain": "geography", "label": "Geography", "rank": 42, "checked": false },
-      { "domain": "entrepreneurship", "label": "Entrepreneurship & Business", "rank": 43, "checked": false },
-      { "domain": "history", "label": "History", "rank": 44, "checked": false },
-      { "domain": "linguistics", "label": "Linguistics", "rank": 45, "checked": false }
+      {
+        "domain": "astronomy-astrophysics",
+        "label": "Astronomy & Astrophysics",
+        "rank": 1,
+        "checked": true
+      },
+      {
+        "domain": "space-law-policy",
+        "label": "Space Law & Policy",
+        "rank": 2,
+        "checked": true
+      },
+      {
+        "domain": "remote-sensing",
+        "label": "Remote Sensing",
+        "rank": 3,
+        "checked": true
+      },
+      {
+        "domain": "earth-planetary-science",
+        "label": "Earth & Planetary Science",
+        "rank": 4,
+        "checked": true
+      },
+      {
+        "domain": "computer-science-software",
+        "label": "CS & Software",
+        "rank": 5,
+        "checked": true
+      },
+      {
+        "domain": "space-finance-economics",
+        "label": "Space Finance & Economics",
+        "rank": 6,
+        "checked": false
+      },
+      {
+        "domain": "philosophy-ethics-space",
+        "label": "Philosophy & Ethics",
+        "rank": 7,
+        "checked": false
+      },
+      {
+        "domain": "space-medicine-biology",
+        "label": "Space Medicine & Biology",
+        "rank": 8,
+        "checked": false
+      },
+      {
+        "domain": "aerospace-engineering",
+        "label": "Aerospace Engineering",
+        "rank": 9,
+        "checked": false
+      },
+      {
+        "domain": "science-communication",
+        "label": "Science Communication",
+        "rank": 10,
+        "checked": false
+      },
+      {
+        "domain": "robotics-automation",
+        "label": "Robotics & Automation",
+        "rank": 11,
+        "checked": false
+      },
+      {
+        "domain": "materials-science",
+        "label": "Materials Science",
+        "rank": 12,
+        "checked": false
+      },
+      {
+        "domain": "telecommunications-signals",
+        "label": "Telecom & Signals",
+        "rank": 13,
+        "checked": false
+      },
+      {
+        "domain": "space-architecture",
+        "label": "Space Architecture",
+        "rank": 14,
+        "checked": false
+      },
+      {
+        "domain": "physics",
+        "label": "Physics",
+        "rank": 15,
+        "checked": false
+      },
+      {
+        "domain": "art-culture-space",
+        "label": "Art & Culture of Space",
+        "rank": 16,
+        "checked": false
+      },
+      {
+        "domain": "chemistry",
+        "label": "Chemistry",
+        "rank": 17,
+        "checked": false
+      },
+      {
+        "domain": "mathematics",
+        "label": "Mathematics",
+        "rank": 18,
+        "checked": false
+      },
+      {
+        "domain": "environmental-studies",
+        "label": "Environmental Studies",
+        "rank": 19,
+        "checked": false
+      },
+      {
+        "domain": "geology",
+        "label": "Geology",
+        "rank": 20,
+        "checked": false
+      },
+      {
+        "domain": "atmospheric-science",
+        "label": "Atmospheric Science",
+        "rank": 21,
+        "checked": false
+      },
+      {
+        "domain": "astrobiology",
+        "label": "Astrobiology",
+        "rank": 22,
+        "checked": false
+      },
+      {
+        "domain": "genetics",
+        "label": "Genetics & Genomics",
+        "rank": 23,
+        "checked": false
+      },
+      {
+        "domain": "statistics",
+        "label": "Statistics",
+        "rank": 24,
+        "checked": false
+      },
+      {
+        "domain": "data-science",
+        "label": "Data Science",
+        "rank": 25,
+        "checked": false
+      },
+      {
+        "domain": "systems-science",
+        "label": "Systems Science",
+        "rank": 26,
+        "checked": false
+      },
+      {
+        "domain": "quantum-computing",
+        "label": "Quantum Computing",
+        "rank": 27,
+        "checked": false
+      },
+      {
+        "domain": "mechanical-engineering",
+        "label": "Mechanical Engineering",
+        "rank": 28,
+        "checked": false
+      },
+      {
+        "domain": "electrical-engineering",
+        "label": "Electrical Engineering",
+        "rank": 29,
+        "checked": false
+      },
+      {
+        "domain": "nuclear-engineering",
+        "label": "Nuclear Engineering",
+        "rank": 30,
+        "checked": false
+      },
+      {
+        "domain": "chemical-engineering",
+        "label": "Chemical Engineering",
+        "rank": 31,
+        "checked": false
+      },
+      {
+        "domain": "civil-engineering",
+        "label": "Civil Engineering",
+        "rank": 32,
+        "checked": false
+      },
+      {
+        "domain": "nanotechnology",
+        "label": "Nanotechnology",
+        "rank": 33,
+        "checked": false
+      },
+      {
+        "domain": "transportation",
+        "label": "Transportation",
+        "rank": 34,
+        "checked": false
+      },
+      {
+        "domain": "urban-planning",
+        "label": "Urban & Settlement Planning",
+        "rank": 35,
+        "checked": false
+      },
+      {
+        "domain": "military-defence",
+        "label": "Military & Defence Sciences",
+        "rank": 36,
+        "checked": false
+      },
+      {
+        "domain": "psychology",
+        "label": "Psychology",
+        "rank": 37,
+        "checked": false
+      },
+      {
+        "domain": "sociology",
+        "label": "Sociology",
+        "rank": 38,
+        "checked": false
+      },
+      {
+        "domain": "anthropology",
+        "label": "Anthropology",
+        "rank": 39,
+        "checked": false
+      },
+      {
+        "domain": "international-relations",
+        "label": "International Relations",
+        "rank": 40,
+        "checked": false
+      },
+      {
+        "domain": "education",
+        "label": "Education",
+        "rank": 41,
+        "checked": false
+      },
+      {
+        "domain": "geography",
+        "label": "Geography",
+        "rank": 42,
+        "checked": false
+      },
+      {
+        "domain": "entrepreneurship",
+        "label": "Entrepreneurship & Business",
+        "rank": 43,
+        "checked": false
+      },
+      {
+        "domain": "history",
+        "label": "History",
+        "rank": 44,
+        "checked": false
+      },
+      {
+        "domain": "linguistics",
+        "label": "Linguistics",
+        "rank": 45,
+        "checked": false
+      }
     ]
   },
-
   "organisations": [
     {
       "id": "uas",
@@ -1510,7 +3858,10 @@
       "logo": null,
       "location": "Kampala, Uganda",
       "summary": "Amateur and professional astronomy society promoting stargazing and space science education across East Africa.",
-      "knowledgeDomains": ["astronomy-astrophysics", "science-communication"],
+      "knowledgeDomains": [
+        "astronomy-astrophysics",
+        "science-communication"
+      ],
       "status": "Active",
       "founded": "Apr 2026",
       "foundingCell": null,
@@ -1525,7 +3876,11 @@
       "logo": null,
       "location": "Vienna, Austria (global)",
       "summary": "Global network of young space professionals under 35, representing over 165 countries.",
-      "knowledgeDomains": ["space-law-policy", "aerospace-engineering", "science-communication"],
+      "knowledgeDomains": [
+        "space-law-policy",
+        "aerospace-engineering",
+        "science-communication"
+      ],
       "status": "Active",
       "founded": "Jan 2026",
       "foundingCell": null,
@@ -1540,7 +3895,10 @@
       "logo": null,
       "location": "Accra, Ghana",
       "summary": "Non-profit advancing space science awareness and satellite technology development in Ghana.",
-      "knowledgeDomains": ["astronomy-astrophysics", "remote-sensing"],
+      "knowledgeDomains": [
+        "astronomy-astrophysics",
+        "remote-sensing"
+      ],
       "status": "Active",
       "founded": "Mar 2026",
       "foundingCell": null,
@@ -1548,7 +3906,6 @@
       "website": null
     }
   ],
-
   "systemSettings": {
     "stewardTermMonths": 12,
     "maxConsecutiveTerms": 2,
@@ -1557,27 +3914,130 @@
     "autoExpireCircles": false,
     "defaultCircleExpiryMonths": 24
   },
-
   "integrityRecords": [
-    { "id": "IR-001", "type": "vSTF", "subject": "Ssempa David", "purpose": "Steward Candidacy", "circle": "Space Law", "date": "Jul 12, 2026", "verdict": "Approved", "text": "Candidate verified as qualified steward for Space Law Circle. Competence in Space Law confirmed at Ws 1800." },
-    { "id": "IR-002", "type": "aSTF", "subject": "Debris Liability Framework", "purpose": "Motion Adjudication", "circle": "Space Law", "date": "Jul 10, 2026", "verdict": "Passed", "text": "Proportional liability framework adopted by blind assessment of 3 assessors. Enacted as Resolution R-002." },
-    { "id": "IR-003", "type": "jSTF", "subject": "Credential Misrepresentation", "purpose": "Investigation", "circle": "Commons", "date": "Jun 28, 2026", "verdict": "Exonerated", "text": "Investigation found insufficient evidence of deliberate misrepresentation. No sanctions applied." },
-    { "id": "IR-004", "type": "p-aSTF", "subject": "Space Law Circle", "purpose": "Periodic Health Review", "circle": "Space Law", "date": "Jun 15, 2026", "verdict": "Healthy", "text": "Circle assessed at 26/30 across 5 rubric dimensions. Strong cohesion and delivery metrics." },
-    { "id": "IR-005", "type": "aSTF", "subject": "Artemis Accords Ratification", "purpose": "Motion Adjudication", "circle": "Space Law", "date": "Jun 20, 2026", "verdict": "Failed", "text": "Recommendation did not achieve required competence-weighted majority. Motion archived." },
-    { "id": "IR-006", "type": "vSTF", "subject": "Akello Jane", "purpose": "Competence Claims", "circle": "Space Law", "date": "Jul 14, 2026", "verdict": "Approved", "text": "Competence claims for Space Law and Astrophysics domains verified. Ws confirmed." }
+    {
+      "id": "IR-001",
+      "type": "vSTF",
+      "subject": "Ssempa David",
+      "purpose": "Steward Candidacy",
+      "circle": "Space Law",
+      "date": "Jul 12, 2026",
+      "verdict": "Approved",
+      "text": "Candidate verified as qualified steward for Space Law Circle. Competence in Space Law confirmed at Ws 1800."
+    },
+    {
+      "id": "IR-002",
+      "type": "aSTF",
+      "subject": "Debris Liability Framework",
+      "purpose": "Motion Adjudication",
+      "circle": "Space Law",
+      "date": "Jul 10, 2026",
+      "verdict": "Passed",
+      "text": "Proportional liability framework adopted by blind assessment of 3 assessors. Enacted as Resolution R-002."
+    },
+    {
+      "id": "IR-003",
+      "type": "jSTF",
+      "subject": "Credential Misrepresentation",
+      "purpose": "Investigation",
+      "circle": "Commons",
+      "date": "Jun 28, 2026",
+      "verdict": "Exonerated",
+      "text": "Investigation found insufficient evidence of deliberate misrepresentation. No sanctions applied."
+    },
+    {
+      "id": "IR-004",
+      "type": "p-aSTF",
+      "subject": "Space Law Circle",
+      "purpose": "Periodic Health Review",
+      "circle": "Space Law",
+      "date": "Jun 15, 2026",
+      "verdict": "Healthy",
+      "text": "Circle assessed at 26/30 across 5 rubric dimensions. Strong cohesion and delivery metrics."
+    },
+    {
+      "id": "IR-005",
+      "type": "aSTF",
+      "subject": "Artemis Accords Ratification",
+      "purpose": "Motion Adjudication",
+      "circle": "Space Law",
+      "date": "Jun 20, 2026",
+      "verdict": "Failed",
+      "text": "Recommendation did not achieve required competence-weighted majority. Motion archived."
+    },
+    {
+      "id": "IR-006",
+      "type": "vSTF",
+      "subject": "Akello Jane",
+      "purpose": "Competence Claims",
+      "circle": "Space Law",
+      "date": "Jul 14, 2026",
+      "verdict": "Approved",
+      "text": "Competence claims for Space Law and Astrophysics domains verified. Ws confirmed."
+    }
   ],
-
   "governanceEvents": [
-    { "id": "GE-001", "type": "circle-created", "circle": "Space Law Circle", "date": "Mar 2026", "text": "Circle founded with 5 founding members. Primary mandate: Space Law, Liability." },
-    { "id": "GE-002", "type": "circle-created", "circle": "Remote Sensing Circle", "date": "Jan 2026", "text": "Circle founded with 4 founding members. Primary mandate: Remote Sensing, Satellite." },
-    { "id": "GE-003", "type": "steward-confirmed", "circle": "Space Law Circle", "date": "Jul 12, 2026", "text": "Ssempa David confirmed as steward via vSTF verification.", "participant": "Ssempa David" },
-    { "id": "GE-004", "type": "steward-resigned", "circle": "Space Law Circle", "date": "May 2026", "text": "Esi Kojo stepped down due to term expiry.", "participant": "Esi Kojo" },
-    { "id": "GE-005", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Mensah Naa joined the circle.", "participant": "Mensah Naa" },
-    { "id": "GE-006", "type": "circle-suggested", "circle": "Mars Habitability Circle", "date": "Jun 2026", "text": "Circle suggested, awaiting founding members." },
-    { "id": "GE-007", "type": "circle-archived", "circle": "Frequency Allocation Circle", "date": "Apr 2026", "text": "Circle archived due to scope overlap with Space Law Circle." },
-    { "id": "GE-008", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Diallo Mamadou accepted into the circle.", "participant": "Diallo Mamadou" }
+    {
+      "id": "GE-001",
+      "type": "circle-created",
+      "circle": "Space Law Circle",
+      "date": "Mar 2026",
+      "text": "Circle founded with 5 founding members. Primary mandate: Space Law, Liability."
+    },
+    {
+      "id": "GE-002",
+      "type": "circle-created",
+      "circle": "Remote Sensing Circle",
+      "date": "Jan 2026",
+      "text": "Circle founded with 4 founding members. Primary mandate: Remote Sensing, Satellite."
+    },
+    {
+      "id": "GE-003",
+      "type": "steward-confirmed",
+      "circle": "Space Law Circle",
+      "date": "Jul 12, 2026",
+      "text": "Ssempa David confirmed as steward via vSTF verification.",
+      "participant": "Ssempa David"
+    },
+    {
+      "id": "GE-004",
+      "type": "steward-resigned",
+      "circle": "Space Law Circle",
+      "date": "May 2026",
+      "text": "Esi Kojo stepped down due to term expiry.",
+      "participant": "Esi Kojo"
+    },
+    {
+      "id": "GE-005",
+      "type": "member-joined",
+      "circle": "Space Law Circle",
+      "date": "Jul 18, 2026",
+      "text": "Mensah Naa joined the circle.",
+      "participant": "Mensah Naa"
+    },
+    {
+      "id": "GE-006",
+      "type": "circle-suggested",
+      "circle": "Mars Habitability Circle",
+      "date": "Jun 2026",
+      "text": "Circle suggested, awaiting founding members."
+    },
+    {
+      "id": "GE-007",
+      "type": "circle-archived",
+      "circle": "Frequency Allocation Circle",
+      "date": "Apr 2026",
+      "text": "Circle archived due to scope overlap with Space Law Circle."
+    },
+    {
+      "id": "GE-008",
+      "type": "member-joined",
+      "circle": "Space Law Circle",
+      "date": "Jul 18, 2026",
+      "text": "Diallo Mamadou accepted into the circle.",
+      "participant": "Diallo Mamadou"
+    }
   ],
-
   "circleApplications": [
     {
       "id": "app-1",
@@ -1586,7 +4046,10 @@
       "applicant": "Oumo Samuel",
       "initials": "OS",
       "motivation": "I have strong interest in space law and policy, with 3 years of research experience in African space governance frameworks.",
-      "relevantDomains": ["Space Law", "Policy"],
+      "relevantDomains": [
+        "Space Law",
+        "Policy"
+      ],
       "status": "pending",
       "appliedDate": "Jul 20, 2026",
       "queuePosition": 2
@@ -1598,13 +4061,15 @@
       "applicant": "Osei Kwame",
       "initials": "OK",
       "motivation": "My background is in satellite imagery analysis and GIS. I want to contribute to remote sensing governance.",
-      "relevantDomains": ["Remote Sensing", "Satellite"],
+      "relevantDomains": [
+        "Remote Sensing",
+        "Satellite"
+      ],
       "status": "pending",
       "appliedDate": "Jul 22, 2026",
       "queuePosition": 1
     }
   ],
-
   "stfCandidates": [
     {
       "id": "cand-1",
@@ -1612,7 +4077,10 @@
       "name": "Oumo Samuel",
       "initials": "OS",
       "matchScore": 87,
-      "matchedDomains": ["Space Law", "Policy"],
+      "matchedDomains": [
+        "Space Law",
+        "Policy"
+      ],
       "interestScore": 92,
       "competenceScore": 82,
       "status": "invited",
@@ -1624,7 +4092,9 @@
       "name": "Kimani A.",
       "initials": "KA",
       "matchScore": 74,
-      "matchedDomains": ["Policy"],
+      "matchedDomains": [
+        "Policy"
+      ],
       "interestScore": 70,
       "competenceScore": 78,
       "status": "pending",
@@ -1636,14 +4106,15 @@
       "name": "Mensah Naa",
       "initials": "MN",
       "matchScore": 68,
-      "matchedDomains": ["Education"],
+      "matchedDomains": [
+        "Education"
+      ],
       "interestScore": 65,
       "competenceScore": 71,
       "status": "pending",
       "invitedDate": null
     }
   ],
-
   "projectApplications": [
     {
       "id": "papp-1",
