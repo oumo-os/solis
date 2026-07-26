@@ -3942,11 +3942,11 @@ function renderMemberList() {
   }).join('') : '';
 
   var successHtml = successionCandidates.length ? successionCandidates.map(function(a) {
-    var initials = a.name.split(' ').map(function(w){return w[0];}).join('').substring(0, 2);
     return '<div class="mm-card" onclick="selectSuccessionCandidate(\'' + a.id + '\')" id="mm-card-' + a.id + '">' +
-      '<div class="mm-avatar" style="background:var(--amber-soft);color:var(--amber)">' + initials + '</div>' +
-      '<div class="mm-info"><div class="mm-name">' + a.name + '</div>' +
-      '<div class="mm-meta">Applied ' + a.applied + ' · ' + a.motivation.substring(0, 40) + '…</div></div>' +
+      '<div class="mm-avatar" style="background:var(--amber-soft);color:var(--amber)">' + a.initials + '</div>' +
+      '<div class="mm-info"><div class="mm-name">' + a.applicant + '</div>' +
+      '<div class="mm-meta">Applied ' + a.appliedDate + ' · ' + (a.motivation || '').substring(0, 40) + '…</div></div>' +
+      (a.queuePosition ? '<div class="mm-ws">#' + a.queuePosition + '</div>' : '') +
     '</div>';
   }).join('') : '';
 
@@ -3978,17 +3978,16 @@ function renderSuccessionCandidateDetail(appId) {
   if (!detail) return;
   var a = (MOCK.circleApplications || []).filter(function(x){return x.id===appId})[0];
   if (!a) return;
-  var initials = a.name.split(' ').map(function(w){return w[0];}).join('').substring(0, 2);
-  var isSelf = MOCK.currentUser && a.name === MOCK.currentUser.name;
+  var isSelf = MOCK.currentUser && a.applicant === MOCK.currentUser.name;
   detail.innerHTML =
     '<div>' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
-        '<div style="width:36px;height:36px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' + initials + '</div>' +
-        '<div><div style="font-size:15px;font-weight:600;color:var(--text)">' + a.name + '</div>' +
-        '<div style="font-size:11px;color:var(--text-tertiary)">Applied ' + a.applied + '</div></div>' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' + a.initials + '</div>' +
+        '<div><div style="font-size:15px;font-weight:600;color:var(--text)">' + a.applicant + '</div>' +
+        '<div style="font-size:11px;color:var(--text-tertiary)">Applied ' + a.appliedDate + '</div></div>' +
       '</div>' +
       '<div class="mm-section-title">Motivation</div>' +
-      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation) + '</div>' +
+      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation || '') + '</div>' +
       (a.notes ? '<div class="mm-section-title">Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
       (isSelf ? '<button onclick="withdrawFromQueue(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Withdraw</button>' : '') +
     '</div>';
