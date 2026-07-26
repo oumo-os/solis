@@ -3979,6 +3979,7 @@ function renderSuccessionCandidateDetail(appId) {
   var a = (MOCK.circleApplications || []).filter(function(x){return x.id===appId})[0];
   if (!a) return;
   var initials = a.name.split(' ').map(function(w){return w[0];}).join('').substring(0, 2);
+  var isSelf = MOCK.currentUser && a.name === MOCK.currentUser.name;
   detail.innerHTML =
     '<div>' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
@@ -3988,35 +3989,19 @@ function renderSuccessionCandidateDetail(appId) {
       '</div>' +
       '<div class="mm-section-title">Motivation</div>' +
       '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation) + '</div>' +
-      (a.notes ? '<div class="mm-section-title">Steward Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
-      '<div style="margin-top:16px;display:flex;gap:8px">' +
-        '<button onclick="approveSuccession(\'' + a.id + '\')" style="background:var(--green-soft);color:var(--green);border:1px solid var(--green);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Approve</button>' +
-        '<button onclick="rejectSuccession(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Reject</button>' +
-      '</div>' +
+      (a.notes ? '<div class="mm-section-title">Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
+      (isSelf ? '<button onclick="withdrawFromQueue(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Withdraw</button>' : '') +
     '</div>';
 }
 
-function approveSuccession(appId) {
+function withdrawFromQueue(appId) {
   var apps = MOCK.circleApplications || [];
   var a = apps.find(function(x){return x.id===appId;});
   if (!a) return;
-  a.status = 'approved';
-  a.decided = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  alert(a.name + ' approved. They can now serve as steward when a seat opens.');
+  if (!confirm('Withdraw your application to join the circle?')) return;
+  a.status = 'withdrawn';
   successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
   renderMemberList();
-  if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
-}
-
-function rejectSuccession(appId) {
-  var apps = MOCK.circleApplications || [];
-  var a = apps.find(function(x){return x.id===appId;});
-  if (!a) return;
-  a.status = 'rejected';
-  a.decided = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
-  renderMemberList();
-  if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
 }
 
 function renderMemberDetail(id) {
@@ -4112,11 +4097,11 @@ function escapeHtml(s) {
 }
 var esc = escapeHtml;
 
-function isStewardOfCircle(circleId) {
+function isStewardOfCircle(userId, circleId) {
   if (!MOCK || !MOCK.circles || !MOCK.currentUser) return false;
   var circle = MOCK.circles.find(function(c) { return c.id === circleId; });
   if (!circle || !circle.roster || !circle.roster.active) return false;
-  return circle.roster.active.some(function(m) { return m.id === MOCK.currentUser.id; });
+  return circle.roster.active.some(function(m) { return m.id === userId; });
 }
 
 function isStewardOfAnyCircle() {
@@ -4647,7 +4632,7 @@ function submitThreadForPublication() {
   };
   MOCK.cells.push(newCell);
   MOCK.cellsById[delibId] = newCell;
-  alert('Publication-approval cell created: ' + delibId + '. Your circle will review and vote on publication.');
+  openDelibCell(delibId);
 }
 
 // Domain autocomplete — filters to knowledge+experiential only
@@ -5954,7 +5939,8 @@ function renderDeliverables(cellId, containerId) {
   }
   html += '</div>';
   var circleId = cell.supervisingCircleId || cell.supervisingCircle || '';
-  if (isStewardOfCircle(circleId) && delivs.length && cell.status === 'Active') {
+  var uid = MOCK.currentUser ? MOCK.currentUser.id : '';
+  if (isStewardOfCircle(uid, circleId) && delivs.length && cell.status === 'Active') {
     html += '<button onclick="publishDeliverablesToCommons(\'' + cellId + '\')" style="margin-top:10px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;width:100%;text-align:center;font-weight:500"><i class="fa-solid fa-share-from-square" style="margin-right:4px"></i>Publish to Commons</button>';
   }
   el.innerHTML = html;
@@ -5977,7 +5963,7 @@ function publishDeliverablesToCommons(cellId) {
     repliesList: []
   };
   MOCK.threads.push(newThread);
-  alert('Published to Commons! Thread "' + (cell.title || cell.name) + '" is now visible in Discussions.');
+  nav('commons');
 }
 
 function renderMessages(cellId, containerId) {
@@ -6136,7 +6122,7 @@ function renderProjectSettings(cellId) {
 
   var circleId = cell.supervisingCircleId || cell.supervisingCircle || '';
   var circleObj = (MOCK.circles || []).find(function(c){ return c.id === circleId; }) || {};
-  var isSteward = isStewardOfCircle(circleId);
+  var isSteward = isStewardOfCircle(MOCK.currentUser ? MOCK.currentUser.id : '', circleId);
 
   if (!isSteward || cell.status !== 'Active') {
     settingsCard.style.display = 'none';
@@ -6161,7 +6147,31 @@ function renderProjectSettings(cellId) {
 
   html += '<button onclick="addProjectMemberPrompt(\'' + cellId + '\')" style="margin-top:8px;background:var(--surface-raised);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text-secondary);cursor:pointer;width:100%;text-align:center" onmouseover="this.style.borderColor=\'var(--green)\'" onmouseout="this.style.borderColor=\'var(--border)\'">+ Add Member</button>';
 
+  html += '<div class="sec" style="margin-top:14px">Project Status</div>';
+  var statuses = ['Active', 'Paused', 'Archived'];
+  html += '<div style="display:flex;gap:4px;margin-bottom:10px">';
+  statuses.forEach(function(s) {
+    var active = cell.status === s;
+    var cls = active ? 'b-active' : (s === 'Active' ? 'b-pending' : s === 'Paused' ? 'b-amber' : 'b-default');
+    html += '<span class="badge ' + cls + '" style="font-size:10px;cursor:pointer;padding:4px 10px;border-radius:999px' + (active ? ';font-weight:600' : '') + '" onclick="setProjectStatus(\'' + cellId + '\',\'' + s + '\')">' + s + '</span>';
+  });
+  html += '</div>';
+
+  var delivs = cell.deliverables || [];
+  if (delivs.length) {
+    html += '<div class="sec" style="margin-top:14px">Deliverables</div>';
+    delivs.forEach(function(d) {
+      var done = d.status === 'complete';
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11px">' +
+        '<input type="checkbox" ' + (done ? 'checked' : '') + ' onchange="toggleDeliverableStatus(\'' + cellId + '\',\'' + esc(d.name) + '\')" style="accent-color:var(--green)"/> ' +
+        '<span style="' + (done ? 'text-decoration:line-through;color:var(--text-tertiary)' : '') + '">' + esc(d.name) + '</span>' +
+        '<span class="badge ' + (done ? 'b-active' : 'b-pending') + '" style="font-size:8px">' + (done ? 'Complete' : 'Pending') + '</span>' +
+      '</div>';
+    });
+  }
+
   settingsDiv.innerHTML = html;
+}
 }
 
 function removeProjectMember(cellId, memberId) {
@@ -6182,6 +6192,22 @@ function addProjectMemberPrompt(cellId) {
   cell.team.push({ id: name.toLowerCase().replace(/\s+/g,'-'), name: name, initials: initials });
   renderProjectSettings(cellId);
   renderTeam(cellId, 'projcell-team');
+}
+
+function setProjectStatus(cellId, newStatus) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  cell.status = newStatus;
+  renderProjectSettings(cellId);
+}
+
+function toggleDeliverableStatus(cellId, delivName) {
+  var cell = cellsById[cellId];
+  if (!cell || !cell.deliverables) return;
+  var d = cell.deliverables.find(function(x){return x.name === delivName;});
+  if (!d) return;
+  d.status = d.status === 'complete' ? 'pending' : 'complete';
+  renderProjectSettings(cellId);
 }
 
 function openDelibCell(cellId) {

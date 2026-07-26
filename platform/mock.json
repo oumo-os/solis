@@ -1615,8 +1615,8 @@
       "matchedDomains": ["Space Law", "Policy"],
       "interestScore": 92,
       "competenceScore": 82,
-      "status": "selected",
-      "selectedDate": "Jul 18, 2026"
+      "status": "invited",
+      "invitedDate": "Jul 18, 2026"
     },
     {
       "id": "cand-2",
@@ -1628,7 +1628,7 @@
       "interestScore": 70,
       "competenceScore": 78,
       "status": "pending",
-      "selectedDate": null
+      "invitedDate": null
     },
     {
       "id": "cand-3",
@@ -1640,7 +1640,7 @@
       "interestScore": 65,
       "competenceScore": 71,
       "status": "pending",
-      "selectedDate": null
+      "invitedDate": null
     }
   ],
 

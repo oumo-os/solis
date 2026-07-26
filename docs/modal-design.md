@@ -171,6 +171,51 @@ Contains circle-specific configuration:
 
 ---
 
+## Co-Stewards List Modal
+
+### Invocation
+
+Open from Circle Home page (Co-Stewards card) via `openMembersModal()`. Shows all stewards and succession candidates for a circle.
+
+### Structure (split-pane, full size)
+
+**Left panel — Member list** (3 sections):
+1. **Active** (`roster.active`) — currently serving stewards
+2. **Succession Queue** (`circleApplications` where `status === 'pending'`) — candidates waiting for vacancies
+3. **Former** (`roster.former`) — previously serving stewards
+
+**Right panel — Detail view:**
+- Active member: Ws, domains, mandate overlap, competence bars, activity history
+- Succession candidate: name, initials, applied date, motivation, queue position, withdraw button (self only)
+- Former member: tenure, departure reason, timeline
+
+### Status Values
+
+| Status | Meaning |
+|--------|---------|
+| `active` | Currently serving steward |
+| `former` | Previously served, no longer a member |
+| `candidate` | In the succession queue (applied to join) |
+
+- No `invited` status exists for circles — candidates apply, they are not invited
+- Membership = stewardship = all privileges (no roles within circles)
+
+### Succession Flow
+
+1. User applies to join circle → `status: 'pending'` in `circleApplications`
+2. When a seat opens, system runs vSTF evaluation on pending candidates
+3. Top evaluated candidate automatically takes the steward post
+4. Candidate can withdraw from the queue at any time
+5. No approval/rejection by stewards — fully automatic
+
+### CSS Architecture
+
+### Why backdrop blur?
+
+### Why box-shadow instead of border?
+
+---
+
 ## CSS Architecture
 
 ### Shared Classes

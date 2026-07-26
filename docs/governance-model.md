@@ -38,16 +38,18 @@ Solis uses a flat, permission-less governance model where **circle membership eq
 4. A vSTF is spawned to verify the candidate's competence
 5. Top candidate takes the post
 
-### Key Behaviors
+### Succession Flow
 
-- Candidates can withdraw from the succession queue
-- Circle stewards can approve/reject candidates in the queue
-- Approval means: "This person is qualified and can serve when a seat opens"
-- Rejection means: "This person is not currently qualified"
+- Candidate applies to the circle (via "Apply to Join") and enters the succession queue
+- When a steward vacancy opens, the system automatically runs a vSTF evaluation
+- vSTF evaluates pending candidates by interest alignment, competence (Ws), and workload
+- Top evaluated candidate automatically takes the steward post (no human approval needed)
+- Candidates can withdraw from the queue at any time
+- The entire process is invisible and automatic — no steward action required
 
 ### Candidate Evaluation
 
-The system evaluates candidates based on:
+The system evaluates candidates automatically based on:
 - **Interest alignment** — domains of interest vs circle mandate
 - **Competence** — domain knowledge scores (Ws)
 - **Workload** — current participation in other circles/cells
@@ -64,8 +66,10 @@ The Co-Stewards modal (`openMembersModal()`) shows three sections:
 
 ### 2. Succession Queue
 - Candidates waiting for a seat to open
-- Shows application date, motivation, steward notes
-- Stewards can approve or reject candidates
+- Shows application date, motivation, queue position
+- vSTF auto-evaluates candidates when vacancies open (top candidate takes the post)
+- Candidates can withdraw from the queue at any time
+- No steward action required — fully automatic
 
 ### 3. Former Members
 - Previously served stewards
