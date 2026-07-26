@@ -484,6 +484,7 @@
             <div class="hero-desc" id="projcell-desc">Loading…</div>
             <div class="hero-tags" id="projcell-tags"></div>
           </div>
+          <button class="btn btn-primary" style="font-size:12px" onclick="openProjectApplyModal('East Africa Mapping','cell-14')">Apply to Join</button>
         </div>
         <div class="sec">Cell Messages</div>
         <div class="card" id="projcell-messages" style="margin-bottom:16px">
@@ -734,6 +735,13 @@
           <tr class="click" onclick="nav('stf-jstf')"><td><span class="tag tag-red" style="font-size:8px">jSTF</span></td><td class="s">Investigation: Credential misrepresentation</td><td>Judicial</td><td class="m">Aug 01</td><td><span class="badge b-judicial"><i class="fa-solid fa-lock"></i> Closed</span></td></tr>
           <tr class="click" onclick="nav('stf-xstf')"><td><span class="tag tag-green" style="font-size:8px">xSTF</span></td><td class="s">Execution: ITU coordination guide deliverable</td><td>Space Law</td><td class="m">Aug 15</td><td><span class="badge b-active">Active</span></td></tr>
         </table>
+
+        <div class="sec" style="margin-top:16px"><i class="fa-solid fa-wand-magic-sparkles" style="color:var(--gold);margin-right:4px"></i> xSTF Auto-Evaluation</div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:10px">System-matched candidates for active xSTFs based on interest + competence fit.</div>
+        <div class="card" style="margin-bottom:8px">
+          <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:8px">ITU Coordination Guide Execution</div>
+          <div id="xstf-candidates"></div>
+        </div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1582,7 +1590,7 @@
         <div class="hero-desc" id="cd-desc">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</div>
         <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">Founded Mar 2026 · 8 members · 2 motions</span></div>
       </div>
-      <button class="btn btn-primary" style="font-size:12px">Join Circle</button>
+      <button class="btn btn-primary" style="font-size:12px" onclick="openCircleApplyModal('Space Law Circle','space-law')">Apply to Join</button>
     </div>
     <div class="layout-split">
       <div class="layout-main">
@@ -2627,6 +2635,76 @@
       </div>
     </div>
     <div class="reg-modal-body" id="org-detail-body"></div>
+  </div>
+</div>
+
+<!-- ═══ CIRCLE APPLY MODAL ═══ -->
+<div class="reg-modal-overlay" id="circle-apply-modal">
+  <div class="reg-modal" style="max-width:500px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="document.getElementById('circle-apply-modal').classList.remove('active')">&times;</button>
+        <span class="modal-titlebar-title">Apply to Join Circle</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <div style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px" id="apply-circle-name">Circle Name</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">Your application will be queued. When a vacancy opens, the steward will review pending candidates.</div>
+      </div>
+      <div style="margin-bottom:12px"><label class="form-label">Why do you want to join?</label>
+        <textarea class="form-input" id="apply-motivation" rows="3" placeholder="Describe your relevant experience and motivation..."></textarea></div>
+      <div style="margin-bottom:12px"><label class="form-label">Relevant domains</label>
+        <div id="apply-domains" style="font-size:11px;color:var(--text-secondary)">Loading...</div></div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="submitCircleApplication()">Submit Application</button>
+      <button class="btn btn-sm" onclick="document.getElementById('circle-apply-modal').classList.remove('active')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ xSTF CANDIDATE INVITE MODAL ═══ -->
+<div class="reg-modal-overlay" id="xstf-invite-modal">
+  <div class="reg-modal" style="max-width:500px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="document.getElementById('xstf-invite-modal').classList.remove('active')">&times;</button>
+        <span class="modal-titlebar-title" id="xstf-invite-title">xSTF Task Invitation</span>
+      </div>
+    </div>
+    <div class="reg-modal-body" id="xstf-invite-body">
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="acceptXstfInvite()">Accept &amp; Join</button>
+      <button class="btn btn-sm" onclick="declineXstfInvite()">Decline</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROJECT APPLY MODAL ═══ -->
+<div class="reg-modal-overlay" id="project-apply-modal">
+  <div class="reg-modal" style="max-width:500px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="document.getElementById('project-apply-modal').classList.remove('active')">&times;</button>
+        <span class="modal-titlebar-title">Apply to Join Project</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <div style="margin-bottom:16px">
+        <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px" id="apply-project-name">Project Name</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">Your application will be sent to the project lead for review.</div>
+      </div>
+      <div style="margin-bottom:12px"><label class="form-label">Why do you want to contribute?</label>
+        <textarea class="form-input" id="apply-project-motivation" rows="3" placeholder="Describe what you can bring to this project..."></textarea></div>
+      <div style="margin-bottom:12px"><label class="form-label">Proposed role</label>
+        <input class="form-input" id="apply-project-role" placeholder="e.g. Data Analyst, Researcher, Writer..."></div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="submitProjectApplication()">Submit Application</button>
+      <button class="btn btn-sm" onclick="document.getElementById('project-apply-modal').classList.remove('active')">Cancel</button>
+    </div>
   </div>
 </div>
 
@@ -5174,6 +5252,140 @@ function filterInbox(filter, btn) {
   renderInboxList(filter);
 }
 
+// ═══ JOIN FLOWS ═══
+
+// -- xSTF Candidate Auto-Evaluation --
+function renderXstfCandidates() {
+  var el = document.getElementById('xstf-candidates');
+  if (!el || !MOCK.stfCandidates) return;
+  el.innerHTML = MOCK.stfCandidates.map(function(c) {
+    var statusBadge = c.status === 'invited' ? '<span class="badge b-active" style="font-size:7px">Invited</span>'
+      : c.status === 'accepted' ? '<span class="badge" style="font-size:7px;background:var(--green-soft);color:var(--green)">Accepted</span>'
+      : '<span class="badge b-review" style="font-size:7px">Pending</span>';
+    var barColor = c.matchScore >= 80 ? 'var(--green)' : c.matchScore >= 60 ? 'var(--gold)' : 'var(--text-tertiary)';
+    return '<div class="flex items-center gap-3" style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">'
+      + '<div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:28px;height:28px;font-size:9px">' + c.initials + '</div>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="flex items-center gap-2"><span style="font-size:12px;font-weight:500;color:var(--text)">' + esc(c.name) + '</span>' + statusBadge + '</div>'
+      + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Matched: ' + c.matchedDomains.join(', ') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0">'
+      + '<div style="font-family:var(--mono);font-size:13px;font-weight:600;color:' + barColor + '">' + c.matchScore + '%</div>'
+      + '<div class="htk" style="width:60px;margin-top:2px"><div class="hfill" style="width:' + c.matchScore + '%;background:' + barColor + '"></div></div>'
+      + '</div>'
+      + (c.status === 'pending' ? '<button class="btn btn-sm" style="font-size:9px;padding:3px 8px" onclick="openXstfInviteModal(\'' + c.id + '\')">Invite</button>' : '')
+      + '</div>';
+  }).join('');
+}
+
+// -- Circle Apply --
+function openCircleApplyModal(circleName, circleId) {
+  document.getElementById('apply-circle-name').textContent = circleName;
+  document.getElementById('apply-motivation').value = '';
+  var domainsEl = document.getElementById('apply-domains');
+  var circle = MOCK.circles.find(function(c) { return c.name === circleName; });
+  if (circle) {
+    domainsEl.innerHTML = circle.domains.map(function(d) {
+      return '<span class="tag tag-purple" style="font-size:9px;margin-right:4px">' + d + '</span>';
+    }).join('');
+  }
+  document.getElementById('circle-apply-modal').classList.add('active');
+  document.getElementById('circle-apply-modal')._circleId = circleId;
+}
+
+function submitCircleApplication() {
+  var modal = document.getElementById('circle-apply-modal');
+  var circleId = modal._circleId;
+  var motivation = document.getElementById('apply-motivation').value.trim();
+  if (!motivation) { alert('Please describe your motivation.'); return; }
+  var circle = MOCK.circles.find(function(c) { return c.name === document.getElementById('apply-circle-name').textContent; });
+  var apps = MOCK.circleApplications || [];
+  apps.push({
+    id: 'app-' + Date.now(),
+    circleId: circleId,
+    circleName: document.getElementById('apply-circle-name').textContent,
+    applicant: MOCK.currentUser.name,
+    initials: MOCK.currentUser.initials,
+    motivation: motivation,
+    relevantDomains: circle ? circle.domains : [],
+    status: 'pending',
+    appliedDate: 'Jul 26, 2026',
+    queuePosition: apps.length + 1
+  });
+  MOCK.circleApplications = apps;
+  modal.classList.remove('active');
+  alert('Application submitted! You are #' + apps.length + ' in the queue.');
+}
+
+// -- xSTF Candidate Invite --
+function openXstfInviteModal(candidateId) {
+  var cand = MOCK.stfCandidates.find(function(c) { return c.id === candidateId; });
+  if (!cand) return;
+  var stf = MOCK.stfs.active.find(function(s) { return s.id === cand.stfId; }) || {};
+  document.getElementById('xstf-invite-title').textContent = 'xSTF Task Invitation';
+  var body = document.getElementById('xstf-invite-body');
+  body.innerHTML = '<div style="margin-bottom:16px">'
+    + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">You have been invited to join an xSTF execution team based on your domain match and competence profile.</div>'
+    + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px">' + esc(stf.title || 'ITU Coordination Guide') + '</div>'
+    + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px">' + esc(stf.purpose || 'Execution') + ' · Commissioned by ' + esc(stf.circle || 'Space Law Circle') + '</div>'
+    + '<div style="margin-bottom:12px"><span style="font-size:11px;color:var(--text-tertiary)">Match Score: </span><span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--green)">' + cand.matchScore + '%</span></div>'
+    + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.6">'
+    + '<div class="flex justify-between" style="padding:3px 0"><span>Interest alignment</span><span style="color:var(--text)">' + cand.interestScore + '%</span></div>'
+    + '<div class="flex justify-between" style="padding:3px 0"><span>Competence fit</span><span style="color:var(--text)">' + cand.competenceScore + '%</span></div>'
+    + '<div class="flex justify-between" style="padding:3px 0"><span>Matched domains</span><span style="color:var(--text)">' + cand.matchedDomains.join(', ') + '</span></div>'
+    + '</div></div>';
+  document.getElementById('xstf-invite-modal').classList.add('active');
+  document.getElementById('xstf-invite-modal')._candId = candidateId;
+}
+
+function acceptXstfInvite() {
+  var modal = document.getElementById('xstf-invite-modal');
+  var candId = modal._candId;
+  var cand = MOCK.stfCandidates.find(function(c) { return c.id === candId; });
+  if (cand) cand.status = 'accepted';
+  modal.classList.remove('active');
+  alert('You have accepted the xSTF invitation! You will be added to the execution team.');
+}
+
+function declineXstfInvite() {
+  var modal = document.getElementById('xstf-invite-modal');
+  var candId = modal._candId;
+  var cand = MOCK.stfCandidates.find(function(c) { return c.id === candId; });
+  if (cand) cand.status = 'declined';
+  modal.classList.remove('active');
+}
+
+// -- Project Apply --
+function openProjectApplyModal(projectName, cellId) {
+  document.getElementById('apply-project-name').textContent = projectName;
+  document.getElementById('apply-project-motivation').value = '';
+  document.getElementById('apply-project-role').value = '';
+  document.getElementById('project-apply-modal').classList.add('active');
+  document.getElementById('project-apply-modal')._cellId = cellId;
+}
+
+function submitProjectApplication() {
+  var modal = document.getElementById('project-apply-modal');
+  var cellId = modal._cellId;
+  var motivation = document.getElementById('apply-project-motivation').value.trim();
+  var role = document.getElementById('apply-project-role').value.trim();
+  if (!motivation || !role) { alert('Please fill in all fields.'); return; }
+  MOCK.projectApplications = MOCK.projectApplications || [];
+  MOCK.projectApplications.push({
+    id: 'papp-' + Date.now(),
+    cellId: cellId,
+    projectName: document.getElementById('apply-project-name').textContent,
+    applicant: MOCK.currentUser.name,
+    initials: MOCK.currentUser.initials,
+    motivation: motivation,
+    status: 'pending',
+    appliedDate: 'Jul 26, 2026',
+    proposedRole: role
+  });
+  modal.classList.remove('active');
+  alert('Application submitted! The project lead will review your application.');
+}
+
 // ═══ TASK MANAGEMENT ═══
 var _taskTarget = null; // {cellId, taskIdx}
 
@@ -5435,6 +5647,7 @@ nav=function(key){
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='cell-undertaking'){renderProjectCell('cell-14');}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
+  if(key==='stf'){renderXstfCandidates();}
 };
 </script>
 </body>

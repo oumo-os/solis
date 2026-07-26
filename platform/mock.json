@@ -1235,5 +1235,85 @@
     { "id": "GE-006", "type": "circle-suggested", "circle": "Mars Habitability Circle", "date": "Jun 2026", "text": "Circle suggested, awaiting founding members." },
     { "id": "GE-007", "type": "circle-archived", "circle": "Frequency Allocation Circle", "date": "Apr 2026", "text": "Circle archived due to scope overlap with Space Law Circle." },
     { "id": "GE-008", "type": "member-joined", "circle": "Space Law Circle", "date": "Jul 18, 2026", "text": "Diallo Mamadou invited to the circle.", "participant": "Diallo Mamadou" }
+  ],
+
+  "circleApplications": [
+    {
+      "id": "app-1",
+      "circleId": "space-law",
+      "circleName": "Space Law Circle",
+      "applicant": "Oumo Samuel",
+      "initials": "OS",
+      "motivation": "I have strong interest in space law and policy, with 3 years of research experience in African space governance frameworks.",
+      "relevantDomains": ["Space Law", "Policy"],
+      "status": "pending",
+      "appliedDate": "Jul 20, 2026",
+      "queuePosition": 2
+    },
+    {
+      "id": "app-2",
+      "circleId": "remote-sensing",
+      "circleName": "Remote Sensing Circle",
+      "applicant": "Osei Kwame",
+      "initials": "OK",
+      "motivation": "My background is in satellite imagery analysis and GIS. I want to contribute to remote sensing governance.",
+      "relevantDomains": ["Remote Sensing", "Satellite"],
+      "status": "pending",
+      "appliedDate": "Jul 22, 2026",
+      "queuePosition": 1
+    }
+  ],
+
+  "stfCandidates": [
+    {
+      "id": "cand-1",
+      "stfId": "xstf-itu",
+      "name": "Oumo Samuel",
+      "initials": "OS",
+      "matchScore": 87,
+      "matchedDomains": ["Space Law", "Policy"],
+      "interestScore": 92,
+      "competenceScore": 82,
+      "status": "invited",
+      "invitedDate": "Jul 18, 2026"
+    },
+    {
+      "id": "cand-2",
+      "stfId": "xstf-itu",
+      "name": "Kimani A.",
+      "initials": "KA",
+      "matchScore": 74,
+      "matchedDomains": ["Policy"],
+      "interestScore": 70,
+      "competenceScore": 78,
+      "status": "pending",
+      "invitedDate": null
+    },
+    {
+      "id": "cand-3",
+      "stfId": "xstf-itu",
+      "name": "Mensah Naa",
+      "initials": "MN",
+      "matchScore": 68,
+      "matchedDomains": ["Education"],
+      "interestScore": 65,
+      "competenceScore": 71,
+      "status": "pending",
+      "invitedDate": null
+    }
+  ],
+
+  "projectApplications": [
+    {
+      "id": "papp-1",
+      "cellId": "cell-14",
+      "projectName": "East Africa Space Sector Mapping",
+      "applicant": "Diallo Mamadou",
+      "initials": "DM",
+      "motivation": "I can contribute data collection expertise for West Africa to complement the East Africa focus.",
+      "status": "pending",
+      "appliedDate": "Jul 19, 2026",
+      "proposedRole": "Data Analyst"
+    }
   ]
 }
