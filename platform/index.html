@@ -6140,7 +6140,7 @@ function renderProjectSettings(cellId) {
     html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-subtle)">' +
       '<div style="width:24px;height:24px;border-radius:50%;background:var(--surface-raised);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text-secondary)">' + (member.initials || member.substring(0,2).toUpperCase()) + '</div>' +
       '<div style="flex:1;font-size:12px;color:var(--text)">' + esc(member.name || member) + '</div>' +
-      '<button onclick="removeProjectMember(\'' + cellId + '\',\'' + esc(member.id || member) + '\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px" onmouseover="this.style.background=\'var(--red-soft)\'" onmouseout="this.style.background=\'none\'">Remove</button>' +
+      '<button onclick="removeProjectMember(\'' + cellId + '\',\'' + esc(member.initials) + '\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px" onmouseover="this.style.background=\'var(--red-soft)\'" onmouseout="this.style.background=\'none\'">Remove</button>' +
     '</div>';
   });
 
@@ -6172,10 +6172,10 @@ function renderProjectSettings(cellId) {
   settingsDiv.innerHTML = html;
 }
 
-function removeProjectMember(cellId, memberId) {
+function removeProjectMember(cellId, memberInitials) {
   var cell = cellsById[cellId];
   if (!cell || !cell.team) return;
-  cell.team = cell.team.filter(function(m) { return (m.id || m) !== memberId; });
+  cell.team = cell.team.filter(function(m) { return m.initials !== memberInitials; });
   renderProjectSettings(cellId);
   renderTeam(cellId, 'projcell-team');
 }
