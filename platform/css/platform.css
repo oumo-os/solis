@@ -194,6 +194,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .inbox-item{display:flex;gap:14px;align-items:flex-start;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
 .inbox-item:hover{background:var(--surface-raised)}
 .inbox-item.unread{border-left:2px solid var(--gold)}
+.inbox-item.selected{background:var(--surface-raised);border-left:2px solid var(--gold)}
+.inbox-item-icon{width:20px;text-align:center;font-size:14px;flex-shrink:0;margin-top:2px}
 .idot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .ibody{flex:1}
 .ititle{font-size:13px;color:var(--text);margin-bottom:2px}

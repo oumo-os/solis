@@ -143,15 +143,24 @@
   <div class="view" id="view-inbox">
     <div class="page-title">Inbox</div>
     <div class="page-sub">Your notifications and assignments</div>
-    <div class="flex gap-2 mb-3"><button class="btn btn-primary btn-sm">All</button><button class="btn btn-sm">Unread</button><button class="btn btn-sm">STF</button><button class="btn btn-sm">Circles</button></div>
-    <div class="card">
-      <div class="inbox-item unread" onclick="modalInvitation()"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">vSTF invitation: Candidate Verification — Policy & Advocacy</div><div class="imeta">STF Dash · Expires Jul 19 · Est. 4–6 hours</div></div></div>
-
-      <div class="inbox-item unread" onclick="nav('cell-delib')"><div class="idot" style="background:var(--gold)"></div><div class="ibody"><div class="ititle">Deliberation Cell: Motion crystallising — Debris liability framework</div><div class="imeta">Cells · Space Law · Sponsored by Akello J.</div></div></div>
-      <div class="inbox-item unread" onclick="nav('stf-astf')"><div class="idot" style="background:var(--blue)"></div><div class="ibody"><div class="ititle">aSTFCell #Cell-23: Motion adjudication ready — Debris liability</div><div class="imeta">STF Dash · Blind cell · 3 adjudicators · Due Jul 28</div></div></div>
-      <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">xSTFCell #Cell-19: ITU guide — 45% complete</div><div class="imeta">Cells · Blind execution · Due Aug 15</div></div></div>
-      <div class="inbox-item"><div class="idot" style="background:var(--text-tertiary)"></div><div class="ibody"><div class="ititle">Cell update: Kenya section 80% complete</div><div class="imeta">East Africa Space Sector Mapping · 3h ago</div></div></div>
-      <div class="inbox-item"><div class="idot" style="background:var(--green)"></div><div class="ibody"><div class="ititle">Competence verified: Space Law W<sub>h</sub> +50</div><div class="imeta">vSTF-2026-0712 · Verified by 3 assessors</div></div></div>
+    <div class="feed-filters" style="margin-bottom:16px">
+      <button class="feed-filter active" onclick="filterInbox('all',this)">All</button>
+      <button class="feed-filter" onclick="filterInbox('unread',this)">Unread</button>
+      <button class="feed-filter" onclick="filterInbox('STF',this)">STF</button>
+      <button class="feed-filter" onclick="filterInbox('Circles',this)">Circles</button>
+    </div>
+    <div class="layout-split">
+      <div class="layout-main" style="padding:0">
+        <div id="inbox-list"></div>
+      </div>
+      <div class="layout-aside" style="padding:0">
+        <div id="inbox-detail" style="padding:20px">
+          <div style="text-align:center;padding:40px 20px;color:var(--text-tertiary)">
+            <i class="fa-solid fa-inbox" style="font-size:24px;margin-bottom:8px;display:block"></i>
+            <div style="font-size:12px">Select a message to view details</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -5036,6 +5045,135 @@ function dmInit(){
   requestAnimationFrame(frame);
 }
 
+// ═══ INBOX SPLIT-PANE ═══
+var _inboxSelected = null;
+
+function renderInboxList(filter) {
+  filter = filter || 'all';
+  var items = MOCK ? MOCK.inbox : [];
+  if (filter === 'unread') items = items.filter(function(i) { return i.unread; });
+  else if (filter === 'STF') items = items.filter(function(i) { return i.type === 'vSTF' || i.type === 'aSTF' || i.type === 'xSTF'; });
+  else if (filter === 'Circles') items = items.filter(function(i) { return i.type === 'Deliberation' || i.type === 'Cell'; });
+
+  var typeIcons = {
+    'vSTF': '<i class="fa-solid fa-scale-balanced"></i>',
+    'aSTF': '<i class="fa-solid fa-gavel"></i>',
+    'xSTF': '<i class="fa-solid fa-hammer"></i>',
+    'Deliberation': '<i class="fa-solid fa-comments"></i>',
+    'Cell': '<i class="fa-solid fa-cubes"></i>',
+    'Competence': '<i class="fa-solid fa-certificate"></i>'
+  };
+  var typeColors = {
+    'vSTF': 'var(--gold)',
+    'aSTF': 'var(--blue)',
+    'xSTF': 'var(--green)',
+    'Deliberation': 'var(--purple)',
+    'Cell': 'var(--teal)',
+    'Competence': 'var(--green)'
+  };
+  var badgeClasses = {
+    'Invitation': 'b-pending',
+    'Active': 'b-active',
+    'Verified': 'b-active',
+    'Update': 'b-review'
+  };
+
+  var el = document.getElementById('inbox-list');
+  if (!el) return;
+  el.innerHTML = items.map(function(item) {
+    var icon = typeIcons[item.type] || '<i class="fa-solid fa-circle"></i>';
+    var color = typeColors[item.type] || 'var(--text-secondary)';
+    var badge = badgeClasses[item.badge] || 'b-review';
+    var unread = item.unread ? ' unread' : '';
+    var selected = _inboxSelected === item.id ? ' selected' : '';
+    return '<div class="inbox-item' + unread + selected + '" onclick="selectInboxItem(\'' + item.id + '\')">'
+      + '<div class="inbox-item-icon" style="color:' + color + '">' + icon + '</div>'
+      + '<div class="ibody">'
+      + '<div class="ititle">' + esc(item.title) + '</div>'
+      + '<div class="imeta">' + esc(item.desc) + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0">'
+      + '<span class="badge ' + badge + '" style="font-size:7px">' + esc(item.badge) + '</span>'
+      + '<div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">' + esc(item.time) + '</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function selectInboxItem(itemId) {
+  _inboxSelected = itemId;
+  var item = MOCK.inbox.find(function(i) { return i.id === itemId; });
+  if (!item) return;
+
+  if (item.unread) item.unread = false;
+
+  renderInboxList(_inboxFilter || 'all');
+
+  var typeIcons = {
+    'vSTF': '<i class="fa-solid fa-scale-balanced"></i>',
+    'aSTF': '<i class="fa-solid fa-gavel"></i>',
+    'xSTF': '<i class="fa-solid fa-hammer"></i>',
+    'Deliberation': '<i class="fa-solid fa-comments"></i>',
+    'Cell': '<i class="fa-solid fa-cubes"></i>',
+    'Competence': '<i class="fa-solid fa-certificate"></i>'
+  };
+  var typeColors = {
+    'vSTF': 'var(--gold)',
+    'aSTF': 'var(--blue)',
+    'xSTF': 'var(--green)',
+    'Deliberation': 'var(--purple)',
+    'Cell': 'var(--teal)',
+    'Competence': 'var(--green)'
+  };
+
+  var icon = typeIcons[item.type] || '<i class="fa-solid fa-circle"></i>';
+  var color = typeColors[item.type] || 'var(--text-secondary)';
+
+  var html = '<div style="margin-bottom:16px">';
+  html += '<div class="flex items-center gap-2 mb-3"><span style="color:' + color + ';font-size:16px">' + icon + '</span><span class="tag" style="font-size:9px;background:' + color + '18;color:' + color + ';border:1px solid ' + color + '44">' + esc(item.type) + '</span></div>';
+  html += '<div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px">' + esc(item.title) + '</div>';
+  html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:16px">' + esc(item.time) + '</div>';
+  html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:20px">' + esc(item.detail) + '</div>';
+
+  if (item.meta && item.meta.length) {
+    html += '<div style="margin-bottom:20px">';
+    item.meta.forEach(function(m) {
+      html += '<div class="flex justify-between" style="padding:4px 0;border-bottom:1px solid var(--border-subtle);font-size:11px"><span style="color:var(--text-tertiary)">' + esc(m.label) + '</span><span style="color:var(--text);font-weight:500">' + esc(m.value) + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  if (item.actions && item.actions.length) {
+    html += '<div class="inbox-action">';
+    item.actions.forEach(function(a) {
+      var onclick = a.action === 'nav' ? 'nav(\'' + item.nav + '\')' : 'handleInboxAction(\'' + item.id + '\',\'' + a.action + '\')';
+      html += '<button class="btn ' + a.style + '" onclick="' + onclick + '">' + esc(a.label) + '</button>';
+    });
+    html += '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById('inbox-detail').innerHTML = html;
+}
+
+function handleInboxAction(itemId, action) {
+  var item = MOCK.inbox.find(function(i) { return i.id === itemId; });
+  if (!item) return;
+  if (action === 'accept' || action === 'decline') {
+    item.badge = action === 'accept' ? 'Accepted' : 'Declined';
+    item.actions = [];
+    item.detail += action === 'accept' ? '\n\nYou have accepted this invitation.' : '\n\nYou have declined this invitation.';
+    selectInboxItem(itemId);
+  }
+}
+
+var _inboxFilter = 'all';
+function filterInbox(filter, btn) {
+  _inboxFilter = filter;
+  document.querySelectorAll('#view-inbox .feed-filter').forEach(function(f) { f.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderInboxList(filter);
+}
+
 // ═══ TASK MANAGEMENT ═══
 var _taskTarget = null; // {cellId, taskIdx}
 
@@ -5296,6 +5434,7 @@ nav=function(key){
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='cell-undertaking'){renderProjectCell('cell-14');}
+  if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
 };
 </script>
 </body>

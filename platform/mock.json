@@ -861,52 +861,129 @@
 
   "inbox": [
     {
+      "id": "ib-1",
       "type": "vSTF",
       "title": "Candidate Verification — Ssempa D.",
       "desc": "Steward candidacy assessment for Space Law Circle",
       "time": "Jul 12",
       "badge": "Invitation",
-      "detail": "Expires Jul 19"
+      "unread": true,
+      "detail": "You have been selected as an assessor for Ssempa David's steward candidacy. This is a vSTF process — you will evaluate their competence claims, investment evidence, and domain fit for Space Law stewardship.",
+      "actions": [
+        { "label": "Accept Invitation", "style": "btn-primary", "action": "accept" },
+        { "label": "Decline", "style": "btn-sm", "action": "decline" }
+      ],
+      "meta": [
+        { "label": "Circle", "value": "Space Law" },
+        { "label": "Candidate", "value": "Ssempa David" },
+        { "label": "Expires", "value": "Jul 19, 2026" },
+        { "label": "Est. Time", "value": "4–6 hours" },
+        { "label": "Assessors", "value": "3 required" }
+      ],
+      "nav": "stf-vstf-steward"
     },
     {
+      "id": "ib-2",
       "type": "Deliberation",
       "title": "Motion crystallising — Space Law",
       "desc": "Akello J. sponsored debris liability framework",
       "time": "Jul 11",
       "badge": "Active",
-      "detail": "12 participants"
+      "unread": true,
+      "detail": "A motion you are participating in has crystallised and is heading to vote. The debris liability framework proposes a proportional liability model for manoeuvre-induced debris. Your circle deliberation input has been recorded.",
+      "actions": [
+        { "label": "View Deliberation", "style": "btn-primary", "action": "nav" }
+      ],
+      "meta": [
+        { "label": "Circle", "value": "Space Law" },
+        { "label": "Sponsor", "value": "Akello J." },
+        { "label": "Participants", "value": "12" },
+        { "label": "Domains", "value": "Space Law · Liability · Remote Sensing" }
+      ],
+      "nav": "cell-delib"
     },
     {
+      "id": "ib-3",
       "type": "aSTF",
       "title": "Cell #Cell-23 — Motion adjudication",
       "desc": "Debris liability framework — blind review",
       "time": "Jul 10",
       "badge": "Due Jul 28",
-      "detail": "3 assessors"
+      "unread": true,
+      "detail": "You have been assigned as a blind adjudicator for the debris liability framework motion. You will evaluate using the rubric: Alignment/Conflict (10 pts), Jurisdiction (9 pts), Competence (6 pts), Depth/Effort (5 pts). All adjudicators see the same evidence independently.",
+      "actions": [
+        { "label": "Open Adjudication", "style": "btn-primary", "action": "nav" }
+      ],
+      "meta": [
+        { "label": "Type", "value": "aSTF — Blind Adjudication" },
+        { "label": "Cell", "value": "#Cell-23" },
+        { "label": "Adjudicators", "value": "3 (blind)" },
+        { "label": "Deadline", "value": "Jul 28, 2026" },
+        { "label": "Domains", "value": "Space Law · Liability" }
+      ],
+      "nav": "stf-astf"
     },
     {
+      "id": "ib-4",
       "type": "xSTF",
       "title": "Cell #Cell-19 — ITU guide 45% complete",
       "desc": "Execution deliverable on track",
       "time": "Jul 9",
       "badge": "Due Aug 15",
-      "detail": "3 team members"
+      "unread": false,
+      "detail": "The ITU Frequency Coordination Guide xSTF is progressing well. Current status: 45% complete. Team Members A and B have completed Sections 1–2 and are working on Section 3. Internal review is pending.",
+      "actions": [
+        { "label": "View xSTF Cell", "style": "btn-primary", "action": "nav" }
+      ],
+      "meta": [
+        { "label": "Type", "value": "xSTF — Execution" },
+        { "label": "Cell", "value": "#Cell-19" },
+        { "label": "Team", "value": "3 members (blind)" },
+        { "label": "Commissioned by", "value": "Space Law Circle" },
+        { "label": "Deadline", "value": "Aug 15, 2026" }
+      ],
+      "nav": "stf-xstf"
     },
     {
+      "id": "ib-5",
       "type": "Cell",
       "title": "Cell update — Kenya section",
       "desc": "East Africa Mapping project: Kenya section 80% complete",
       "time": "Jul 8",
       "badge": "Update",
-      "detail": ""
+      "unread": false,
+      "detail": "Okello R. reported that the Kenya section of the East Africa Space Sector Mapping project is 80% complete. Missing satellite programme funding data. Kimani A. has a contact at KSA and will reach out.",
+      "actions": [
+        { "label": "View Project Cell", "style": "btn-primary", "action": "nav" }
+      ],
+      "meta": [
+        { "label": "Project", "value": "East Africa Space Sector Mapping" },
+        { "label": "Lead", "value": "Okello R." },
+        { "label": "Progress", "value": "60% overall" },
+        { "label": "Domains", "value": "Policy · Remote Sensing" }
+      ],
+      "nav": "cell-undertaking"
     },
     {
+      "id": "ib-6",
       "type": "Competence",
       "title": "Competence verified — Space Law",
       "desc": "Your Space Law Wh increased by +50",
       "time": "Jul 7",
       "badge": "Verified",
-      "detail": "Wh 1200 → 1250"
+      "unread": false,
+      "detail": "Your Space Law competence claim has been verified through the vSTF process. Your Wh (held competence) has increased from 1200 to 1250. This was based on your submitted evidence: Space Law Certificate (Makerere) and ITU Workshop Attendance.",
+      "actions": [
+        { "label": "View Profile", "style": "btn-primary", "action": "nav" }
+      ],
+      "meta": [
+        { "label": "Domain", "value": "Space Law" },
+        { "label": "Previous Wh", "value": "1200" },
+        { "label": "New Wh", "value": "1250" },
+        { "label": "Change", "value": "+50" },
+        { "label": "Verified by", "value": "3 assessors" }
+      ],
+      "nav": "profile"
     }
   ],
 
