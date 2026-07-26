@@ -247,9 +247,9 @@
       <div class="layout-main">
         <table class="tbl">
           <tr><th>Project</th><th>Domains</th><th>Lead</th><th>Progress</th><th>Your Role</th><th></th></tr>
-          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
-          <tr class="click" onclick="nav('undertaking-detail')"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">East Africa Space Sector Mapping</td><td><span class="tag tag-blue" style="font-size:8px">Policy</span> <span class="tag tag-green" style="font-size:8px">Remote Sensing</span></td><td>Okello R.</td><td><div class="htk"><div class="hfill" style="width:60%;background:var(--gold)"></div></div></td><td><span class="badge b-active">Contributor</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">Space Debris Liability Framework Review</td><td><span class="tag tag-purple" style="font-size:8px">Space Law</span></td><td>You</td><td><div class="htk"><div class="hfill" style="width:30%;background:var(--gold)"></div></div></td><td><span class="badge b-pending">Lead</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
+          <tr class="click" onclick="openProjectCell('cell-14')"><td class="s">Swahili Space Terminology</td><td><span class="tag tag-green" style="font-size:8px">Education</span> <span class="tag tag-amber" style="font-size:8px">Communications</span></td><td>Kimani A.</td><td><div class="htk"><div class="hfill" style="width:75%;background:var(--green)"></div></div></td><td><span class="badge b-vol">Observer</span></td><td style="color:var(--text-tertiary)">&rsaquo;</td></tr>
         </table>
       </div>
       <div class="layout-aside">
@@ -270,76 +270,8 @@
         <div class="aside-card">
           <div class="aside-title">Suggested Projects</div>
           <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">Based on your domains:</div>
-          <div class="aside-link" onclick="nav('undertaking-detail')">Space Debris Tracking — East Africa</div>
-          <div class="aside-link" onclick="nav('undertaking-detail')">ITU Frequency Coordination Guide</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ UNDERTAKING DETAIL ═══ -->
-  <div class="view" id="view-undertaking-detail">
-    <div class="back" onclick="nav('undertakings')">← Projects</div>
-    <div class="hero">
-      <div class="hero-icon" style="background:var(--green-soft);border:1px solid var(--green-border);color:var(--green);font-size:22px">◈</div>
-      <div style="flex:1">
-        <div class="hero-title">East Africa Space Sector Mapping</div>
-        <div class="hero-desc">Produce a comprehensive mapping of the East African space sector — active organisations, initiatives, funding sources, academic programmes, and key individuals.</div>
-        <div class="hero-tags"><span class="tag tag-blue">Policy</span><span class="tag tag-green">Remote Sensing</span><span class="badge b-active" style="margin-left:4px">Contributor</span></div>
-      </div>
-      <div style="text-align:right;flex-shrink:0"><div class="text-label mb-2">Progress</div><div style="font-family:var(--serif);font-size:28px;color:var(--green);font-weight:600">60<span style="font-size:14px;color:var(--text-tertiary)">%</span></div></div>
-    </div>
-    <div class="layout-split">
-      <div class="layout-main">
-        <div class="sec">Project Cell</div>
-        <div class="card">
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-            <div class="avatar avatar-md">OR</div>
-            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">3h ago</span></div><p class="text-sm">Kenya section is 80% done. Missing satellite programme funding data. Anyone have contacts at KSA?</p></div>
-          </div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-            <div class="avatar avatar-md">KA</div>
-            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">I have a contact. Will reach out today. Also — should we include private operators or focus on government and academic?</p></div>
-          </div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)">
-            <div class="avatar avatar-md avatar-gold">OS</div>
-            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600;color:var(--gold)">You</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Both. The private sector data is thin but worth capturing even if incomplete. Let's flag gaps explicitly rather than exclude.</p></div>
-          </div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0">
-            <div class="avatar avatar-md">OR</div>
-            <div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello R.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">Agreed. I'll add a 'data quality' field to the schema. Mwenda, can you review the Uganda section draft by Friday?</p></div>
-          </div>
-          <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
-        </div>
-      </div>
-      <div class="layout-aside">
-        <div class="aside-card">
-          <div class="aside-title">Project Info</div>
-          <div class="aside-row"><span class="aside-label">Lead</span><span style="font-size:12px;color:var(--text)">Okello R.</span></div>
-          <div class="aside-row"><span class="aside-label">Your Role</span><span class="badge b-active" style="font-size:8px">Contributor</span></div>
-          <div class="aside-row"><span class="aside-label">Created</span><span style="font-size:12px;color:var(--text)">Jun 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Status</span><span class="badge b-active" style="font-size:8px">Active</span></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Members (7)</div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OR</div><div><div style="font-weight:500">Okello R. <span class="badge b-active" style="font-size:7px">Lead</span></div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">OS</div><div><div style="font-weight:500">You</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--blue-soft);color:var(--blue)">MT</div><div><div style="font-weight:500">Mwenda T.</div></div></div>
-          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">+ 3 more</div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Domains</div>
-          <div class="aside-tags">
-            <span class="tag tag-blue" style="font-size:9px">Policy</span>
-            <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
-          </div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Related Discussions</div>
-          <div class="aside-link" onclick="nav('thread-detail')">East Africa space sector gaps</div>
-          <div class="aside-link" onclick="nav('thread-detail')">Kenya satellite programme data</div>
+          <div class="aside-link" onclick="openProjectCell('cell-14')">Space Debris Tracking — East Africa</div>
+          <div class="aside-link" onclick="openProjectCell('cell-14')">ITU Frequency Coordination Guide</div>
         </div>
       </div>
     </div>
@@ -532,7 +464,7 @@
 
   <!-- ═══ CELL: UNDERTAKING ═══ -->
   <div class="view" id="view-cell-undertaking">
-    <div class="back" onclick="nav('cells')">← Cells</div>
+    <div class="back" id="projcell-back" onclick="nav(_cellBackNav)">← Cells</div>
     <div class="layout-split">
       <div class="layout-main" id="projcell-main">
         <div class="hero">
@@ -1223,8 +1155,8 @@
         <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ xSTF — Execution Cell</div>
         <div class="blind-wall" id="xstf-blind"></div>
         <div class="sec">Deliberations</div>
-        <div class="card" id="xstf-messages" style="margin-bottom:16px">
-          <div style="padding:16px;color:var(--text-tertiary);font-size:12px">Loading…</div>
+        <div class="card" style="margin-bottom:16px">
+          <div id="xstf-messages"></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
           <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
         </div>
@@ -2740,7 +2672,6 @@ var views = {
   inbox:            ['Personal', 'Inbox'],
   commons:          ['Discussions'],
   undertakings:     ['Projects'],
-  'undertaking-detail': ['Projects', 'East Africa Mapping'],
   observatory:      ['Observatory'],
   'observatory-news': ['Observatory', 'News'],
   'observatory-calendar': ['Observatory', 'Calendar'],
@@ -2771,7 +2702,7 @@ var views = {
 var navMap = {
   personal:'personal', inbox:'inbox',
   commons:'commons', 'thread-detail':'commons',
-  undertakings:'undertakings', 'undertaking-detail':'undertakings',
+  undertakings:'undertakings',
   observatory:'observatory', 'observatory-news':'observatory', 'observatory-calendar':'observatory', 'observatory-opportunities':'observatory', 'observatory-publications':'observatory', 'publication-detail':'observatory',
   'resolutions':'resolutions',
   circles:'circles', 'circle-detail':'circles',
@@ -2784,6 +2715,7 @@ var navMap = {
 function nav(key) {
   if (key === 'registration') { openRegModal(); return; }
   if (!views[key]) return;
+  currentNav = key;
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active') });
   var el = document.getElementById('view-' + key);
   if (el) el.classList.add('active');
@@ -2801,6 +2733,15 @@ function nav(key) {
     window.location.hash = key;
   }
   closeSidebar();
+}
+
+var _cellBackNav = 'cells';
+function openProjectCell(cellId) {
+  _cellBackNav = navMap[currentNav] || 'cells';
+  nav('cell-undertaking');
+  var backEl = document.getElementById('projcell-back');
+  if (backEl) backEl.textContent = '← ' + (_cellBackNav === 'undertakings' ? 'Projects' : 'Cells');
+  renderProjectCell(cellId);
 }
 
 function layoutParticipantCards(){
@@ -5299,6 +5240,7 @@ function renderProjectCell(cellId) {
 }
 
 // Init domain map when view is shown
+var currentNav = 'personal';
 var _dmInited=false;
 var _origNav=nav;
 nav=function(key){
