@@ -124,11 +124,12 @@ function renderProjectRows() {
 function renderCellCards() {
   if (!MOCK) return '';
   return MOCK.cells.map(function(c) {
-    return '<div class="card click" onclick="nav(\'cell-' + (c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : '') + '\')">'
+    var icon = c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : c.type === 'Founding Cell' ? 'organisations' : '';
+    return '<div class="card click" onclick="nav(\'' + (c.type === 'Founding Cell' ? 'organisations' : 'cell-' + icon) + '\')">'
       + '<div class="flex justify-between mb-2"><span class="badge b-' + (c.status === 'Active' ? 'active' : 'pending') + '">' + c.type + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.title + '</div>'
-      + '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + (c.participants ? c.participants + ' participants' : c.members + ' members') + (c.progress ? ' · ' + c.progress + '% complete' : '') + '</div>'
+      + '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + (c.participants ? c.participants + ' participants' : c.members ? c.members + ' members' : '') + (c.progress ? ' · ' + c.progress + '% complete' : '') + '</div>'
       + '</div>';
   }).join('');
 }

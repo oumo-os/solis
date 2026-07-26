@@ -44,6 +44,7 @@
       <div class="nav-label">Oversight</div>
       <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon">◆</span> STF Dash <span class="nav-badge">1</span></div>
       <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon">◷</span> Participants</div>
+      <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon">◎</span> Organisations</div>
       <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon">◌</span> Profile</div>
     </div>
     <div class="nav-section">
@@ -1510,6 +1511,43 @@
     </div>
   </div>
 
+  <!-- ═══ ORGANISATIONS ═══ -->
+  <div class="view" id="view-organisations">
+    <div class="page-title">Organisations</div>
+    <div class="page-sub">Officially endorsed partners of the Solis Commons</div>
+    <div class="layout-split">
+      <div class="layout-main">
+        <div class="flex items-center justify-between mb-5">
+          <span class="text-label" id="orgs-count">3 organisations</span>
+          <div class="flex gap-1">
+            <input placeholder="Search organisations..." class="msg-input" style="width:180px;padding:5px 10px;font-size:12px" id="org-search" oninput="filterOrgs()">
+          </div>
+        </div>
+        <div class="g3" id="orgs-grid"></div>
+      </div>
+      <div class="layout-aside">
+        <div class="aside-card">
+          <div class="aside-title">Platform Stats</div>
+          <div class="aside-stat">
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Organisations</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Affiliate Domains</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Knowledge Areas</div></div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">By Location</div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Kampala, Uganda</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Vienna, Austria</span><span class="aside-value">1</span></div>
+          <div class="aside-row"><span style="font-size:12px;color:var(--text)">Accra, Ghana</span><span class="aside-value">1</span></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">What are Organisations?</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══ PROFILE ═══ -->
   <div class="view" id="view-profile">
     <div class="page-title">Profile</div>
@@ -1930,12 +1968,13 @@
     <div class="flex justify-between items-center" style="margin-bottom:12px">
       <div>
         <div class="page-title">Domain Map</div>
-        <div class="page-sub">Membership constellation across 16 knowledge domains</div>
+        <div class="page-sub">Membership constellation across 16 knowledge + 3 affiliate domains</div>
       </div>
       <div class="dm-toggles" id="dm-toggles">
         <button class="dm-toggle active" data-mode="membership" onclick="dmSetMode('membership')">Membership</button>
         <button class="dm-toggle" data-mode="activity" onclick="dmSetMode('activity')">Activity</button>
         <button class="dm-toggle" data-mode="undertakings" onclick="dmSetMode('undertakings')">Projects</button>
+        <button class="dm-toggle" data-mode="organisations" onclick="dmSetMode('organisations')">Organisations</button>
       </div>
     </div>
     <div class="dm-canvas" id="dm-canvas">
@@ -2545,6 +2584,65 @@
   </div>
 </div>
 
+<!-- ═══ ORGANISATION SETTINGS MODAL ═══ -->
+<div class="reg-modal-overlay" id="org-settings-modal">
+  <div class="reg-modal" style="max-width:640px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeOrgSettingsModal()">&times;</button>
+        <span class="modal-titlebar-title">Organisation Settings</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <div class="settings-tab-bar">
+        <div class="settings-tab active" onclick="switchOrgSettingsTab(0,this)">Profile</div>
+        <div class="settings-tab" onclick="switchOrgSettingsTab(1,this)">Domains</div>
+      </div>
+      <div class="settings-tab-content" id="org-settings-tab-0">
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Organisation Profile</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="org-settings-name" value="Uganda Astronomical Society"></div>
+            <div class="form-group"><label class="form-label">Acronym</label><input class="form-input" id="org-settings-acronym" value="UAS"></div>
+          </div>
+          <div class="form-group"><label class="form-label">Short Name</label><input class="form-input" id="org-settings-shortname" value="Uganda Astro"></div>
+          <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="org-settings-location" value="Kampala, Uganda"></div>
+          <div class="form-group"><label class="form-label">Summary</label><textarea class="form-input" rows="2" id="org-settings-summary">Amateur and professional astronomy society promoting stargazing and space science education across East Africa.</textarea></div>
+          <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="org-settings-website" placeholder="https://..."></div>
+        </div>
+      </div>
+      <div class="settings-tab-content" id="org-settings-tab-1" style="display:none">
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">Knowledge Domains</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Select the domains this organisation specialises in. These domains become affiliate domains affecting vote weights.</div>
+          <div id="org-settings-domains" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+          <div style="display:flex;gap:4px;margin-top:8px">
+            <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="org-new-domain-input">
+            <button class="btn btn-sm" onclick="addOrgDomain()">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footerbar">
+      <button class="btn btn-primary" onclick="submitOrgSettingsProposal()">Submit as Proposal</button>
+      <button class="btn btn-sm" onclick="closeOrgSettingsModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ORGANISATION DETAIL MODAL ═══ -->
+<div class="reg-modal-overlay" id="org-detail-modal">
+  <div class="reg-modal" style="max-width:640px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeOrgDetailModal()">&times;</button>
+        <span class="modal-titlebar-title" id="org-detail-name">Organisation</span>
+      </div>
+    </div>
+    <div class="reg-modal-body" id="org-detail-body"></div>
+  </div>
+</div>
+
   <script src="../shared/colors.js"></script>
   <script src="../shared/solmark.js"></script>
   <script src="../shared/modal.js"></script>
@@ -2589,6 +2687,7 @@ var views = {
   'stf-xstf':       ['STF Dash', 'xSTF — Execution'],
   'stf-pastf':      ['STF Dash', 'p-aSTF — Circle Health'],
   participants:     ['Participants'],
+  organisations:    ['Organisations'],
   profile:          ['Profile'],
   'thread-detail':  ['Discussions', 'Thread'],
   'domain-map':     ['Domain Map'],
@@ -2605,7 +2704,7 @@ var navMap = {
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
   stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
-  participants:'participants', profile:'profile',
+  participants:'participants', organisations:'organisations', profile:'profile',
   'domain-map':'domain-map'
 };
 
@@ -3233,6 +3332,162 @@ function submitCircleProposal() {
   alert('Circle settings submitted as a proposal to the Circle cell.');
 }
 
+// ─── Organisation Modals ───
+var orgs = [];
+var orgDomains = {};
+
+function openOrgSettingsModal(orgId) {
+  var org = orgs.find(function(o) { return o.id === orgId; });
+  if (!org) return;
+  document.getElementById('org-settings-name').value = org.name;
+  document.getElementById('org-settings-acronym').value = org.acronym;
+  document.getElementById('org-settings-shortname').value = org.shortname;
+  document.getElementById('org-settings-location').value = org.location;
+  document.getElementById('org-settings-summary').value = org.summary;
+  document.getElementById('org-settings-website').value = org.website || '';
+  orgDomains = {};
+  (org.knowledgeDomains || []).forEach(function(d) { orgDomains[d] = true; });
+  renderOrgSettingsDomains();
+  document.getElementById('org-settings-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  document.getElementById('org-settings-modal').dataset.orgId = orgId;
+}
+
+function closeOrgSettingsModal() {
+  document.getElementById('org-settings-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function switchOrgSettingsTab(idx, el) {
+  document.querySelectorAll('#org-settings-modal .settings-tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+  document.querySelectorAll('#org-settings-modal .settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
+  document.getElementById('org-settings-tab-' + idx).style.display = '';
+}
+
+function renderOrgSettingsDomains() {
+  var el = document.getElementById('org-settings-domains');
+  if (!el) return;
+  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
+  el.innerHTML = '';
+  Object.keys(orgDomains).forEach(function(key) {
+    if (!orgDomains[key]) return;
+    var meta = domainMeta[key] || {};
+    var tag = document.createElement('span');
+    tag.style.cssText = 'background:var(--surface-raised);color:var(--text);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)';
+    tag.innerHTML = (meta.label || key) + ' <span style="cursor:pointer;opacity:.4;font-size:13px" onclick="removeOrgDomain(\'' + key + '\')">&times;</span>';
+    el.appendChild(tag);
+  });
+}
+
+function addOrgDomain() {
+  var i = document.getElementById('org-new-domain-input');
+  if (!i.value.trim()) return;
+  var key = i.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  orgDomains[key] = true;
+  if (!MOCK.domains[key]) {
+    MOCK.domains[key] = { label: i.value.trim(), short: key.slice(0, 6).toUpperCase(), color: '#808080', hasCircle: false, type: 'affiliate' };
+  } else {
+    MOCK.domains[key].type = 'affiliate';
+  }
+  renderOrgSettingsDomains();
+  i.value = '';
+}
+
+function removeOrgDomain(key) {
+  delete orgDomains[key];
+  renderOrgSettingsDomains();
+}
+
+function submitOrgSettingsProposal() {
+  var id = document.getElementById('org-settings-modal').dataset.orgId;
+  closeOrgSettingsModal();
+  alert('Organisation settings for ' + id + ' submitted as a proposal.');
+}
+
+function openOrgDetailModal(orgId) {
+  var org = orgs.find(function(o) { return o.id === orgId; });
+  if (!org) return;
+  document.getElementById('org-detail-name').textContent = org.name;
+  var body = document.getElementById('org-detail-body');
+  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
+  var members = (typeof MOCK !== 'undefined' && MOCK.participants) ? MOCK.participants.filter(function(p) {
+    return (p.interests || []).some(function(i) {
+      return (org.knowledgeDomains || []).indexOf(i.domain || i) !== -1;
+    });
+  }) : [];
+  var domainsHtml = (org.knowledgeDomains || []).map(function(key) {
+    var meta = domainMeta[key] || {};
+    return '<span class="tag" style="background:' + (meta.color || '#808080') + '22;color:' + (meta.color || '#808080') + ';border:1px solid ' + (meta.color || '#808080') + '44">' + (meta.label || key) + '</span>';
+  }).join(' ');
+  var membersHtml = members.length > 0
+    ? members.map(function(m) {
+        return '<div class="flex items-center gap-2 mb-3">' +
+          '<div class="avatar-square" style="width:32px;height:32px;border-radius:6px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text)">' + (m.initials || '??') + '</div>' +
+          '<div><div style="font-size:12px;font-weight:600;color:var(--text)">' + (m.name || 'Unknown') + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + (m.location || '—') + '</div></div>' +
+        '</div>';
+      }).join('')
+    : '<div style="font-size:11px;color:var(--text-tertiary);padding:12px 0">No affiliated members yet.</div>';
+  body.innerHTML =
+    '<div class="card" style="margin-bottom:12px">' +
+      '<div class="flex items-center gap-2 mb-4">' +
+        '<div style="width:48px;height:48px;border-radius:8px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);border:1px solid var(--gold-border)">' + (org.acronym || '??') + '</div>' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:600;color:var(--text)">' + (org.name || 'Unknown') + '</div>' +
+          '<div style="font-size:10px;color:var(--text-tertiary)">' + (org.location || '—') + (org.founded ? ' · Founded ' + org.founded : '') + (org.memberCount ? ' · ' + fmt(org.memberCount) + ' members' : '') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">' + (org.summary || 'No summary.') + '</div>' +
+      '<div class="mb-4"><span class="text-label">Knowledge Domains</span><div class="flex gap-1 mt-2" style="flex-wrap:wrap">' + domainsHtml + '</div></div>' +
+      '<div class="mb-4"><span class="text-label">Affiliated Members</span><div class="mt-2">' + membersHtml + '</div></div>' +
+      '<div style="display:flex;gap:4px">' +
+        '<button class="btn btn-sm btn-primary" onclick="closeOrgDetailModal();openOrgSettingsModal(\'' + org.id + '\')">Settings</button>' +
+        (org.website ? '<button class="btn btn-sm" onclick="window.open(\'' + org.website + '\',\'_blank\')">Visit Website</button>' : '') +
+      '</div>' +
+    '</div>';
+  document.getElementById('org-detail-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+
+function closeOrgDetailModal() {
+  document.getElementById('org-detail-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function renderOrganisations() {
+  var grid = document.getElementById('orgs-grid');
+  if (!grid || !orgs.length) return;
+  var domainMeta = (typeof MOCK !== 'undefined' && MOCK.domains) ? MOCK.domains : {};
+  var search = (document.getElementById('org-search') || {}).value || '';
+  var filtered = orgs.filter(function(o) {
+    return !search || o.name.toLowerCase().indexOf(search.toLowerCase()) !== -1 || (o.acronym || '').toLowerCase().indexOf(search.toLowerCase()) !== -1;
+  });
+  grid.innerHTML = filtered.map(function(org) {
+    var domainsHtml = (org.knowledgeDomains || []).map(function(key) {
+      var meta = domainMeta[key] || {};
+      return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:9px;background:' + (meta.color || '#808080') + '18;color:' + (meta.color || '#808080') + ';border:1px solid ' + (meta.color || '#808080') + '33"><span style="width:6px;height:6px;border-radius:50%;background:' + (meta.color || '#808080') + '"></span>' + (meta.label || key) + '</span>';
+    }).join(' ');
+    return '<div class="card" style="cursor:pointer" onclick="openOrgDetailModal(\'' + org.id + '\')">' +
+      '<div class="flex items-center gap-2 mb-3">' +
+        '<div style="width:40px;height:40px;border-radius:8px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gold);border:1px solid var(--gold-border)">' + (org.acronym || '??') + '</div>' +
+        '<div><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.name || 'Unknown') + '</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary)">' + (org.location || '—') + '</div></div>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + (org.summary || 'No summary.') + '</div>' +
+      '<div class="flex gap-1" style="flex-wrap:wrap">' + domainsHtml + '</div>' +
+      '<div class="flex gap-2 mt-3" style="border-top:1px solid var(--border);padding-top:8px">' +
+        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + fmt(org.memberCount || 0) + '</div><div style="font-size:9px;color:var(--text-tertiary)">Members</div></div>' +
+        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.knowledgeDomains || []).length + '</div><div style="font-size:9px;color:var(--text-tertiary)">Domains</div></div>' +
+        '<div style="text-align:center;flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (org.foundingCell ? 'Active' : 'None') + '</div><div style="font-size:9px;color:var(--text-tertiary)">Founding</div></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  var countEl = document.getElementById('orgs-count');
+  if (countEl) countEl.textContent = filtered.length + ' organisation' + (filtered.length !== 1 ? 's' : '');
+}
+
+function filterOrgs() { renderOrganisations(); }
+
 // ─── Content Type Selector ───
 function selectContentType(btn, type) {
   document.querySelectorAll('.compose-type-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -3539,7 +3794,7 @@ loadMockData().then(function() {
   DM_META = {};
   DM_IDS.forEach(function(id){
     var d = MOCK.domains[id];
-    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle };
+    DM_META[id] = { label: d.label, short: d.short, color: d.color, steward: !!d.hasCircle, type: d.type || 'knowledge' };
   });
   renderDefaultInterestRows();
 
@@ -3560,6 +3815,8 @@ loadMockData().then(function() {
   layoutParticipantCards();
   renderResolutionsList();
   renderObservatoryPublications();
+  orgs = MOCK.organisations || [];
+  renderOrganisations();
   var initial = window.location.hash.replace('#', '') || 'personal';
   nav(views[initial] ? initial : 'personal');
 });
@@ -3678,7 +3935,7 @@ function regAddEntry(containerId,type){
 function openProposalModal(){
   var html='<div class="modal-header">New Proposal</div>'+
     '<div style="margin-bottom:12px"><label class="form-label">Type</label>'+
-    '<select class="form-input" id="propose-type"><option>Discussion Thread</option><option>Project</option><option>Circle Formation</option></select></div>'+
+    '<select class="form-input" id="propose-type"><option>Discussion Thread</option><option>Project</option><option>Circle Formation</option><option>Organisation Affiliation</option></select></div>'+
     '<div style="margin-bottom:12px"><label class="form-label">Title</label>'+
     '<input class="form-input" id="propose-title" placeholder="What do you want to propose?"></div>'+
     '<div style="margin-bottom:12px"><label class="form-label">Description</label>'+
@@ -3689,6 +3946,45 @@ function openProposalModal(){
     '<button class="btn btn-primary" onclick="submitProposal()">Submit Proposal</button></div>';
   openModal(html,{size:'md'});
 }
+function submitProposal(){
+  var title=document.getElementById('propose-title').value;
+  if(!title){alert('Please enter a title.');return;}
+  closeModal();
+  alert('Proposal "'+title+'" submitted! It will appear in Discussions after review.');
+}
+
+// ─── Acronym Extraction + Auto-linking ───
+function extractAcronym(text) {
+  if (!text) return null;
+  var m = text.match(/\[([^\]]+)\]/);
+  return m ? m[1] : null;
+}
+
+function findOrgByAcronym(acronym) {
+  if (!acronym) return null;
+  var upper = acronym.toUpperCase();
+  return orgs.find(function(o) {
+    return (o.acronym || '').toUpperCase() === upper || (o.shortname || '').toUpperCase() === upper;
+  }) || null;
+}
+
+function autoLinkOrgs(text) {
+  if (!text) return text;
+  var result = text;
+  orgs.forEach(function(org) {
+    var patterns = [
+      new RegExp('\\b' + org.acronym.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'),
+      new RegExp('\\b' + org.shortname.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi')
+    ];
+    patterns.forEach(function(pat) {
+      if (pat.test(result) && org.acronym) {
+        result = result.replace(pat, '<span style="color:var(--gold);cursor:pointer;border-bottom:1px dashed var(--gold)" onclick="openOrgDetailModal(\'' + org.id + '\')">' + org.acronym + '</span>');
+      }
+    });
+  });
+  return result;
+}
+
 function submitProposal(){
   var title=document.getElementById('propose-title').value;
   if(!title){alert('Please enter a title.');return;}
@@ -4129,6 +4425,18 @@ var DM_STATS=dmStats();
 
 function dmEdges(type){
   var edges=[];
+  if (type === 'organisations') {
+    var affiliateIds = DM_IDS.filter(function(id) { return MOCK.domains[id] && MOCK.domains[id].type === 'affiliate'; });
+    var knowledgeIds = DM_IDS.filter(function(id) { return MOCK.domains[id] && MOCK.domains[id].type === 'knowledge'; });
+    affiliateIds.forEach(function(aid) {
+      var org = orgs.find(function(o) { return o.id === aid; });
+      if (!org) return;
+      (org.knowledgeDomains || []).forEach(function(kid) {
+        if (MOCK.domains[kid]) edges.push({a: aid, b: kid, count: 3});
+      });
+    });
+    return edges;
+  }
   for(var i=0;i<DM_IDS.length;i++){
     for(var j=i+1;j<DM_IDS.length;j++){
       var a=DM_IDS[i],b=DM_IDS[j];
@@ -4156,7 +4464,7 @@ function dmLayout(){
     "robotics-automation":[640,460],"space-law-policy":[1080,380],"philosophy-ethics-space":[1180,460],
     "space-finance-economics":[1060,520],"science-communication":[1180,320],"art-culture-space":[880,680],
     "space-medicine-biology":[830,700],"materials-science":[730,640],"space-architecture":[980,180],
-    "aerospace-engineering":[900,280]
+    "aerospace-engineering":[900,280],"uas":[380,180],"sgac":[1100,280],"gss":[300,130]
   };
   var pos={};
   DM_IDS.forEach(function(d){

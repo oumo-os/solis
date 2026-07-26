@@ -62,22 +62,25 @@
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
 
-    var orgs = [
-      {name:'Uganda Astronomical Society',domain:'Astronomy · Observation',members:'600+',location:'Kampala'},
-      {name:'Makerspace KLA',domain:'Engineering · Hardware',members:'80+',location:'Kampala'},
-      {name:'Space Policy East Africa',domain:'Policy · Advocacy',members:'40+',location:'Nairobi'},
-      {name:'Astro Club — Makerere University',domain:'Education · Research',members:'120+',location:'Kampala'}
-    ];
-    document.getElementById('orgs-grid').innerHTML = orgs.map(function(o) {
-      return '<div class="card card-interactive">' +
-        '<div class="flex items-center justify-between mb-2">' +
-          '<h3 class="text-sm" style="font-weight:600">'+o.name+'</h3>' +
-          '<span class="text-xs" style="color:var(--text-tertiary)">'+o.members+'</span>' +
-        '</div>' +
-        '<p class="text-xs" style="color:var(--text-secondary)">'+o.domain+'</p>' +
-        '<p class="text-xs" style="color:var(--text-tertiary)">'+o.location+'</p>' +
-      '</div>';
-    }).join('');
+    fetch('../platform/mock.json').then(function(r) { return r.json(); }).then(function(data) {
+      var orgs = data.organisations || [];
+      var domainMeta = data.domains || {};
+      document.getElementById('orgs-grid').innerHTML = orgs.map(function(o) {
+        var domains = (o.knowledgeDomains || []).map(function(key) {
+          var m = domainMeta[key] || {};
+          return m.label || key;
+        }).join(' · ');
+        return '<div class="card card-interactive">' +
+          '<div class="flex items-center justify-between mb-2">' +
+            '<h3 class="text-sm" style="font-weight:600">'+o.name+'</h3>' +
+            '<span class="text-xs" style="color:var(--text-tertiary)">'+(o.memberCount || 0)+' members</span>' +
+          '</div>' +
+          '<p class="text-xs" style="color:var(--text-secondary)">'+domains+'</p>' +
+          '<p class="text-xs" style="color:var(--text-tertiary)">'+o.location+'</p>' +
+          (o.summary ? '<p class="text-xs mt-2" style="color:var(--text-secondary);line-height:1.5">'+o.summary+'</p>' : '') +
+        '</div>';
+      }).join('');
+    });
   </script>
 </body>
 </html>

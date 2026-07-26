@@ -258,22 +258,25 @@
   },
 
   "domains": {
-    "astronomy-astrophysics": { "label": "Astronomy & Astrophysics", "short": "ASTRO", "color": "#6EB8FF", "hasCircle": true },
-    "aerospace-engineering": { "label": "Aerospace Engineering", "short": "AERO", "color": "#4ACCA8", "hasCircle": false },
-    "earth-planetary-science": { "label": "Earth & Planetary Science", "short": "EARTH", "color": "#7AACDA", "hasCircle": true },
-    "space-medicine-biology": { "label": "Space Medicine & Biology", "short": "MED", "color": "#FF8080", "hasCircle": false },
-    "space-law-policy": { "label": "Space Law & Policy", "short": "LAW", "color": "#FFB84D", "hasCircle": true },
-    "telecommunications-signals": { "label": "Telecom & Signals", "short": "COMMS", "color": "#B088F0", "hasCircle": false },
-    "computer-science-software": { "label": "CS & Software", "short": "CODE", "color": "#50E0C0", "hasCircle": true },
-    "physics": { "label": "Physics", "short": "PHYS", "color": "#AACCEE", "hasCircle": false },
-    "materials-science": { "label": "Materials Science", "short": "MAT", "color": "#E0A060", "hasCircle": false },
-    "robotics-automation": { "label": "Robotics & Automation", "short": "ROBO", "color": "#80D0FF", "hasCircle": false },
-    "remote-sensing": { "label": "Remote Sensing", "short": "RS", "color": "#40C090", "hasCircle": true },
-    "space-architecture": { "label": "Space Architecture", "short": "ARCH", "color": "#C0A0E0", "hasCircle": false },
-    "space-finance-economics": { "label": "Space Finance & Economics", "short": "FIN", "color": "#FFD060", "hasCircle": false },
-    "science-communication": { "label": "Science Communication", "short": "SCICOMM", "color": "#FF90B0", "hasCircle": false },
-    "philosophy-ethics-space": { "label": "Philosophy & Ethics", "short": "PHIL", "color": "#D0C0A0", "hasCircle": true },
-    "art-culture-space": { "label": "Art & Culture of Space", "short": "ART", "color": "#E0B0C0", "hasCircle": false }
+    "astronomy-astrophysics": { "label": "Astronomy & Astrophysics", "short": "ASTRO", "color": "#6EB8FF", "hasCircle": true, "type": "knowledge" },
+    "aerospace-engineering": { "label": "Aerospace Engineering", "short": "AERO", "color": "#4ACCA8", "hasCircle": false, "type": "knowledge" },
+    "earth-planetary-science": { "label": "Earth & Planetary Science", "short": "EARTH", "color": "#7AACDA", "hasCircle": true, "type": "knowledge" },
+    "space-medicine-biology": { "label": "Space Medicine & Biology", "short": "MED", "color": "#FF8080", "hasCircle": false, "type": "knowledge" },
+    "space-law-policy": { "label": "Space Law & Policy", "short": "LAW", "color": "#FFB84D", "hasCircle": true, "type": "knowledge" },
+    "telecommunications-signals": { "label": "Telecom & Signals", "short": "COMMS", "color": "#B088F0", "hasCircle": false, "type": "knowledge" },
+    "computer-science-software": { "label": "CS & Software", "short": "CODE", "color": "#50E0C0", "hasCircle": true, "type": "knowledge" },
+    "physics": { "label": "Physics", "short": "PHYS", "color": "#AACCEE", "hasCircle": false, "type": "knowledge" },
+    "materials-science": { "label": "Materials Science", "short": "MAT", "color": "#E0A060", "hasCircle": false, "type": "knowledge" },
+    "robotics-automation": { "label": "Robotics & Automation", "short": "ROBO", "color": "#80D0FF", "hasCircle": false, "type": "knowledge" },
+    "remote-sensing": { "label": "Remote Sensing", "short": "RS", "color": "#40C090", "hasCircle": true, "type": "knowledge" },
+    "space-architecture": { "label": "Space Architecture", "short": "ARCH", "color": "#C0A0E0", "hasCircle": false, "type": "knowledge" },
+    "space-finance-economics": { "label": "Space Finance & Economics", "short": "FIN", "color": "#FFD060", "hasCircle": false, "type": "knowledge" },
+    "science-communication": { "label": "Science Communication", "short": "SCICOMM", "color": "#FF90B0", "hasCircle": false, "type": "knowledge" },
+    "philosophy-ethics-space": { "label": "Philosophy & Ethics", "short": "PHIL", "color": "#D0C0A0", "hasCircle": true, "type": "knowledge" },
+    "art-culture-space": { "label": "Art & Culture of Space", "short": "ART", "color": "#E0B0C0", "hasCircle": false, "type": "knowledge" },
+    "uas": { "label": "Uganda Astronomical Society", "short": "UAS", "color": "#C0A0E0", "hasCircle": false, "type": "affiliate" },
+    "sgac": { "label": "Space Generation Advisory Council", "short": "SGAC", "color": "#B088F0", "hasCircle": false, "type": "affiliate" },
+    "gss": { "label": "Ghana Space Society", "short": "GSS", "color": "#40C090", "hasCircle": false, "type": "affiliate" }
   },
 
   "domainLayout": {
@@ -631,6 +634,32 @@
       "progress": 45,
       "deadline": "Aug 15",
       "status": "Active"
+    },
+    {
+      "id": "cell-30",
+      "type": "Founding Cell",
+      "entityType": "organisation",
+      "title": "Organisation: Senegal Space Agency",
+      "participants": 8,
+      "status": "Active",
+      "daysActive": 2,
+      "domains": ["aerospace-engineering", "remote-sensing"],
+      "circles": [],
+      "draftResolutions": [
+        {
+          "id": 1,
+          "title": "Founding Declaration — Senegal Space Agency",
+          "text": "DECLARE: The Solarian Commons formally affiliates the Senegal Space Agency as a partner organisation.\n\n1. The Senegal Space Agency (ASE) is recognised as an affiliate of the Commons\n2. Knowledge domains: Aerospace Engineering, Remote Sensing\n3. Location: Dakar, Senegal\n4. The agency shall participate in Commons deliberations through its affiliate domain\n5. Partnership terms are governed by the founding resolution and may be amended through standard governance processes",
+          "action": "Declaration",
+          "implementingCircles": [],
+          "domainShares": { "aerospace-engineering": 0.55, "remote-sensing": 0.45 },
+          "votesNullified": false,
+          "aiDraftMeta": { "draftCount": 1, "maxDrafts": 3, "cooldownMs": 300000, "lastDraftTs": null, "confirmations": [], "confirmQuorum": 3 },
+          "versions": [
+            { "title": "Founding Declaration — Senegal Space Agency", "text": "Initial AI draft", "action": "Declaration", "author": "AI Drafter", "ts": "Jul 24, 2026 10:00" }
+          ]
+        }
+      ]
     }
   ],
 
@@ -798,5 +827,53 @@
       { "domain": "physics", "label": "Physics", "rank": 15, "checked": false },
       { "domain": "art-culture-space", "label": "Art & Culture of Space", "rank": 16, "checked": false }
     ]
-  }
+  },
+
+  "organisations": [
+    {
+      "id": "uas",
+      "name": "Uganda Astronomical Society",
+      "acronym": "UAS",
+      "shortname": "Uganda Astro",
+      "logo": null,
+      "location": "Kampala, Uganda",
+      "summary": "Amateur and professional astronomy society promoting stargazing and space science education across East Africa.",
+      "knowledgeDomains": ["astronomy-astrophysics", "science-communication"],
+      "status": "Active",
+      "founded": "Apr 2026",
+      "foundingCell": null,
+      "memberCount": 600,
+      "website": null
+    },
+    {
+      "id": "sgac",
+      "name": "Space Generation Advisory Council",
+      "acronym": "SGAC",
+      "shortname": "SGAC",
+      "logo": null,
+      "location": "Vienna, Austria (global)",
+      "summary": "Global network of young space professionals under 35, representing over 165 countries.",
+      "knowledgeDomains": ["space-law-policy", "aerospace-engineering", "science-communication"],
+      "status": "Active",
+      "founded": "Jan 2026",
+      "foundingCell": null,
+      "memberCount": 20000,
+      "website": "https://spacegeneration.org"
+    },
+    {
+      "id": "gss",
+      "name": "Ghana Space Society",
+      "acronym": "GSS",
+      "shortname": "Ghana Space",
+      "logo": null,
+      "location": "Accra, Ghana",
+      "summary": "Non-profit advancing space science awareness and satellite technology development in Ghana.",
+      "knowledgeDomains": ["astronomy-astrophysics", "remote-sensing"],
+      "status": "Active",
+      "founded": "Mar 2026",
+      "foundingCell": null,
+      "memberCount": 40,
+      "website": null
+    }
+  ]
 }

@@ -232,6 +232,35 @@ See `docs/ai-drafter.md` for full details.
 ### Data Structures
 
 ```javascript
+// Domain with type field
+domain = {
+  label: "Astronomy & Astrophysics",
+  short: "ASTRO",
+  color: "#6EB8FF",
+  hasCircle: true,
+  type: "knowledge" | "experiential" | "affiliate"
+};
+
+// Affiliate domain (created when organisation joins)
+domain = {
+  label: "Uganda Astronomical Society",
+  short: "UAS",
+  color: "#C0A0E0",
+  hasCircle: false,
+  type: "affiliate"
+};
+
+// Organisation
+organisation = {
+  id: "uas",
+  name: "Uganda Astronomical Society",
+  acronym: "UAS",
+  shortname: "Uganda Astro",
+  knowledgeDomains: ["astronomy-astrophysics", "science-communication"],
+  memberCount: 600,
+  foundingCell: null // or cell ID
+};
+
 // Per-member domain competence
 member.domainWs = {
   "Space Law": 1800,
@@ -239,7 +268,7 @@ member.domainWs = {
   "Remote Sensing": 0
 };
 
-// Resolution: domain shares (configurable)
+// Resolution: domain shares (AI-generated, not user-editable)
 resolution.domainShares = {
   "Space Law": 0.38,
   "Liability": 0.35,
@@ -269,5 +298,6 @@ resolution.votes.domains = [
 
 - `to_prod.md` — Phase 3: Competence & Weight System
 - `platform/index.html` — `updateVoteSummary()`, `selectVote()`
-- `platform/mock.json` — `votes.domains`, `members.domainWs`
+- `platform/mock.json` — `votes.domains`, `members.domainWs`, `domains[type]`, `organisations[]`
 - `docs/modal-design.md` — Resolution modal UI decisions
+- `docs/organisations.md` — Organisation feature design
