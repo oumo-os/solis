@@ -193,7 +193,7 @@
           { "id": "mn", "name": "Mensah Naa", "initials": "MN", "color": "var(--navy-light)", "ws": 1040, "domains": ["Astronomy", "Education"], "domainWs": [1040, 980], "joined": "Apr 2025", "lastActive": "4d ago", "status": "active", "topDomain": "Astronomy" },
           { "id": "ao", "name": "Aisha Omondi", "initials": "AO", "color": "linear-gradient(135deg,var(--green),#0d3a20)", "ws": 980, "domains": ["Comms", "Education"], "domainWs": [980, 920], "joined": "Mar 2025", "lastActive": "5d ago", "status": "active", "topDomain": "Comms" },
           { "id": "sd", "name": "Ssempa David", "initials": "SD", "color": "linear-gradient(135deg,var(--purple),#3a1860)", "ws": 900, "domains": ["Space Law", "Policy"], "domainWs": [900, 760], "joined": "Apr 2025", "lastActive": "6d ago", "status": "active", "topDomain": "Space Law" },
-          { "id": "dm", "name": "Diallo Mamadou", "initials": "DM", "color": "var(--border)", "ws": 800, "domains": ["Space Finance", "Entrepreneurship"], "domainWs": [800, 720], "joined": "Jul 2025", "lastActive": "2w ago", "status": "invited", "topDomain": "Space Finance" }
+          { "id": "dm", "name": "Diallo Mamadou", "initials": "DM", "color": "var(--border)", "ws": 800, "domains": ["Space Finance", "Entrepreneurship"], "domainWs": [800, 720], "joined": "Jul 2025", "lastActive": "2w ago", "status": "candidate", "topDomain": "Space Finance" }
         ],
         "former": [
           { "id": "ek", "name": "Esi Kojo", "initials": "EK", "color": "var(--text-tertiary)", "ws": 0, "domains": ["Policy", "Astronomy"], "domainWs": [700, 500], "joined": "Jan 2025", "left": "May 2026", "status": "former", "topDomain": "Policy", "leftReason": "term-expiry" },
@@ -663,6 +663,7 @@
       "blind": false,
       "lead": "Oumo Samuel",
       "domains": ["Space Law"],
+      "supervisingCircleId": "space-law",
       "created": "Jul 2026",
       "tasks": [
         { "id": "t1", "label": "Literature review of existing liability frameworks", "status": "complete", "locked": false },

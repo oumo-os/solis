@@ -512,6 +512,10 @@
           <div class="aside-title">Team</div>
           <div id="projcell-team"></div>
         </div>
+        <div class="aside-card" id="projcell-settings-card" style="display:none">
+          <div class="aside-title">Settings</div>
+          <div id="projcell-settings"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -597,7 +601,7 @@
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openProposalModal()">+ Submit Proposal</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Circle Home</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('circle-detail')"><i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>View Circle Home</button>
           </div>
         </div>
         <div class="aside-card">
@@ -1503,6 +1507,11 @@
           <div class="aside-row"><span class="aside-label">Created</span><span style="font-size:12px;color:var(--text)">2 hours ago</span></div>
           <div class="aside-row"><span class="aside-label">Replies</span><span style="font-size:12px;color:var(--text)">4</span></div>
           <div class="aside-row"><span class="aside-label">Views</span><span style="font-size:12px;color:var(--text)">23</span></div>
+        </div>
+        <div class="aside-card" id="td-actions-card">
+          <div class="aside-title">Actions</div>
+          <button class="btn btn-primary" style="width:100%;margin-bottom:6px;font-size:12px" onclick="submitThreadForPublication()">Submit for Publication</button>
+          <div style="font-size:10px;color:var(--text-tertiary);text-align:center">Creates a publication-approval deliberation cell for your circle to review</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
@@ -2472,7 +2481,6 @@
       <div class="settings-tab-bar">
         <div class="settings-tab active" onclick="switchCircleSettingsTab(0,this)">Configuration</div>
         <div class="settings-tab" onclick="switchCircleSettingsTab(1,this)">Mandate Domains</div>
-        <div class="settings-tab" onclick="switchCircleSettingsTab(2,this)">Members &amp; Queue</div>
       </div>
       <!-- Tab 0: Circle Configuration -->
       <div class="settings-tab-content" id="circle-settings-tab-0">
@@ -2519,18 +2527,6 @@
             <button class="btn btn-sm" onclick="addCircleMandateDomain()">Add</button>
           </div>
           <div style="font-size:9px;color:var(--text-tertiary);margin-top:6px">Suggested: Astronomy, Remote Sensing, Space Medicine, Publications</div>
-        </div>
-      </div>
-      <!-- Tab 2: Members & Succession Queue -->
-      <div class="settings-tab-content" id="circle-settings-tab-2" style="display:none">
-        <div class="card" style="margin-bottom:12px">
-          <div class="sec">Current Members</div>
-          <div id="circle-settings-members"></div>
-        </div>
-        <div class="card">
-          <div class="sec">Succession Queue</div>
-          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">When a steward vacancy opens (term expiry, p-aSTF, resignation), the system evaluates top candidates from this queue via vSTF. The top-ranked candidate takes the post.</div>
-          <div id="circle-settings-queue"></div>
         </div>
       </div>
     </div>
@@ -3503,54 +3499,11 @@ function switchCircleSettingsTab(idx, el) {
   el.classList.add('active');
   document.querySelectorAll('#circle-settings-modal .settings-tab-content').forEach(function(c) { c.style.display = 'none'; });
   document.getElementById('circle-settings-tab-' + idx).style.display = '';
-  if (idx === 2) renderCircleSettingsMembers();
 }
 
 function submitCircleProposal() {
   closeCircleSettingsModal();
   alert('Circle settings submitted as a proposal to the Circle cell.');
-}
-
-function renderCircleSettingsMembers() {
-  var membersEl = document.getElementById('circle-settings-members');
-  var queueEl = document.getElementById('circle-settings-queue');
-  if (!membersEl || !queueEl) return;
-
-  var circle = MOCK.circles[0];
-  var roster = circle.roster || [];
-  var activeMembers = roster.filter(function(m) { return !m.departed; });
-
-  membersEl.innerHTML = activeMembers.map(function(m) {
-    return '<div class="flex items-center gap-3" style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">'
-      + '<div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:9px">' + m.initials + '</div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(m.name) + (m.role === 'Steward' ? ' <span class="badge b-active" style="font-size:7px">Steward</span>' : '') + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary)">Ws ' + m.ws + ' · Joined ' + m.joined + '</div>'
-      + '</div></div>';
-  }).join('') || '<div style="font-size:11px;color:var(--text-tertiary)">No members found.</div>';
-
-  var queue = MOCK.circleApplications.filter(function(a) { return a.circleId === 'space-law' && a.status === 'pending'; });
-  queueEl.innerHTML = queue.map(function(q) {
-    var isCurrentUser = q.applicant === MOCK.currentUser.name;
-    return '<div class="flex items-center gap-3" style="padding:8px 0;border-bottom:1px solid var(--border-subtle)">'
-      + '<div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--green),#0d3a20);width:28px;height:28px;font-size:9px">' + q.initials + '</div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(q.applicant) + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">' + esc(q.motivation) + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Queued ' + esc(q.appliedDate) + ' · Position #' + q.queuePosition + '</div>'
-      + '</div>'
-      + (isCurrentUser ? '<button class="btn btn-sm" style="font-size:9px;padding:3px 8px;color:var(--red)" onclick="withdrawFromQueue(\'' + q.id + '\')">Withdraw</button>' : '')
-      + '</div>';
-  }).join('') || '<div style="font-size:11px;color:var(--text-tertiary)">No one in the succession queue yet.</div>';
-}
-
-function withdrawFromQueue(appId) {
-  var app = MOCK.circleApplications.find(function(a) { return a.id === appId; });
-  if (app) {
-    app.status = 'withdrawn';
-    renderCircleSettingsMembers();
-    alert('You have withdrawn from the succession queue.');
-  }
 }
 
 // ─── Organisation Modals ───
@@ -3943,13 +3896,16 @@ var membersData = [];
 var reasonLabels = {};
 var activeMembers = [];
 var formerMembers = [];
+var successionCandidates = [];
 
 function openMembersModal() {
-  var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
+  var circleId = 'space-law';
+  var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] || {};
+  successionCandidates = (MOCK.circleApplications || []).filter(function(a){ return a.circleId === circleId && a.status === 'pending'; });
   var mandateText = 'Mandate: ' + (circle.domains || []).join(', ');
   var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
-    '<div><span class="page-title" style="font-size:16px">' + (circle.name || 'Circle') + ' · Stewards</span>' +
-    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · ' + mandateText + '</div></div>' +
+    '<div><span class="page-title" style="font-size:16px">' + (circle.name || 'Circle') + ' · Co-Stewards</span>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-top:2px">' + activeMembers.length + ' serving · ' + formerMembers.length + ' former · ' + successionCandidates.length + ' in succession queue · ' + mandateText + '</div></div>' +
     '<span style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">' + mandateText + '</span></div>' +
     '<div class="mm-layout">' +
       '<div class="mm-list" id="mm-list"></div>' +
@@ -3966,9 +3922,9 @@ function renderMemberList() {
   if (!list) return;
 
   var activeHtml = activeMembers.map(function(m, i) {
-    var dot = m.status === 'invited' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
-    var label = m.status === 'invited' ? 'Invited' : '';
-    var lastOrDot = m.status === 'invited' ? (dot + ' ' + label) : m.lastActive;
+    var dot = m.status === 'candidate' ? '<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--text-tertiary);margin-right:4px"></span>' : '';
+    var label = m.status === 'candidate' ? 'Candidate' : '';
+    var lastOrDot = m.status === 'candidate' ? (dot + ' ' + label) : m.lastActive;
     return '<div class="mm-card" onclick="selectMember(\'' + m.id + '\')" id="mm-card-' + m.id + '">' +
       '<div class="mm-avatar" style="background:' + m.color + '">' + m.initials + '</div>' +
       '<div class="mm-info"><div class="mm-name">' + m.name + '</div>' +
@@ -3985,11 +3941,22 @@ function renderMemberList() {
     '</div>';
   }).join('') : '';
 
+  var successHtml = successionCandidates.length ? successionCandidates.map(function(a) {
+    var initials = a.name.split(' ').map(function(w){return w[0];}).join('').substring(0, 2);
+    return '<div class="mm-card" onclick="selectSuccessionCandidate(\'' + a.id + '\')" id="mm-card-' + a.id + '">' +
+      '<div class="mm-avatar" style="background:var(--amber-soft);color:var(--amber)">' + initials + '</div>' +
+      '<div class="mm-info"><div class="mm-name">' + a.name + '</div>' +
+      '<div class="mm-meta">Applied ' + a.applied + ' · ' + a.motivation.substring(0, 40) + '…</div></div>' +
+    '</div>';
+  }).join('') : '';
+
   var activeSection = '<div class="mm-section-title" style="margin:0 0 4px 4px">Active (' + activeMembers.length + ')</div>' + activeHtml;
+  var successSection = successHtml ? '<div class="mm-section-title" style="margin:12px 0 4px 4px">Succession Queue (' + successionCandidates.length + ')</div>' + successHtml : '';
   var formerSection = formerHtml ? '<div class="mm-section-title" style="margin:12px 0 4px 4px">Former (' + formerMembers.length + ')</div>' + formerHtml : '';
 
-  list.innerHTML = activeSection + formerSection;
+  list.innerHTML = activeSection + successSection + formerSection;
   if (activeMembers.length) selectMember(activeMembers[0].id);
+  else if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
 }
 
 function selectMember(id) {
@@ -3997,6 +3964,59 @@ function selectMember(id) {
   var card = document.getElementById('mm-card-' + id);
   if (card) card.classList.add('active');
   renderMemberDetail(id);
+}
+
+function selectSuccessionCandidate(appId) {
+  document.querySelectorAll('.mm-card').forEach(function(c){c.classList.remove('active')});
+  var card = document.getElementById('mm-card-' + appId);
+  if (card) card.classList.add('active');
+  renderSuccessionCandidateDetail(appId);
+}
+
+function renderSuccessionCandidateDetail(appId) {
+  var detail = document.getElementById('mm-detail');
+  if (!detail) return;
+  var a = (MOCK.circleApplications || []).filter(function(x){return x.id===appId})[0];
+  if (!a) return;
+  var initials = a.name.split(' ').map(function(w){return w[0];}).join('').substring(0, 2);
+  detail.innerHTML =
+    '<div>' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
+        '<div style="width:36px;height:36px;border-radius:50%;background:var(--amber-soft);color:var(--amber);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px">' + initials + '</div>' +
+        '<div><div style="font-size:15px;font-weight:600;color:var(--text)">' + a.name + '</div>' +
+        '<div style="font-size:11px;color:var(--text-tertiary)">Applied ' + a.applied + '</div></div>' +
+      '</div>' +
+      '<div class="mm-section-title">Motivation</div>' +
+      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation) + '</div>' +
+      (a.notes ? '<div class="mm-section-title">Steward Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
+      '<div style="margin-top:16px;display:flex;gap:8px">' +
+        '<button onclick="approveSuccession(\'' + a.id + '\')" style="background:var(--green-soft);color:var(--green);border:1px solid var(--green);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Approve</button>' +
+        '<button onclick="rejectSuccession(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Reject</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function approveSuccession(appId) {
+  var apps = MOCK.circleApplications || [];
+  var a = apps.find(function(x){return x.id===appId;});
+  if (!a) return;
+  a.status = 'approved';
+  a.decided = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  alert(a.name + ' approved. They can now serve as steward when a seat opens.');
+  successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
+  renderMemberList();
+  if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
+}
+
+function rejectSuccession(appId) {
+  var apps = MOCK.circleApplications || [];
+  var a = apps.find(function(x){return x.id===appId;});
+  if (!a) return;
+  a.status = 'rejected';
+  a.decided = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
+  renderMemberList();
+  if (successionCandidates.length) selectSuccessionCandidate(successionCandidates[0].id);
 }
 
 function renderMemberDetail(id) {
@@ -4008,7 +4028,7 @@ function renderMemberDetail(id) {
 
   var isFormer = m.status === 'former';
   var statusBadge = isFormer ? '<span class="badge b-default" style="font-size:8px;margin-left:6px;opacity:0.5">Former</span>' :
-    (m.status === 'invited' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Invited</span>' : '');
+    (m.status === 'candidate' ? '<span class="badge b-amber" style="font-size:8px;margin-left:6px">Candidate</span>' : '');
   var primaryMandate = (rosterCircle.mandate && rosterCircle.mandate.primary) || [];
   var secondaryMandate = (rosterCircle.mandate && rosterCircle.mandate.secondary) || [];
   var desiredWs = rosterCircle.desiredWs || {};
@@ -4092,6 +4112,21 @@ function escapeHtml(s) {
 }
 var esc = escapeHtml;
 
+function isStewardOfCircle(circleId) {
+  if (!MOCK || !MOCK.circles || !MOCK.currentUser) return false;
+  var circle = MOCK.circles.find(function(c) { return c.id === circleId; });
+  if (!circle || !circle.roster || !circle.roster.active) return false;
+  return circle.roster.active.some(function(m) { return m.id === MOCK.currentUser.id; });
+}
+
+function isStewardOfAnyCircle() {
+  if (!MOCK || !MOCK.circles) return false;
+  return MOCK.circles.some(function(c) {
+    return c.status === 'Active' && c.roster && c.roster.active &&
+      c.roster.active.some(function(m) { return m.id === MOCK.currentUser.id; });
+  });
+}
+
 window.addEventListener('hashchange', function() {
   var key = window.location.hash.replace('#', '') || 'personal';
   if (views[key]) nav(key);
@@ -4102,7 +4137,7 @@ loadMockData().then(function() {
   var roster = spaceLawCircle.roster || { active: [], former: [] };
   membersData = roster.active.concat(roster.former);
   reasonLabels = MOCK.exitReasonLabels || {};
-  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='invited'});
+  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='candidate'});
   formerMembers = membersData.filter(function(m){return m.status==='former'});
 
   var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
@@ -4586,6 +4621,33 @@ function modalCuriosityMatch(){
     '<div style="margin:12px 0;font-size:12px"><strong>Cell:</strong> #14 — East Africa space mapping<br><strong>Match:</strong> Remote Sensing 87%<br><strong>Type:</strong> Project Cell</div>'+
     '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Dismiss</button>'+
     '<button class="btn btn-primary" onclick="closeModal();nav(\'cells\')">View Cells</button></div>',{size:'sm'});
+}
+
+function submitThreadForPublication() {
+  if (!isStewardOfAnyCircle()) {
+    alert('Only circle stewards can submit threads for publication.');
+    return;
+  }
+  var titleEl = document.getElementById('td-title');
+  var title = titleEl ? titleEl.textContent : 'Untitled Discussion';
+  var delibId = 'cell-' + Date.now().toString(36) + 'pub';
+  var newCell = {
+    id: delibId,
+    title: 'Publication: ' + title,
+    description: 'This publication-approval cell was created from a Commons discussion thread. Circle stewards review whether to publish this as an official publication.',
+    status: 'Active',
+    type: 'Deliberation Cell',
+    delibType: 'publication-approval',
+    source: { type: 'commons', title: title },
+    participatingCircles: [],
+    messages: [],
+    created: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    cellType: 'Deliberation Cell',
+    proposalType: 'Publication Approval'
+  };
+  MOCK.cells.push(newCell);
+  MOCK.cellsById[delibId] = newCell;
+  alert('Publication-approval cell created: ' + delibId + '. Your circle will review and vote on publication.');
 }
 
 // Domain autocomplete — filters to knowledge+experiential only
@@ -5891,7 +5953,31 @@ function renderDeliverables(cellId, containerId) {
     html += '</div>';
   }
   html += '</div>';
+  var circleId = cell.supervisingCircleId || cell.supervisingCircle || '';
+  if (isStewardOfCircle(circleId) && delivs.length && cell.status === 'Active') {
+    html += '<button onclick="publishDeliverablesToCommons(\'' + cellId + '\')" style="margin-top:10px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;width:100%;text-align:center;font-weight:500"><i class="fa-solid fa-share-from-square" style="margin-right:4px"></i>Publish to Commons</button>';
+  }
   el.innerHTML = html;
+}
+
+function publishDeliverablesToCommons(cellId) {
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  if (!confirm('Publish "' + (cell.title || cell.name) + '" deliverables to Commons as a discussion thread?')) return;
+  var threadId = 'thread-' + Date.now().toString(36);
+  var newThread = {
+    id: threadId,
+    title: cell.title || cell.name,
+    author: MOCK.currentUser ? MOCK.currentUser.name : 'Unknown',
+    created: new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    replies: 0,
+    status: 'New',
+    domains: cell.domains || [],
+    badge: 'Project Deliverable',
+    repliesList: []
+  };
+  MOCK.threads.push(newThread);
+  alert('Published to Commons! Thread "' + (cell.title || cell.name) + '" is now visible in Discussions.');
 }
 
 function renderMessages(cellId, containerId) {
@@ -6039,6 +6125,63 @@ function renderProjectCell(cellId) {
   renderDeliverables(cellId, 'projcell-deliverables');
   renderTeam(cellId, 'projcell-team');
   renderMessages(cellId, 'projcell-messages');
+  renderProjectSettings(cellId);
+}
+
+function renderProjectSettings(cellId) {
+  var cell = cellsById[cellId];
+  var settingsCard = document.getElementById('projcell-settings-card');
+  var settingsDiv = document.getElementById('projcell-settings');
+  if (!cell || !settingsCard || !settingsDiv) return;
+
+  var circleId = cell.supervisingCircleId || cell.supervisingCircle || '';
+  var circleObj = (MOCK.circles || []).find(function(c){ return c.id === circleId; }) || {};
+  var isSteward = isStewardOfCircle(circleId);
+
+  if (!isSteward || cell.status !== 'Active') {
+    settingsCard.style.display = 'none';
+    return;
+  }
+
+  settingsCard.style.display = '';
+  var team = cell.team || [];
+  var html = '<div style="margin-bottom:10px">' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px">Supervising Circle: <strong style="color:var(--text)">' + esc(circleObj.name || circleId) + '</strong></div>' +
+    '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">You are a steward. Manage team membership below.</div>' +
+  '</div>';
+
+  html += '<div class="sec" style="margin-top:8px">Manage Team (' + team.length + ')</div>';
+  team.forEach(function(member) {
+    html += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-subtle)">' +
+      '<div style="width:24px;height:24px;border-radius:50%;background:var(--surface-raised);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--text-secondary)">' + (member.initials || member.substring(0,2).toUpperCase()) + '</div>' +
+      '<div style="flex:1;font-size:12px;color:var(--text)">' + esc(member.name || member) + '</div>' +
+      '<button onclick="removeProjectMember(\'' + cellId + '\',\'' + esc(member.id || member) + '\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px" onmouseover="this.style.background=\'var(--red-soft)\'" onmouseout="this.style.background=\'none\'">Remove</button>' +
+    '</div>';
+  });
+
+  html += '<button onclick="addProjectMemberPrompt(\'' + cellId + '\')" style="margin-top:8px;background:var(--surface-raised);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;color:var(--text-secondary);cursor:pointer;width:100%;text-align:center" onmouseover="this.style.borderColor=\'var(--green)\'" onmouseout="this.style.borderColor=\'var(--border)\'">+ Add Member</button>';
+
+  settingsDiv.innerHTML = html;
+}
+
+function removeProjectMember(cellId, memberId) {
+  var cell = cellsById[cellId];
+  if (!cell || !cell.team) return;
+  cell.team = cell.team.filter(function(m) { return (m.id || m) !== memberId; });
+  renderProjectSettings(cellId);
+  renderTeam(cellId, 'projcell-team');
+}
+
+function addProjectMemberPrompt(cellId) {
+  var name = prompt('Enter member name:');
+  if (!name) return;
+  var cell = cellsById[cellId];
+  if (!cell) return;
+  if (!cell.team) cell.team = [];
+  var initials = name.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
+  cell.team.push({ id: name.toLowerCase().replace(/\s+/g,'-'), name: name, initials: initials });
+  renderProjectSettings(cellId);
+  renderTeam(cellId, 'projcell-team');
 }
 
 function openDelibCell(cellId) {
