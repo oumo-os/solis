@@ -7021,6 +7021,7 @@ function toast(msg, type) {
 
 // ─── Auth: Login / Register / Logout ───
 var SOLIS_TOKEN = localStorage.getItem('solisToken') || null;
+var API_BASE = '/solis/api/';
 
 function showLogin() {
   document.getElementById('login-email').value = '';
@@ -7049,7 +7050,7 @@ function doLogin() {
   var errEl = document.getElementById('login-error');
   if (!email || !pass) { errEl.textContent = 'Email and password required'; errEl.style.display = ''; return; }
 
-  fetch('api/login.php', {
+  fetch(API_BASE + 'login.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email, password: pass }),
@@ -7074,7 +7075,7 @@ function doLogin() {
 
 function doRegister(apiData) {
   // Called after regSubmit() collects form data
-  fetch('api/register.php', {
+  fetch(API_BASE + 'register.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(apiData),
@@ -7098,7 +7099,7 @@ function doRegister(apiData) {
 
 function doLogout() {
   if (!SOLIS_TOKEN) return;
-  fetch('api/logout.php', {
+  fetch(API_BASE + 'logout.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SOLIS_TOKEN },
   }).catch(function() {});
@@ -7152,7 +7153,7 @@ function loadApiData() {
     MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
     return Promise.resolve();
   }
-  return fetch('api/data-load.php', {
+  return fetch(API_BASE + 'data-load.php', {
     headers: { 'Authorization': 'Bearer ' + SOLIS_TOKEN },
   })
   .then(function(r) {
