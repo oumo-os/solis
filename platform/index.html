@@ -2345,6 +2345,7 @@
               </tfoot>
             </table>
           </div>
+          <div style="font-size:9px;color:var(--text-tertiary);margin:4px 0 8px;font-family:var(--mono)"><span style="color:var(--green)">+</span> primary (1.5×) · <span style="color:var(--red)">!</span> no mandate (0.25×) · unmarked = secondary (1.0×) · <span style="color:var(--text-tertiary)">(n)</span> = against</div>
           <!-- Quorum & Threshold Details -->
           <div style="margin-top:10px;overflow-x:auto">
             <table class="vote-table" style="min-width:auto">
@@ -3031,6 +3032,26 @@ function updateVoteSummary() {
   var voters = ['AJ','OK','NC','MT','SR'];
   var tagColors = { LAW:'tag-purple', RS:'tag-green', BIO:'tag-amber' };
 
+  // Compute per-voter totals (simple + effective)
+  var voterSimple = {}; var voterEffective = {};
+  voters.forEach(function(v) { voterSimple[v] = 0; voterEffective[v] = 0; });
+  domainVotes.forEach(function(d) {
+    Object.keys(d.voters).forEach(function(v) {
+      var voterId = v.toLowerCase();
+      var mult = getMandateMultiplier(voterId, d.name, participatingCircles);
+      var ws = d.voters[v];
+      voterSimple[v] += Math.abs(ws);
+      voterEffective[v] += Math.abs(ws) * d.share * mult;
+    });
+  });
+
+  function mandateIndicator(voterId, domain) {
+    var mult = getMandateMultiplier(voterId, domain, participatingCircles);
+    if (mult >= 1.5) return '+';  // primary
+    if (mult <= 0.25) return '!';  // no mandate
+    return '';                      // secondary
+  }
+
   var rows = '';
   domainVotes.forEach(function(d) {
     var dYea = 0, dNay = 0;
@@ -3050,8 +3071,11 @@ function updateVoteSummary() {
       if (val === undefined) {
         rows += '<td style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">—</td>';
       } else {
+        var ind = mandateIndicator(v.toLowerCase(), d.name);
         var color = val > 0 ? 'var(--green)' : 'var(--red)';
-        rows += '<td style="text-align:right;font-family:var(--mono);font-size:11px;font-weight:500;color:' + color + '">' + (val > 0 ? '+' : '') + fmt(val) + '</td>';
+        var absVal = Math.abs(val);
+        var cell = val > 0 ? fmt(absVal) + ind : '(' + fmt(absVal) + ')' + ind;
+        rows += '<td style="text-align:right;font-family:var(--mono);font-size:11px;font-weight:500;color:' + color + '">' + cell + '</td>';
       }
     });
     rows += '</tr>';
@@ -3060,22 +3084,29 @@ function updateVoteSummary() {
 
   var footRows = '';
   var simpleTotal = rawYea + rawNay;
+
+  // Simple Totals row — per-voter Σ raw Ws
   footRows += '<tr style="background:var(--surface-raised)">';
   footRows += '<td class="domain-name" style="font-weight:600">Simple Totals</td>';
   footRows += '<td style="font-size:9px;color:var(--text-tertiary)">&Sigma; raw</td>';
   footRows += '<td class="vote-yea-cell" style="text-align:right;font-size:12px">' + fmt(rawYea) + '</td>';
   footRows += '<td class="vote-nay-cell" style="text-align:right;font-size:12px">' + fmt(rawNay) + '</td>';
   footRows += '<td class="vote-total-cell" style="text-align:right;font-size:12px">' + fmt(simpleTotal) + '</td>';
-  voters.forEach(function() { footRows += '<td></td>'; });
+  voters.forEach(function(v) {
+    footRows += '<td style="text-align:right;font-family:var(--mono);font-size:10px;color:var(--text-secondary)">' + (voterSimple[v] > 0 ? fmt(Math.round(voterSimple[v])) : '—') + '</td>';
+  });
   footRows += '</tr>';
 
+  // Effective Totals row — per-voter Σ (Ws × share × mult)
   footRows += '<tr style="background:var(--gold-soft)">';
   footRows += '<td class="domain-name" style="font-weight:600;color:var(--gold)">Effective Totals</td>';
-  footRows += '<td style="font-size:9px;color:var(--text-tertiary)">&Sigma;(raw &times; share)</td>';
+  footRows += '<td style="font-size:9px;color:var(--text-tertiary)">&Sigma;(Ws &times; share &times; mult)</td>';
   footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--green);font-family:var(--mono)">' + fmt(Math.round(effYea)) + '</td>';
   footRows += '<td style="text-align:right;font-size:12px;font-weight:600;color:var(--red);font-family:var(--mono)">' + fmt(Math.round(effNay)) + '</td>';
   footRows += '<td style="text-align:right;font-size:12px;font-weight:600;font-family:var(--mono)">' + fmt(Math.round(effYN)) + '</td>';
-  voters.forEach(function() { footRows += '<td></td>'; });
+  voters.forEach(function(v) {
+    footRows += '<td style="text-align:right;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--gold)">' + (voterEffective[v] > 0.5 ? fmt(Math.round(voterEffective[v])) : '—') + '</td>';
+  });
   footRows += '</tr>';
   tfoot.innerHTML = footRows;
 }

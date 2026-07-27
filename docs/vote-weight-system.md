@@ -185,17 +185,32 @@ Full-width informational bar below the vote buttons:
 ### Per-Domain Breakdown Table
 
 ```
-Domain            Share   Yea Ws  Nay Ws  Total    AJ      OK      NC      MT
-─────────────────────────────────────────────────────────────────────────────────
-LAW Space Law     38%     2,840     620   3,460  +1,800  +1,040   -620      —
-LAW Liability     35%     1,200     312   1,512    +800    +400   -312      —
-RS  Remote Sens.  27%       920       0     920      —       —       —    +920
-─────────────────────────────────────────────────────────────────────────────────
-Simple Totals     Σ raw   4,960     932   5,892
-Effective Totals  Σ×share 1,653     311   1,964
+Domain            Share   Yea Ws  Nay Ws  Total    AJ        OK        NC        MT
+─────────────────────────────────────────────────────────────────────────────────────
+LAW Space Law     38%     2,840     620   3,460   1,800+    1,040+    (620)!       —
+LAW Liability     35%     1,200     312   1,512     800+      400+    (312)!       —
+RS  Remote Sens.  27%       920       0     920        —         —         —      920!
+─────────────────────────────────────────────────────────────────────────────────────
+Simple Totals     Σraw    4,960     932   5,892     2,600     1,440       932       920
+Effective Totals  Σ×××    1,501     273   1,774       588       350       126       230
 ```
 
-Voter columns show signed weights: positive = yea, negative = nay.
+**Voter cell format:**
+- `1,800+` — Yea vote, primary mandate (1.5× boosted)
+- `(620)!` — Nay vote, no mandate (0.25× weakened)
+- `920` — Yea vote, secondary mandate (1.0×, unmarked)
+- `(312)` — Nay vote, secondary mandate (1.0×, unmarked)
+- `—` — no vote cast in this domain
+
+**Indicators:**
+- `+` = primary mandate (1.5×)
+- `!` = no mandate (0.25×)
+- unmarked = secondary mandate (1.0×)
+- `(n)` = against (nay vote)
+
+**Footer rows:**
+- **Simple Totals** — per-voter Σ raw Ws across all domains
+- **Effective Totals** — per-voter Σ (Ws × share × mult) across all domains
 
 ### Quorum & Threshold Table
 
