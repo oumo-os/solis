@@ -449,7 +449,23 @@ The core governance mechanism. A deliberation cell has four components:
 **Proposal Origins (how a proposal enters a deliberation cell):**
 1. **Discussion thread → steward proposal**: A user creates a discussion thread, participants discuss, and a steward creates a proposal from that thread. The proposal links back to the source thread.
 2. **Direct steward proposal**: A steward directly creates a proposal without a preceding discussion thread.
-3. **System-bound proposal**: A steward makes changes to a system setting or circle profile, submits the changes as a proposal. When the resolution passes, the approved system settings are activated automatically.
+3. **System-bound proposal (settings-as-proposals)**: A steward opens a Settings Modal (System, Circle, or Org), fills in proposed values, and clicks "Submit as Proposal". This creates a new Deliberation Cell with a `settingsSnapshot` attached. The snapshot flows through deliberation → resolution → aSTF → auto-apply. Settings are NEVER applied directly — they always go through this pipeline.
+
+**Settings Snapshot Schema:**
+```
+{
+  type: "system" | "circle" | "org",
+  target: "stf" | "quorum" | "circles" | "deliberation" | "new" | <circle-id> | <org-id>,
+  status: "pending" | "approved" | "rejected",
+  settings: { ... }  // Type-specific settings object
+}
+```
+
+**System settings snapshot** contains nested sections: `stf`, `quorum`, `circles`, `deliberation` with their respective field values.
+**Circle settings snapshot** contains: `name`, `status`, `description`, `maxMembers`, `stewardTermOverride`, `expiryOverride`, `mandateDomains` (primary/secondary with desiredWs).
+**Org settings snapshot** contains: `name`, `acronym`, `shortname`, `location`, `summary`, `website`, `domains`.
+
+**Auto-application:** When aSTF approves a settings-type resolution, `applySettingsSnapshot()` automatically applies the settings to MOCK data and logs the change to `MOCK.governanceLedger`.
 
 **Multi-circle participation:**
 Deliberation cells can have multiple circles participating, not just the originating circle.

@@ -348,7 +348,7 @@ A proposal enters a deliberation cell through one of three paths:
 
 2. **Direct steward proposal**: A steward directly creates a proposal without a preceding discussion thread. The steward writes the proposal themselves.
 
-3. **System-bound proposal**: A steward makes changes to a system setting or circle profile, submits the changes as a proposal. When the resolution passes, the approved system settings are activated automatically by the Integrity Engine.
+3. **System-bound proposal (settings-as-proposals)**: A steward opens a Settings Modal (System, Circle, or Org), fills in proposed values, and clicks "Submit as Proposal". This creates a new Deliberation Cell with a `settingsSnapshot` attached. The snapshot flows through deliberation → resolution (where stewards can edit values) → aSTF → auto-apply via `applySettingsSnapshot()`. Settings are NEVER applied directly — they always go through this pipeline. All applied changes are logged to `MOCK.governanceLedger`.
 
 ---
 
@@ -430,13 +430,13 @@ jSTF: Report (any member) → Anonymous post → Steward sponsors → jSTF Cell 
 | Aggregate | Sum of all Yea Ws vs Nay Ws across all domains |
 | Pass condition | Aggregate Yea Ws > aggregate Nay Ws |
 | Self-disqualify | Auditable withdrawal — "withdrew from deliberation by: [member name]" |
-| Resolution drafting | Modal: text, type, system settings, non-system actions, implementing circles |
+| Resolution drafting | Modal: text, type, settings snapshot form (for settings-type cells), implementing circles |
 | Multiple resolutions | Each spawns its own aSTF |
-| Edit nullifies votes | Any edit to resolution text or type nullifies existing votes |
+| Edit nullifies votes | Any edit to resolution text, type, or settings snapshot nullifies existing votes |
 | Submit Resolution | Green button, active when quorum met + passes → aSTF |
 | Close Debate | Red button, always active → crystallises cell, resolution recorded |
-| System Settings | Tabbed modal (Circle/STF/Quorum/Deliberation) → submits system-bound proposal |
+| System Settings | Tabbed modal → creates deliberation cell with settings snapshot (NOT direct apply) |
 | Resolution types | Directive (circles implement), System (auto-executed), Hybrid (both) |
-| System-bound settings | Circle CRUD, approval, org CRUD, domain CRUD, aSTF periods, STF composition |
+| System-bound settings | System/circle/org settings changes via settings snapshot pipeline → auto-apply on aSTF approval |
 | Non-system actions | Policy, Declaration, Deliverable, Contract, Agreement, Letter |
 | Implementing circle | Required for non-system — named circle(s) responsible for execution |

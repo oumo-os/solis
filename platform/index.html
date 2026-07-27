@@ -2253,6 +2253,13 @@
         <div class="sec">Title</div>
         <input class="msg-input" id="res-modal-title-field" placeholder="Resolution title…" style="font-size:13px;font-weight:500">
       </div>
+      <!-- Settings Snapshot Form — shown only for settings-type cells -->
+      <div id="res-settings-form" style="display:none;margin-bottom:10px">
+        <div class="card" style="margin-bottom:10px">
+          <div class="sec">Settings Snapshot <span style="font-size:9px;color:var(--text-tertiary);font-weight:normal;margin-left:4px">Editable — adjust values during deliberation</span></div>
+          <div id="res-settings-fields"></div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:10px">
         <div class="sec">Resolution Text</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">This text will be sent to aSTF for blind adjudication. Every edit nullifies existing votes.</div>
@@ -2398,12 +2405,12 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">STF Composition & Durations</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Min vSTF Assessors</label><input class="form-input" type="number" value="3"></div>
-            <div class="form-group"><label class="form-label">Max vSTF Assessors</label><input class="form-input" type="number" value="7"></div>
-            <div class="form-group"><label class="form-label">aSTF Assessors</label><input class="form-input" type="number" value="3"></div>
-            <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14"></div>
-            <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10"></div>
-            <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
+            <div class="form-group"><label class="form-label">Min vSTF Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-min-vstf"></div>
+            <div class="form-group"><label class="form-label">Max vSTF Assessors</label><input class="form-input" type="number" value="7" id="settings-stf-max-vstf"></div>
+            <div class="form-group"><label class="form-label">aSTF Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-astf-assessors"></div>
+            <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14" id="settings-stf-vstf-duration"></div>
+            <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10" id="settings-stf-astf-duration"></div>
+            <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6" id="settings-stf-pastf-cycle"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
           </div>
         </div>
       </div>
@@ -2411,10 +2418,10 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Quorum Thresholds</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Minimum Participants</label><input class="form-input" type="number" value="4"></div>
-            <div class="form-group"><label class="form-label">Minimum % of Members</label><input class="form-input" type="number" value="60"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
-            <div class="form-group"><label class="form-label">Pass Threshold (Yea %) </label><input class="form-input" type="number" value="50"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
-            <div class="form-group"><label class="form-label">Abstain Limit</label><input class="form-input" type="number" value="30"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
+            <div class="form-group"><label class="form-label">Minimum Participants</label><input class="form-input" type="number" value="4" id="settings-quorum-min-participants"></div>
+            <div class="form-group"><label class="form-label">Minimum % of Members</label><input class="form-input" type="number" value="60" id="settings-quorum-min-percent"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
+            <div class="form-group"><label class="form-label">Pass Threshold (Yea %) </label><input class="form-input" type="number" value="50" id="settings-quorum-pass-threshold"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
+            <div class="form-group"><label class="form-label">Abstain Limit</label><input class="form-input" type="number" value="30" id="settings-quorum-abstain-limit"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
           </div>
         </div>
       </div>
@@ -2422,16 +2429,16 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Circle Governance</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Steward Term Length (months)</label><input class="form-input" type="number" value="12"><span style="font-size:10px;color:var(--text-tertiary)">Global default, overridable per circle</span></div>
-            <div class="form-group"><label class="form-label">Max Consecutive Terms</label><input class="form-input" type="number" value="2"><span style="font-size:10px;color:var(--text-tertiary)">Before mandatory rotation</span></div>
-            <div class="form-group"><label class="form-label">Cool-off Period (months)</label><input class="form-input" type="number" value="6"><span style="font-size:10px;color:var(--text-tertiary)">Gap before re-running after max terms</span></div>
+            <div class="form-group"><label class="form-label">Steward Term Length (months)</label><input class="form-input" type="number" value="12" id="settings-circles-steward-term"><span style="font-size:10px;color:var(--text-tertiary)">Global default, overridable per circle</span></div>
+            <div class="form-group"><label class="form-label">Max Consecutive Terms</label><input class="form-input" type="number" value="2" id="settings-circles-max-consecutive"><span style="font-size:10px;color:var(--text-tertiary)">Before mandatory rotation</span></div>
+            <div class="form-group"><label class="form-label">Cool-off Period (months)</label><input class="form-input" type="number" value="6" id="settings-circles-cooloff"><span style="font-size:10px;color:var(--text-tertiary)">Gap before re-running after max terms</span></div>
           </div>
         </div>
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Circle Lifecycle</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Auto-Expire Circles</label><select class="form-input"><option>No</option><option>Yes</option></select><span style="font-size:10px;color:var(--text-tertiary)">Circles auto-disband after expiry period</span></div>
-            <div class="form-group"><label class="form-label">Default Circle Expiry (months)</label><input class="form-input" type="number" value="24"><span style="font-size:10px;color:var(--text-tertiary)">Only applies when auto-expire is enabled</span></div>
+            <div class="form-group"><label class="form-label">Auto-Expire Circles</label><select class="form-input" id="settings-circles-auto-expire"><option>No</option><option>Yes</option></select><span style="font-size:10px;color:var(--text-tertiary)">Circles auto-disband after expiry period</span></div>
+            <div class="form-group"><label class="form-label">Default Circle Expiry (months)</label><input class="form-input" type="number" value="24" id="settings-circles-default-expiry"><span style="font-size:10px;color:var(--text-tertiary)">Only applies when auto-expire is enabled</span></div>
           </div>
           <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;line-height:1.5">
             Circles with no expiry override inherit this default. Setting a circle's expiry to 0 (never) prevents auto-disbandment. Expired circles are archived and their members are released.
@@ -2442,18 +2449,18 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Defaults</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Max Deliberation Days</label><input class="form-input" type="number" value="14"></div>
-            <div class="form-group"><label class="form-label">Auto-Close After Inactivity</label><input class="form-input" type="number" value="7"><span style="font-size:10px;color:var(--text-tertiary)">days</span></div>
-            <div class="form-group"><label class="form-label">Vote Nullify on Edit</label><select class="form-input"><option selected>Yes</option><option>No</option></select></div>
+            <div class="form-group"><label class="form-label">Max Deliberation Days</label><input class="form-input" type="number" value="14" id="settings-delib-max-days"></div>
+            <div class="form-group"><label class="form-label">Auto-Close After Inactivity</label><input class="form-input" type="number" value="7" id="settings-delib-auto-close"><span style="font-size:10px;color:var(--text-tertiary)">days</span></div>
+            <div class="form-group"><label class="form-label">Vote Nullify on Edit</label><select class="form-input" id="settings-delib-vote-nullify"><option selected>Yes</option><option>No</option></select></div>
           </div>
         </div>
         <div class="card" style="margin-bottom:12px">
           <div class="sec">AI Drafter</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Max Auto-Redrafts per Resolution</label><input class="form-input" type="number" value="3"></div>
-            <div class="form-group"><label class="form-label">Redraft Cooldown</label><input class="form-input" type="number" value="5"><span style="font-size:10px;color:var(--text-tertiary)">min</span></div>
-            <div class="form-group"><label class="form-label">Confirmation Quorum</label><select class="form-input"><option selected>1/3 participants</option><option>1/2 participants</option><option>Unanimous</option></select></div>
-            <div class="form-group"><label class="form-label">AI Sets Domain Weights</label><select class="form-input"><option selected>Yes (recommended)</option><option>No (equal shares)</option></select></div>
+            <div class="form-group"><label class="form-label">Max Auto-Redrafts per Resolution</label><input class="form-input" type="number" value="3" id="settings-delib-ai-max-redrafts"></div>
+            <div class="form-group"><label class="form-label">Redraft Cooldown</label><input class="form-input" type="number" value="5" id="settings-delib-ai-cooldown"><span style="font-size:10px;color:var(--text-tertiary)">min</span></div>
+            <div class="form-group"><label class="form-label">Confirmation Quorum</label><select class="form-input" id="settings-delib-ai-confirm-quorum"><option selected>1/3 participants</option><option>1/2 participants</option><option>Unanimous</option></select></div>
+            <div class="form-group"><label class="form-label">AI Sets Domain Weights</label><select class="form-input" id="settings-delib-ai-domain-weights"><option selected>Yes (recommended)</option><option>No (equal shares)</option></select></div>
           </div>
           <div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;line-height:1.5">
             AI drafter generates resolution text, title, type, and domain weight shares from the proposal and deliberation. Domain weights are not user-editable. If AI fails, equal shares (1/N) are used as fallback.
@@ -2487,18 +2494,18 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Circle Configuration</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle"></div>
-            <div class="form-group"><label class="form-label">Status</label><select class="form-input"><option selected>Active</option><option>Inactive</option><option>Probation</option></select></div>
+            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle" id="circle-settings-name"></div>
+            <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="circle-settings-status"><option selected>Active</option><option>Inactive</option><option>Probation</option></select></div>
           </div>
-          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
-          <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2" id="circle-settings-desc">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
+          <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15" id="circle-settings-max-members"></div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Steward Term Override</label>
-              <select class="form-input"><option selected>Use Global Default</option><option>3 months</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option></select>
+              <select class="form-input" id="circle-settings-term-override"><option selected>Use Global Default</option><option>3 months</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option></select>
               <span style="font-size:10px;color:var(--text-tertiary)">Override global default for this circle</span>
             </div>
             <div class="form-group"><label class="form-label">Circle Expiry Override</label>
-              <select class="form-input"><option selected>Use Global Default</option><option>Never (no expiry)</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option><option>36 months</option></select>
+              <select class="form-input" id="circle-settings-expiry-override"><option selected>Use Global Default</option><option>Never (no expiry)</option><option>6 months</option><option>12 months</option><option>18 months</option><option>24 months</option><option>36 months</option></select>
               <span style="font-size:10px;color:var(--text-tertiary)">Override global lifecycle default</span>
             </div>
           </div>
@@ -3356,6 +3363,18 @@ function openResolutionModal(idx) {
     ? 'I confirm this accurately reflects the publication review.'
     : 'I confirm this resolution as drafted accurately reflects the deliberation.';
 
+  // Settings form — show for settings-type cells
+  var settingsFormEl = document.getElementById('res-settings-form');
+  var settingsFieldsEl = document.getElementById('res-settings-fields');
+  var isSettingsType = cell && (cell.delibType === 'system-settings' || cell.delibType === 'circle-settings' || cell.delibType === 'org-settings');
+  if (isSettingsType && settingsFormEl && settingsFieldsEl) {
+    settingsFormEl.style.display = '';
+    renderResolutionSettingsForm(cell, settingsFieldsEl);
+  } else if (settingsFormEl) {
+    settingsFormEl.style.display = 'none';
+    settingsFieldsEl.innerHTML = '';
+  }
+
   updateVoteSummary();
   document.getElementById('resolution-modal').classList.add('active');
   document.body.classList.add('modal-open');
@@ -3369,6 +3388,146 @@ function closeResolutionModal() {
   toggler.textContent = '▸ Per-domain breakdown';
 }
 
+function renderResolutionSettingsForm(cell, container) {
+  var snap = cell.settingsSnapshot || {};
+  var s = snap.settings || {};
+  var html = '';
+  if (cell.delibType === 'system-settings') {
+    var fieldLabels = {
+      minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
+      stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
+      autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
+      maxDeliberationDays:'Max Deliberation Days', autoCloseInactivityDays:'Auto-Close Inactivity (d)',
+      voteNullifyOnEdit:'Vote Nullify on Edit', aiMaxRedrafts:'AI Max Redrafts', aiRedraftCooldown:'AI Redraft Cooldown (min)',
+      aiConfirmQuorum:'AI Confirm Quorum', aiSetsDomainWeights:'AI Sets Domain Weights'
+    };
+    var sectionLabels = { stf: 'STF Configuration', quorum: 'Quorum Thresholds', circles: 'Circle Governance', deliberation: 'Deliberation Defaults' };
+    ['stf','quorum','circles','deliberation'].forEach(function(section) {
+      var secSettings = s[section];
+      if (!secSettings) return;
+      html += '<div style="font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin:8px 0 4px">' + (sectionLabels[section] || section) + '</div>';
+      Object.keys(secSettings).forEach(function(k) {
+        var label = fieldLabels[k] || k;
+        var val = secSettings[k];
+        var inputId = 'res-settings-' + section + '-' + k;
+        if (typeof val === 'boolean') {
+          html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+            '<label style="font-size:11px;color:var(--text-secondary);min-width:160px">' + esc(label) + '</label>' +
+            '<select class="form-input" id="' + inputId + '" style="width:auto;font-size:11px;padding:3px 6px" data-section="' + section + '" data-key="' + k + '" data-type="boolean">' +
+            '<option value="true"' + (val ? ' selected' : '') + '>Yes</option><option value="false"' + (!val ? ' selected' : '') + '>No</option></select></div>';
+        } else if (typeof val === 'number') {
+          html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+            '<label style="font-size:11px;color:var(--text-secondary);min-width:160px">' + esc(label) + '</label>' +
+            '<input class="form-input" type="number" value="' + val + '" id="' + inputId + '" style="width:80px;font-size:11px;padding:3px 6px" data-section="' + section + '" data-key="' + k + '" data-type="number"></div>';
+        } else {
+          html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+            '<label style="font-size:11px;color:var(--text-secondary);min-width:160px">' + esc(label) + '</label>' +
+            '<input class="form-input" value="' + esc(String(val)) + '" id="' + inputId + '" style="width:200px;font-size:11px;padding:3px 6px" data-section="' + section + '" data-key="' + k + '" data-type="string"></div>';
+        }
+      });
+    });
+  } else if (cell.delibType === 'circle-settings') {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Circle Name</label>' +
+      '<input class="form-input" value="' + esc(s.name || '') + '" id="res-settings-circle-name" style="width:240px;font-size:11px;padding:3px 6px"></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Status</label>' +
+      '<select class="form-input" id="res-settings-circle-status" style="width:auto;font-size:11px;padding:3px 6px">' +
+      '<option value="Active"' + (s.status === 'Active' ? ' selected' : '') + '>Active</option><option value="Inactive"' + (s.status === 'Inactive' ? ' selected' : '') + '>Inactive</option><option value="Probation"' + (s.status === 'Probation' ? ' selected' : '') + '>Probation</option></select></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Max Members</label>' +
+      '<input class="form-input" type="number" value="' + (s.maxMembers || 15) + '" id="res-settings-circle-max" style="width:80px;font-size:11px;padding:3px 6px"></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Description</label>' +
+      '<textarea class="form-input" rows="2" id="res-settings-circle-desc" style="width:300px;font-size:11px;padding:3px 6px">' + esc(s.description || '') + '</textarea></div>';
+    var primary = (s.mandateDomains && s.mandateDomains.primary) || [];
+    var secondary = (s.mandateDomains && s.mandateDomains.secondary) || [];
+    html += '<div style="font-size:10px;font-weight:600;color:var(--gold);margin:8px 0 4px">Primary Domains</div>';
+    html += '<div id="res-settings-circle-primary" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+    primary.forEach(function(d) {
+      html += '<span style="background:var(--gold-soft);color:var(--gold);padding:4px 10px;border-radius:999px;font-size:10px;border:1px solid var(--gold-border);display:inline-flex;align-items:center;gap:6px">' +
+        esc(d.name) + ' <input type="number" value="' + (d.desiredWs || 1000) + '" style="width:48px;font-size:9px;padding:1px 3px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" data-domain="' + esc(d.name) + '" data-tier="primary"></span>';
+    });
+    html += '</div>';
+    html += '<div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin:8px 0 4px">Secondary Domains</div>';
+    html += '<div id="res-settings-circle-secondary" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+    secondary.forEach(function(d) {
+      html += '<span style="background:var(--surface-raised);color:var(--text-secondary);padding:4px 10px;border-radius:999px;font-size:10px;border:1px solid var(--border);display:inline-flex;align-items:center;gap:6px">' +
+        esc(d.name) + ' <input type="number" value="' + (d.desiredWs || 1000) + '" style="width:48px;font-size:9px;padding:1px 3px;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--text-secondary);text-align:center" data-domain="' + esc(d.name) + '" data-tier="secondary"></span>';
+    });
+    html += '</div>';
+  } else if (cell.delibType === 'org-settings') {
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Organisation</label>' +
+      '<input class="form-input" value="' + esc(s.name || '') + '" id="res-settings-org-name" style="width:240px;font-size:11px;padding:3px 6px"></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Acronym</label>' +
+      '<input class="form-input" value="' + esc(s.acronym || '') + '" id="res-settings-org-acronym" style="width:80px;font-size:11px;padding:3px 6px"></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Location</label>' +
+      '<input class="form-input" value="' + esc(s.location || '') + '" id="res-settings-org-location" style="width:200px;font-size:11px;padding:3px 6px"></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Summary</label>' +
+      '<textarea class="form-input" rows="2" id="res-settings-org-summary" style="width:300px;font-size:11px;padding:3px 6px">' + esc(s.summary || '') + '</textarea></div>';
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">' +
+      '<label style="font-size:11px;color:var(--text-secondary);min-width:120px">Website</label>' +
+      '<input class="form-input" value="' + esc(s.website || '') + '" id="res-settings-org-website" style="width:200px;font-size:11px;padding:3px 6px"></div>';
+    if (s.domains && s.domains.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;color:var(--purple);margin:8px 0 4px">Knowledge Domains</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+      s.domains.forEach(function(d) {
+        html += '<span class="tag tag-purple" style="font-size:9px">' + esc(d) + '</span>';
+      });
+      html += '</div>';
+    }
+  }
+  container.innerHTML = html;
+}
+
+function collectResolutionSettings(cell) {
+  if (!cell || !cell.settingsSnapshot) return null;
+  var snap = JSON.parse(JSON.stringify(cell.settingsSnapshot));
+  if (cell.delibType === 'system-settings') {
+    var inputs = document.querySelectorAll('#res-settings-fields [data-section]');
+    inputs.forEach(function(inp) {
+      var section = inp.dataset.section;
+      var key = inp.dataset.key;
+      var type = inp.dataset.type;
+      if (!snap.settings) snap.settings = {};
+      if (!snap.settings[section]) snap.settings[section] = {};
+      if (type === 'boolean') snap.settings[section][key] = inp.value === 'true';
+      else if (type === 'number') snap.settings[section][key] = parseInt(inp.value) || 0;
+      else snap.settings[section][key] = inp.value;
+    });
+  } else if (cell.delibType === 'circle-settings') {
+    var nameInp = document.getElementById('res-settings-circle-name');
+    var statusInp = document.getElementById('res-settings-circle-status');
+    var maxInp = document.getElementById('res-settings-circle-max');
+    var descInp = document.getElementById('res-settings-circle-desc');
+    if (nameInp) snap.settings.name = nameInp.value;
+    if (statusInp) snap.settings.status = statusInp.value;
+    if (maxInp) snap.settings.maxMembers = parseInt(maxInp.value) || 15;
+    if (descInp) snap.settings.description = descInp.value;
+    var domainInputs = document.querySelectorAll('#res-settings-fields [data-domain]');
+    var primary = [], secondary = [];
+    domainInputs.forEach(function(inp) {
+      var tier = inp.dataset.tier;
+      var entry = { name: inp.dataset.domain, desiredWs: parseInt(inp.value) || 1000 };
+      if (tier === 'primary') primary.push(entry); else secondary.push(entry);
+    });
+    snap.settings.mandateDomains = { primary: primary, secondary: secondary };
+  } else if (cell.delibType === 'org-settings') {
+    var fields = ['name','acronym','location','summary','website'];
+    fields.forEach(function(f) {
+      var el = document.getElementById('res-settings-org-' + f);
+      if (el) snap.settings[f] = el.value;
+    });
+  }
+  return snap;
+}
+
 function saveResolution() {
   if (!confirm('Saving this resolution will nullify all existing votes. Continue?')) return;
   var res = delibResolutions[delibSelectedRes];
@@ -3379,12 +3538,21 @@ function saveResolution() {
   res.text = text;
   res.action = action;
   res.votesNullified = true;
+  var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
+  if (cell && cell.settingsSnapshot) {
+    var updatedSnap = collectResolutionSettings(cell);
+    if (updatedSnap) {
+      cell.settingsSnapshot = updatedSnap;
+      res.settingsSnapshot = updatedSnap;
+    }
+  }
   var now = new Date();
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   var author = MOCK ? MOCK.currentUser.name : 'You';
   res.versions.push({ title: title, text: text, action: action, author: author, ts: ts });
   updateResolutionSlot();
   closeResolutionModal();
+  toast('Resolution saved. Settings snapshot updated.', 'success');
 }
 
 function submitResolution() {
@@ -3501,8 +3669,46 @@ function switchCircleSettingsTab(idx, el) {
 }
 
 function submitCircleProposal() {
+  var primaryTags = document.querySelectorAll('#circle-primary-domains .mandate-tag');
+  var secondaryTags = document.querySelectorAll('#circle-secondary-domains .mandate-tag');
+  function readDomains(tags) {
+    var arr = [];
+    tags.forEach(function(t) {
+      var name = t.childNodes[0] ? t.childNodes[0].textContent.trim() : '';
+      var inp = t.querySelector('input');
+      var ws = inp ? parseInt(inp.value) || 1000 : 1000;
+      if (name) arr.push({ name: name, desiredWs: ws });
+    });
+    return arr;
+  }
+  var settings = {
+    name: document.getElementById('circle-settings-name').value || 'New Circle',
+    status: document.getElementById('circle-settings-status').value || 'Active',
+    description: document.getElementById('circle-settings-desc').value || '',
+    maxMembers: parseInt(document.getElementById('circle-settings-max-members').value) || 15,
+    stewardTermOverride: document.getElementById('circle-settings-term-override').value,
+    expiryOverride: document.getElementById('circle-settings-expiry-override').value,
+    mandateDomains: { primary: readDomains(primaryTags), secondary: readDomains(secondaryTags) }
+  };
+  var existingCircleId = document.getElementById('circle-settings-modal').dataset.circleId || 'new';
+  var snapshot = { type: 'circle', target: existingCircleId, status: 'pending', settings: settings };
+  var cellId = 'cell-' + Date.now().toString(36);
+  var label = existingCircleId === 'new' ? 'Circle: ' + settings.name + ' Founding' : 'Circle: ' + settings.name + ' Settings Change';
+  MOCK.cells.push({
+    id: cellId, type: 'Deliberation Cell', delibType: existingCircleId === 'new' ? 'circle-creation' : 'circle-settings',
+    title: label, participants: 8, status: 'Active',
+    domains: settings.mandateDomains.primary.map(function(d) { return d.name; }),
+    source: { type: 'circle-proposal', proposer: MOCK.currentUser.name },
+    settingsSnapshot: snapshot,
+    circleDetails: existingCircleId === 'new' ? settings : undefined,
+    participatingCircles: [], resolution: { status: 'Draft' },
+    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed ' + (existingCircleId === 'new' ? 'founding of ' + settings.name : 'settings change for ' + settings.name) + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+  });
+  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
   closeCircleSettingsModal();
-  toast('Circle settings submitted as a proposal to the Circle cell.','success');
+  nav('deliberation');
+  renderDelibCell(cellId);
+  toast('Circle proposal created. Deliberation cell opened.', 'success');
 }
 
 // ─── Organisation Modals ───
@@ -3573,9 +3779,102 @@ function removeOrgDomain(key) {
 }
 
 function submitOrgSettingsProposal() {
-  var id = document.getElementById('org-settings-modal').dataset.orgId;
+  var orgId = document.getElementById('org-settings-modal').dataset.orgId;
+  var domainTags = document.querySelectorAll('#org-settings-domains .tag');
+  var domains = [];
+  domainTags.forEach(function(t) { domains.push(t.textContent.replace('×', '').trim()); });
+  var settings = {
+    name: document.getElementById('org-settings-name').value,
+    acronym: document.getElementById('org-settings-acronym').value,
+    shortname: document.getElementById('org-settings-shortname').value,
+    location: document.getElementById('org-settings-location').value,
+    summary: document.getElementById('org-settings-summary').value,
+    website: document.getElementById('org-settings-website').value,
+    domains: domains
+  };
+  var snapshot = { type: 'org', target: orgId, status: 'pending', settings: settings };
+  var cellId = 'cell-' + Date.now().toString(36);
+  MOCK.cells.push({
+    id: cellId, type: 'Deliberation Cell', delibType: 'org-settings',
+    title: 'Org: ' + settings.name + (settings.acronym ? ' [' + settings.acronym + ']' : '') + ' Settings Change',
+    participants: 6, status: 'Active',
+    domains: domains,
+    source: { type: 'org-proposal', proposer: MOCK.currentUser.name },
+    settingsSnapshot: snapshot,
+    participatingCircles: [], resolution: { status: 'Draft' },
+    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed settings change for ' + settings.name + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+  });
+  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
   closeOrgSettingsModal();
-  toast('Organisation settings for ' + id + ' submitted as a proposal.','success');
+  nav('deliberation');
+  renderDelibCell(cellId);
+  toast('Organisation settings proposal created. Deliberation cell opened.', 'success');
+}
+
+function applySettingsSnapshot(snapshot) {
+  if (!snapshot || !snapshot.type) return false;
+  var now = new Date();
+  var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  if (snapshot.type === 'system') {
+    var s = snapshot.settings || {};
+    if (s.stf && MOCK.systemSettings) {
+      Object.keys(s.stf).forEach(function(k) { MOCK.systemSettings.stf[k] = s.stf[k]; });
+    }
+    if (s.quorum && MOCK.systemSettings) {
+      Object.keys(s.quorum).forEach(function(k) { MOCK.systemSettings.quorum[k] = s.quorum[k]; });
+    }
+    if (s.circles && MOCK.systemSettings) {
+      Object.keys(s.circles).forEach(function(k) { MOCK.systemSettings.circles[k] = s.circles[k]; });
+    }
+    if (s.deliberation && MOCK.systemSettings) {
+      Object.keys(s.deliberation).forEach(function(k) { MOCK.systemSettings.deliberation[k] = s.deliberation[k]; });
+    }
+  } else if (snapshot.type === 'circle') {
+    var s = snapshot.settings || {};
+    if (snapshot.target === 'new') {
+      var newCircle = {
+        id: 'circle-' + Date.now().toString(36),
+        name: s.name, status: s.status || 'Active',
+        description: s.description || '',
+        maxMembers: s.maxMembers || 15,
+        mandateDomains: s.mandateDomains || { primary: [], secondary: [] },
+        roster: { active: [], former: [] }
+      };
+      MOCK.circles.push(newCircle);
+    } else {
+      var circle = MOCK.circles.find(function(c) { return c.id === snapshot.target; });
+      if (circle) {
+        if (s.name) circle.name = s.name;
+        if (s.status) circle.status = s.status;
+        if (s.description) circle.description = s.description;
+        if (s.maxMembers) circle.maxMembers = s.maxMembers;
+        if (s.mandateDomains) circle.mandateDomains = s.mandateDomains;
+      }
+    }
+  } else if (snapshot.type === 'org') {
+    var s = snapshot.settings || {};
+    var org = MOCK.orgs ? MOCK.orgs.find(function(o) { return o.id === snapshot.target; }) : null;
+    if (org) {
+      if (s.name) org.name = s.name;
+      if (s.acronym) org.acronym = s.acronym;
+      if (s.summary) org.summary = s.summary;
+      if (s.location) org.location = s.location;
+      if (s.website) org.website = s.website;
+      if (s.domains) org.knowledgeDomains = s.domains;
+    }
+  }
+  if (!MOCK.governanceLedger) MOCK.governanceLedger = [];
+  MOCK.governanceLedger.push({
+    id: 'ledger-' + Date.now().toString(36),
+    type: snapshot.type,
+    target: snapshot.target,
+    settings: snapshot.settings,
+    appliedBy: MOCK.currentUser.name,
+    appliedAt: ts,
+    status: 'applied'
+  });
+  snapshot.status = 'approved';
+  return true;
 }
 
 function openOrgDetailModal(orgId) {
@@ -4066,8 +4365,66 @@ function switchSettingsTab(idx, el) {
 }
 
 function submitSystemProposal() {
+  var settings = {
+    stf: {
+      minVstfAssessors: parseInt(document.getElementById('settings-stf-min-vstf').value) || 3,
+      maxVstfAssessors: parseInt(document.getElementById('settings-stf-max-vstf').value) || 7,
+      astfAssessors: parseInt(document.getElementById('settings-stf-astf-assessors').value) || 3,
+      vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
+      astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
+      pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
+    },
+    quorum: {
+      minParticipants: parseInt(document.getElementById('settings-quorum-min-participants').value) || 4,
+      minPercentMembers: parseInt(document.getElementById('settings-quorum-min-percent').value) || 60,
+      passThreshold: parseInt(document.getElementById('settings-quorum-pass-threshold').value) || 50,
+      abstainLimit: parseInt(document.getElementById('settings-quorum-abstain-limit').value) || 30
+    },
+    circles: {
+      stewardTermMonths: parseInt(document.getElementById('settings-circles-steward-term').value) || 12,
+      maxConsecutiveTerms: parseInt(document.getElementById('settings-circles-max-consecutive').value) || 2,
+      cooloffMonths: parseInt(document.getElementById('settings-circles-cooloff').value) || 6,
+      autoExpireCircles: document.getElementById('settings-circles-auto-expire').value === 'Yes',
+      defaultCircleExpiryMonths: parseInt(document.getElementById('settings-circles-default-expiry').value) || 24
+    },
+    deliberation: {
+      maxDeliberationDays: parseInt(document.getElementById('settings-delib-max-days').value) || 14,
+      autoCloseInactivityDays: parseInt(document.getElementById('settings-delib-auto-close').value) || 7,
+      voteNullifyOnEdit: document.getElementById('settings-delib-vote-nullify').value === 'Yes',
+      aiMaxRedrafts: parseInt(document.getElementById('settings-delib-ai-max-redrafts').value) || 3,
+      aiRedraftCooldown: parseInt(document.getElementById('settings-delib-ai-cooldown').value) || 5,
+      aiConfirmQuorum: document.getElementById('settings-delib-ai-confirm-quorum').value,
+      aiSetsDomainWeights: document.getElementById('settings-delib-ai-domain-weights').value === 'Yes (recommended)'
+    }
+  };
+  var target = 'circles';
+  var tabIdx = document.querySelector('.settings-tab.active');
+  if (tabIdx) {
+    var label = tabIdx.textContent.trim().toLowerCase();
+    if (label === 'stf') target = 'stf';
+    else if (label === 'quorum') target = 'quorum';
+    else if (label === 'circles') target = 'circles';
+    else if (label === 'deliberation') target = 'deliberation';
+  }
+  var snapshot = { type: 'system', target: target, status: 'pending', settings: settings };
+  var cellId = 'cell-' + Date.now().toString(36);
+  MOCK.cells.push({
+    id: cellId, type: 'Deliberation Cell', delibType: 'system-settings',
+    title: 'System Settings: ' + target.charAt(0).toUpperCase() + target.slice(1) + ' configuration change',
+    participants: 8, status: 'Active',
+    domains: ['Space Law', 'Philosophy & Ethics'],
+    source: { type: 'settings-proposal', proposer: MOCK.currentUser.name },
+    settingsSnapshot: snapshot,
+    settingsChanges: [],
+    participatingCircles: [{ name: 'Space Law Circle', role: 'Lead', votes: 5, id: 'space-law' }],
+    resolution: { status: 'Draft' },
+    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed system settings change for ' + target + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+  });
+  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
   closeSettingsModal();
-  toast('System settings submitted as a system-bound proposal to this deliberation cell.','success');
+  nav('deliberation');
+  renderDelibCell(cellId);
+  toast('System settings proposal created. Deliberation cell opened.', 'success');
 }
 
 function toggleImplementingCircle(el) {
@@ -6244,11 +6601,12 @@ function renderDelibCell(cellId) {
 
   var status = cell.resolution ? cell.resolution.status : 'Draft';
   if (insight) {
-    if (cell.delibType === 'system-settings') {
+    if (cell.delibType === 'system-settings' || cell.delibType === 'circle-settings' || cell.delibType === 'org-settings') {
+      var typeLabel = cell.delibType === 'system-settings' ? 'System' : cell.delibType === 'circle-settings' ? 'Circle' : 'Organisation';
       if (status === 'Draft') {
-        insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-gear"></i></div><div class="itext"><strong>Settings Change — Drafting:</strong> A settings change has been proposed. The snapshot shows current values; proposed changes are highlighted. <span style="color:var(--gold)">If the resolution passes, stewards must manually apply these changes in System Settings.</span></div></div>';
+        insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-gear"></i></div><div class="itext"><strong>' + typeLabel + ' Settings — Drafting:</strong> A settings change has been proposed. The snapshot shows the proposed values. <span style="color:var(--gold)">If the resolution passes aSTF, settings will be applied automatically.</span></div></div>';
       } else if (status === 'Approved') {
-        insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-check-circle"></i></div><div class="itext"><strong>Settings Change — Approved:</strong> This resolution has been approved. <span style="color:var(--amber)">Stewards should now update System Settings to reflect the agreed changes.</span></div></div>';
+        insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-check-circle"></i></div><div class="itext"><strong>' + typeLabel + ' Settings — Approved:</strong> This resolution has been approved. <span style="color:var(--green)">Settings have been applied automatically and recorded on the governance ledger.</span></div></div>';
       } else {
         insight.innerHTML = '';
       }
@@ -6328,60 +6686,95 @@ function renderDelibOrigin(cell, container) {
       '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
       '</div></div></div>';
   } else if (cell.delibType === 'system-settings') {
-    var changes = cell.settingsChanges || [];
     var snap = cell.settingsSnapshot || {};
-    var settingLabels = {
-      stewardTermMonths: 'Steward Term Length',
-      maxConsecutiveTerms: 'Max Consecutive Terms',
-      cooloffMonths: 'Cool-off Period',
-      pAstfCycleMonths: 'p-aSTF Cycle Duration',
-      autoExpireCircles: 'Auto-Expire Circles',
-      defaultCircleExpiryMonths: 'Default Circle Expiry'
-    };
-    var snapKeys = ['stewardTermMonths','maxConsecutiveTerms','cooloffMonths','pAstfCycleMonths','autoExpireCircles','defaultCircleExpiryMonths'];
-    var changedKeys = changes.map(function(ch) {
-      var match = Object.keys(settingLabels).filter(function(k) { return settingLabels[k] === ch.setting; })[0];
-      return match || null;
-    }).filter(Boolean);
-
+    var snapSettings = snap.settings || {};
+    var targetLabel = snap.target ? snap.target.charAt(0).toUpperCase() + snap.target.slice(1) : 'System';
     html = '<div class="card" style="margin-bottom:16px"><div class="sec">System Settings Change</div>' +
       '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--amber);margin-top:5px;flex-shrink:0"></div>' +
       '<div style="flex:1">' +
-      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Proposed changes to global system settings. These affect all circles and governance processes.</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Proposed changes to <strong>' + esc(targetLabel) + '</strong> system settings. These affect all circles and governance processes.</div>' +
       '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>';
-
-    if (Object.keys(snap).length > 0) {
-      html += '<div style="font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Current Settings (Snapshot)</div>' +
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:14px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius)">';
-      snapKeys.forEach(function(k) {
-        var label = settingLabels[k] || k;
-        var val = snap[k];
-        var isChanged = changedKeys.indexOf(k) !== -1;
-        var color = isChanged ? 'color:var(--amber);font-weight:600' : 'color:var(--text-secondary)';
+    var sectionLabels = { stf: 'STF Configuration', quorum: 'Quorum Thresholds', circles: 'Circle Governance', deliberation: 'Deliberation Defaults' };
+    var fieldLabels = {
+      minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
+      stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
+      autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
+      maxDeliberationDays:'Max Deliberation Days', autoCloseInactivityDays:'Auto-Close Inactivity (d)',
+      voteNullifyOnEdit:'Vote Nullify on Edit', aiMaxRedrafts:'AI Max Redrafts', aiRedraftCooldown:'AI Redraft Cooldown (min)',
+      aiConfirmQuorum:'AI Confirm Quorum', aiSetsDomainWeights:'AI Sets Domain Weights'
+    };
+    ['stf','quorum','circles','deliberation'].forEach(function(section) {
+      var secSettings = snapSettings[section];
+      if (!secSettings || Object.keys(secSettings).length === 0) return;
+      html += '<div style="font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin:10px 0 6px">' + (sectionLabels[section] || section) + '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:8px">';
+      Object.keys(secSettings).forEach(function(k) {
+        var label = fieldLabels[k] || k;
+        var val = secSettings[k];
         html += '<div style="font-size:10px;color:var(--text-tertiary)">' + esc(label) + '</div>' +
-          '<div style="font-size:10px;' + color + '">' + (typeof val === 'boolean' ? (val ? 'Yes' : 'No') : val) + (typeof val === 'number' && k !== 'maxConsecutiveTerms' ? ' months' : '') + '</div>';
+          '<div style="font-size:10px;color:var(--amber);font-weight:600">' + (typeof val === 'boolean' ? (val ? 'Yes' : 'No') : val) + '</div>';
       });
       html += '</div>';
+    });
+    html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius)"><i class="fa-solid fa-info-circle" style="margin-right:4px;color:var(--amber)"></i>If this resolution passes aSTF, settings will be applied automatically.</div>' +
+      '</div></div></div>';
+  } else if (cell.delibType === 'circle-settings') {
+    var snap = cell.settingsSnapshot || {};
+    var s = snap.settings || {};
+    var primary = (s.mandateDomains && s.mandateDomains.primary) || [];
+    var secondary = (s.mandateDomains && s.mandateDomains.secondary) || [];
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Circle Settings Change</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(s.name || 'Unknown Circle') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Proposed changes to circle configuration and mandate domains.</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:10px">' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Status</div><div style="font-size:10px;color:var(--amber);font-weight:600">' + esc(s.status || 'Active') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Max Members</div><div style="font-size:10px;color:var(--amber);font-weight:600">' + (s.maxMembers || 15) + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Term Override</div><div style="font-size:10px;color:var(--text-secondary)">' + esc(s.stewardTermOverride || 'Global default') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Expiry Override</div><div style="font-size:10px;color:var(--text-secondary)">' + esc(s.expiryOverride || 'Global default') + '</div>' +
+      '</div>';
+    if (primary.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Primary Domains</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' +
+        primary.map(function(d) { return '<span style="background:var(--gold-soft);color:var(--gold);padding:4px 10px;border-radius:999px;font-size:10px;border:1px solid var(--gold-border)">' + esc(d.name) + ' — Ws ' + (d.desiredWs || 1000) + '</span>'; }).join('') + '</div>';
     }
-
-    if (changes.length > 0) {
-      html += '<div style="font-size:10px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Proposed Changes</div>' +
-        changes.map(function(ch) {
-          return '<div style="margin-bottom:10px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--amber-border);border-left:3px solid var(--amber);border-radius:var(--radius)">' +
-            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">' +
-            '<span style="font-size:11px;color:var(--text);font-weight:500">' + esc(ch.setting) + '</span>' +
-            '</div>' +
-            '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">' +
-            '<span style="font-size:11px;color:var(--red);text-decoration:line-through;opacity:0.8">' + esc(ch.from) + '</span>' +
-            '<i class="fa-solid fa-arrow-right" style="font-size:9px;color:var(--amber)"></i>' +
-            '<span style="font-size:11px;color:var(--green);font-weight:600">' + esc(ch.to) + '</span>' +
-            '</div>' +
-            (ch.rationale ? '<div style="font-size:10px;color:var(--text-secondary);line-height:1.5;font-style:italic">"' + esc(ch.rationale) + '"</div>' : '') +
-            '</div>';
-        }).join('');
+    if (secondary.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Secondary Domains</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' +
+        secondary.map(function(d) { return '<span style="background:var(--surface-raised);color:var(--text-secondary);padding:4px 10px;border-radius:999px;font-size:10px;border:1px solid var(--border)">' + esc(d.name) + ' — Ws ' + (d.desiredWs || 1000) + '</span>'; }).join('') + '</div>';
     }
-
-    html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius)"><i class="fa-solid fa-info-circle" style="margin-right:4px;color:var(--amber)"></i>If this resolution passes, stewards must manually update these values in System Settings.</div>' +
+    if (s.description) {
+      html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius);line-height:1.5">' + esc(s.description) + '</div>';
+    }
+    html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius)"><i class="fa-solid fa-info-circle" style="margin-right:4px;color:var(--green)"></i>If this resolution passes aSTF, circle settings will be applied automatically.</div>' +
+      '</div></div></div>';
+  } else if (cell.delibType === 'org-settings') {
+    var snap = cell.settingsSnapshot || {};
+    var s = snap.settings || {};
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Organisation Settings Change</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--purple);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(s.name || 'Unknown') + (s.acronym ? ' [' + esc(s.acronym) + ']' : '') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">Proposed changes to organisation profile and knowledge domains.</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);margin-bottom:10px">' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Short Name</div><div style="font-size:10px;color:var(--amber);font-weight:600">' + esc(s.shortname || '') + '</div>' +
+      '<div style="font-size:10px;color:var(--text-tertiary)">Location</div><div style="font-size:10px;color:var(--text-secondary)">' + esc(s.location || '') + '</div>' +
+      (s.website ? '<div style="font-size:10px;color:var(--text-tertiary)">Website</div><div style="font-size:10px;color:var(--text-secondary)">' + esc(s.website) + '</div>' : '') +
+      '</div>';
+    if (s.summary) {
+      html += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius);line-height:1.5">' + esc(s.summary) + '</div>';
+    }
+    if (s.domains && s.domains.length > 0) {
+      html += '<div style="font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Knowledge Domains</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">' +
+        s.domains.map(function(d) { return '<span class="tag tag-purple" style="font-size:8px">' + esc(d) + '</span>'; }).join('') + '</div>';
+    }
+    html += '<div style="font-size:10px;color:var(--text-tertiary);margin-top:8px;padding:6px 10px;background:var(--surface);border:1px solid var(--border-subtle);border-radius:var(--radius)"><i class="fa-solid fa-info-circle" style="margin-right:4px;color:var(--purple)"></i>If this resolution passes aSTF, organisation settings will be applied automatically.</div>' +
       '</div></div></div>';
   } else if (cell.delibType === 'publication-approval') {
     var pub = cell.publicationDetails || {};

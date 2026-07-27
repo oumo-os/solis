@@ -18,9 +18,12 @@ Solis uses a unified modal system with consistent structure, sizing, and interac
 | Registration | `reg-modal` | 680px, 80vh | 3-step registration or profile edit |
 | Participant Detail | `pd-modal` | 640px, 80vh | View member profile |
 | Resolution | `resolution-modal` | 720px, 80vh | View/edit/vote on resolution (one per cell) |
-| System Settings | `settings-modal` | 640px, 80vh | STF, Quorum, Deliberation config |
-| Circle Settings | `circle-settings-modal` | 640px, 80vh | Circle config, Mandate Domains |
+| System Settings | `settings-modal` | 640px, 80vh | **Proposal drafter** — creates system settings change proposal |
+| Circle Settings | `circle-settings-modal` | 640px, 80vh | **Proposal drafter** — creates circle settings change proposal |
+| Org Settings | `org-settings-modal` | 640px, 80vh | **Proposal drafter** — creates org settings change proposal |
 | Members Modal | (inline) | full | Circle steward roster |
+
+**Key:** Settings modals do NOT apply changes directly. They create proposals with settings snapshots that flow through deliberation → resolution → aSTF → auto-apply.
 
 ---
 

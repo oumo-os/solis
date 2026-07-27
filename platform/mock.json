@@ -2779,12 +2779,16 @@
         }
       ],
       "settingsSnapshot": {
-        "stewardTermMonths": 12,
-        "maxConsecutiveTerms": 2,
-        "cooloffMonths": 6,
-        "pAstfCycleMonths": 6,
-        "autoExpireCircles": false,
-        "defaultCircleExpiryMonths": 24
+        "type": "system",
+        "target": "circles",
+        "status": "pending",
+        "settings": {
+          "circles": {
+            "stewardTermMonths": 18,
+            "maxConsecutiveTerms": 3,
+            "cooloffMonths": 6
+          }
+        }
       }
     },
     {
@@ -2831,12 +2835,14 @@
         }
       ],
       "settingsSnapshot": {
-        "stewardTermMonths": 12,
-        "maxConsecutiveTerms": 2,
-        "cooloffMonths": 6,
-        "pAstfCycleMonths": 6,
-        "autoExpireCircles": false,
-        "defaultCircleExpiryMonths": 24
+        "type": "system",
+        "target": "stf",
+        "status": "approved",
+        "settings": {
+          "stf": {
+            "pastfCycleMonths": 4
+          }
+        }
       }
     },
     {
@@ -2928,6 +2934,116 @@
           "text": "Protocol published and adopted by 3 institutions. Available in Commons library.",
           "time": "Jul 2026",
           "color": "var(--green)"
+        }
+      ]
+    },
+    {
+      "id": "cell-44",
+      "type": "Deliberation Cell",
+      "delibType": "circle-settings",
+      "title": "Circle: Space Law Circle — Mandate Domain Expansion",
+      "participants": 8,
+      "domains": [
+        "Space Law",
+        "Liability",
+        "Policy"
+      ],
+      "status": "Active",
+      "source": {
+        "type": "circle-proposal",
+        "proposer": "Akello J."
+      },
+      "settingsSnapshot": {
+        "type": "circle",
+        "target": "space-law",
+        "status": "pending",
+        "settings": {
+          "name": "Space Law Circle",
+          "status": "Active",
+          "description": "Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.",
+          "maxMembers": 20,
+          "stewardTermOverride": "Use Global Default",
+          "expiryOverride": "Use Global Default",
+          "mandateDomains": {
+            "primary": [
+              { "name": "Space Law", "desiredWs": 2800 },
+              { "name": "Liability", "desiredWs": 2000 }
+            ],
+            "secondary": [
+              { "name": "Policy", "desiredWs": 1500 },
+              { "name": "Regulatory Compliance", "desiredWs": 1200 }
+            ]
+          }
+        }
+      },
+      "participatingCircles": [
+        {
+          "name": "Space Law Circle",
+          "role": "Lead",
+          "votes": 5,
+          "id": "space-law"
+        }
+      ],
+      "resolution": {
+        "status": "Draft"
+      },
+      "messages": [
+        {
+          "author": "Akello J.",
+          "initials": "AJ",
+          "text": "We should expand max members to 20 and add Regulatory Compliance as a secondary domain. The workload has grown significantly.",
+          "time": "2d ago",
+          "color": "var(--amber)"
+        },
+        {
+          "author": "You",
+          "initials": "OS",
+          "text": "Agreed. Also consider raising desired Ws for Space Law to 2800 given the team's growth.",
+          "time": "1d ago",
+          "gold": true
+        }
+      ]
+    },
+    {
+      "id": "cell-45",
+      "type": "Deliberation Cell",
+      "delibType": "org-settings",
+      "title": "Org: Uganda Astronomical Society — Domain Update",
+      "participants": 6,
+      "domains": [
+        "Astronomy",
+        "Astrophysics"
+      ],
+      "status": "Active",
+      "source": {
+        "type": "org-proposal",
+        "proposer": "Namugga C."
+      },
+      "settingsSnapshot": {
+        "type": "org",
+        "target": "uas",
+        "status": "pending",
+        "settings": {
+          "name": "Uganda Astronomical Society",
+          "acronym": "UAS",
+          "shortname": "Uganda Astro",
+          "location": "Kampala, Uganda",
+          "summary": "Amateur and professional astronomy society promoting stargazing and space science education across East Africa.",
+          "website": "https://uas.org.ug",
+          "domains": ["Astronomy", "Astrophysics", "Space Education"]
+        }
+      },
+      "participatingCircles": [],
+      "resolution": {
+        "status": "Draft"
+      },
+      "messages": [
+        {
+          "author": "Namugga C.",
+          "initials": "NC",
+          "text": "We've expanded into space education outreach. Adding it as a knowledge domain to reflect our current activities.",
+          "time": "1d ago",
+          "color": "var(--teal)"
         }
       ]
     }
@@ -4126,6 +4242,21 @@
       "status": "pending",
       "appliedDate": "Jul 19, 2026",
       "proposedRole": "Data Analyst"
+    }
+  ],
+  "governanceLedger": [
+    {
+      "id": "ledger-001",
+      "type": "system",
+      "target": "stf",
+      "settings": {
+        "stf": {
+          "pastfCycleMonths": 4
+        }
+      },
+      "appliedBy": "Akello J.",
+      "appliedAt": "Jun 15, 2026 10:30 AM",
+      "status": "applied"
     }
   ]
 }

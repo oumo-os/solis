@@ -266,3 +266,157 @@ The Governance view tracks:
   ]
 }
 ```
+
+---
+
+## Settings-as-Proposals Architecture
+
+### Core Principle
+
+Settings changes are **never applied directly**. All settings changes flow through the proposal → deliberation → resolution → aSTF → auto-apply pipeline. This prevents the infinite loop of edit → deliberation → resolution → manual apply → edit again.
+
+### Flow
+
+1. **Steward opens Settings Modal** (System, Circle, or Org) and fills in proposed values
+2. **"Submit as Proposal"** creates a new Deliberation Cell with a `settingsSnapshot` attached
+3. **Deliberation Cell displays snapshot** as a read-only diff (proposed values highlighted)
+4. **Resolution renders snapshot as editable form** — stewards can adjust values during deliberation
+5. **Vote passes** → resolution + snapshot go to aSTF for blind adjudication
+6. **aSTF approves** → `applySettingsSnapshot()` automatically applies settings + logs to governance ledger
+
+### Settings Snapshot Schema
+
+```json
+{
+  "type": "system" | "circle" | "org",
+  "target": "stf" | "quorum" | "circles" | "deliberation" | "new" | "<circle-id>" | "<org-id>",
+  "status": "pending" | "approved" | "rejected",
+  "settings": { ... }
+}
+```
+
+#### System Settings Snapshot
+
+```json
+{
+  "type": "system",
+  "target": "stf",
+  "status": "pending",
+  "settings": {
+    "stf": {
+      "minVstfAssessors": 3,
+      "maxVstfAssessors": 7,
+      "astfAssessors": 3,
+      "vstfDurationDays": 14,
+      "astfDurationDays": 10,
+      "pastfCycleMonths": 6
+    },
+    "quorum": {
+      "minParticipants": 4,
+      "minPercentMembers": 60,
+      "passThreshold": 50,
+      "abstainLimit": 30
+    },
+    "circles": {
+      "stewardTermMonths": 12,
+      "maxConsecutiveTerms": 2,
+      "cooloffMonths": 6,
+      "autoExpireCircles": false,
+      "defaultCircleExpiryMonths": 24
+    },
+    "deliberation": {
+      "maxDeliberationDays": 14,
+      "autoCloseInactivityDays": 7,
+      "voteNullifyOnEdit": true,
+      "aiMaxRedrafts": 3,
+      "aiRedraftCooldown": 5,
+      "aiConfirmQuorum": "1/3 participants",
+      "aiSetsDomainWeights": true
+    }
+  }
+}
+```
+
+#### Circle Settings Snapshot
+
+```json
+{
+  "type": "circle",
+  "target": "space-law",
+  "status": "pending",
+  "settings": {
+    "name": "Space Law Circle",
+    "status": "Active",
+    "description": "...",
+    "maxMembers": 15,
+    "stewardTermOverride": "Use Global Default",
+    "expiryOverride": "Use Global Default",
+    "mandateDomains": {
+      "primary": [
+        { "name": "Space Law", "desiredWs": 2500 },
+        { "name": "Liability", "desiredWs": 1800 }
+      ],
+      "secondary": [
+        { "name": "Policy", "desiredWs": 1500 }
+      ]
+    }
+  }
+}
+```
+
+#### Org Settings Snapshot
+
+```json
+{
+  "type": "org",
+  "target": "uas",
+  "status": "pending",
+  "settings": {
+    "name": "Uganda Astronomical Society",
+    "acronym": "UAS",
+    "shortname": "Uganda Astro",
+    "location": "Kampala, Uganda",
+    "summary": "...",
+    "website": "https://uas.org.ug",
+    "domains": ["Astronomy", "Astrophysics"]
+  }
+}
+```
+
+### Deliberation Cell Types
+
+| `delibType` | Purpose | Snapshot Target |
+|-------------|---------|-----------------|
+| `system-settings` | Change system-wide governance config | `stf`, `quorum`, `circles`, `deliberation` |
+| `circle-settings` | Edit existing circle config | Circle ID |
+| `circle-creation` | Found a new circle | `new` |
+| `org-settings` | Edit existing org profile | Org ID |
+| `org-creation` | Affiliate a new org | `new` |
+
+### Governance Ledger
+
+All applied settings changes are recorded on `MOCK.governanceLedger`:
+
+```json
+{
+  "id": "ledger-001",
+  "type": "system",
+  "target": "stf",
+  "settings": { ... },
+  "appliedBy": "Akello J.",
+  "appliedAt": "Jun 15, 2026 10:30 AM",
+  "status": "applied"
+}
+```
+
+### Key Functions
+
+| Function | Purpose |
+|----------|---------|
+| `submitSystemProposal()` | Reads system settings form → creates deliberation cell with snapshot |
+| `submitCircleProposal()` | Reads circle settings form → creates deliberation cell with snapshot |
+| `submitOrgSettingsProposal()` | Reads org settings form → creates deliberation cell with snapshot |
+| `applySettingsSnapshot(snapshot)` | Applies approved snapshot to MOCK data + logs to governance ledger |
+| `renderResolutionSettingsForm(cell, container)` | Renders editable settings form in resolution modal |
+| `collectResolutionSettings(cell)` | Reads edited form values back into snapshot |
+| `renderDelibOrigin(cell, container)` | Renders settings snapshot as read-only diff in deliberation view |
