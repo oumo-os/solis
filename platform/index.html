@@ -4378,38 +4378,6 @@ function switchSettingsTab(idx, el) {
 }
 
 function submitSystemProposal() {
-  var settings = {
-    stf: {
-      minVstfAssessors: parseInt(document.getElementById('settings-stf-min-vstf').value) || 3,
-      maxVstfAssessors: parseInt(document.getElementById('settings-stf-max-vstf').value) || 7,
-      astfAssessors: parseInt(document.getElementById('settings-stf-astf-assessors').value) || 3,
-      vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
-      astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
-      pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
-    },
-    quorum: {
-      minParticipants: parseInt(document.getElementById('settings-quorum-min-participants').value) || 4,
-      minPercentMembers: parseInt(document.getElementById('settings-quorum-min-percent').value) || 60,
-      passThreshold: parseInt(document.getElementById('settings-quorum-pass-threshold').value) || 50,
-      abstainLimit: parseInt(document.getElementById('settings-quorum-abstain-limit').value) || 30
-    },
-    circles: {
-      stewardTermMonths: parseInt(document.getElementById('settings-circles-steward-term').value) || 12,
-      maxConsecutiveTerms: parseInt(document.getElementById('settings-circles-max-consecutive').value) || 2,
-      cooloffMonths: parseInt(document.getElementById('settings-circles-cooloff').value) || 6,
-      autoExpireCircles: document.getElementById('settings-circles-auto-expire').value === 'Yes',
-      defaultCircleExpiryMonths: parseInt(document.getElementById('settings-circles-default-expiry').value) || 24
-    },
-    deliberation: {
-      maxDeliberationDays: parseInt(document.getElementById('settings-delib-max-days').value) || 14,
-      autoCloseInactivityDays: parseInt(document.getElementById('settings-delib-auto-close').value) || 7,
-      voteNullifyOnEdit: document.getElementById('settings-delib-vote-nullify').value === 'Yes',
-      aiMaxRedrafts: parseInt(document.getElementById('settings-delib-ai-max-redrafts').value) || 3,
-      aiRedraftCooldown: parseInt(document.getElementById('settings-delib-ai-cooldown').value) || 5,
-      aiConfirmQuorum: document.getElementById('settings-delib-ai-confirm-quorum').value,
-      aiSetsDomainWeights: document.getElementById('settings-delib-ai-domain-weights').value === 'Yes (recommended)'
-    }
-  };
   var target = 'circles';
   var tabIdx = document.querySelector('.settings-tab.active');
   if (tabIdx) {
@@ -4418,6 +4386,42 @@ function submitSystemProposal() {
     else if (label === 'quorum') target = 'quorum';
     else if (label === 'circles') target = 'circles';
     else if (label === 'deliberation') target = 'deliberation';
+  }
+  var settings = {};
+  if (target === 'stf') {
+    settings.stf = {
+      minVstfAssessors: parseInt(document.getElementById('settings-stf-min-vstf').value) || 3,
+      maxVstfAssessors: parseInt(document.getElementById('settings-stf-max-vstf').value) || 7,
+      astfAssessors: parseInt(document.getElementById('settings-stf-astf-assessors').value) || 3,
+      vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
+      astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
+      pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
+    };
+  } else if (target === 'quorum') {
+    settings.quorum = {
+      minParticipants: parseInt(document.getElementById('settings-quorum-min-participants').value) || 4,
+      minPercentMembers: parseInt(document.getElementById('settings-quorum-min-percent').value) || 60,
+      passThreshold: parseInt(document.getElementById('settings-quorum-pass-threshold').value) || 50,
+      abstainLimit: parseInt(document.getElementById('settings-quorum-abstain-limit').value) || 30
+    };
+  } else if (target === 'circles') {
+    settings.circles = {
+      stewardTermMonths: parseInt(document.getElementById('settings-circles-steward-term').value) || 12,
+      maxConsecutiveTerms: parseInt(document.getElementById('settings-circles-max-consecutive').value) || 2,
+      cooloffMonths: parseInt(document.getElementById('settings-circles-cooloff').value) || 6,
+      autoExpireCircles: document.getElementById('settings-circles-auto-expire').value === 'Yes',
+      defaultCircleExpiryMonths: parseInt(document.getElementById('settings-circles-default-expiry').value) || 24
+    };
+  } else if (target === 'deliberation') {
+    settings.deliberation = {
+      maxDeliberationDays: parseInt(document.getElementById('settings-delib-max-days').value) || 14,
+      autoCloseInactivityDays: parseInt(document.getElementById('settings-delib-auto-close').value) || 7,
+      voteNullifyOnEdit: document.getElementById('settings-delib-vote-nullify').value === 'Yes',
+      aiMaxRedrafts: parseInt(document.getElementById('settings-delib-ai-max-redrafts').value) || 3,
+      aiRedraftCooldown: parseInt(document.getElementById('settings-delib-ai-cooldown').value) || 5,
+      aiConfirmQuorum: document.getElementById('settings-delib-ai-confirm-quorum').value,
+      aiSetsDomainWeights: document.getElementById('settings-delib-ai-domain-weights').value === 'Yes (recommended)'
+    };
   }
   var snapshot = { type: 'system', target: target, status: 'pending', settings: settings };
   var cellId = 'cell-' + Date.now().toString(36);
