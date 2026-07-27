@@ -4632,6 +4632,8 @@ function initApp() {
 }
 
 // Start: try API if token exists, otherwise fall back to mock.json
+var SOLIS_TOKEN = localStorage.getItem('solisToken') || null;
+var API_BASE = '/solis/api/';
 function startApp() {
   if (SOLIS_TOKEN) {
     loadApiData().then(function() { initApp(); }).catch(function() { initApp(); });
@@ -7020,8 +7022,6 @@ function toast(msg, type) {
 }
 
 // ─── Auth: Login / Register / Logout ───
-var SOLIS_TOKEN = localStorage.getItem('solisToken') || null;
-var API_BASE = '/solis/api/';
 
 function showLogin() {
   document.getElementById('login-email').value = '';
