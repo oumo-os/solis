@@ -17,16 +17,21 @@
     <div class="logo">
       <a href="index.html" class="logo-mark" id="brand"></a>
     </div>
-    <div class="member-card" onclick="nav('personal')">
+    <div class="member-card" id="member-card" onclick="nav('personal')">
       <div class="member-avatar" id="member-avatar">OS</div>
-      <div class="member-name">Oumo Samuel</div>
-      <div class="member-meta">Ws 847 · Kampala</div>
+      <div class="member-name" id="member-name">Oumo Samuel</div>
+      <div class="member-meta" id="member-meta">Ws 847 · Kampala</div>
     </div>
-    <div class="nav-section">
+    <div id="auth-sidebar-section" style="display:none;margin:0 8px 8px">
+      <div class="nav-item" style="margin-bottom:4px" onclick="showLogin()"><span class="nav-icon"><i class="fa-solid fa-right-to-bracket"></i></span> Login</div>
+      <div class="nav-item" onclick="openRegModal()"><span class="nav-icon"><i class="fa-solid fa-user-plus"></i></span> Register</div>
+    </div>
+    <div class="nav-section" id="nav-personal-section">
       <div class="nav-label">Personal</div>
       <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon"><i class="fa-solid fa-user"></i></span> Personal</div>
-      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Inbox <span class="nav-badge">3</span></div>
+      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Inbox <span class="nav-badge" id="inbox-badge">3</span></div>
       <div class="nav-item" data-v="registration" onclick="openRegModal(true)"><span class="nav-icon"><i class="fa-solid fa-pen-to-square"></i></span> Edit Profile</div>
+      <div class="nav-item" onclick="doLogout()"><span class="nav-icon"><i class="fa-solid fa-sign-out-alt"></i></span> Logout</div>
     </div>
     <div class="nav-section">
       <div class="nav-label">Commons</div>
@@ -36,19 +41,19 @@
       <div class="nav-item" data-v="observatory" onclick="nav('observatory')"><span class="nav-icon"><i class="fa-solid fa-eye"></i></span> Observatory</div>
       <div class="nav-item" data-v="domain-map" onclick="nav('domain-map')"><span class="nav-icon"><i class="fa-solid fa-map"></i></span> Domain Map</div>
     </div>
-    <div class="nav-section">
+    <div class="nav-section" id="nav-spaces-section">
       <div class="nav-label">Spaces</div>
       <div class="nav-item" data-v="circles" onclick="nav('circles')"><span class="nav-icon"><i class="fa-solid fa-circle-nodes"></i></span> Circles</div>
       <div class="nav-item" data-v="cells" onclick="nav('cells')"><span class="nav-icon"><i class="fa-solid fa-cubes"></i></span> Cells</div>
     </div>
-    <div class="nav-section">
+    <div class="nav-section" id="nav-oversight-section">
       <div class="nav-label">Oversight</div>
-      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge">1</span></div>
+      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge" id="stf-badge">1</span></div>
       <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Participants</div>
       <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon"><i class="fa-solid fa-building"></i></span> Organisations</div>
       <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> Profile</div>
     </div>
-    <div class="nav-section">
+    <div class="nav-section" id="nav-settings-section">
       <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
     </div>
   </nav>
@@ -1959,6 +1964,33 @@
   </div><!-- /content -->
 </div><!-- /main -->
 
+<!-- ═══ LOGIN MODAL ═══ -->
+<div class="reg-modal-overlay" id="login-modal">
+  <div class="reg-modal" style="max-width:400px">
+    <div class="modal-titlebar">
+      <div class="modal-titlebar-left">
+        <button class="modal-titlebar-btn" onclick="closeLoginModal()">&times;</button>
+        <span class="modal-titlebar-title">Login</span>
+      </div>
+    </div>
+    <div class="reg-modal-body">
+      <div class="form-group" style="margin-bottom:12px">
+        <label class="form-label">Email</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@solis.local" autocomplete="email">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-password" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <div id="login-error" style="color:var(--red);font-size:11px;margin-bottom:10px;display:none"></div>
+      <div class="flex justify-between items-center">
+        <button class="btn btn-primary" onclick="doLogin()">Login</button>
+        <span style="font-size:10px;color:var(--text-tertiary)">No account? <a href="#" onclick="showRegister();return false" style="color:var(--gold)">Register</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ REGISTRATION MODAL ═══ -->
 <div class="reg-modal-overlay" id="reg-modal">
   <div class="reg-modal">
@@ -1979,7 +2011,18 @@
       <!-- STEP 1: About You -->
       <div id="reg-s1">
         <div class="card" style="margin-bottom:16px">
-          <div class="sec">About You</div>
+          <div class="sec">Account</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" type="email" placeholder="you@solis.local" id="reg-email" autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Password</label>
+              <input class="form-input" type="password" placeholder="At least 6 characters" id="reg-password" autocomplete="new-password">
+            </div>
+          </div>
+          <div class="sec" style="margin-top:12px">About You</div>
           <div class="form-grid">
             <div class="form-group">
               <label class="form-label">Full Name</label>
@@ -4519,8 +4562,17 @@ window.addEventListener('hashchange', function() {
   var key = window.location.hash.replace('#', '') || 'personal';
   if (views[key]) nav(key);
 });
-loadMockData().then(function() {
-  // ─── Derive all view-state from MOCK (single source of truth) ───
+
+// ─── App initialization (auth-aware) ───
+function initApp() {
+  renderAuthSidebar();
+  if (!MOCK) MOCK = {};
+  if (!MOCK.circles) MOCK.circles = [];
+  if (!MOCK.cells) MOCK.cells = [];
+  if (!MOCK.domains) MOCK.domains = {};
+  if (!MOCK.participants) MOCK.participants = [];
+
+  // ─── Derive all view-state from MOCK ───
   var spaceLawCircle = (MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
   var roster = spaceLawCircle.roster || { active: [], former: [] };
   membersData = roster.active.concat(roster.former);
@@ -4530,7 +4582,6 @@ loadMockData().then(function() {
 
   var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
   delibResolutions = (delibCell.draftResolutions || []).map(function(r){ return r; });
-  // Ensure domainShares and aiDraftMeta exist on existing resolutions
   delibResolutions.forEach(function(r) {
     if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
     if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
@@ -4575,8 +4626,23 @@ loadMockData().then(function() {
   orgs = MOCK.organisations || [];
   renderOrganisations();
   var initial = window.location.hash.replace('#', '') || 'personal';
+  // Anon users land on commons
+  if (!MOCK || !MOCK.currentUser) initial = 'commons';
   nav(views[initial] ? initial : 'personal');
-});
+}
+
+// Start: try API if token exists, otherwise fall back to mock.json
+function startApp() {
+  if (SOLIS_TOKEN) {
+    loadApiData().then(function() { initApp(); }).catch(function() { initApp(); });
+  } else {
+    loadMockData().then(function() {
+      MOCK.currentUser = null;
+      initApp();
+    });
+  }
+}
+startApp();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REGISTRATION
@@ -4609,6 +4675,11 @@ function openRegModal(editMode){
   }else{
     titleEl.textContent='Join the Commons';
   }
+  // Show account fields only for new registration
+  var acctSection = document.querySelector('#reg-s1 .sec:first-child');
+  if (acctSection && acctSection.textContent.trim() === 'Account') {
+    acctSection.parentElement.style.display = regIsEdit ? 'none' : '';
+  }
   regResetSteps();
 }
 function closeRegModal(){
@@ -4629,9 +4700,13 @@ function regPrefill(){
 document.getElementById('reg-modal').addEventListener('click',function(e){
   if(e.target===this) closeRegModal();
 });
+document.getElementById('login-modal').addEventListener('click',function(e){
+  if(e.target===this) closeLoginModal();
+});
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape'&&document.getElementById('reg-modal').classList.contains('active')) closeRegModal();
   if(e.key==='Escape'&&document.getElementById('pd-modal').classList.contains('active')) closeParticipantModal();
+  if(e.key==='Escape'&&document.getElementById('login-modal').classList.contains('active')) closeLoginModal();
 });
 function regResetSteps(){
   regStep=1;
@@ -6944,6 +7019,190 @@ function toast(msg, type) {
   }, 3000);
 }
 
+// ─── Auth: Login / Register / Logout ───
+var SOLIS_TOKEN = localStorage.getItem('solisToken') || null;
+
+function showLogin() {
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+  setTimeout(function() { document.getElementById('login-email').focus(); }, 100);
+  // Enter key submits
+  document.getElementById('login-password').onkeydown = function(e) { if (e.key === 'Enter') doLogin(); };
+}
+
+function closeLoginModal() {
+  document.getElementById('login-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+
+function showRegister() {
+  closeLoginModal();
+  openRegModal();
+}
+
+function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pass = document.getElementById('login-password').value;
+  var errEl = document.getElementById('login-error');
+  if (!email || !pass) { errEl.textContent = 'Email and password required'; errEl.style.display = ''; return; }
+
+  fetch('api/login.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, password: pass }),
+  })
+  .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+  .then(function(res) {
+    if (res.status !== 200) {
+      errEl.textContent = res.data.error || 'Login failed';
+      errEl.style.display = '';
+      return;
+    }
+    SOLIS_TOKEN = res.data.token;
+    localStorage.setItem('solisToken', SOLIS_TOKEN);
+    closeLoginModal();
+    window.location.reload();
+  })
+  .catch(function() {
+    errEl.textContent = 'Network error. Is the server running?';
+    errEl.style.display = '';
+  });
+}
+
+function doRegister(apiData) {
+  // Called after regSubmit() collects form data
+  fetch('api/register.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(apiData),
+  })
+  .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+  .then(function(res) {
+    if (res.status !== 201) {
+      toast(res.data.error || 'Registration failed', 'error');
+      return;
+    }
+    SOLIS_TOKEN = res.data.token;
+    localStorage.setItem('solisToken', SOLIS_TOKEN);
+    toast('Registered! Welcome to the Commons.', 'success');
+    closeRegModal();
+    window.location.reload();
+  })
+  .catch(function() {
+    toast('Network error. Is the server running?', 'error');
+  });
+}
+
+function doLogout() {
+  if (!SOLIS_TOKEN) return;
+  fetch('api/logout.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SOLIS_TOKEN },
+  }).catch(function() {});
+  SOLIS_TOKEN = null;
+  localStorage.removeItem('solisToken');
+  MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+  renderAuthSidebar();
+  closeSidebar();
+  nav('commons');
+  toast('Logged out', '');
+}
+
+function renderAuthSidebar() {
+  var isAuth = !!SOLIS_TOKEN && !!MOCK && !!MOCK.currentUser;
+  document.getElementById('auth-sidebar-section').style.display = isAuth ? 'none' : '';
+  document.getElementById('nav-personal-section').style.display = isAuth ? '' : 'none';
+  document.getElementById('nav-spaces-section').style.display = isAuth ? '' : 'none';
+  document.getElementById('nav-oversight-section').style.display = isAuth ? '' : 'none';
+  document.getElementById('nav-settings-section').style.display = isAuth ? '' : 'none';
+  var card = document.getElementById('member-card');
+  if (card) {
+    if (isAuth && MOCK.currentUser) {
+      card.style.display = '';
+      document.getElementById('member-avatar').textContent = MOCK.currentUser.initials || MOCK.currentUser.name.substring(0,2).toUpperCase();
+      document.getElementById('member-name').textContent = MOCK.currentUser.name;
+      var loc = MOCK.currentUser.location || '';
+      var ws = MOCK.currentUser.standing || MOCK.currentUser.competence || '';
+      document.getElementById('member-meta').textContent = loc ? (ws ? 'Ws ' + ws + ' · ' + loc : loc) : (ws ? 'Ws ' + ws : '');
+    } else {
+      card.style.display = 'none';
+    }
+  }
+  // Update topbar propose button
+  var proposeBtn = document.querySelector('.topbar-actions .btn-primary');
+  if (proposeBtn) proposeBtn.style.display = isAuth ? '' : 'none';
+
+  // Update personal view page if visible
+  updatePersonalView();
+}
+
+function updatePersonalView() {
+  var personalView = document.getElementById('view-personal');
+  if (!personalView) return;
+  if (!MOCK || !MOCK.currentUser) {
+    personalView.innerHTML = '<div class="empty-state" style="padding:40px;text-align:center"><div style="font-size:40px;color:var(--gold);margin-bottom:16px"><i class="fa-solid fa-sun"></i></div><h2 style="margin:0 0 8px;color:var(--text)">Welcome to Solis Commons</h2><p style="color:var(--text-tertiary);font-size:13px;line-height:1.6;max-width:400px;margin:0 auto 20px">A space governance platform for the solarian era. Login or register to participate in circles, deliberations, and projects.</p><div><button class="btn btn-primary" onclick="showLogin()" style="margin-right:10px">Login</button><button class="btn" onclick="openRegModal()">Register</button></div></div>';
+  }
+}
+
+function loadApiData() {
+  if (!SOLIS_TOKEN) {
+    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+    return Promise.resolve();
+  }
+  return fetch('api/data-load.php', {
+    headers: { 'Authorization': 'Bearer ' + SOLIS_TOKEN },
+  })
+  .then(function(r) {
+    if (!r.ok) {
+      if (r.status === 401) {
+        // Token expired — clear
+        SOLIS_TOKEN = null;
+        localStorage.removeItem('solisToken');
+        MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+        return;
+      }
+      throw new Error('API error: ' + r.status);
+    }
+    return r.json();
+  })
+  .then(function(data) {
+    if (!data) return;
+    MOCK = data;
+    cellsById = {};
+    if (data.cells) {
+      data.cells.forEach(function(c) { cellsById[c.id] = c; });
+    }
+  })
+  .catch(function(e) {
+    console.error('loadApiData failed:', e);
+    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+  });
+}
+
+// Override regSubmit to use API for new registrations
+var _origRegSubmit = window.regSubmit;
+window.regSubmit = function() {
+  if (regIsEdit) {
+    // Edit mode — update existing user profile
+    closeRegModal();
+    toast('Profile updated! Competences will go through vSTF verification.','success');
+    nav('personal');
+    return;
+  }
+  // New registration
+  var name = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) {
+    toast('Please fill in email, password, and name', 'error');
+    return;
+  }
+  doRegister({ name: name, email: email, password: password, location: document.getElementById('reg-location').value.trim(), bio: document.getElementById('reg-bio').value.trim(), essay: document.getElementById('reg-essay').value.trim() });
+};
+
 // ─── Global Escape handler for all modals ───
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Escape') return;
@@ -6954,7 +7213,7 @@ document.addEventListener('keydown', function(e) {
   [
     'reg-modal', 'pd-modal', 'resolution-modal', 'settings-modal',
     'circle-settings-modal', 'org-settings-modal', 'org-detail-modal',
-    'task-modal', 'xstf-create-modal', 'proposal-modal'
+    'task-modal', 'xstf-create-modal', 'proposal-modal', 'login-modal'
   ].forEach(function(id) {
     var el = document.getElementById(id);
     if (el && el.classList.contains('active')) {
