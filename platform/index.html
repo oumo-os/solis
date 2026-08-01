@@ -2819,6 +2819,7 @@
   <script src="../shared/solmark.js"></script>
   <script src="../shared/modal.js"></script>
   <script src="mock-loader.js"></script>
+  <script src="api-client.js"></script>
 <script>
 document.getElementById('brand').innerHTML = SolMark(26, true) + '<div><div class="name">Solis</div><div class="sub">COMMONS</div></div>';
 document.querySelector('.watermark').innerHTML = SolMark(400, false);
@@ -3353,6 +3354,7 @@ function executeRedraft() {
     res.aiDraftMeta.lastDraftTs = now.getTime();
     res.aiDraftMeta.confirmations = [];
     res.versions.push({ title: title, text: text, action: res.action, author: 'AI Drafter', ts: ts });
+    if (currentDelibCellId) SolisApi.saveDraftVersion(currentDelibCellId, res);
 
     updateResolutionSlot();
     openResolutionModal(0);
@@ -3637,6 +3639,7 @@ function saveResolution() {
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   var author = MOCK ? MOCK.currentUser.name : 'You';
   res.versions.push({ title: title, text: text, action: action, author: author, ts: ts });
+  if (currentDelibCellId) SolisApi.saveDraftVersion(currentDelibCellId, res);
   updateResolutionSlot();
   closeResolutionModal();
   toast('Resolution saved. Settings snapshot updated.', 'success');
@@ -3796,6 +3799,7 @@ function submitCircleProposal() {
   nav('deliberation');
   renderDelibCell(cellId);
   toast('Circle proposal created. Deliberation cell opened.', 'success');
+  SolisApi.saveCell(cellsById[cellId]);
 }
 
 // ─── Organisation Modals ───
@@ -3896,6 +3900,7 @@ function submitOrgSettingsProposal() {
   nav('deliberation');
   renderDelibCell(cellId);
   toast('Organisation settings proposal created. Deliberation cell opened.', 'success');
+  SolisApi.saveCell(cellsById[cellId]);
 }
 
 function applySettingsSnapshot(snapshot) {
@@ -3928,6 +3933,7 @@ function applySettingsSnapshot(snapshot) {
         roster: { active: [], former: [] }
       };
       MOCK.circles.push(newCircle);
+      SolisApi.saveCircle(newCircle);
     } else {
       var circle = MOCK.circles.find(function(c) { return c.id === snapshot.target; });
       if (circle) {
@@ -3951,7 +3957,7 @@ function applySettingsSnapshot(snapshot) {
     }
   }
   if (!MOCK.governanceLedger) MOCK.governanceLedger = [];
-  MOCK.governanceLedger.push({
+  var ledgerEntry = {
     id: 'ledger-' + Date.now().toString(36),
     type: snapshot.type,
     target: snapshot.target,
@@ -3959,7 +3965,9 @@ function applySettingsSnapshot(snapshot) {
     appliedBy: MOCK.currentUser.name,
     appliedAt: ts,
     status: 'applied'
-  });
+  };
+  MOCK.governanceLedger.push(ledgerEntry);
+  SolisApi.saveGovernanceEntry(ledgerEntry);
   snapshot.status = 'approved';
   return true;
 }
@@ -4516,6 +4524,7 @@ function submitSystemProposal() {
   nav('deliberation');
   renderDelibCell(cellId);
   toast('System settings proposal created. Deliberation cell opened.', 'success');
+  SolisApi.saveCell(cellsById[cellId]);
 }
 
 function toggleImplementingCircle(el) {
@@ -4633,7 +4642,7 @@ function initApp() {
 
 // Start: try API if token exists, otherwise fall back to mock.json
 var SOLIS_TOKEN = localStorage.getItem('solisToken') || null;
-var API_BASE = '/solis/api/';
+var API_BASE = '/api/';
 function startApp() {
   if (SOLIS_TOKEN) {
     loadApiData().then(function() { initApp(); }).catch(function() { initApp(); });
@@ -4960,6 +4969,7 @@ function submitProposal(){
     cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
      toast('Circle Formation proposal "'+name+'" submitted! Deliberation cell created.','success');
+    SolisApi.saveCell(cellsById[delibId]);
   } else if(type==='org'){
     var name=document.getElementById('propose-org-name').value;
     var acronym=document.getElementById('propose-org-acronym').value;
@@ -4983,6 +4993,7 @@ function submitProposal(){
     cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
      toast('Organisation Affiliation proposal "'+name+'" submitted! Deliberation cell created.','success');
+    SolisApi.saveCell(cellsById[delibId]);
   } else if(type==='project'){
     var title=document.getElementById('propose-proj-title').value;
     var desc=document.getElementById('propose-proj-desc').value;
@@ -5025,6 +5036,7 @@ function submitProposal(){
     cellsById[cellId]=MOCK.cells[MOCK.cells.length-1];
     closeModal();
      toast('Project "'+title+'" submitted! Deliberation cell created. Project cell will activate after approval.','success');
+    SolisApi.saveCell(cellsById[delibId]).then(function() { return SolisApi.saveCell(cellsById[cellId]); });
   } else {
     var title=document.getElementById('propose-title').value;
     if(!title){toast('Please enter a title.','warn');return;}
@@ -5112,6 +5124,7 @@ function submitThreadForPublication() {
   };
   MOCK.cells.push(newCell);
   MOCK.cellsById[delibId] = newCell;
+  SolisApi.saveCell(newCell);
   openDelibCell(delibId);
 }
 
@@ -6049,6 +6062,7 @@ function handleInboxAction(itemId, action) {
     item.badge = action === 'accept' ? 'Accepted' : 'Declined';
     item.actions = [];
     item.detail += action === 'accept' ? '\n\nYou have accepted this invitation.' : '\n\nYou have declined this invitation.';
+    SolisApi.saveInboxItem(item);
     selectInboxItem(itemId);
   }
 }
@@ -6205,6 +6219,7 @@ function xstfCreateSubmit() {
 
   closeXstfCreateModal();
   toast('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.','success');
+  SolisApi.saveCell(MOCK.cells[MOCK.cells.length - 1]);
 }
 
 // -- Circle Apply --
@@ -6242,6 +6257,7 @@ function submitCircleApplication() {
     queuePosition: apps.length + 1
   });
   MOCK.circleApplications = apps;
+  SolisApi.saveCircleApplication(apps[apps.length - 1]);
   modal.classList.remove('active');
   toast('Added to the succession queue! You are #' + apps.length + ' in position.','success');
 }
@@ -6271,7 +6287,10 @@ function acceptXstfInvite() {
   var modal = document.getElementById('xstf-invite-modal');
   var candId = modal._candId;
   var cand = MOCK.stfCandidates.find(function(c) { return c.id === candId; });
-  if (cand) cand.status = 'accepted';
+  if (cand) {
+    cand.status = 'accepted';
+    SolisApi.updateStfCandidate(cand.stfId, cand.id, { status: 'accepted' });
+  }
   modal.classList.remove('active');
   toast('You have accepted the xSTF invitation! You will be added to the execution team.','success');
 }
@@ -6280,7 +6299,10 @@ function declineXstfInvite() {
   var modal = document.getElementById('xstf-invite-modal');
   var candId = modal._candId;
   var cand = MOCK.stfCandidates.find(function(c) { return c.id === candId; });
-  if (cand) cand.status = 'declined';
+  if (cand) {
+    cand.status = 'declined';
+    SolisApi.updateStfCandidate(cand.stfId, cand.id, { status: 'declined' });
+  }
   modal.classList.remove('active');
 }
 
@@ -6300,7 +6322,7 @@ function submitProjectApplication() {
   var role = document.getElementById('apply-project-role').value.trim();
   if (!motivation || !role) { toast('Please fill in all fields.','warn'); return; }
   MOCK.projectApplications = MOCK.projectApplications || [];
-  MOCK.projectApplications.push({
+  var projectApp = {
     id: 'papp-' + Date.now(),
     cellId: cellId,
     projectName: document.getElementById('apply-project-name').textContent,
@@ -6310,7 +6332,9 @@ function submitProjectApplication() {
     status: 'pending',
     appliedDate: 'Jul 26, 2026',
     proposedRole: role
-  });
+  };
+  MOCK.projectApplications.push(projectApp);
+  SolisApi.saveProjectApplication(projectApp);
   modal.classList.remove('active');
   toast('Application submitted! The project lead will review your application.','success');
 }
@@ -6443,6 +6467,7 @@ function publishDeliverablesToCommons(cellId) {
     repliesList: []
   };
   MOCK.threads.push(newThread);
+  SolisApi.addThread(newThread);
   nav('commons');
 }
 
@@ -6501,8 +6526,11 @@ function saveTask() {
     cell.tasks[_taskTarget.taskIdx].label = label;
     cell.tasks[_taskTarget.taskIdx].status = status;
     cell.tasks[_taskTarget.taskIdx].assignee = assignee || undefined;
+    SolisApi.updateTask(_taskTarget.cellId, cell.tasks[_taskTarget.taskIdx].id, { label: label, status: status, assignee: assignee || null });
   } else {
-    cell.tasks.push({ id: 'task-' + Date.now(), label: label, status: status, assignee: assignee || undefined });
+    var newTask = { id: 'task-' + Date.now(), label: label, status: status, assignee: assignee || undefined };
+    cell.tasks.push(newTask);
+    SolisApi.addTask(_taskTarget.cellId, newTask);
   }
   closeTaskModal();
   renderCellView(_taskTarget.cellId);
@@ -6514,12 +6542,14 @@ function toggleTaskStatus(cellId, taskIdx) {
   if (t.locked) return;
   var cycle = { 'pending': 'in-progress', 'in-progress': 'complete', 'complete': 'pending' };
   t.status = cycle[t.status] || 'pending';
+  SolisApi.updateTask(cellId, t.id, { status: t.status });
   renderCellView(cellId);
 }
 
 function deleteTask(cellId, taskIdx) {
   var cell = cellsById[cellId];
   if (cell.tasks[taskIdx].locked) return;
+  SolisApi.deleteTask(cellId, cell.tasks[taskIdx].id);
   cell.tasks.splice(taskIdx, 1);
   renderCellView(cellId);
 }
@@ -7050,19 +7080,14 @@ function doLogin() {
   var errEl = document.getElementById('login-error');
   if (!email || !pass) { errEl.textContent = 'Email and password required'; errEl.style.display = ''; return; }
 
-  fetch(API_BASE + 'login.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email, password: pass }),
-  })
-  .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+  SolisApi.authLogin(email, pass)
   .then(function(res) {
-    if (res.status !== 200) {
-      errEl.textContent = res.data.error || 'Login failed';
+    if (res.__status !== 200) {
+      errEl.textContent = res.error || 'Login failed';
       errEl.style.display = '';
       return;
     }
-    SOLIS_TOKEN = res.data.token;
+    SOLIS_TOKEN = res.token;
     localStorage.setItem('solisToken', SOLIS_TOKEN);
     closeLoginModal();
     window.location.reload();
@@ -7075,18 +7100,13 @@ function doLogin() {
 
 function doRegister(apiData) {
   // Called after regSubmit() collects form data
-  fetch(API_BASE + 'register.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(apiData),
-  })
-  .then(function(r) { return r.json().then(function(d) { return { status: r.status, data: d }; }); })
+  SolisApi.authRegister(apiData)
   .then(function(res) {
-    if (res.status !== 201) {
-      toast(res.data.error || 'Registration failed', 'error');
+    if (res.__status !== 201) {
+      toast(res.error || 'Registration failed', 'error');
       return;
     }
-    SOLIS_TOKEN = res.data.token;
+    SOLIS_TOKEN = res.token;
     localStorage.setItem('solisToken', SOLIS_TOKEN);
     toast('Registered! Welcome to the Commons.', 'success');
     closeRegModal();
@@ -7099,10 +7119,7 @@ function doRegister(apiData) {
 
 function doLogout() {
   if (!SOLIS_TOKEN) return;
-  fetch(API_BASE + 'logout.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SOLIS_TOKEN },
-  }).catch(function() {});
+  SolisApi.authLogout().catch(function() {});
   SOLIS_TOKEN = null;
   localStorage.removeItem('solisToken');
   MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
@@ -7153,24 +7170,16 @@ function loadApiData() {
     MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
     return Promise.resolve();
   }
-  return fetch(API_BASE + 'data-load.php', {
-    headers: { 'Authorization': 'Bearer ' + SOLIS_TOKEN },
-  })
-  .then(function(r) {
-    if (!r.ok) {
-      if (r.status === 401) {
-        // Token expired — clear
-        SOLIS_TOKEN = null;
-        localStorage.removeItem('solisToken');
-        MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
-        return;
-      }
-      throw new Error('API error: ' + r.status);
-    }
-    return r.json();
-  })
+  return SolisApi.bootstrap()
   .then(function(data) {
-    if (!data) return;
+    if (!data || data.__status === 401) {
+      // Token expired — clear
+      SOLIS_TOKEN = null;
+      localStorage.removeItem('solisToken');
+      MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+      return;
+    }
+    if (!data || data.error) throw new Error('API error: ' + (data.__status || 'unknown'));
     MOCK = data;
     cellsById = {};
     if (data.cells) {

@@ -1,0 +1,715 @@
+#!/usr/bin/env node
+// server.mjs — Solis Commons database prototype server.
+// Serves static files (platform/) + granular REST API backed by SQLite.
+// Usage: node server.mjs   →  http://localhost:3000
+import { createServer } from 'node:http';
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync, statSync, createReadStream, existsSync } from 'node:fs';
+import { createHash, randomBytes } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, extname, normalize, sep } from 'node:path';
+import { execSync } from 'node:child_process';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const PLATFORM_DIR = join(__dirname);
+const DB_PATH = process.env.SOLIS_DB || join(PLATFORM_DIR, 'solis.db');
+const PORT = process.env.PORT || 3000;
+
+// ── DB bootstrap ────────────────────────────────────────
+if (!existsSync(DB_PATH)) {
+  execSync(`node ${join(__dirname, 'db', 'seed.js')}`, { env: { ...process.env, SOLIS_DB: DB_PATH } });
+}
+const db = new DatabaseSync(DB_PATH);
+db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+
+// ── helpers ─────────────────────────────────────────────
+const send = (res, code, obj) => {
+  if (res.writableEnded) return true;
+  res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(obj));
+  return true;
+};
+const readBody = (req) =>
+  new Promise((resolve) => {
+    let raw = '';
+    req.on('data', (c) => (raw += c));
+    req.on('end', () => {
+      try { resolve(raw ? JSON.parse(raw) : {}); }
+      catch { resolve({}); }
+    });
+  });
+const hashPassword = (pw) => createHash('sha256').update(String(pw)).digest('hex');
+const genToken = () => randomBytes(48).toString('hex');
+
+// ── auth ────────────────────────────────────────────────
+function authUser(req) {
+  const h = req.headers.authorization || '';
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  if (!m) return null;
+  const row = db.prepare(
+    `SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id
+     WHERE t.token = ? AND t.expires_at > datetime('now')`).get(m[1]);
+  return row || null;
+}
+
+// ═════════════════════════════════════════════════════════
+// AUTH ENDPOINTS
+// ═════════════════════════════════════════════════════════
+
+async function authRoutes(req, res, path, method) {
+  if (method === 'POST' && path === '/api/auth/login') {
+    const body = await readBody(req);
+    const email = String(body.email || '').trim().toLowerCase();
+    const user = db.prepare('SELECT * FROM users WHERE lower(email) = ?').get(email);
+    if (!user || !user.password_hash || user.password_hash !== hashPassword(String(body.password || ''))) {
+      return send(res, 401, { error: 'Invalid email or password' });
+    }
+    const token = genToken();
+    const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
+    db.prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)').run(user.id, token, expires);
+    delete user.password_hash;
+    return send(res, 200, { token, user });
+  }
+
+  if (method === 'POST' && path === '/api/auth/register') {
+    const body = await readBody(req);
+    const { name, email, password, location, bio, essay } = body;
+    if (!name || !email || !password) return send(res, 400, { error: 'Name, email, and password required' });
+    if (String(password).length < 6) return send(res, 400, { error: 'Password must be at least 6 characters' });
+    const exists = db.prepare('SELECT id FROM users WHERE lower(email) = ?').get(String(email).toLowerCase());
+    if (exists) return send(res, 409, { error: 'Email already registered' });
+    const id = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'user-' + Date.now();
+    const initials = String(name).split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    const joined = new Date().toISOString().slice(0, 10);
+    db.prepare(`INSERT INTO users (id,name,initials,email,location,bio,essay,joined,status,is_current,password_hash)
+                VALUES (?,?,?,?,?,?,?,?,?,0,?)`)
+      .run(id, name, initials, String(email).toLowerCase(), location || '', bio || '', essay || '', joined, 'Active', hashPassword(password));
+    const token = genToken();
+    db.prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)')
+      .run(id, token, new Date(Date.now() + 24 * 3600 * 1000).toISOString());
+    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    delete user.password_hash;
+    return send(res, 201, { token, user });
+  }
+
+  if (method === 'POST' && path === '/api/auth/logout') {
+    const m = (req.headers.authorization || '').match(/^Bearer\s+(.+)$/i);
+    if (m) db.prepare('DELETE FROM auth_tokens WHERE token = ?').run(m[1]);
+    return send(res, 200, { ok: true });
+  }
+
+  if (method === 'GET' && path === '/api/auth/me') {
+    const u = authUser(req);
+    if (!u) return send(res, 401, { error: 'Unauthorized' });
+    delete u.password_hash;
+    return send(res, 200, { user: u });
+  }
+
+  return null;
+}
+
+// ═════════════════════════════════════════════════════════
+// RESOURCE ROUTER
+// ═════════════════════════════════════════════════════════
+
+const routes = [
+  // users
+  { table: 'users', path: '/api/users', keys: ['id', 'name', 'initials', 'email', 'location', 'joined', 'status', 'standing', 'competence', 'bio', 'essay'] },
+  { table: 'domains', path: '/api/domains' },
+  { table: 'organisations', path: '/api/organisations' },
+  { table: 'circles', path: '/api/circles' },
+  { table: 'cells', path: '/api/cells' },
+  { table: 'stfs', path: '/api/stfs' },
+  { table: 'threads', path: '/api/threads' },
+  { table: 'inbox', path: '/api/inbox' },
+  { table: 'publications', path: '/api/publications' },
+  { table: 'news', path: '/api/news' },
+  { table: 'events', path: '/api/events' },
+  { table: 'opportunities', path: '/api/opportunities' },
+  { table: 'projects', path: '/api/projects' },
+  { table: 'integrity_records', path: '/api/integrity-records' },
+  { table: 'governance_events', path: '/api/governance-events' },
+  { table: 'circle_applications', path: '/api/circle-applications' },
+  { table: 'project_applications', path: '/api/project-applications' },
+  { table: 'governance_ledger', path: '/api/governance-ledger' },
+  { table: 'exit_reason_labels', path: '/api/exit-reason-labels' },
+];
+
+function parseId(reqUrl, base) {
+  if (!reqUrl.startsWith(base + '/')) return null;
+  const rest = reqUrl.slice(base.length + 1);
+  if (!rest || rest.includes('/')) return null;
+  return decodeURIComponent(rest);
+}
+
+async function resourceRoutes(req, res, reqUrl, method) {
+  for (const r of routes) {
+    const id = parseId(reqUrl, r.path);
+    if (reqUrl === r.path || id !== null) {
+      // GET list or item
+      if (method === 'GET') {
+        const idParam = parseId(reqUrl, r.path);
+        if (idParam !== null) {
+          const row = db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(idParam);
+          if (!row) return send(res, 404, { error: 'Not found' });
+          return send(res, 200, row);
+        }
+        const rows = db.prepare(`SELECT * FROM ${r.table}`).all();
+        return send(res, 200, rows);
+      }
+      // POST → create
+      if (method === 'POST' && reqUrl === r.path) {
+        const body = await readBody(req);
+        if (!body.id) return send(res, 400, { error: 'id required' });
+        try {
+          db.prepare(`INSERT INTO ${r.table} (id) VALUES (?) ON CONFLICT(id) DO NOTHING`).run(String(body.id));
+          const ok = updateRow(r.table, body);
+          return send(res, ok ? 201 : 409, { ok: !!ok, id: body.id });
+        } catch (e) {
+          return send(res, 400, { error: e.message });
+        }
+      }
+      // PATCH/PUT → update
+      if (method === 'PATCH' || method === 'PUT') {
+        const body = await readBody(req);
+        const row = db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(id);
+        if (!row) return send(res, 404, { error: 'Not found' });
+        updateRow(r.table, body, id);
+        return send(res, 200, db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(id));
+      }
+      // DELETE
+      if (method === 'DELETE') {
+        const out = db.prepare(`DELETE FROM ${r.table} WHERE id = ?`).run(id);
+        return send(res, out.changes ? 200 : 404, { ok: out.changes > 0 });
+      }
+      return send(res, 405, { error: 'Method not allowed' });
+    }
+  }
+  return null;
+}
+
+function bindVal(v) {
+  if (typeof v === 'boolean') return v ? 1 : 0;
+  if (typeof v === 'object' && v !== null) return JSON.stringify(v);
+  return v;
+}
+
+// Apply a flat JSON body to a row's columns (only known columns).
+function updateRow(table, body, id) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+  const entries = Object.entries(body).filter(([k]) => cols.includes(k) && k !== 'id');
+  if (!entries.length) return false;
+  const sets = entries.map(([k]) => `${k} = ?`).join(', ');
+  const vals = entries.map(([, v]) => bindVal(v));
+  if (id) {
+    db.prepare(`UPDATE ${table} SET ${sets} WHERE id = ?`).run(...vals, String(id));
+  } else {
+    db.prepare(`UPDATE ${table} SET ${sets} WHERE id = ?`).run(...vals, String(body.id));
+  }
+  return true;
+}
+
+// ── child collections (granular, tied to parent id) ──────
+const childDefs = [
+  { parent: 'circles', child: 'circle_domains', parentKey: 'circle_id', path: '/api/circles/:id/domains' },
+  { parent: 'circles', child: 'circle_roster', parentKey: 'circle_id', path: '/api/circles/:id/roster' },
+  { parent: 'circles', child: 'circle_proposals', parentKey: 'circle_id', path: '/api/circles/:id/proposals' },
+  { parent: 'circles', child: 'circle_resolutions', parentKey: 'circle_id', path: '/api/circles/:id/resolutions' },
+  { parent: 'circles', child: 'circle_activity', parentKey: 'circle_id', path: '/api/circles/:id/activity' },
+  { parent: 'cells', child: 'cell_domains', parentKey: 'cell_id', path: '/api/cells/:id/domains' },
+  { parent: 'cells', child: 'cell_circles', parentKey: 'cell_id', path: '/api/cells/:id/circles' },
+  { parent: 'cells', child: 'cell_messages', parentKey: 'cell_id', path: '/api/cells/:id/messages' },
+  { parent: 'cells', child: 'cell_tasks', parentKey: 'cell_id', path: '/api/cells/:id/tasks' },
+  { parent: 'cells', child: 'cell_objectives', parentKey: 'cell_id', path: '/api/cells/:id/objectives' },
+  { parent: 'cells', child: 'cell_team', parentKey: 'cell_id', path: '/api/cells/:id/team' },
+  { parent: 'cells', child: 'draft_resolutions', parentKey: 'cell_id', path: '/api/cells/:id/draft-resolutions' },
+  { parent: 'cells', child: 'cell_votes', parentKey: 'cell_id', path: '/api/cells/:id/votes' },
+  { parent: 'cells', child: 'vote_records', parentKey: 'cell_id', path: '/api/cells/:id/vote-records' },
+  { parent: 'stfs', child: 'stf_candidates', parentKey: 'stf_id', path: '/api/stfs/:id/candidates' },
+  { parent: 'circle_applications', child: 'circle_application_domains', parentKey: 'app_id', path: '/api/circle-applications/:id/domains' },
+];
+
+// ── draft-resolution sub-children (resolution_versions / implementing circles) ──
+// POST /api/cells/:cellId/draft-resolutions/:draftId/versions
+// POST /api/cells/:cellId/draft-resolutions/:draftId/implementing-circles
+async function draftChildRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/draft-resolutions\/([^/]+)\/(versions|implementing-circles)$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const cellId = decodeURIComponent(m[1]);
+  const draftId = decodeURIComponent(m[2]);
+  const kind = m[3];
+  const body = await readBody(req);
+  const draft = db.prepare('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?').get(String(draftId), cellId);
+  if (!draft) return send(res, 404, { error: 'Not found' });
+  if (kind === 'versions') {
+    const cols = ['draft_id', 'title', 'text', 'action', 'author', 'ts'];
+    const keys = ['draft_id', ...cols.filter(k => k !== 'draft_id' && body[k] !== undefined)];
+    db.prepare(`INSERT INTO resolution_versions (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
+      .run(...keys.map(k => (k === 'draft_id' ? String(draftId) : bindVal(body[k]))));
+  } else {
+    db.prepare('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON CONFLICT DO NOTHING')
+      .run(String(draftId), String(body.circle_name ?? ''));
+  }
+  return send(res, 201, { ok: true });
+}
+
+async function childRoutes(req, res, reqUrl, method) {
+  for (const d of childDefs) {
+    const esc = d.path.replace(/\//g, '\\/').replace(':id', '([^/]+)');
+    const re = new RegExp('^' + esc + '$');
+    const childIdRe = new RegExp('^' + esc + '/([^/]+)$');
+    const m = reqUrl.match(re);
+    const cm = reqUrl.match(childIdRe);
+    if (!m && !cm) continue;
+    const parentId = decodeURIComponent((m || cm)[1]);
+    if (method === 'GET' && m) {
+      const rows = db.prepare(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ?`).all(parentId);
+      return send(res, 200, rows);
+    }
+    if (method === 'POST' && m) {
+      const body = await readBody(req);
+      const cols = db.prepare(`PRAGMA table_info(${d.child})`).all().map(c => c.name).filter(c => c !== d.parentKey && c !== 'id');
+      const entries = Object.entries(body).filter(([k]) => cols.includes(k));
+      const keys = [d.parentKey, ...entries.map(([k]) => k)];
+      const vals = [parentId, ...entries.map(([, v]) => bindVal(v))];
+      try {
+        db.prepare(`INSERT INTO ${d.child} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`).run(...vals);
+      } catch (e) {
+        return send(res, 400, { error: e.message });
+      }
+      const created = db.prepare(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ? ORDER BY id DESC LIMIT 1`).get(parentId);
+      return send(res, 201, created);
+    }
+    if (cm) {
+      const childId = decodeURIComponent(cm[2]);
+      if (method === 'PATCH' || method === 'PUT') {
+        const body = await readBody(req);
+        const cols = db.prepare(`PRAGMA table_info(${d.child})`).all().map(c => c.name).filter(c => c !== 'id');
+        const entries = Object.entries(body).filter(([k]) => cols.includes(k));
+        if (!entries.length) return send(res, 200, db.prepare(`SELECT * FROM ${d.child} WHERE id = ?`).get(childId));
+        const sets = entries.map(([k]) => `${k} = ?`).join(', ');
+        db.prepare(`UPDATE ${d.child} SET ${sets} WHERE id = ?`).run(...entries.map(([, v]) => bindVal(v)), String(childId));
+        return send(res, 200, db.prepare(`SELECT * FROM ${d.child} WHERE id = ?`).get(childId));
+      }
+      if (method === 'DELETE') {
+        const out = db.prepare(`DELETE FROM ${d.child} WHERE id = ?`).run(String(childId));
+        return send(res, out.changes ? 200 : 404, { ok: out.changes > 0 });
+      }
+      return send(res, 405, { error: 'Method not allowed' });
+    }
+    return send(res, 405, { error: 'Method not allowed' });
+  }
+  return null;
+}
+
+// ═════════════════════════════════════════════════════════
+// BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
+// (read model for the frontend; writes stay on granular routes)
+// ═════════════════════════════════════════════════════════
+
+function parseJson(s) {
+  if (s === null || s === undefined) return null;
+  try { return JSON.parse(s); } catch { return null; }
+}
+
+function groupBy(rows, key) {
+  const out = {};
+  for (const r of rows) (out[r[key]] ||= []).push(r);
+  return out;
+}
+
+function mapKeys(obj, map) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj || {})) out[map[k] ?? k] = v;
+  return out;
+}
+
+async function bootstrapRoute(req, res, reqUrl, method) {
+  if (!(reqUrl === '/api/bootstrap' && method === 'GET')) return null;
+
+  const j = parseJson;
+  const all = (sql) => db.prepare(sql).all();
+
+  // ── identity ──
+  const users = all('SELECT * FROM users');
+  const currentRow = users.find(u => u.is_current === 1) || null;
+  const compByUser = groupBy(all('SELECT * FROM user_competence'), 'user_id');
+  const cirByUser = groupBy(all('SELECT * FROM user_circles'), 'user_id');
+  const orgByUser = groupBy(all('SELECT * FROM user_orgs'), 'user_id');
+  const dirByUser = groupBy(all('SELECT * FROM participants'), 'user_id');
+  const actByUser = groupBy(all('SELECT * FROM user_activity'), 'user_id');
+
+  const participants = users.map(u => {
+    const dir = dirByUser[u.id] ? dirByUser[u.id][0] : {};
+    return {
+      id: u.id, name: u.name, initials: u.initials, location: dir.location ?? u.location,
+      joined: dir.joined ?? u.joined, avatar: j(u.avatar) || {},
+      domains: (compByUser[u.id] || []).filter(c => c.kind === 'roster').map(c => ({ name: c.domain, ws: c.ws, color: c.color })),
+      circles: (cirByUser[u.id] || []).filter(c => c.kind === 'roster').map(c => c.circle),
+      orgs: (orgByUser[u.id] || []).map(o => o.org_acronym),
+      bio: dir.bio ?? u.bio,
+    };
+  });
+
+  let currentUser = null;
+  if (currentRow) {
+    currentUser = {
+      id: currentRow.id, name: currentRow.name, initials: currentRow.initials,
+      email: currentRow.email, location: currentRow.location, joined: currentRow.joined,
+      status: currentRow.status, standing: currentRow.standing, standingDrift: currentRow.standing_drift,
+      competence: currentRow.competence, competenceNote: currentRow.competence_note,
+      interestScore: currentRow.interest_score, interestDrift: currentRow.interest_drift,
+      activeRoles: currentRow.active_roles, rolesBreakdown: currentRow.roles_breakdown,
+      bio: currentRow.bio, essay: currentRow.essay, avatar: j(currentRow.avatar) || {},
+      domains: {},
+      circles: (cirByUser[currentRow.id] || []).filter(c => c.kind === 'self').map(c => ({ name: c.circle, status: c.status, since: c.since })),
+      activity: (actByUser[currentRow.id] || []).map(a => ({ text: a.text, time: a.time, type: a.type })),
+    };
+    for (const c of (compByUser[currentRow.id] || []).filter(c => c.kind === 'self')) {
+      currentUser.domains[c.domain] = { ws: c.ws, wh: c.wh, interest: c.interest, barWs: c.bar_ws, barWh: c.bar_wh, members: c.members };
+    }
+  }
+
+  // ── organisations ──
+  const kdByOrg = groupBy(all('SELECT * FROM org_knowledge_domains'), 'org_id');
+  const organisations = all('SELECT * FROM organisations').map(o => ({
+    id: o.id, name: o.name, acronym: o.acronym, shortname: o.shortname,
+    location: o.location, summary: o.summary, status: o.status, founded: o.founded,
+    foundingCell: o.founding_cell, memberCount: o.member_count,
+    website: o.website, logo: o.logo,
+    knowledgeDomains: (kdByOrg[o.id] || []).map(d => d.domain),
+  }));
+
+  // ── domains catalog + layout ──
+  const domains = {};
+  for (const d of all('SELECT * FROM domains')) {
+    domains[d.id] = { label: d.label, short: d.short, color: d.color, hasCircle: !!d.has_circle, type: d.type, taxonomy: d.taxonomy };
+  }
+  const layoutMeta = db.prepare('SELECT * FROM domain_layout_meta WHERE id = 1').get();
+  const seeds = {};
+  for (const l of all('SELECT * FROM domain_layout')) seeds[l.domain_id] = [l.x, l.y];
+  const domainLayout = {
+    worldSize: layoutMeta ? layoutMeta.world_size : 1800,
+    seeds,
+    camera: layoutMeta ? j(layoutMeta.camera) || { x: 900, y: 900, scale: 0.5 } : { x: 900, y: 900, scale: 0.5 },
+  };
+
+  // ── circles ──
+  const cdByCircle = groupBy(all('SELECT * FROM circle_domains'), 'circle_id');
+  const rosterByCircle = groupBy(all('SELECT * FROM circle_roster'), 'circle_id');
+  const rdByRoster = groupBy(all('SELECT * FROM circle_roster_domains'), 'roster_id');
+  const propByCircle = groupBy(all('SELECT * FROM circle_proposals'), 'circle_id');
+  const resByCircle = groupBy(all('SELECT * FROM circle_resolutions'), 'circle_id');
+  const actByCircle = groupBy(all('SELECT * FROM circle_activity'), 'circle_id');
+
+  const circles = all('SELECT * FROM circles').map(c => {
+    const cds = cdByCircle[c.id] || [];
+    const domainsList = cds.filter(d => !d.mandate).map(d => d.domain);
+    const primary = cds.filter(d => d.mandate === 'primary').map(d => d.domain);
+    const secondary = cds.filter(d => d.mandate === 'secondary').map(d => d.domain);
+    const desiredWs = {};
+    cds.forEach(d => { if (d.desired_ws != null) desiredWs[d.domain] = d.desired_ws; });
+    const roster = { active: [], former: [] };
+    for (const r of (rosterByCircle[c.id] || [])) {
+      const dRows = rdByRoster[r.id] || [];
+      const entry = {
+        id: r.member_id, name: r.name, initials: r.initials, color: r.color, ws: r.ws,
+        status: r.status, joined: r.joined, lastActive: r.last_active, topDomain: r.top_domain,
+        domains: dRows.map(d => d.domain), domainWs: dRows.map(d => d.ws),
+      };
+      if (r.status === 'former') {
+        entry.left = r.left; entry.leftReason = r.left_reason;
+        delete entry.lastActive;
+        roster.former.push(entry);
+      } else {
+        roster.active.push(entry);
+      }
+    }
+    const meta = j(c.meta) || {};
+    const cMeta = {};
+    if (meta.maxMembers != null) cMeta.maxMembers = meta.maxMembers;
+    if (meta.archivedDate != null) cMeta.archivedDate = meta.archivedDate;
+    if (meta.archiveReason != null) cMeta.archiveReason = meta.archiveReason;
+    const stripCircleId = ({ circle_id, ...rest }) => rest;
+    const stripDupes = ({ circle_id, id, ...rest }) => rest;
+    return {
+      id: c.id, name: c.name, status: c.status, members: c.members, motions: c.motions,
+      description: c.description, founded: c.founded,
+      termOverride: j(c.term_override), expiryOverride: j(c.expiry_override),
+      domains: domainsList, mandate: { primary, secondary }, desiredWs,
+      roster, proposals: (propByCircle[c.id] || []).map(stripCircleId),
+      resolutions: (resByCircle[c.id] || []).map(stripCircleId),
+      activity: (actByCircle[c.id] || []).map(stripDupes),
+      ...cMeta,
+    };
+  });
+
+  // ── cells ──
+  const cellDomains = groupBy(all('SELECT * FROM cell_domains'), 'cell_id');
+  const cellCircles = groupBy(all('SELECT * FROM cell_circles'), 'cell_id');
+  const msgByCell = groupBy(all('SELECT * FROM cell_messages'), 'cell_id');
+  const taskByCell = groupBy(all('SELECT * FROM cell_tasks'), 'cell_id');
+  const objByCell = groupBy(all('SELECT * FROM cell_objectives'), 'cell_id');
+  const teamByCell = groupBy(all('SELECT * FROM cell_team'), 'cell_id');
+  const draftByCell = groupBy(all('SELECT * FROM draft_resolutions'), 'cell_id');
+  const verByDraft = groupBy(all('SELECT * FROM resolution_versions'), 'draft_id');
+  const impByDraft = groupBy(all('SELECT * FROM resolution_implementing_circles'), 'draft_id');
+  const voteByCell = groupBy(all('SELECT * FROM cell_votes'), 'cell_id');
+  const voterByCell = groupBy(all('SELECT * FROM vote_records'), 'cell_id');
+  const vsumByCell = groupBy(all('SELECT * FROM cell_vote_summary'), 'cell_id');
+
+  const cells = all('SELECT * FROM cells').map(c => {
+    const meta = j(c.meta) || {};
+    const cell = {
+      id: c.id, type: c.type, title: c.title, status: c.status, delibType: c.delib_type,
+      participants: c.participants, members: c.members, progress: c.progress, daysActive: c.days_active,
+      lead: c.lead, circle: c.circle, created: c.created, deadline: c.deadline,
+      assessors: c.assessors, commissionedBy: c.commissioned_by,
+      resolutionRef: c.resolution_ref, entityType: c.entity_type,
+      source: j(c.source), resolution: j(c.resolution), deliverableSpecs: j(c.deliverable_specs),
+      domains: (cellDomains[c.id] || []).map(d => d.domain),
+      ...Object.fromEntries(Object.entries(meta).filter(([, v]) => v !== null && v !== undefined)),
+    };
+    if (c.blind) cell.blind = true;
+    const ccs = cellCircles[c.id] || [];
+    cell.circles = ccs.filter(cc => !cc.circle_id && !cc.votes).map(cc => ({ name: cc.name, initials: cc.initials, gradient: cc.gradient, status: cc.status, role: cc.role }));
+    cell.participatingCircles = ccs.filter(cc => cc.circle_id || cc.votes).map(cc => ({ id: cc.circle_id, name: cc.name, role: cc.role, votes: cc.votes }));
+    cell.messages = (msgByCell[c.id] || []).map(m => {
+      const msg = { author: m.author, initials: m.initials, text: m.text, time: m.time };
+      if (m.color != null) msg.color = m.color;
+      return msg;
+    });
+    cell.tasks = (taskByCell[c.id] || []).map(t => ({ id: t.task_id || 't' + t.id, label: t.label, status: t.status, locked: !!t.locked, assignee: t.assignee }));
+    cell.objectives = (objByCell[c.id] || []).map(o => ({ id: o.obj_id || 'o' + o.id, label: o.label, status: o.status }));
+    cell.team = (teamByCell[c.id] || []).map(t => ({ name: t.name, initials: t.initials, role: t.role, focus: t.focus }));
+    cell.draftResolutions = (draftByCell[c.id] || []).map(d => ({
+      id: d.res_id ?? d.id, title: d.title, text: d.text, action: d.action, votesNullified: !!d.votes_nullified,
+      versions: (verByDraft[d.id] || []).map(v => ({ title: v.title, text: v.text, action: v.action, author: v.author, ts: v.ts })),
+      implementingCircles: (impByDraft[d.id] || []).map(i => i.circle_name),
+    }));
+    const vs = voteByCell[c.id] || [];
+    if (vs.length || vsumByCell[c.id]) {
+      cell.votes = {
+        domains: vs.map(v => ({
+          name: v.domain, yea: v.yea, nay: v.nay, total: v.total,
+          voters: (voterByCell[c.id] || []).filter(vr => vr.domain === v.domain).map(vr => ({ name: vr.name, initials: vr.initials, ws: vr.ws, vote: vr.vote })),
+        })),
+        summary: vsumByCell[c.id] ? j(vsumByCell[c.id][0].summary) : undefined,
+      };
+    }
+    return Object.fromEntries(Object.entries(cell).filter(([, v]) => v !== null && v !== undefined));
+  });
+
+  // ── stfs + candidates ──
+  const stfShape = { pending: [], active: [], completed: [] };
+  for (const s of all('SELECT * FROM stfs')) {
+    const obj = { id: s.id, type: s.type, purpose: s.purpose, circle: s.circle, deadline: s.deadline, status: s.status };
+    if (s.bucket === 'pending') obj.candidate = s.title;
+    else obj.title = s.title;
+    stfShape[s.bucket] = stfShape[s.bucket] || [];
+    stfShape[s.bucket].push(obj);
+  }
+  const cdByCand = groupBy(all('SELECT * FROM stf_candidate_domains'), 'candidate_id');
+  const stfCandidates = all('SELECT * FROM stf_candidates').map(c => ({
+    id: c.id, stfId: c.stf_id, name: c.name, initials: c.initials, matchScore: c.match_score,
+    matchedDomains: (cdByCand[c.id] || []).map(d => d.domain), interestScore: c.interest_score, competenceScore: c.competence_score,
+    status: c.status, invitedDate: c.invited_date,
+  }));
+
+  // ── threads / inbox / publications / projects ──
+  const threads = all('SELECT * FROM threads').map(t => ({
+    id: t.id, title: t.title, body: t.body, author: t.author, initials: t.initials, avatar: j(t.avatar) || {},
+    domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
+    replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
+  }));
+
+  const actByInbox = groupBy(all('SELECT * FROM inbox_actions'), 'inbox_id');
+  const metaByInbox = groupBy(all('SELECT * FROM inbox_meta'), 'inbox_id');
+  const inbox = all('SELECT * FROM inbox').map(i => ({
+    id: i.id, type: i.type, title: i.title, desc: i.desc, time: i.time, badge: i.badge,
+    unread: !!i.unread, detail: i.detail, nav: i.nav,
+    actions: (actByInbox[i.id] || []).map(a => ({ label: a.label, style: a.style, action: a.action })),
+    meta: (metaByInbox[i.id] || []).map(m => ({ label: m.label, value: m.value })),
+  }));
+
+  const authorByPub = groupBy(all('SELECT * FROM publication_authors'), 'publication_id');
+  const publications = all('SELECT * FROM publications').map(p => ({
+    title: p.title, journal: p.journal, date: p.date, views: p.views, downloads: p.downloads,
+    authors: (authorByPub[p.id] || []).map(a => a.author),
+  }));
+
+  const news = all('SELECT * FROM news').map(n => ({ title: n.title, time: n.time, source: n.source }));
+  const events = all('SELECT * FROM events').map(e => ({ title: e.title, date: e.date, location: e.location }));
+  const opportunities = all('SELECT * FROM opportunities').map(o => ({ title: o.title, deadline: o.deadline, type: o.type }));
+  const domByProject = groupBy(all('SELECT * FROM project_domains'), 'project_id');
+  const projects = all('SELECT * FROM projects').map(p => ({
+    id: p.id, title: p.title, lead: p.lead, progress: p.progress, role: p.role,
+    domains: (domByProject[p.id] || []).map(d => d.domain),
+  }));
+
+  // ── config & misc ──
+  const exitReasonLabels = {};
+  for (const r of all('SELECT * FROM exit_reason_labels')) exitReasonLabels[r.key] = r.label;
+
+  const ss = db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {};
+  const systemSettings = {
+    stewardTermMonths: ss.steward_term_months ?? null,
+    maxConsecutiveTerms: ss.max_consecutive_terms ?? null,
+    cooloffMonths: ss.cooloff_months ?? null,
+    pAstfCycleMonths: ss.p_astf_cycle_months ?? null,
+    autoExpireCircles: !!ss.auto_expire_circles,
+    defaultCircleExpiryMonths: ss.default_circle_expiry_months ?? null,
+  };
+  const stats = j(db.prepare('SELECT stats FROM stats WHERE id = 1').get()?.stats) || {};
+
+  const regRows = all('SELECT * FROM registration_domains');
+  const regMeta = db.prepare('SELECT * FROM registration_meta WHERE id = 1').get();
+  const registration = {
+    domains: regRows.map(r => ({ name: r.name, type: r.type })),
+    eloMap: regMeta ? j(regMeta.elo_map) : {},
+    knowledgeLevels: regMeta ? j(regMeta.knowledge_levels) : [],
+    experientialLevels: regMeta ? j(regMeta.experiential_levels) : [],
+    defaultInterests: regMeta ? j(regMeta.default_interests) : [],
+  };
+
+  const integrityRecords = all('SELECT * FROM integrity_records');
+  const governanceEvents = all('SELECT * FROM governance_events').map(g => {
+    const o = { id: g.id, type: g.type, circle: g.circle, date: g.date, text: g.text };
+    if (g.participant != null) o.participant = g.participant;
+    return o;
+  });
+
+  const domByApp = groupBy(all('SELECT * FROM circle_application_domains'), 'app_id');
+  const circleApplications = all('SELECT * FROM circle_applications').map(a => ({
+    id: a.id, circleId: a.circle_id, circleName: a.circle_name, applicant: a.applicant, initials: a.initials,
+    motivation: a.motivation, relevantDomains: (domByApp[a.id] || []).map(d => d.domain), status: a.status,
+    appliedDate: a.applied_date, queuePosition: a.queue_position,
+  }));
+
+  const projectApplications = all('SELECT * FROM project_applications').map(p => ({
+    id: p.id, cellId: p.cell_id, projectName: p.project_name, applicant: p.applicant, initials: p.initials,
+    motivation: p.motivation, status: p.status, appliedDate: p.applied_date, proposedRole: p.proposed_role,
+  }));
+
+  const governanceLedger = all('SELECT * FROM governance_ledger').map(l => ({
+    id: l.id, type: l.type, target: l.target, settings: j(l.settings), appliedBy: l.applied_by,
+    appliedAt: l.applied_at, status: l.status,
+  }));
+
+  return send(res, 200, {
+    currentUser, participants, organisations, domains, domainLayout,
+    circles, cells, stfs: stfShape, stfCandidates, threads, inbox, publications,
+    news, events, opportunities, projects, exitReasonLabels, systemSettings, stats, registration,
+    integrityRecords, governanceEvents, circleApplications, projectApplications, governanceLedger,
+  });
+}
+
+// ═════════════════════════════════════════════════════════
+// CONFIG ENDPOINTS
+// ═════════════════════════════════════════════════════════
+
+async function configRoutes(req, res, reqUrl, method) {
+  if (reqUrl === '/api/system-settings' && method === 'GET') {
+    return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {});
+  }
+  if (reqUrl === '/api/system-settings' && (method === 'PATCH' || method === 'PUT')) {
+    const body = await readBody(req);
+    const cols = db.prepare('PRAGMA table_info(system_settings)').all().map(c => c.name).filter(c => c !== 'id');
+    const entries = Object.entries(body).filter(([k]) => cols.includes(k));
+    if (!entries.length) return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get());
+    const sets = entries.map(([k]) => `${k} = ?`).join(', ');
+    db.prepare(`UPDATE system_settings SET ${sets} WHERE id = 1`).run(...entries.map(([, v]) => v));
+    return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get());
+  }
+  if (reqUrl === '/api/stats' && method === 'GET') {
+    const row = db.prepare('SELECT stats FROM stats WHERE id = 1').get();
+    return send(res, 200, row ? JSON.parse(row.stats) : {});
+  }
+  if (reqUrl === '/api/registration' && method === 'GET') {
+    const reg = db.prepare('SELECT * FROM registration_domains').all();
+    const meta = db.prepare('SELECT * FROM registration_meta WHERE id = 1').get();
+    return send(res, 200, {
+      domains: reg,
+      eloMap: meta ? JSON.parse(meta.elo_map || '{}') : {},
+      knowledgeLevels: meta ? JSON.parse(meta.knowledge_levels || '[]') : [],
+      experientialLevels: meta ? JSON.parse(meta.experiential_levels || '[]') : [],
+      defaultInterests: meta ? JSON.parse(meta.default_interests || '[]') : [],
+    });
+  }
+  if (reqUrl === '/api/current-user' && method === 'GET') {
+    const u = db.prepare('SELECT * FROM users WHERE is_current = 1').get();
+    if (!u) return send(res, 404, { error: 'No current user' });
+    delete u.password_hash;
+    return send(res, 200, u);
+  }
+  return null;
+}
+
+// ═════════════════════════════════════════════════════════
+// STATIC FILES
+// ═════════════════════════════════════════════════════════
+
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=utf-8',
+  '.md': 'text/plain; charset=utf-8',
+};
+
+function staticFile(reqUrl) {
+  const urlPath = reqUrl.split('?')[0];
+  let rel = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
+  const full = normalize(join(PLATFORM_DIR, rel));
+  if (!full.startsWith(PLATFORM_DIR + sep)) return null;
+  if (!existsSync(full) || statSync(full).isDirectory()) return null;
+  return full;
+}
+
+// ═════════════════════════════════════════════════════════
+// REQUEST HANDLER
+// ═════════════════════════════════════════════════════════
+
+const server = createServer(async (req, res) => {
+  const reqUrl = decodeURIComponent(new URL(req.url, 'http://x').pathname);
+  const method = req.method;
+
+  // API routes
+  if (reqUrl.startsWith('/api/')) {
+    let handled = await authRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await bootstrapRoute(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await resourceRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await childRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await draftChildRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await configRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    return send(res, 404, { error: 'Not found' });
+  }
+
+  // Static
+  const file = staticFile(reqUrl);
+  if (file) {
+    const ext = extname(file);
+    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+    createReadStream(file).pipe(res);
+    return;
+  }
+
+  send(res, 404, { error: 'Not found' });
+});
+
+server.listen(PORT, () => {
+  console.log(`Solis database prototype → http://localhost:${PORT}`);
+  console.log(`  static root: ${PLATFORM_DIR}`);
+  console.log(`  database:    ${DB_PATH}`);
+});
