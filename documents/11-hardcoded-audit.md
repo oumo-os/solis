@@ -12,16 +12,14 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
 
 ## Remaining known-static areas (intentional / out of scope)
 
-- `view-stf-*` detail pages (6) — full static UI for candidate rubrics/verdicts;
-  no data source yet.
-- `view-thread-detail` — static sample post + replies (threads table exists;
-  renderer not built).
+- `view-stf-*` detail pages — rubric/verdict/commentary UI, match tables,
+  evidence packages remain static (no data source); Assignment card + page
+  header + vSTF candidate name/initials are now hydrated from `stfs`.
 - `view-inbox` filter tabs "Unread / Circles" — fixed UI labels.
 - "From Discussion to Action" explainer, library cards, "How STFs Work",
   lifecycle/type explainers — fixed copy, not data.
-- `view-domain-map` (static layout; catalog now contains all circle-backed
-  domain ids).
-- `view-publication-detail` — static publication page.
+- `view-domain-map` canvas/SVG topology — static layout; the page-sub count is
+  now derived from the domain catalog.
 - `view-profile` — now rendered from `currentUser` (see item 6b).
 
 ## Completed items
@@ -86,6 +84,32 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
    `mars`, `freq`) → user domain slugs rendered as raw keys; added the four
    entries to `mock.json` (re-seed required).
 
+7. **view-thread-detail rendered** — `openThreadDetail(threadId)` +
+   `renderThreadDetail()`: hero avatar (domain gradient or blue-soft), title,
+   body, badge + "author · time · N replies" meta, domain tag, replies from
+   the new `thread_replies` table (first 10), info rows (Author/Created/
+   Replies/Likes/Shares), participants (author + unique reply authors), related
+   threads (same-domain first, top 3, clickable); empty state "No discussions
+   yet" + Go to Discussions. Discussion feed cards now open via
+   `openThreadDetail('id')`; observatory/related aside links route here.
+
+8. **view-publication-detail rendered** — `openPublicationDetail(pubId)` +
+   `renderPublicationDetail()`: title, authors · journal · date meta, tags,
+   abstract, info rows (Type/Published/Views/Downloads), author avatars,
+   citation string, related discussions (first 3 threads, clickable); empty
+   state "No publications yet" + Back to Observatory. `publications` gained
+   `id/type/abstract/tags` columns; observatory cards/aside links open the
+   detail page (resolutions in the pubs list keep `id: null` and stay
+   non-clickable).
+
+9. **view-stf-* Assignment cards + headers hydrated** — `renderStfDetail(key)`
+   renders the Assignment card (Type/Candidate|Motion/Circle/Deadline/Status)
+   and page header ("◆ type — purpose") from `stfs` (pending/active/completed
+   arrays, matched via `stfNavKey`), plus the vSTF Steward candidate
+   name/initials; "No assignment data." fallback. Rubric/verdict/evidence UI
+   intentionally static. `view-domain-map` page-sub count now derived from the
+   catalog ("49 knowledge + 3 affiliate domains").
+
 ## Data notes (verified against bootstrap)
 
 - `circles[].motions` is a **number** (not array); `circles[].resolutions` has
@@ -93,6 +117,14 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
   `versions[].ts` ("Jul 21, 2026 14:30").
 - `stfCandidates`: `{stfId, name, initials, matchScore, status}` — 3 for
   `xstf-itu`.
+- `stfs` boots as `{pending[], active[], completed[]}` with `id/type/purpose/
+  circle/deadline/status` (`candidate` on vSTFs, `title` on aSTF/jSTF/p-aSTF);
+  `stfNavKey(id)` maps to view keys.
+- Threads carry `repliesList[]` (from the `thread_replies` table; 2–3 rows)
+  while the `replies` count (8–14) stays the display number; publications have
+  numeric `id` + `type/abstract/tags`.
+- `MOCK.domains` is an object keyed by slug (not an array) — iterate with
+  `Object.keys()`.
 - Participants have `joined: undefined` / empty `avatar` — renderers are
   null-safe.
 - Server caches nothing, but holds the DB file open: after re-seeding, the

@@ -366,6 +366,13 @@ for (const t of (MOCK.threads || [])) {
      t.avatar ? JSON.stringify(t.avatar) : null, t.domain ?? null,
      t.domainColor ?? null, t.badge ?? null, t.badgeClass ?? null,
      t.replies ?? 0, t.likes ?? 0, t.shares ?? 0, t.time ?? null, t.pinned ? 1 : 0]);
+  for (const r of (t.repliesList || [])) {
+    run(`INSERT OR REPLACE INTO thread_replies
+      (id,thread_id,author,initials,avatar,time,body,likes) VALUES (?,?,?,?,?,?,?,?)`,
+      [r.id, t.id, r.author ?? null, r.initials ?? null,
+       r.avatar ? JSON.stringify(r.avatar) : null,
+       r.time ?? null, r.body ?? null, r.likes ?? 0]);
+  }
 }
 
 for (const i of (MOCK.inbox || [])) {
@@ -384,8 +391,9 @@ for (const i of (MOCK.inbox || [])) {
 }
 
 for (const p of (MOCK.publications || [])) {
-  const pid = run(`INSERT INTO publications (title,journal,date,views,downloads) VALUES (?,?,?,?,?)`,
-    [p.title, p.journal ?? null, p.date ?? null, p.views ?? 0, p.downloads ?? 0]).lastInsertRowid;
+  const pid = run(`INSERT INTO publications (title,journal,date,views,downloads,type,abstract,tags) VALUES (?,?,?,?,?,?,?,?)`,
+    [p.title, p.journal ?? null, p.date ?? null, p.views ?? 0, p.downloads ?? 0,
+     p.type ?? 'Essay', p.abstract ?? null, p.tags ? JSON.stringify(p.tags) : null]).lastInsertRowid;
   for (const a of (p.authors || [])) {
     run(`INSERT INTO publication_authors (publication_id,author) VALUES (?,?)`, [pid, a]);
   }

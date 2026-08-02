@@ -103,7 +103,7 @@ function renderDiscussionThreads() {
     else if (t.domainColor === 'tag-blue') domainTagBg = 'background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border)';
     else if (t.domainColor === 'tag-red') domainTagBg = 'background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)';
 
-    return '<div class="post-card' + pinnedClass + '" onclick="nav(\'thread-detail\')">'
+    return '<div class="post-card' + pinnedClass + '" onclick="openThreadDetail(\'' + t.id + '\')">'
       + '<div class="post-header">'
       + '<div class="post-avatar" style="' + avatarBg + '">' + t.initials + '</div>'
       + '<div class="post-meta">'

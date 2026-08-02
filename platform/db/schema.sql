@@ -385,6 +385,17 @@ CREATE TABLE IF NOT EXISTS threads (
   pinned       INTEGER DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS thread_replies (
+  id        TEXT PRIMARY KEY,
+  thread_id TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  author    TEXT,
+  initials  TEXT,
+  avatar    TEXT,            -- JSON
+  time      TEXT,
+  body      TEXT,
+  likes     INTEGER DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS inbox (
   id     TEXT PRIMARY KEY,
   type   TEXT,
@@ -418,7 +429,10 @@ CREATE TABLE IF NOT EXISTS publications (
   journal   TEXT,
   date      TEXT,
   views     INTEGER,
-  downloads INTEGER
+  downloads INTEGER,
+  type      TEXT,
+  abstract  TEXT,
+  tags      TEXT             -- JSON array
 );
 
 CREATE TABLE IF NOT EXISTS publication_authors (

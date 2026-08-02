@@ -530,10 +530,15 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   }));
 
   // ── threads / inbox / publications / projects ──
+  const replyByThread = groupBy(all('SELECT * FROM thread_replies'), 'thread_id');
   const threads = all('SELECT * FROM threads').map(t => ({
     id: t.id, title: t.title, body: t.body, author: t.author, initials: t.initials, avatar: j(t.avatar) || {},
     domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
     replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
+    repliesList: (replyByThread[t.id] || []).map(r => ({
+      id: r.id, author: r.author, initials: r.initials, avatar: j(r.avatar) || {},
+      time: r.time, body: r.body, likes: r.likes,
+    })),
   }));
 
   const actByInbox = groupBy(all('SELECT * FROM inbox_actions'), 'inbox_id');
@@ -547,7 +552,8 @@ async function bootstrapRoute(req, res, reqUrl, method) {
 
   const authorByPub = groupBy(all('SELECT * FROM publication_authors'), 'publication_id');
   const publications = all('SELECT * FROM publications').map(p => ({
-    title: p.title, journal: p.journal, date: p.date, views: p.views, downloads: p.downloads,
+    id: p.id, title: p.title, journal: p.journal, date: p.date, views: p.views, downloads: p.downloads,
+    type: p.type, abstract: p.abstract, tags: j(p.tags) || [],
     authors: (authorByPub[p.id] || []).map(a => a.author),
   }));
 

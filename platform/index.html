@@ -602,11 +602,11 @@
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Steward Candidacy Assessment</div>
+        <div id="stf-header-vstf-steward" style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Steward Candidacy Assessment</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div class="sec">Candidate Profile</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
+          <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
           <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
           <table class="tbl" style="margin-bottom:12px">
             <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
@@ -643,10 +643,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">Steward Candidacy</span></div>
-          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 19, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Assessors</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
+          <div id="stf-assignment-vstf-steward"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Mandate</div>
@@ -672,7 +669,7 @@
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Competence Claims Assessment</div>
+        <div id="stf-header-vstf-competence" style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Competence Claims Assessment</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div class="sec">Evidence Package</div>
         <div class="evidence-shelf" style="margin-bottom:16px">
@@ -728,10 +725,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">Competence Verification</span></div>
-          <div class="aside-row"><span class="aside-label">Candidate</span><span style="font-size:11px;color:var(--text)">Akello J.</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 19, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Assessors</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
+          <div id="stf-assignment-vstf-competence"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Candidate Profile</div>
@@ -873,11 +867,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">jSTF — Investigation</span></div>
-          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Judicial</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 01, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Team</span><span style="font-size:11px;color:var(--text)">3 investigators</span></div>
-          <div class="aside-row"><span class="aside-label">Access</span><span style="font-size:11px;color:var(--red)"><i class="fa-solid fa-lock"></i> Sealed</span></div>
+          <div id="stf-assignment-jstf"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Accused</div>
@@ -921,7 +911,7 @@
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
+        <div id="stf-header-astf" style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
         <div class="sec">Motion Record</div>
         <div class="card" style="margin-bottom:16px">
@@ -961,12 +951,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">aSTF — Motion Adjudication</span></div>
-          <div class="aside-row"><span class="aside-label">Motion</span><span style="font-size:11px;color:var(--text)">Debris Liability</span></div>
-          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Jul 28, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Adjudicators</span><span style="font-size:11px;color:var(--text)">3 blind</span></div>
-          <div class="aside-row"><span class="aside-label">Required</span><span style="font-size:11px;color:var(--text)">Majority verdict</span></div>
+          <div id="stf-assignment-astf"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Commissioning Circle</div>
@@ -1043,7 +1028,7 @@
     <div class="back" onclick="nav('stf')">← STF Dash</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ p-aSTF — Periodic Circle Health Review</div>
+        <div id="stf-header-pastf" style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ p-aSTF — Periodic Circle Health Review</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
 
         <!-- Layer 1: Circle Rubric -->
@@ -1144,11 +1129,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">p-aSTF — Circle Health</span></div>
-          <div class="aside-row"><span class="aside-label">Circle</span><span style="font-size:11px;color:var(--text)">Space Law</span></div>
-          <div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">Aug 05, 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Your members</span><span style="font-size:11px;color:var(--text)">2 assigned</span></div>
-          <div class="aside-row"><span class="aside-label">Circle rubric</span><span style="font-size:11px;color:var(--text)">All reviewers</span></div>
+          <div id="stf-assignment-pastf"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Profile</div>
@@ -1345,24 +1326,17 @@
     <div class="layout-split">
       <div class="layout-main">
         <div class="hero">
-          <div class="hero-icon" style="background:var(--blue-soft);border:1px solid var(--blue-border);color:var(--blue);font-size:18px">SR</div>
+          <div class="hero-icon" style="background:var(--blue-soft);border:1px solid var(--blue-border);color:var(--blue);font-size:18px" id="td-hero-icon">?</div>
           <div style="flex:1">
-            <div class="hero-title" id="td-title">Should Uganda ratify the Artemis Accords?</div>
-            <div class="hero-desc" id="td-body">The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing.</div>
-            <div class="hero-tags"><span class="badge b-active">Endorsed</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">Sarah R. · 2h ago · 4 replies</span></div>
+            <div class="hero-title" id="td-title">No discussion selected</div>
+            <div class="hero-desc" id="td-body">Select a thread from the Discussions feed.</div>
+            <div class="hero-tags" id="td-meta"></div>
           </div>
         </div>
-        <div class="flex gap-2" style="margin-bottom:20px">
-          <span class="tag tag-blue" style="font-size:10px">Space Law</span>
-          <span class="tag tag-green" style="font-size:10px">Policy</span>
-          <span class="tag tag-amber" style="font-size:10px">Uganda</span>
-        </div>
-        <div class="sec">Replies (4)</div>
+        <div class="flex gap-2" style="margin-bottom:20px" id="td-tags"></div>
+        <div class="sec" id="td-replies-title">Replies (0)</div>
         <div class="card">
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">OK</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Okello Robert</span><span class="text-xs" style="color:var(--text-tertiary)">1h ago</span></div><p class="text-sm">Great topic. The main concern is Article 10 on resource extraction — it could conflict with our existing mineral rights frameworks. But the cooperation benefits for capacity building are significant.</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">KA</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Kimani A.</span><span class="text-xs" style="color:var(--text-tertiary)">45m ago</span></div><p class="text-sm">I'd also consider the precedent set by Nigeria and Kenya. Neither has signed yet, and there may be strategic reasons to wait for an African consensus position.</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0;border-bottom:1px solid var(--border-subtle)"><div class="avatar avatar-md">MN</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Mensah N.</span><span class="text-xs" style="color:var(--text-tertiary)">30m ago</span></div><p class="text-sm">From a law student's perspective — the dispute resolution mechanism in Article 19 is actually quite favorable. It's binding arbitration, which gives smaller nations more leverage than the Outer Space Treaty's vague framework.</p></div></div>
-          <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">AO</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Aisha O.</span><span class="text-xs" style="color:var(--text-tertiary)">10m ago</span></div><p class="text-sm">Adding a science comm angle — the public perception in East Africa is largely positive. The "Artemis" brand resonates well. Could be a good opportunity for educational outreach tied to ratification.</p></div></div>
+          <div id="td-replies"></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
           <textarea class="msg-input" rows="2" placeholder="Write a reply..."></textarea>
         </div>
@@ -1370,10 +1344,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Thread Info</div>
-          <div class="aside-row"><span class="aside-label">Author</span><span style="font-size:12px;color:var(--text)">Sarah R.</span></div>
-          <div class="aside-row"><span class="aside-label">Created</span><span style="font-size:12px;color:var(--text)">2 hours ago</span></div>
-          <div class="aside-row"><span class="aside-label">Replies</span><span style="font-size:12px;color:var(--text)">4</span></div>
-          <div class="aside-row"><span class="aside-label">Views</span><span style="font-size:12px;color:var(--text)">23</span></div>
+          <div id="td-info"></div>
         </div>
         <div class="aside-card" id="td-actions-card">
           <div class="aside-title">Actions</div>
@@ -1382,24 +1353,15 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
-          <div class="aside-tags">
-            <span class="tag tag-blue" style="font-size:9px">Space Law</span>
-            <span class="tag tag-green" style="font-size:9px">Policy</span>
-            <span class="tag tag-amber" style="font-size:9px">Uganda</span>
-          </div>
+          <div class="aside-tags" id="td-domains"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Participants</div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--blue-soft);color:var(--blue)">SR</div><div><div style="font-weight:500">Sarah R.</div><div style="font-size:10px;color:var(--text-tertiary)">Author</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OK</div><div><div style="font-weight:500">Okello R.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--gold-soft);color:var(--gold)">MN</div><div><div style="font-weight:500">Mensah N.</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--green-soft);color:var(--green)">AO</div><div><div style="font-weight:500">Aisha O.</div></div></div>
+          <div id="td-participants"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Related Threads</div>
-          <div class="aside-link" onclick="nav('thread-detail')">Artemis Accords — East African perspective</div>
-          <div class="aside-link" onclick="nav('thread-detail')">ITU frequency coordination basics</div>
+          <div id="td-related"></div>
         </div>
       </div>
     </div>
@@ -1532,49 +1494,34 @@
     <div class="back" onclick="nav('observatory')">← Back to Observatory</div>
     <div class="layout-split">
       <div class="layout-main">
-        <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">Why East Africa Needs a Coordinated Space Debris Policy</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Okello R., Kimani A. · Journal of African Space Policy · June 2026</div>
-        <div class="flex gap-1 mb-3">
-          <span class="tag tag-blue" style="font-size:10px">Space Law</span>
-          <span class="tag tag-green" style="font-size:10px">Policy</span>
-          <span class="tag tag-amber" style="font-size:10px">Debris</span>
-        </div>
-        <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px">
-          <strong>Abstract:</strong> East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context.
-        </div>
+        <div style="font-family:var(--display);font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px" id="pub-title">No publication selected</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px" id="pub-meta"></div>
+        <div class="flex gap-1 mb-3" id="pub-tags"></div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px" id="pub-abstract"><strong>Abstract:</strong> Select a publication from the Observatory.</div>
         <div class="flex gap-2 mb-4">
           <button class="btn btn-primary" style="font-size:12px">Download PDF</button>
           <button class="btn btn-sm">Cite</button>
           <button class="btn btn-sm">Share</button>
         </div>
         <div class="sec">Related Discussions</div>
-        <div class="card" style="cursor:pointer" onclick="nav('thread-detail')"><div style="font-size:12px;font-weight:500;color:var(--text)">Should Uganda ratify the Artemis Accords?</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">4 replies · Space Law Circle</div></div>
-        <div class="card"><div style="font-size:12px;font-weight:500;color:var(--text)">Space Debris Liability Standards for LEO</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Active motion · Space Law Circle</div></div>
+        <div id="pub-related"></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Publication Info</div>
-          <div class="aside-row"><span class="aside-label">Type</span><span style="font-size:12px;color:var(--text)">Essay</span></div>
-          <div class="aside-row"><span class="aside-label">Published</span><span style="font-size:12px;color:var(--text)">Jun 2026</span></div>
-          <div class="aside-row"><span class="aside-label">Views</span><span style="font-size:12px;color:var(--text)">142</span></div>
-          <div class="aside-row"><span class="aside-label">Downloads</span><span style="font-size:12px;color:var(--text)">38</span></div>
+          <div id="pub-info"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Authors</div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">OR</div><div><div style="font-weight:500">Okello R.</div><div style="font-size:10px;color:var(--text-tertiary)">Space Law & Policy</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">KA</div><div><div style="font-weight:500">Kimani A.</div><div style="font-size:10px;color:var(--text-tertiary)">Education & Policy</div></div></div>
+          <div id="pub-authors"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Domains</div>
-          <div class="aside-tags">
-            <span class="tag tag-blue" style="font-size:9px">Space Law</span>
-            <span class="tag tag-green" style="font-size:9px">Policy</span>
-            <span class="tag tag-amber" style="font-size:9px">Debris</span>
-          </div>
+          <div class="aside-tags" id="pub-domains"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Cite</div>
-          <div style="font-size:11px;color:var(--text-secondary);font-family:var(--mono);line-height:1.5;background:var(--surface-raised);padding:10px;border-radius:var(--radius);word-break:break-all">Okello R., Kimani A. (2026). "Why East Africa Needs a Coordinated Space Debris Policy." <em>J. African Space Policy</em>.</div>
+          <div style="font-size:11px;color:var(--text-secondary);font-family:var(--mono);line-height:1.5;background:var(--surface-raised);padding:10px;border-radius:var(--radius);word-break:break-all" id="pub-cite"></div>
         </div>
       </div>
     </div>
@@ -1585,7 +1532,7 @@
     <div class="flex justify-between items-center" style="margin-bottom:12px">
       <div>
         <div class="page-title">Domain Map</div>
-        <div class="page-sub">Membership constellation across 16 knowledge + 3 affiliate domains</div>
+        <div class="page-sub" id="dm-sub">Membership constellation across 16 knowledge + 3 affiliate domains</div>
       </div>
       <div class="dm-toggles" id="dm-toggles">
         <button class="dm-toggle active" data-mode="membership" onclick="dmSetMode('membership')">Membership</button>
@@ -4110,6 +4057,143 @@ function renderStfSummary() {
   set('stf-sum-completed', completed);
 }
 
+var currentThreadId = null;
+
+function openThreadDetail(threadId) {
+  currentThreadId = threadId || null;
+  renderThreadDetail(currentThreadId);
+  nav('thread-detail');
+}
+
+function renderThreadDetail(threadId) {
+  var view = document.getElementById('view-thread-detail');
+  if (!view) return;
+  var threads = (MOCK && MOCK.threads) || [];
+  var t = null;
+  if (threadId) t = threads.filter(function(x) { return x.id === threadId; })[0] || null;
+  if (!t) t = threads[0] || null;
+  if (!t) {
+    view.innerHTML = '<div class="back" onclick="nav(\'commons\')">← Back to Discussions</div><div class="empty-state" style="padding:40px;text-align:center"><div style="font-size:40px;color:var(--gold);margin-bottom:16px"><i class="fa-solid fa-comments"></i></div><h2 style="margin:0 0 8px;color:var(--text)">No discussions yet</h2><p style="color:var(--text-tertiary);font-size:13px;max-width:400px;margin:0 auto 20px">Start a thread from the Discussions feed to open it here.</p><button class="btn btn-primary" onclick="nav(\'commons\')">Go to Discussions</button></div>';
+    return;
+  }
+  function set(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+  function setTxt(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+  var avatarBg = t.avatar && t.avatar.gradient ? t.avatar.gradient : 'var(--blue-soft)';
+  var iconEl = document.getElementById('td-hero-icon');
+  if (iconEl) {
+    iconEl.textContent = t.initials || (t.author || '?').slice(0, 2).toUpperCase();
+    iconEl.style.background = t.avatar && t.avatar.gradient ? t.avatar.gradient : 'var(--blue-soft)';
+    iconEl.style.color = t.avatar && t.avatar.gradient ? '#fff' : 'var(--blue)';
+  }
+  setTxt('td-title', t.title || 'Untitled thread');
+  setTxt('td-body', t.body || '');
+  var badgeHtml = t.badge ? '<span class="badge ' + (t.badgeClass || 'b-pending') + '">' + escapeHtml(t.badge) + '</span>' : '';
+  set('td-meta', badgeHtml + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">' + escapeHtml(t.author || '') + (t.time ? ' · ' + escapeHtml(t.time) : '') + ' · ' + (t.replies || 0) + ' replies</span>');
+  var tagClass = (t.domainColor || '').indexOf('tag-') === 0 ? t.domainColor : 'tag-blue';
+  set('td-tags', t.domain ? '<span class="tag ' + tagClass + '" style="font-size:10px">' + escapeHtml(t.domain) + '</span>' : '');
+  set('td-domains', t.domain ? '<span class="tag ' + tagClass + '" style="font-size:9px">' + escapeHtml(t.domain) + '</span>' : '<span style="font-size:11px;color:var(--text-tertiary)">No domain.</span>');
+
+  var replies = (t.repliesList || []).slice(0, 10);
+  setTxt('td-replies-title', 'Replies (' + (t.replies || 0) + ')');
+  var repliesHtml = '';
+  replies.forEach(function(r, i) {
+    var bg = r.avatar && r.avatar.gradient ? r.avatar.gradient : 'var(--navy-light)';
+    var color = r.avatar && r.avatar.gradient ? '#fff' : 'var(--text-secondary)';
+    var border = i < replies.length - 1 ? ';border-bottom:1px solid var(--border-subtle)' : '';
+    repliesHtml += '<div class="flex gap-3" style="padding:var(--space-2) 0' + border + '"><div class="avatar avatar-md" style="background:' + bg + ';color:' + color + '">' + escapeHtml(r.initials || (r.author || '?').slice(0, 2).toUpperCase()) + '</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">' + escapeHtml(r.author || '') + '</span><span class="text-xs" style="color:var(--text-tertiary)">' + escapeHtml(r.time || '') + '</span></div><p class="text-sm">' + escapeHtml(r.body || '') + '</p>' + (r.likes ? '<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">♥ ' + r.likes + ' like' + (r.likes !== 1 ? 's' : '') + '</div>' : '') + '</div></div>';
+  });
+  if (!repliesHtml) repliesHtml = '<div style="padding:12px 0;font-size:12px;color:var(--text-tertiary)">No replies yet — be the first to respond.</div>';
+  set('td-replies', repliesHtml);
+
+  var infoRows = '';
+  function row(label, val) { infoRows += '<div class="aside-row"><span class="aside-label">' + label + '</span><span style="font-size:12px;color:var(--text)">' + escapeHtml(val) + '</span></div>'; }
+  row('Author', t.author || '—');
+  row('Created', t.time || '—');
+  row('Replies', t.replies || 0);
+  row('Likes', t.likes || 0);
+  row('Shares', t.shares || 0);
+  set('td-info', infoRows);
+
+  var seen = {};
+  var participantsHtml = '<div class="aside-member"><div class="aside-member-avatar" style="background:var(--blue-soft);color:var(--blue)">' + escapeHtml(t.initials || (t.author || '?').slice(0, 2).toUpperCase()) + '</div><div><div style="font-weight:500">' + escapeHtml(t.author || '') + '</div><div style="font-size:10px;color:var(--text-tertiary)">Author</div></div></div>';
+  seen[t.author || ''] = true;
+  var softBg = ['var(--teal-soft);color:var(--teal)', 'var(--purple-soft);color:var(--purple)', 'var(--gold-soft);color:var(--gold)', 'var(--green-soft);color:var(--green)'];
+  var si = 0;
+  replies.forEach(function(r) {
+    if (seen[r.author]) return;
+    seen[r.author] = true;
+    participantsHtml += '<div class="aside-member"><div class="aside-member-avatar" style="background:' + softBg[si++ % softBg.length] + '">' + escapeHtml(r.initials || (r.author || '?').slice(0, 2).toUpperCase()) + '</div><div><div style="font-weight:500">' + escapeHtml(r.author || '') + '</div></div></div>';
+  });
+  set('td-participants', participantsHtml);
+
+  var related = threads.filter(function(x) { return x.id !== t.id; })
+    .sort(function(a, b) { return (b.domain === t.domain ? 1 : 0) - (a.domain === t.domain ? 1 : 0); })
+    .slice(0, 3);
+  var relatedHtml = related.length ? related.map(function(x) {
+    return '<div class="aside-link" onclick="openThreadDetail(\'' + x.id + '\')">' + escapeHtml(x.title || '') + '</div>';
+  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No related threads yet.</div>';
+  set('td-related', relatedHtml);
+}
+
+var currentPublicationId = null;
+
+function openPublicationDetail(pubId) {
+  currentPublicationId = pubId || null;
+  renderPublicationDetail(currentPublicationId);
+  nav('publication-detail');
+}
+
+function renderPublicationDetail(pubId) {
+  var view = document.getElementById('view-publication-detail');
+  if (!view) return;
+  var pubs = (MOCK && MOCK.publications) || [];
+  var p = null;
+  if (pubId != null) p = pubs.filter(function(x) { return x.id === pubId; })[0] || null;
+  if (!p) p = pubs[0] || null;
+  if (!p) {
+    view.innerHTML = '<div class="back" onclick="nav(\'observatory\')">← Back to Observatory</div><div class="empty-state" style="padding:40px;text-align:center"><div style="font-size:40px;color:var(--gold);margin-bottom:16px"><i class="fa-solid fa-file-lines"></i></div><h2 style="margin:0 0 8px;color:var(--text)">No publications yet</h2><p style="color:var(--text-tertiary);font-size:13px;max-width:400px;margin:0 auto 20px">Publications approved by the Commons will appear here.</p><button class="btn btn-primary" onclick="nav(\'observatory\')">Back to Observatory</button></div>';
+    return;
+  }
+  function set(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+  function setTxt(id, txt) { var el = document.getElementById(id); if (el) el.textContent = txt; }
+  setTxt('pub-title', p.title || 'Untitled publication');
+  var authors = (p.authors || []).join(', ');
+  setTxt('pub-meta', authors + (p.journal ? ' · ' + p.journal : '') + (p.date ? ' · ' + p.date : ''));
+  var tagPool = ['tag-blue', 'tag-green', 'tag-amber', 'tag-purple'];
+  var tags = (p.tags || []);
+  set('pub-tags', tags.map(function(tg, i) { return '<span class="tag ' + tagPool[i % tagPool.length] + '" style="font-size:10px">' + escapeHtml(tg) + '</span>'; }).join(''));
+  set('pub-abstract', '<strong>Abstract:</strong> ' + escapeHtml(p.abstract || 'No abstract available for this publication yet.'));
+  set('pub-domains', tags.map(function(tg, i) { return '<span class="tag ' + tagPool[i % tagPool.length] + '" style="font-size:9px">' + escapeHtml(tg) + '</span>'; }).join('') || '<span style="font-size:11px;color:var(--text-tertiary)">No domains.</span>');
+
+  var infoRows = '';
+  function row(label, val) { infoRows += '<div class="aside-row"><span class="aside-label">' + label + '</span><span style="font-size:12px;color:var(--text)">' + val + '</span></div>'; }
+  row('Type', escapeHtml(p.type || '—'));
+  row('Published', escapeHtml(p.date || '—'));
+  row('Views', p.views != null ? fmt(p.views) : '—');
+  row('Downloads', p.downloads != null ? fmt(p.downloads) : '—');
+  set('pub-info', infoRows);
+
+  var softBg = ['var(--teal-soft);color:var(--teal)', 'var(--purple-soft);color:var(--purple)', 'var(--gold-soft);color:var(--gold)', 'var(--green-soft);color:var(--green)'];
+  set('pub-authors', (p.authors || []).length ? p.authors.map(function(a, i) {
+    var ini = a.split(/\s+/).filter(Boolean);
+    var initials = ini.length >= 2 ? (ini[0].charAt(0) + ini[1].charAt(0)).toUpperCase() : a.slice(0, 2).toUpperCase();
+    return '<div class="aside-member"><div class="aside-member-avatar" style="background:' + softBg[i % softBg.length] + '">' + escapeHtml(initials) + '</div><div><div style="font-weight:500">' + escapeHtml(a) + '</div></div></div>';
+  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No authors listed.</div>');
+
+  var citeParts = [];
+  if (authors) citeParts.push(escapeHtml(authors));
+  citeParts.push('(' + escapeHtml(p.date || 'n.d.') + ')');
+  citeParts.push('&ldquo;' + escapeHtml(p.title || 'Untitled') + '.&rdquo;');
+  if (p.journal) citeParts.push('<em>' + escapeHtml(p.journal) + '</em>.');
+  set('pub-cite', citeParts.join(' '));
+
+  var threads = (MOCK && MOCK.threads) || [];
+  var related = threads.slice(0, 3);
+  set('pub-related', related.length ? related.map(function(t) {
+    return '<div class="card" style="cursor:pointer" onclick="openThreadDetail(\'' + t.id + '\')"><div style="font-size:12px;font-weight:500;color:var(--text)">' + escapeHtml(t.title || '') + '</div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">' + (t.replies || 0) + ' replies' + (t.domain ? ' · ' + escapeHtml(t.domain) : '') + '</div></div>';
+  }).join('') : '<div class="card"><div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No discussions yet.</div></div>');
+}
+
 function updateNavBadges() {
   var inboxBadge = document.getElementById('inbox-badge');
   if (inboxBadge) {
@@ -4268,7 +4352,7 @@ function renderObservatoryCounts() {
   var recentPubs = document.getElementById('obs-recent-pubs');
   if (recentPubs) {
     var pubRows = ((MOCK && MOCK.publications) || []).slice(0, 3).map(function(p) {
-      return '<div class="aside-link" onclick="nav(\'publication-detail\')">' + escapeHtml(p.title || '') + '</div>';
+      return '<div class="aside-link" onclick="openPublicationDetail(' + p.id + ')">' + escapeHtml(p.title || '') + '</div>';
     }).join('');
     recentPubs.innerHTML = pubRows || '<div style="font-size:11px;color:var(--text-tertiary)">No publications yet.</div>';
   }
@@ -4285,10 +4369,10 @@ function renderObservatoryPublications(filter) {
   var el = document.getElementById('observatory-publications-list');
   if (!el) return;
   var pubs = ((MOCK && MOCK.publications) || []).map(function(p) {
-    return { title: p.title, type: p.type || 'essay', author: (p.authors || []).join(', '), date: p.date, domains: [] };
+    return { id: p.id, title: p.title, type: p.type || 'essay', author: (p.authors || []).join(', '), date: p.date, domains: [] };
   });
   resolutionsData.filter(function(r) { return r.status === 'enacted' && r.forPublication; }).forEach(function(r) {
-    pubs.push({ title: r.title, type: 'resolution', author: 'Governance', date: r.date, domains: r.circles });
+    pubs.push({ id: null, title: r.title, type: 'resolution', author: 'Governance', date: r.date, domains: r.circles });
   });
   if (filter && filter !== 'all') {
     pubs = pubs.filter(function(p) { return p.type === filter; });
@@ -4301,7 +4385,8 @@ function renderObservatoryPublications(filter) {
     var typeColors = { essay: 'tag-blue', guide: 'tag-green', report: 'tag-amber', resolution: 'tag-purple' };
     var typeLabels = { essay: 'Essay', guide: 'Guide', report: 'Report', resolution: 'Resolution' };
     var domainsHtml = (p.domains || []).map(function(d) { return '<span class="tag tag-default" style="font-size:8px">' + d + '</span>'; }).join(' ');
-    return '<div class="card" style="margin-bottom:8px">'
+    var clickAttr = p.id != null ? ' onclick="openPublicationDetail(' + p.id + ')"' : '';
+    return '<div class="card"' + clickAttr + ' style="margin-bottom:8px;cursor:' + (p.id != null ? 'pointer' : 'default') + '">'
       + '<div class="flex justify-between mb-1"><span style="font-size:13px;font-weight:500;color:var(--text)">' + p.title + '</span>'
       + '<span class="tag ' + (typeColors[p.type] || 'tag-default') + '" style="font-size:8px">' + (typeLabels[p.type] || p.type) + '</span></div>'
       + '<div style="font-size:11px;color:var(--text-tertiary)">' + p.author + ' &middot; ' + p.date + '</div>'
@@ -4669,6 +4754,18 @@ function initApp() {
   renderYourCells();
   renderParticipantsAside();
   updateNavBadges();
+  renderThreadDetail(currentThreadId);
+  renderPublicationDetail(currentPublicationId);
+  var dmSub = document.getElementById('dm-sub');
+  if (dmSub && MOCK && MOCK.domains) {
+    var dmList = Object.keys(MOCK.domains).map(function(k){ return MOCK.domains[k]; });
+    var dmK = 0, dmA = 0;
+    for (var di = 0; di < dmList.length; di++) {
+      if (dmList[di] && dmList[di].type === 'knowledge') dmK++;
+      else if (dmList[di] && dmList[di].type === 'affiliate') dmA++;
+    }
+    dmSub.textContent = 'Membership constellation across ' + dmK + ' knowledge + ' + dmA + ' affiliate domains';
+  }
   layoutParticipantCards();
   resolutionsData = buildResolutionsData();
   renderResolutionsList();
@@ -6652,6 +6749,56 @@ function renderXstf(cellId) {
   renderMessages(cellId, 'xstf-messages');
 }
 
+function renderStfDetail(key) {
+  var stf = null;
+  if (MOCK.stfs) {
+    for (var k in MOCK.stfs) {
+      var list = MOCK.stfs[k];
+      if (!Array.isArray(list)) continue;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i] && stfNavKey(list[i].id) === key) { stf = list[i]; break; }
+      }
+      if (stf) break;
+    }
+  }
+  var ids = {
+    'stf-vstf-steward': { el: 'stf-assignment-vstf-steward', hdr: 'stf-header-vstf-steward', cand: 'stf-cand-name-vstf-steward', ini: 'stf-cand-ini-vstf-steward' },
+    'stf-vstf-competence': { el: 'stf-assignment-vstf-competence', hdr: 'stf-header-vstf-competence' },
+    'stf-jstf': { el: 'stf-assignment-jstf' },
+    'stf-astf': { el: 'stf-assignment-astf', hdr: 'stf-header-astf' },
+    'stf-pastf': { el: 'stf-assignment-pastf', hdr: 'stf-header-pastf' }
+  };
+  var viewIds = ids[key] || { el: null, hdr: null };
+  var el = viewIds.el ? document.getElementById(viewIds.el) : null;
+  if (el) {
+    if (!stf) {
+      el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No assignment data.</div>';
+    } else {
+      var rows = [];
+      rows.push(['Type', stf.type]);
+      if (stf.candidate) rows.push(['Candidate', stf.candidate]);
+      if (stf.title) rows.push(['Motion', stf.title]);
+      if (stf.circle) rows.push(['Circle', stf.circle]);
+      if (stf.deadline) rows.push(['Deadline', stf.deadline]);
+      rows.push(['Status', stf.status.charAt(0).toUpperCase() + stf.status.slice(1)]);
+      var html = '';
+      for (var i = 0; i < rows.length; i++) {
+        html += '<div class="aside-row"><span class="aside-label">' + escapeHtml(rows[i][0]) + '</span><span style="font-size:11px;color:var(--text)">' + escapeHtml(rows[i][1]) + '</span></div>';
+      }
+      el.innerHTML = html;
+    }
+  }
+  var hdr = viewIds.hdr ? document.getElementById(viewIds.hdr) : null;
+  if (hdr && stf) hdr.textContent = '◆ ' + stf.type + ' — ' + stf.purpose;
+  var candName = viewIds.cand ? document.getElementById(viewIds.cand) : null;
+  var candIni = viewIds.ini ? document.getElementById(viewIds.ini) : null;
+  if (candName && stf && stf.candidate) {
+    var parts = stf.candidate.split(' ');
+    candName.textContent = parts[0] + ' ' + (parts[1] ? parts[1].charAt(0) + '.' : '');
+    if (candIni) candIni.textContent = parts.map(function(p){ return p.charAt(0); }).join('').slice(0, 2);
+  }
+}
+
 function renderProjectCell(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
@@ -7347,6 +7494,7 @@ var _origNav=nav;
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){renderXstf('cell-19');}
+  if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-astf'||key==='stf-pastf'){renderStfDetail(key);}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
   if(key==='commons'){var tf=document.getElementById('threads-feed');if(tf)tf.innerHTML=renderDiscussionThreads();}
  };

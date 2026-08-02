@@ -1404,7 +1404,27 @@
       "likes": 24,
       "shares": 6,
       "time": "3h ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": [
+        {
+          "id": "rep-042-1",
+          "author": "Okello Robert",
+          "initials": "OK",
+          "avatar": {},
+          "time": "2h ago",
+          "likes": 7,
+          "body": "The proportional-liability framing is promising. The key test will be how intent is evidenced — without telemetry sharing between operators, establishing intent after the fact is nearly impossible."
+        },
+        {
+          "id": "rep-042-2",
+          "author": "Kimani A.",
+          "initials": "KA",
+          "avatar": {},
+          "time": "1h ago",
+          "likes": 4,
+          "body": "Agreed with Okello. I would add a safe-harbour clause for manoeuvres attempted under IADC guidelines — otherwise operators will be deterred from attempting avoidance at all."
+        }
+      ]
     },
     {
       "id": "thread-038",
@@ -1423,7 +1443,36 @@
       "likes": 41,
       "shares": 12,
       "time": "7h ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": [
+        {
+          "id": "rep-038-1",
+          "author": "Aisha O.",
+          "initials": "AO",
+          "avatar": {},
+          "time": "5h ago",
+          "likes": 11,
+          "body": "The 4-6 month deterioration window matches the ISS experience. Circadian lighting rigs help but the social fatigue component needs a design-level answer — crew rotation protocols, not just hardware."
+        },
+        {
+          "id": "rep-038-2",
+          "author": "Osei Kwame",
+          "initials": "OK",
+          "avatar": {},
+          "time": "3h ago",
+          "likes": 6,
+          "body": "Happy to join a cross-domain working group. The Antarctic winterover datasets are well structured and could map cleanly onto Mars transit constraint tables."
+        },
+        {
+          "id": "rep-038-3",
+          "author": "Mensah N.",
+          "initials": "MN",
+          "avatar": {},
+          "time": "2h ago",
+          "likes": 3,
+          "body": "Also worth reviewing the lunar habitat analogues — the shorter mission profile changes the psychology significantly versus Mars transit."
+        }
+      ]
     },
     {
       "id": "thread-035",
@@ -1440,7 +1489,27 @@
       "likes": 18,
       "shares": 3,
       "time": "1d ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": [
+        {
+          "id": "rep-035-1",
+          "author": "Akello Jane",
+          "initials": "AJ",
+          "avatar": {},
+          "time": "9h ago",
+          "likes": 6,
+          "body": "The data quality argument is decisive here — open datasets raise the floor for the whole region, not just the hosting institution."
+        },
+        {
+          "id": "rep-035-2",
+          "author": "Mensah N.",
+          "initials": "MN",
+          "avatar": {},
+          "time": "6h ago",
+          "likes": 3,
+          "body": "Worth aligning the licensing terms with the UAS data-sharing precedent so contributors know what they are signing."
+        }
+      ]
     },
     {
       "id": "thread-029",
@@ -1457,7 +1526,36 @@
       "likes": 67,
       "shares": 19,
       "time": "2d ago",
-      "pinned": true
+      "pinned": true,
+      "repliesList": [
+        {
+          "id": "rep-029-1",
+          "author": "Osei Kwame",
+          "initials": "OK",
+          "avatar": {},
+          "time": "2d ago",
+          "likes": 12,
+          "body": "This is the direction the stewardship model should move. Per-domain budgets make contribution ceilings legible to every member."
+        },
+        {
+          "id": "rep-029-2",
+          "author": "Namugga Claire",
+          "initials": "NC",
+          "avatar": {},
+          "time": "1d ago",
+          "likes": 7,
+          "body": "The recalculation cadence matters — quarterly reviews would smooth over seasonal contribution dips without losing accountability."
+        },
+        {
+          "id": "rep-029-3",
+          "author": "Kimani A.",
+          "initials": "KA",
+          "avatar": {},
+          "time": "20h ago",
+          "likes": 4,
+          "body": "Support the ceiling proposal. Just ensure exemptions are public when they are granted."
+        }
+      ]
     },
     {
       "id": "thread-031",
@@ -1476,7 +1574,8 @@
       "likes": 33,
       "shares": 8,
       "time": "3d ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": []
     },
     {
       "id": "thread-036",
@@ -1495,7 +1594,18 @@
       "likes": 29,
       "shares": 5,
       "time": "4d ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": [
+        {
+          "id": "rep-036-1",
+          "author": "Aisha O.",
+          "initials": "AO",
+          "avatar": {},
+          "time": "10h ago",
+          "likes": 2,
+          "body": "The tourism framing risks overselling capability. The institutional pipeline — engineering training, launch integration — is where the durable value sits."
+        }
+      ]
     },
     {
       "id": "thread-040",
@@ -1514,7 +1624,27 @@
       "likes": 15,
       "shares": 4,
       "time": "5d ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": [
+        {
+          "id": "rep-040-1",
+          "author": "Kimani A.",
+          "initials": "KA",
+          "avatar": {},
+          "time": "3h ago",
+          "likes": 5,
+          "body": "A shared curriculum with accredited modules would travel better across partner institutions than a standalone course."
+        },
+        {
+          "id": "rep-040-2",
+          "author": "Okello Robert",
+          "initials": "OK",
+          "avatar": {},
+          "time": "1h ago",
+          "likes": 2,
+          "body": "Seconded — the certification angle is what makes it fundable through education grants."
+        }
+      ]
     },
     {
       "id": "thread-044",
@@ -1533,7 +1663,8 @@
       "likes": 52,
       "shares": 11,
       "time": "6d ago",
-      "pinned": false
+      "pinned": false,
+      "repliesList": []
     }
   ],
   "projects": [
@@ -3442,7 +3573,15 @@
       "journal": "African Space Law Journal",
       "date": "Jun 2026",
       "views": 142,
-      "downloads": 38
+      "downloads": 38,
+      "id": 1,
+      "type": "Essay",
+      "tags": [
+        "Space Law",
+        "Policy",
+        "Debris"
+      ],
+      "abstract": "East African nations are increasingly active in space activities, yet lack coordinated policies for space debris mitigation and liability. This paper proposes a regional framework for debris tracking, remediation responsibilities, and shared liability structures. We analyze existing international obligations under the Outer Space Treaty and Liability Convention, and propose a model bilateral agreement tailored to the East African context."
     },
     {
       "title": "Space policy harmonisation in East Africa",
@@ -3452,7 +3591,14 @@
       "journal": "Policy Brief",
       "date": "May 2026",
       "views": 89,
-      "downloads": 22
+      "downloads": 22,
+      "id": 2,
+      "type": "Policy Brief",
+      "tags": [
+        "Policy",
+        "Coordination"
+      ],
+      "abstract": "A review of space policy harmonisation efforts across East Africa, comparing national regulatory stances and proposing convergence points for frequency coordination, licensing, and liability allocation ahead of regional multilateral discussions."
     },
     {
       "title": "Remote sensing for agricultural monitoring in Uganda",
@@ -3462,7 +3608,14 @@
       "journal": "Research Report",
       "date": "Apr 2026",
       "views": 67,
-      "downloads": 15
+      "downloads": 15,
+      "id": 3,
+      "type": "Research Report",
+      "tags": [
+        "Remote Sensing",
+        "Agriculture"
+      ],
+      "abstract": "Field study evaluating the accuracy and cost-effectiveness of Sentinel-2 and PlanetScope imagery for crop monitoring in Uganda, with recommendations for building national analysis capacity."
     }
   ],
   "registration": {
