@@ -1,0 +1,421 @@
+**Building Solis**
+
+*Infrastructure for the Solarian Commons*
+
+> *Solis is not a product. It is the digital expression of a community
+> that already exists. The task is not to build a platform and attract
+> users. The task is to build infrastructure worthy of the Commons that
+> is already gathering.*
+
+**Preamble**
+
+Every community needs infrastructure.
+
+The marketplace needs stalls, paths, and a central square. The library
+needs shelves, catalogues, and reading rooms. The observatory needs
+instruments, records, and a way to share what is seen. Without
+infrastructure, communities remain gatherings — dependent on the memory
+of whoever was present, lost when those people move on.
+
+Solis is the infrastructure of the Solarian Commons.
+
+It is not a social network. It is not a forum. It is not a project
+management tool. It is not Discord, LinkedIn, WhatsApp, or Reddit. Each
+of those platforms was built to solve a different problem for a
+different kind of community. None of them were built for this.
+
+Solis is built for a community that spans disciplines, nationalities,
+career stages, and types of organisation. A community that needs to
+remember what it learns. A community where organisations affiliate
+without subordinating. A community where identity precedes membership. A
+community that faces a direction rather than pursuing a destination.
+
+When Solis works well, it disappears. What remains is the Commons: the
+student who finds a researcher, the expedition that forms from a
+conversation, the organisation that discovers a collaborator it never
+knew existed. Solis is the infrastructure that made those things
+possible. The Commons is what is felt.
+
+**I. What Solis Is Not**
+
+Before describing what Solis is, it is worth being precise about what it
+is not. The Commons’ design philosophy is shaped as much by what it
+refuses as by what it embraces.
+
+**Not a social network.**
+
+Social networks are built to maximise engagement. Their architecture —
+algorithmic feeds, notifications, likes, follower counts — is designed
+to keep people inside the platform as long as possible. The Commons has
+no interest in maximising time spent. It is interested in maximising
+meaningful connection. These are different objectives, and they produce
+different designs.
+
+**Not an ephemeral chat platform.**
+
+WhatsApp groups and Discord servers are built for real-time
+conversation. They are fast, informal, and immediate. They are also
+designed to forget. A conversation from six months ago is practically
+unreachable. The institutional knowledge of a community — its debates,
+its decisions, its accumulated understanding — disappears into the
+scroll. The Commons is designed to remember. That is a fundamental
+architectural choice, and it rules out ephemeral chat as the Commons’
+primary medium.
+
+**Not a membership management system.**
+
+The Commons does not have members in the formal sense. It has
+participants. It has affiliated organisations. A system built around
+formal membership — with applications, approvals, dues, and directories
+— would impose a structure that contradicts the Commons’ philosophy.
+Solis is built around participation, not membership.
+
+**Not a parent organisation’s platform.**
+
+Organisations that affiliate with the Commons retain their independence.
+Solis is not the Uganda Astronomical Society’s platform, nor any other
+organisation’s. It is shared infrastructure. Each organisation has its
+own space within it, but no organisation owns it. This is not a
+technical limitation. It is a design principle.
+
+**II. The Seven Layers**
+
+Solis is composed of seven interconnected layers. Each layer serves a
+distinct purpose. Together they provide the full infrastructure the
+Commons requires.
+
+**1. Identity**
+
+The foundation of everything else. Before a participant can connect with
+others, contribute to a project, or affiliate with an organisation, they
+need a Solarian identity within the Commons.
+
+A Solarian profile is not a social media profile. It does not ask for a
+photo, a follower count, or a status update. It asks: who are you in the
+context of this community? What domains interest you? What organisations
+are you affiliated with? What have you contributed?
+
+The profile is the participant’s point of presence in the Commons. It
+persists. It accumulates a record of participation — expeditions
+contributed to, initiatives maintained, discussions led. This record is
+not a score. It is a history. It is also how trust is built over time —
+not through self-description, but through demonstrated contribution.
+
+> **Principle:** *identity in the Commons is earned through
+> participation, not declared through profile text.*
+
+**2. Affiliation**
+
+The layer through which organisations participate in the Commons. An
+organisation creates an affiliation page — its presence within Solis.
+Through that page, it can host discussions, post events, share
+publications, and be discovered by participants with relevant interests.
+
+Affiliation does not grant the organisation ownership of the platform or
+authority over the Commons. It grants visibility and access to the
+Commons’ infrastructure. The organisation’s own governance remains
+entirely its own. Its members participate in both their organisation’s
+space and the wider Commons simultaneously.
+
+The affiliation layer is what makes Solis an ecosystem rather than an
+institution. The Uganda Astronomical Society, a university space club,
+and a startup can all be present in the same Commons without any of them
+controlling it or subordinating to the others.
+
+> **Distinction:** *organisations affiliate; individuals participate.
+> Different actions, different relationships.*
+
+**3. Discussions**
+
+The primary medium of the Commons. Not chat — threads. Discussions in
+Solis are threaded, tagged by domain, and permanently archived. A
+conversation from three years ago is as findable as one from yesterday.
+
+Discussions are organised by domain, not by group. When a participant
+posts in the Space Law domain, it reaches everyone who has declared an
+interest in Space Law — regardless of which organisation they affiliate
+with, which Circle they belong to, or how long they have been in the
+Commons. Domain interest is the routing mechanism, not organisational
+membership.
+
+Organisations may host discussions within their own affiliation spaces.
+These remain visible to the wider Commons unless the organisation
+explicitly restricts them. The default is openness.
+
+> **Design choice:** *threads over chat, archives over ephemera, domains
+> over groups.*
+
+**4. Expeditions & Initiatives**
+
+The layer where work happens. An expedition is a scoped collaborative
+project with a defined purpose and end. An initiative is an ongoing
+effort with a direction and no fixed conclusion. Both are first-class
+objects in Solis — they have their own pages, contributor lists,
+documentation spaces, and archive records.
+
+Expeditions and initiatives are owned by those who start them, not by
+the Commons. Solis provides the infrastructure — the page, the
+coordination tools, the visibility. Participants provide the work. When
+an expedition concludes, its page becomes a permanent record in the
+archive: what was attempted, who contributed, what was learned.
+
+Any participant can start an expedition or initiative. No approval is
+required. The Commons’ culture of initiative — ideas do not wait for
+permission — is built into the architecture.
+
+> **Naming:** *expeditions and initiatives, not projects. The language
+> matters. See the Lexicon.*
+
+**5. Organisations**
+
+The affiliation directory. Every organisation participating in the
+Commons has a presence here — a page describing who they are, what they
+do, what domains they engage with, and how to connect with them. The
+directory is public. Anyone can browse it, whether or not they are a
+participant in the Commons.
+
+Organisation pages show current events, active expeditions, recent
+discussions, and affiliated participants who have chosen to be visible.
+They serve as both a presence within the Commons and a point of
+discovery for people outside it.
+
+The organisation layer is how the Commons becomes visible to the formal
+sector. A researcher looking for collaborators, a student looking for a
+society to join, a funder looking for communities to support — the
+organisation directory is where they begin.
+
+**6. The Observatory**
+
+The Commons’ knowledge space. Entirely public. Accessible without
+participation. The Observatory contains:
+
+Curated sector news — space industry coverage filtered for signal, not
+volume. Opportunities — scholarships, fellowships, competitions, calls
+for papers, open positions. A library — books, courses, podcasts, career
+guides, equipment recommendations, curated by domain. Publications —
+essays, reports, and analyses produced by Commons participants. Archived
+events — recordings and notes from public gatherings. And, beneath all
+of this, the archive — the accumulated record of what the Commons has
+discussed, decided, and learned.
+
+The Observatory is the Commons’ public gift to the world. It asks
+nothing in return for access. It is funded by the Commons’ existence and
+maintained by the participants who contribute to it. It is also the
+primary way the Commons justifies itself to people who have not yet
+participated — proof that something real and valuable is happening here.
+
+> **Principle:** *the Observatory is always open. Participation unlocks
+> the community. Knowledge unlocks itself.*
+
+**7. Domains**
+
+The taxonomy layer. Every piece of content in Solis — every discussion,
+expedition, event, publication, and organisation — is tagged by domain.
+Domains are the routing mechanism that makes a large, diverse community
+navigable.
+
+A participant declares their domains of interest in their profile. Solis
+surfaces content from those domains. When the Commons becomes large —
+hundreds of active discussions, dozens of affiliated organisations,
+ongoing expeditions — domains are what prevent it from becoming noise.
+
+Domains are not fixed categories assigned at launch. They emerge from
+activity. A steward may create a domain deliberately. The platform’s
+classification engine may suggest one based on recurring content. A
+participant may tag one into existence through consistent use of the
+hash convention. Domains are maintained by gardeners and stewards who
+hold mandate over the Commons & Knowledge domain.
+
+> **See Lexicon:** *Domain, Gardener, Steward — three distinct
+> concepts.*
+
+**III. How the Layers Connect**
+
+Solis is not seven separate products. It is one environment in which
+seven layers interact. A brief illustration:
+
+A participant joins the Commons and declares interests in Space Law and
+Astrophotography. Their profile is created. They browse the Organisation
+layer and discover an astronomy society they did not know existed. They
+affiliate with it. They begin receiving discussions tagged Space Law and
+Astrophotography — not because someone added them to a group, but
+because their declared domains routed that content to them.
+
+They encounter a discussion about regulatory frameworks for commercial
+imaging satellites. The discussion was started by a researcher
+affiliated with a university. They contribute. The researcher notices
+their knowledge. The researcher starts an expedition to produce a policy
+brief. The participant joins. Three other participants from three other
+affiliated organisations join as well. The expedition runs for two
+months, produces a brief, and archives its work in the Observatory.
+
+Six months later, a student searching the Observatory for material on
+satellite regulation finds the brief. They find the expedition’s
+archived page. They contact two of its contributors. A new conversation
+begins.
+
+No one managed this. No one approved it. No algorithm optimised for
+engagement amplified it. The seven layers simply provided the conditions
+in which it could happen. That is what infrastructure does.
+
+**IV. Design Principles**
+
+Seven principles govern the design of Solis. Each is a direct expression
+of the Commons’ philosophy.
+
+**Permanence over ephemerality.**
+
+Everything in Solis persists. Discussions are archived. Expeditions
+leave records. Events are documented. The Commons is designed to
+remember. This is not a feature of the platform — it is a statement
+about what the Commons values.
+
+**Participation over membership.**
+
+Solis is not a membership management system. There are no applications,
+approvals, or dues. There are participants, affiliates, gardeners, and
+stewards — each with different relationships to the Commons, none of
+which require formal admission.
+
+**Domains over channels.**
+
+Content in Solis is routed by topic, not by group. A participant who is
+interested in Space Medicine receives Space Medicine content regardless
+of which organisation they are affiliated with. This prevents the
+Commons from fragmenting into isolated silos. The domain layer is what
+keeps a diverse community coherent.
+
+**Open by default.**
+
+The Observatory is entirely public. Discussions default to
+Commons-visible. Organisation spaces default to open within the Commons.
+Privacy is opt-in, not opt-out. This reflects the Commons’ belief that
+knowledge should travel further than organisations.
+
+**Contribution is visible.**
+
+A participant’s history of contribution — expeditions joined,
+initiatives maintained, discussions led, publications written — is part
+of their profile. This is how trust accumulates in the Commons. Not
+through self-description, but through demonstrated record.
+
+**Infrastructure, not programming.**
+
+Solis provides conditions. It does not direct activity. It does not
+decide which expeditions matter, which discussions deserve
+amplification, or which organisations deserve prominence. Those
+judgments belong to the Commons and its participants. Solis sets the
+stage and then steps back.
+
+**The archive is first.**
+
+Archiving is not a secondary function of Solis. It is a primary design
+constraint. Every component of Solis is built with archiving in mind
+from the start. The archive is the Commons’ institutional memory. Memory
+is governance. This was established in the founding documents and is
+reflected here in the architecture.
+
+**V. Roles Within Solis**
+
+Solis is tended by two distinct roles. They are not interchangeable. See
+the Lexicon for precise definitions.
+
+**Gardeners**
+
+Gardeners tend the Commons itself. They welcome newcomers, connect
+people across disciplines, encourage healthy discussion, and preserve
+the culture of the Commons over time. In Solis, gardeners have the tools
+to surface content that deserves wider attention, connect participants
+whose interests overlap, archive significant discussions, and welcome
+new affiliates.
+
+Gardeners do not approve content. They do not control who participates.
+They tend. They notice what needs care and provide it.
+
+> **Not called:** *moderators, administrators, or managers.*
+
+**Stewards**
+
+Stewards hold recognised authority in specific domains. In Solis,
+stewards maintain the domain taxonomy, affirm new domains, curate the
+Observatory within their area of expertise, and are convened when
+decisions touching their domain are needed. A steward of the Space Law
+domain, for instance, curates Space Law content in the Observatory,
+maintains the Space Law domain definition, and is consulted when a
+governance question touching Space Law arises.
+
+Stewardship is domain-specific and earned through demonstrated expertise
+and contribution. It is not a platform role with access controls. It is
+a community role with recognised responsibility.
+
+> **Not to be confused with:** *gardeners. Stewards hold domain
+> authority; gardeners hold community care.*
+
+**VI. What Solis Deliberately Excludes**
+
+A commons is shaped as much by what it refuses as by what it provides.
+Solis deliberately excludes several features common to other platforms.
+
+**Algorithmic feeds.**
+
+Solis does not use engagement-maximising algorithms. Content reaches
+participants based on their declared domain interests, not on what an
+algorithm predicts will hold their attention. This is slower. It
+produces less engagement in the short term. It produces a healthier
+community in the long term.
+
+**Follower counts and public metrics.**
+
+Solis does not display follower counts, like tallies, or view counts.
+These metrics optimise for visibility rather than contribution. The
+Commons values contribution. Contribution is visible through
+participation history, not through engagement metrics.
+
+**Advertising.**
+
+The Commons carries no advertising. The Observatory is not monetised.
+The Solis platform does not surface sponsored content. The Commons’
+independence from commercial incentives is a founding principle and a
+design constraint.
+
+**Gamification.**
+
+Solis does not award badges, points, or ranks for participation.
+Recognition in the Commons comes from the community — from being known,
+from having contributed something lasting, from being trusted with
+stewardship. These forms of recognition cannot be automated or gamed.
+
+**VII. The Relationship Between Solis and the Commons**
+
+Solis is not the Commons. The Commons is the community. Solis is the
+infrastructure that community uses.
+
+If Solis were to disappear tomorrow, the Commons would continue. It
+would gather elsewhere — less efficiently, with less memory, with more
+friction — but it would continue, because it is a community of people,
+not a platform. The platform serves the community. The community does
+not serve the platform.
+
+This distinction matters for how Solis is built, maintained, and
+changed. Decisions about Solis are made in service of the Commons. They
+are not made to grow the platform, to increase user numbers, or to
+demonstrate features. They are made because the Commons needs something
+that Solis does not yet provide, or because something Solis currently
+does is working against the Commons’ health.
+
+The gardeners and stewards who tend the Commons are the people best
+positioned to make those judgments. Not the engineers who build Solis.
+Not the founders who conceived it. The community that lives in it.
+
+> ***Solis exists for the Commons.\
+> The Commons does not exist for Solis.\
+> When that distinction is maintained,\
+> the infrastructure remains in its proper place.***
+>
+> *The task is not to build a platform and attract users.\
+> The task is to build infrastructure worthy of a community\
+> that is already gathering.\
+> \
+> Ultra hic et nunc.*
+
+*Building Solis · Solarian Commons Infrastructure Document · 2026*

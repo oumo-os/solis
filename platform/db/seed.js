@@ -38,10 +38,12 @@ const participants = MOCK.participants || [];
 const userMap = {}; // id -> user row
 for (const p of participants) {
   userMap[p.id] = {
-    id: p.id, name: p.name, initials: p.initials, email: null,
+    id: p.id, name: p.name, initials: p.initials,
+    email: (p.id || '').toLowerCase() + '@solis.local',
     location: p.location, joined: p.joined, status: 'Active',
     standing: null, competence: null, bio: p.bio, essay: null,
     avatar: JSON.stringify(p.avatar || {}),
+    password_hash: hashPassword('solis123'),
   };
 }
 // currentUser fields override

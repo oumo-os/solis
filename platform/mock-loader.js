@@ -1,22 +1,12 @@
-// mock-loader.js — Fetches mock.json and provides render functions
+// mock-loader.js — shared render helpers for the SPA (data comes from /api/bootstrap, never mock.json)
 var MOCK = null;
 var cellsById = {};
 
-function loadMockData() {
-  return fetch('mock.json')
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      MOCK = data;
-      cellsById = {};
-      if (data.cells) {
-        data.cells.forEach(function(c) { cellsById[c.id] = c; });
-      }
-      return data;
-    });
-}
-
 function renderParticipantCards() {
   if (!MOCK) return '';
+  if (!MOCK.participants || !MOCK.participants.length) {
+    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No participants registered yet.</div></div>';
+  }
   return MOCK.participants.map(function(p) {
     var avatarStyle = 'display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0';
     if (p.avatar.gradient) avatarStyle += ';background:' + p.avatar.gradient + ';color:#fff';
@@ -48,7 +38,7 @@ function renderCircleCards(filter) {
     var isArchived = c.status === 'Archived';
     var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
     var cardStyle = isArchived ? 'opacity:0.65' : '';
-    return '<div class="card click" style="' + cardStyle + '" onclick="nav(\'circle-detail\')">'
+    return '<div class="card click" style="' + cardStyle + '" onclick="openCircleDetail(\'' + c.id + '\')">'
       + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.status + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.members + ' members' + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.name + '</div>'
@@ -69,12 +59,14 @@ function filterCircles(filter, btn) {
 function renderSTFRows() {
   if (!MOCK) return '';
   var all = MOCK.stfs.pending.concat(MOCK.stfs.active, MOCK.stfs.completed);
+  if (!all.length) return '<tr><td colspan="5" style="text-align:center;padding:20px;font-size:12px;color:var(--text-tertiary)">No STFs currently active.</td></tr>';
   return all.map(function(s) {
     var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : 'tag-blue';
     var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : 'b-pending';
-    return '<tr class="click" onclick="nav(\'stf-' + s.id + '\')">'
+    var purpose = s.purpose + (s.candidate ? ': ' + s.candidate : s.title ? ': ' + s.title : '');
+    return '<tr class="click" onclick="nav(\'' + (typeof stfNavKey === 'function' ? stfNavKey(s.id) : 'stf-' + s.id) + '\')">'
       + '<td><span class="tag ' + tagClass + '" style="font-size:8px">' + s.type + '</span></td>'
-      + '<td class="s">' + s.purpose + ': ' + s.title + '</td>'
+      + '<td class="s">' + purpose + '</td>'
       + '<td>' + s.circle + '</td>'
       + '<td class="m">' + s.deadline + '</td>'
       + '<td><span class="badge ' + badgeClass + '">' + s.status + '</span></td></tr>';
@@ -139,7 +131,9 @@ function renderProjectRows() {
     return '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-tertiary);font-size:12px">No projects yet. Propose one from Discussions.</td></tr>';
   }
   return MOCK.projects.map(function(p) {
-    return '<tr class="click" onclick="nav(\'undertaking\')">'
+    var cell = ((MOCK.cells || []).filter(function(c) { return c.type === 'Project Cell' && (p.title && (c.title || '').indexOf(p.title.split(' ').slice(0, 2).join(' ')) !== -1 || c.title && (p.title || '').indexOf(c.title.split(' ').slice(0, 2).join(' ')) !== -1); })[0]) || null;
+    var onclick = cell ? "openProjectCell('" + cell.id + "')" : "nav('undertakings')";
+    return '<tr class="click" onclick="' + onclick + '">'
       + '<td class="s">' + p.title + '</td>'
       + '<td>' + p.domains.join(' + ') + '</td>'
       + '<td>' + p.lead + '</td>'
@@ -160,7 +154,7 @@ function renderCellCards(filter) {
     var icon = c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : c.type === 'Founding Cell' ? 'organisations' : '';
     var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
     var cardStyle = isArchived ? 'opacity:0.65' : '';
-    var onclick = c.type === 'Project Cell' ? "openProjectCell('" + c.id + "')" : c.type === 'Deliberation Cell' ? "openDelibCell('" + c.id + "')" : "nav('" + (c.type === 'Founding Cell' ? 'organisations' : c.type === 'Circle Cell' ? 'cell-circle' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells') + "')";
+    var onclick = c.type === 'Project Cell' ? "openProjectCell('" + c.id + "')" : c.type === 'Deliberation Cell' ? "openDelibCell('" + c.id + "')" : c.type === 'Circle Cell' ? "openCircleCell('" + c.id + "')" : "nav('" + (c.type === 'Founding Cell' ? 'organisations' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells') + "')";
     return '<div class="card click" style="' + cardStyle + '" onclick="' + onclick + '">'
       + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.type + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'

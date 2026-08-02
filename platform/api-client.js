@@ -32,8 +32,8 @@ var SolisApi = (function() {
   function authLogout() {
     return req('POST', 'auth/logout');
   }
-  function bootstrap() {
-    return req('GET', 'bootstrap');
+  function bootstrap(empty) {
+    return req('GET', 'bootstrap' + (empty ? '?empty=1' : ''));
   }
 
   // ─── cells ───

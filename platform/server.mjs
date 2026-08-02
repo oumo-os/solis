@@ -12,6 +12,7 @@ import { execSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLATFORM_DIR = join(__dirname);
+const SHARED_DIR = join(PLATFORM_DIR, '..', 'shared');
 const DB_PATH = process.env.SOLIS_DB || join(PLATFORM_DIR, 'solis.db');
 const PORT = process.env.PORT || 3000;
 
@@ -327,13 +328,18 @@ function mapKeys(obj, map) {
 
 async function bootstrapRoute(req, res, reqUrl, method) {
   if (!(reqUrl === '/api/bootstrap' && method === 'GET')) return null;
+  const empty = new URL(req.url, 'http://x').searchParams.get('empty') === '1';
 
   const j = parseJson;
   const all = (sql) => db.prepare(sql).all();
 
-  // ── identity ──
+  // ── identity: current user comes from the session token ──
   const users = all('SELECT * FROM users');
-  const currentRow = users.find(u => u.is_current === 1) || null;
+  const tok = ((req.headers.authorization || '').match(/^Bearer\s+(.+)$/i) || [])[1];
+  const currentRow = tok
+    ? db.prepare(`SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?`)
+        .get(tok, new Date().toISOString()) || null
+    : null;
   const compByUser = groupBy(all('SELECT * FROM user_competence'), 'user_id');
   const cirByUser = groupBy(all('SELECT * FROM user_circles'), 'user_id');
   const orgByUser = groupBy(all('SELECT * FROM user_orgs'), 'user_id');
@@ -366,8 +372,14 @@ async function bootstrapRoute(req, res, reqUrl, method) {
       circles: (cirByUser[currentRow.id] || []).filter(c => c.kind === 'self').map(c => ({ name: c.circle, status: c.status, since: c.since })),
       activity: (actByUser[currentRow.id] || []).map(a => ({ text: a.text, time: a.time, type: a.type })),
     };
-    for (const c of (compByUser[currentRow.id] || []).filter(c => c.kind === 'self')) {
+    const selfComp = (compByUser[currentRow.id] || []).filter(c => c.kind === 'self');
+    // Users without a self-kind profile fall back to their directory (roster) data
+    const compSrc = selfComp.length ? selfComp : (compByUser[currentRow.id] || []).filter(c => c.kind === 'roster');
+    for (const c of compSrc) {
       currentUser.domains[c.domain] = { ws: c.ws, wh: c.wh, interest: c.interest, barWs: c.bar_ws, barWh: c.bar_wh, members: c.members };
+    }
+    if (!currentUser.circles.length) {
+      currentUser.circles = (cirByUser[currentRow.id] || []).filter(c => c.kind === 'roster').map(c => ({ name: c.circle, status: 'Active', since: c.since }));
     }
   }
 
@@ -597,12 +609,27 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     appliedAt: l.applied_at, status: l.status,
   }));
 
-  return send(res, 200, {
+  const payload = {
     currentUser, participants, organisations, domains, domainLayout,
     circles, cells, stfs: stfShape, stfCandidates, threads, inbox, publications,
     news, events, opportunities, projects, exitReasonLabels, systemSettings, stats, registration,
     integrityRecords, governanceEvents, circleApplications, projectApplications, governanceLedger,
-  });
+  };
+
+  // ?empty=1 — same shape, no data: for exploring the platform's empty state.
+  if (empty) {
+    for (const k of ['participants', 'organisations', 'circles', 'cells', 'threads', 'inbox',
+      'publications', 'news', 'events', 'opportunities', 'projects', 'integrityRecords',
+      'governanceEvents', 'circleApplications', 'projectApplications', 'governanceLedger',
+      'stfCandidates']) {
+      payload[k] = [];
+    }
+    payload.stfs = { pending: [], active: [], completed: [] };
+    payload.domains = {};
+    payload.stats = {};
+  }
+
+  return send(res, 200, payload);
 }
 
 // ═════════════════════════════════════════════════════════
@@ -664,6 +691,13 @@ const MIME = {
 
 function staticFile(reqUrl) {
   const urlPath = reqUrl.split('?')[0];
+  if (urlPath === '/shared/' || urlPath.startsWith('/shared/')) {
+    const rel = urlPath.slice('/shared/'.length);
+    const full = normalize(join(SHARED_DIR, rel));
+    if (!full.startsWith(SHARED_DIR + sep)) return null;
+    if (!existsSync(full) || statSync(full).isDirectory()) return null;
+    return full;
+  }
   let rel = urlPath === '/' ? 'index.html' : urlPath.replace(/^\/+/, '');
   const full = normalize(join(PLATFORM_DIR, rel));
   if (!full.startsWith(PLATFORM_DIR + sep)) return null;

@@ -12,8 +12,8 @@
     "interestScore": 34,
     "interestDrift": "+6 from last cycle",
     "activeRoles": 3,
-    "rolesBreakdown": "1 Circle \u00b7 2 Projects",
-    "bio": "Space law and remote sensing practitioner. Building the African space commons \u2014 open identity, shared competence, collective stewardship.",
+    "rolesBreakdown": "1 Circle · 2 Projects",
+    "bio": "Space law and remote sensing practitioner. Building the African space commons — open identity, shared competence, collective stewardship.",
     "essay": "I believe Africa's space future should be commons-governed. Not owned by any single institution, but built collectively by those who contribute. Solis is my attempt to make that tangible.",
     "domains": {
       "space-law": {
@@ -336,7 +336,7 @@
       "proposals": [
         {
           "id": "prop-01",
-          "title": "Debris liability framework \u2014 proportional model",
+          "title": "Debris liability framework — proportional model",
           "status": "In Deliberation",
           "date": "Jul 21"
         },
@@ -761,6 +761,38 @@
       "hasCircle": true,
       "type": "knowledge",
       "taxonomy": "Social Science > Political Science"
+    },
+    "space-law": {
+      "label": "Space Law",
+      "short": "SL",
+      "color": "#8B8BE5",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Political Science"
+    },
+    "policy": {
+      "label": "Policy",
+      "short": "POL",
+      "color": "#5AA7E0",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Social Science > Political Science"
+    },
+    "mars": {
+      "label": "Mars Habitability",
+      "short": "MARS",
+      "color": "#E58B8B",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Natural Science > Physical Science"
+    },
+    "freq": {
+      "label": "Frequency Allocation",
+      "short": "FREQ",
+      "color": "#E0A34E",
+      "hasCircle": true,
+      "type": "knowledge",
+      "taxonomy": "Applied Science > Engineering & Technology"
     },
     "telecommunications-signals": {
       "label": "Telecom & Signals",
@@ -1360,7 +1392,7 @@
     {
       "id": "thread-042",
       "title": "Liability frameworks for debris-generating manoeuvres",
-      "body": "Who bears responsibility when avoidance manoeuvres fail and generate debris? Current international space law is silent on this \u2014 the Outer Space Treaty assigns liability for damage but doesn't address the scenario where a state actor attempts compliance and inadvertently creates a new hazard. I've been drafting a framework that assigns proportional liability based on manoeuvre intent and outcome. Would value input from the Circle before I formalise this as a proposal.",
+      "body": "Who bears responsibility when avoidance manoeuvres fail and generate debris? Current international space law is silent on this — the Outer Space Treaty assigns liability for damage but doesn't address the scenario where a state actor attempts compliance and inadvertently creates a new hazard. I've been drafting a framework that assigns proportional liability based on manoeuvre intent and outcome. Would value input from the Circle before I formalise this as a proposal.",
       "author": "Akello Jane",
       "initials": "AJ",
       "avatar": {},
@@ -1377,7 +1409,7 @@
     {
       "id": "thread-038",
       "title": "Psychological design in confined habitats",
-      "body": "Lessons from Antarctic stations for Mars habitat design. After reviewing 14 months of winterover data from Concordia and Halley VI, I'm seeing consistent patterns in crew psychological deterioration around months 4\u20136. Key factors: loss of circadian cues, reduced spatial variety, and social fatigue from fixed small-group interaction. These map directly to long-duration transit scenarios. Proposal: can we form a cross-domain working group to translate Antarctic habitability data into Mars transit design constraints?",
+      "body": "Lessons from Antarctic stations for Mars habitat design. After reviewing 14 months of winterover data from Concordia and Halley VI, I'm seeing consistent patterns in crew psychological deterioration around months 4–6. Key factors: loss of circadian cues, reduced spatial variety, and social fatigue from fixed small-group interaction. These map directly to long-duration transit scenarios. Proposal: can we form a cross-domain working group to translate Antarctic habitability data into Mars transit design constraints?",
       "author": "Namugga Claire",
       "initials": "NC",
       "avatar": {
@@ -1396,7 +1428,7 @@
     {
       "id": "thread-035",
       "title": "Sentinel-2 data access for East Africa",
-      "body": "Current limitations and workarounds for remote sensing data access. The Copernicus Open Access Hub is reliable but throughput for East African users is poor \u2014 average download times for L2A tiles are 3\u20135x longer than for European endpoints. I've been testing a mirror setup via Kenya's KEPSA network that cuts this to parity. Sharing my config and benchmark results here. If anyone wants to test the mirror, ping me.",
+      "body": "Current limitations and workarounds for remote sensing data access. The Copernicus Open Access Hub is reliable but throughput for East African users is poor — average download times for L2A tiles are 3–5x longer than for European endpoints. I've been testing a mirror setup via Kenya's KEPSA network that cuts this to parity. Sharing my config and benchmark results here. If anyone wants to test the mirror, ping me.",
       "author": "Mwenda Thomas",
       "initials": "MT",
       "avatar": {},
@@ -1412,8 +1444,8 @@
     },
     {
       "id": "thread-029",
-      "title": "ITU coordination procedures \u2014 a plain language walkthrough",
-      "body": "Step-by-step guide to ITU frequency coordination for emerging space nations. I've written this as a practical walkthrough based on our experience coordinating the Ugandan ground station allocation. Covers: filing requirements, coordination simulation, objection windows, and the hidden pitfalls that trip up first-time filers. This is meant to be a living document \u2014 please suggest corrections or additions.",
+      "title": "ITU coordination procedures — a plain language walkthrough",
+      "body": "Step-by-step guide to ITU frequency coordination for emerging space nations. I've written this as a practical walkthrough based on our experience coordinating the Ugandan ground station allocation. Covers: filing requirements, coordination simulation, objection windows, and the hidden pitfalls that trip up first-time filers. This is meant to be a living document — please suggest corrections or additions.",
       "author": "Akello Jane",
       "initials": "AJ",
       "avatar": {},
@@ -1429,8 +1461,8 @@
     },
     {
       "id": "thread-031",
-      "title": "Artemis Accords \u2014 East African perspective",
-      "body": "The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing. Article 10 on resource extraction could conflict with our existing mineral rights frameworks. However, the cooperation benefits for capacity building are significant. What's the collective view \u2014 should we push for an East African consensus position?",
+      "title": "Artemis Accords — East African perspective",
+      "body": "The Artemis Accords represent a framework for international cooperation in lunar exploration and beyond. Uganda, as an emerging spacefaring nation, stands to benefit from joining, but there are sovereignty concerns worth discussing. Article 10 on resource extraction could conflict with our existing mineral rights frameworks. However, the cooperation benefits for capacity building are significant. What's the collective view — should we push for an East African consensus position?",
       "author": "Osei Kwame",
       "initials": "OK",
       "avatar": {
@@ -1449,7 +1481,7 @@
     {
       "id": "thread-036",
       "title": "SAR interferometry for ground subsidence mapping",
-      "body": "I've been processing Sentinel-1 SAR data over the Kampala metropolitan area using InSAR time-series analysis. The results show subsidence rates of 5\u201312 mm/year in several built-up areas, consistent with groundwater extraction patterns. This has implications for infrastructure planning and could feed into our East Africa mapping project. Sharing preliminary interferograms \u2014 would appreciate remote sensing circle members reviewing the processing chain.",
+      "body": "I've been processing Sentinel-1 SAR data over the Kampala metropolitan area using InSAR time-series analysis. The results show subsidence rates of 5–12 mm/year in several built-up areas, consistent with groundwater extraction patterns. This has implications for infrastructure planning and could feed into our East Africa mapping project. Sharing preliminary interferograms — would appreciate remote sensing circle members reviewing the processing chain.",
       "author": "Kimani Aisha",
       "initials": "KA",
       "avatar": {
@@ -1467,8 +1499,8 @@
     },
     {
       "id": "thread-040",
-      "title": "Microgravity fluid dynamics \u2014 open dataset",
-      "body": "I've compiled a dataset of fluid behaviour experiments from ISS research (2018\u20132025) that's been processed into a format suitable for machine learning training. Covers capillary flow, Marangoni convection, and boiling dynamics. 14 GB total, CC-BY licensed. Looking for collaborators to help annotate the\u5b9e\u9a8c conditions and build a prediction model. Any physics or CS members interested?",
+      "title": "Microgravity fluid dynamics — open dataset",
+      "body": "I've compiled a dataset of fluid behaviour experiments from ISS research (2018–2025) that's been processed into a format suitable for machine learning training. Covers capillary flow, Marangoni convection, and boiling dynamics. 14 GB total, CC-BY licensed. Looking for collaborators to help annotate the实验 conditions and build a prediction model. Any physics or CS members interested?",
       "author": "Okello Robert",
       "initials": "OR",
       "avatar": {
@@ -1765,7 +1797,7 @@
         {
           "author": "Nakamura Y.",
           "initials": "NY",
-          "text": "Japan's Space Activities Act has a proportional model \u2014 I can summarise it.",
+          "text": "Japan's Space Activities Act has a proportional model — I can summarise it.",
           "time": "20h ago",
           "color": "var(--blue)"
         },
@@ -1878,14 +1910,14 @@
         {
           "author": "Ochieng P.",
           "initials": "OP",
-          "text": "Received the list. Some terms need context \u2014 'satellite' has different meanings in technical vs everyday usage.",
+          "text": "Received the list. Some terms need context — 'satellite' has different meanings in technical vs everyday usage.",
           "time": "1d ago",
           "color": "var(--teal)"
         },
         {
           "author": "Mwenda T.",
           "initials": "MT",
-          "text": "Uganda side looks good. A few terms differ from Kenyan Swahili \u2014 we should note regional variations.",
+          "text": "Uganda side looks good. A few terms differ from Kenyan Swahili — we should note regional variations.",
           "time": "6h ago",
           "color": "var(--green)"
         }
@@ -1894,14 +1926,14 @@
     {
       "id": "cell-18",
       "type": "Circle Cell",
-      "title": "Space Law Circle \u2014 Internal",
+      "title": "Space Law Circle — Internal",
       "members": 8,
       "status": "Active",
       "circle": "Space Law",
       "proposals": [
         {
           "id": "prop-01",
-          "title": "Debris liability framework \u2014 proportional model",
+          "title": "Debris liability framework — proportional model",
           "status": "In Deliberation",
           "date": "Jul 21"
         },
@@ -1923,7 +1955,7 @@
       "deliverables": [
         {
           "id": "del-01",
-          "title": "ITU Coordination Guide \u2014 Final Draft",
+          "title": "ITU Coordination Guide — Final Draft",
           "status": "Complete",
           "date": "Aug 10"
         }
@@ -1933,7 +1965,7 @@
       "id": "cell-21",
       "type": "Deliberation Cell",
       "delibType": "general",
-      "title": "Debris liability framework \u2014 who bears responsibility?",
+      "title": "Debris liability framework — who bears responsibility?",
       "participants": 12,
       "status": "Active",
       "daysActive": 3,
@@ -1990,7 +2022,7 @@
         {
           "author": "Akello J.",
           "initials": "AJ",
-          "text": "The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different \u2014 the actor was attempting compliance. We need a proportional liability model based on intent and outcome.",
+          "text": "The core issue is that current liability frameworks assume clear fault attribution. But manoeuvre-induced debris is different — the actor was attempting compliance. We need a proportional liability model based on intent and outcome.",
           "time": "3d ago",
           "color": "var(--purple)"
         },
@@ -2004,14 +2036,14 @@
         {
           "author": "Mwenda Thomas",
           "initials": "MT",
-          "text": "From a remote sensing perspective \u2014 tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.",
+          "text": "From a remote sensing perspective — tracking manoeuvre intent requires telemetry data. Can we require operators to submit manoeuvre intent filings before execution? That creates an auditable record.",
           "time": "2d ago",
           "color": "var(--navy-light)"
         },
         {
           "author": "Namugga Claire",
           "initials": "NC",
-          "text": "I'd support a graduated liability model: good-faith manoeuvres with debris generation \u2192 reduced liability; negligent manoeuvres \u2192 standard liability; intentional debris creation \u2192 enhanced liability. The intent filing would distinguish these.",
+          "text": "I'd support a graduated liability model: good-faith manoeuvres with debris generation → reduced liability; negligent manoeuvres → standard liability; intentional debris creation → enhanced liability. The intent filing would distinguish these.",
           "time": "1d ago",
           "color": "var(--teal)"
         }
@@ -2019,7 +2051,7 @@
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Debris liability framework \u2014 proportional model",
+          "title": "Debris liability framework — proportional model",
           "text": "MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms",
           "action": "",
           "implementingCircles": [
@@ -2029,7 +2061,7 @@
           "votesNullified": false,
           "versions": [
             {
-              "title": "Debris liability framework \u2014 proportional model",
+              "title": "Debris liability framework — proportional model",
               "text": "Initial draft",
               "action": "",
               "author": "Akello Jane",
@@ -2136,7 +2168,7 @@
         "name": "ITU Frequency Coordination Guide",
         "description": "Plain-language guide for emerging space nations. Target: policy makers and technical leads in East African space agencies.",
         "sections": 4,
-        "wordCount": "8,000\u201312,000",
+        "wordCount": "8,000–12,000",
         "language": "Plain English"
       },
       "tasks": [
@@ -2209,13 +2241,13 @@
         {
           "name": "Team Member A",
           "initials": "TA",
-          "role": "Sections 1\u20132",
+          "role": "Sections 1–2",
           "color": "linear-gradient(135deg,var(--green),#0d3a20)"
         },
         {
           "name": "Team Member B",
           "initials": "TB",
-          "role": "Sections 3\u20134",
+          "role": "Sections 3–4",
           "color": "linear-gradient(135deg,var(--blue),#0a1e34)"
         },
         {
@@ -2227,7 +2259,7 @@
       ],
       "deliverables": [
         {
-          "name": "Draft v2 \u2014 ITU Frequency Coordination Guide",
+          "name": "Draft v2 — ITU Frequency Coordination Guide",
           "detail": "4,200 words so far"
         },
         {
@@ -2243,21 +2275,21 @@
         {
           "author": "Team Member A",
           "initials": "TA",
-          "text": "Section 2 draft is done. The ITU process diagram needs review \u2014 can someone check the coordination timeline is accurate?",
+          "text": "Section 2 draft is done. The ITU process diagram needs review — can someone check the coordination timeline is accurate?",
           "time": "2h ago",
           "color": "linear-gradient(135deg,var(--green),#0d3a20)"
         },
         {
           "author": "Team Member B",
           "initials": "TB",
-          "text": "On it. Also started Section 3 \u2014 frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?",
+          "text": "On it. Also started Section 3 — frequency assignment tables need a template from the circle. @Team Member C can you pull the ITU reference doc?",
           "time": "1h ago",
           "color": "linear-gradient(135deg,var(--blue),#0a1e34)"
         },
         {
           "author": "Team Member C",
           "initials": "TC",
-          "text": "Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision \u2014 the ITU history paragraph is too detailed for the target audience.",
+          "text": "Pulled it. Uploading to the shared folder now. Also flagged that Section 1 needs a revision — the ITU history paragraph is too detailed for the target audience.",
           "time": "45m ago",
           "color": "linear-gradient(135deg,var(--amber),#5a3a00)"
         }
@@ -2279,7 +2311,7 @@
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Founding Declaration \u2014 Senegal Space Agency",
+          "title": "Founding Declaration — Senegal Space Agency",
           "text": "DECLARE: The Solarian Commons formally affiliates the Senegal Space Agency as a partner organisation.\n\n1. The Senegal Space Agency (ASE) is recognised as an affiliate of the Commons\n2. Knowledge domains: Aerospace Engineering, Remote Sensing\n3. Location: Dakar, Senegal\n4. The agency shall participate in Commons deliberations through its affiliate domain\n5. Partnership terms are governed by the founding resolution and may be amended through standard governance processes",
           "action": "Declaration",
           "implementingCircles": [],
@@ -2298,7 +2330,7 @@
           },
           "versions": [
             {
-              "title": "Founding Declaration \u2014 Senegal Space Agency",
+              "title": "Founding Declaration — Senegal Space Agency",
               "text": "Initial AI draft",
               "action": "Declaration",
               "author": "AI Drafter",
@@ -2324,7 +2356,7 @@
       "draftResolutions": [
         {
           "id": 1,
-          "title": "Founding Declaration \u2014 Mars Habitability Circle",
+          "title": "Founding Declaration — Mars Habitability Circle",
           "text": "DECLARE: The Solarian Commons formally establishes the Mars Habitability Circle.\n\n1. The Mars Habitability Circle is recognised as a steward circle of the Commons\n2. Primary mandate domains: Mars, Habitability\n3. The circle shall steward research and deliberation on life support systems, habitat design, and Mars colonisation\n4. Founding members: Namugga Claire, Osei Kwame, plus 2 additional members\n5. Circle governance is subject to periodic p-aSTF health reviews",
           "action": "Declaration",
           "implementingCircles": [],
@@ -2343,7 +2375,7 @@
           },
           "versions": [
             {
-              "title": "Founding Declaration \u2014 Mars Habitability Circle",
+              "title": "Founding Declaration — Mars Habitability Circle",
               "text": "Initial AI draft",
               "action": "Declaration",
               "author": "AI Drafter",
@@ -2966,12 +2998,24 @@
           "expiryOverride": "Use Global Default",
           "mandateDomains": {
             "primary": [
-              { "name": "Space Law", "desiredWs": 2800 },
-              { "name": "Liability", "desiredWs": 2000 }
+              {
+                "name": "Space Law",
+                "desiredWs": 2800
+              },
+              {
+                "name": "Liability",
+                "desiredWs": 2000
+              }
             ],
             "secondary": [
-              { "name": "Policy", "desiredWs": 1500 },
-              { "name": "Regulatory Compliance", "desiredWs": 1200 }
+              {
+                "name": "Policy",
+                "desiredWs": 1500
+              },
+              {
+                "name": "Regulatory Compliance",
+                "desiredWs": 1200
+              }
             ]
           }
         }
@@ -3030,7 +3074,11 @@
           "location": "Kampala, Uganda",
           "summary": "Amateur and professional astronomy society promoting stargazing and space science education across East Africa.",
           "website": "https://uas.org.ug",
-          "domains": ["Astronomy", "Astrophysics", "Space Education"]
+          "domains": [
+            "Astronomy",
+            "Astrophysics",
+            "Space Education"
+          ]
         }
       },
       "participatingCircles": [],
@@ -3052,12 +3100,12 @@
     {
       "id": "ib-1",
       "type": "vSTF",
-      "title": "Candidate Verification \u2014 Ssempa D.",
+      "title": "Candidate Verification — Ssempa D.",
       "desc": "Steward candidacy assessment for Space Law Circle",
       "time": "Jul 12",
       "badge": "Invitation",
       "unread": true,
-      "detail": "You have been selected as an assessor for Ssempa David's steward candidacy. This is a vSTF process \u2014 you will evaluate their competence claims, investment evidence, and domain fit for Space Law stewardship.",
+      "detail": "You have been selected as an assessor for Ssempa David's steward candidacy. This is a vSTF process — you will evaluate their competence claims, investment evidence, and domain fit for Space Law stewardship.",
       "actions": [
         {
           "label": "Accept Invitation",
@@ -3085,7 +3133,7 @@
         },
         {
           "label": "Est. Time",
-          "value": "4\u20136 hours"
+          "value": "4–6 hours"
         },
         {
           "label": "Assessors",
@@ -3097,7 +3145,7 @@
     {
       "id": "ib-2",
       "type": "Deliberation",
-      "title": "Motion crystallising \u2014 Space Law",
+      "title": "Motion crystallising — Space Law",
       "desc": "Akello J. sponsored debris liability framework",
       "time": "Jul 11",
       "badge": "Active",
@@ -3125,7 +3173,7 @@
         },
         {
           "label": "Domains",
-          "value": "Space Law \u00b7 Liability \u00b7 Remote Sensing"
+          "value": "Space Law · Liability · Remote Sensing"
         }
       ],
       "nav": "cell-delib"
@@ -3133,8 +3181,8 @@
     {
       "id": "ib-3",
       "type": "aSTF",
-      "title": "Cell #Cell-23 \u2014 Motion adjudication",
-      "desc": "Debris liability framework \u2014 blind review",
+      "title": "Cell #Cell-23 — Motion adjudication",
+      "desc": "Debris liability framework — blind review",
       "time": "Jul 10",
       "badge": "Due Jul 28",
       "unread": true,
@@ -3149,7 +3197,7 @@
       "meta": [
         {
           "label": "Type",
-          "value": "aSTF \u2014 Blind Adjudication"
+          "value": "aSTF — Blind Adjudication"
         },
         {
           "label": "Cell",
@@ -3165,7 +3213,7 @@
         },
         {
           "label": "Domains",
-          "value": "Space Law \u00b7 Liability"
+          "value": "Space Law · Liability"
         }
       ],
       "nav": "stf-astf"
@@ -3173,12 +3221,12 @@
     {
       "id": "ib-4",
       "type": "xSTF",
-      "title": "Cell #Cell-19 \u2014 ITU guide 45% complete",
+      "title": "Cell #Cell-19 — ITU guide 45% complete",
       "desc": "Execution deliverable on track",
       "time": "Jul 9",
       "badge": "Due Aug 15",
       "unread": false,
-      "detail": "The ITU Frequency Coordination Guide xSTF is progressing well. Current status: 45% complete. Team Members A and B have completed Sections 1\u20132 and are working on Section 3. Internal review is pending.",
+      "detail": "The ITU Frequency Coordination Guide xSTF is progressing well. Current status: 45% complete. Team Members A and B have completed Sections 1–2 and are working on Section 3. Internal review is pending.",
       "actions": [
         {
           "label": "View xSTF Cell",
@@ -3189,7 +3237,7 @@
       "meta": [
         {
           "label": "Type",
-          "value": "xSTF \u2014 Execution"
+          "value": "xSTF — Execution"
         },
         {
           "label": "Cell",
@@ -3213,7 +3261,7 @@
     {
       "id": "ib-5",
       "type": "Cell",
-      "title": "Cell update \u2014 Kenya section",
+      "title": "Cell update — Kenya section",
       "desc": "East Africa Mapping project: Kenya section 80% complete",
       "time": "Jul 8",
       "badge": "Update",
@@ -3241,7 +3289,7 @@
         },
         {
           "label": "Domains",
-          "value": "Policy \u00b7 Remote Sensing"
+          "value": "Policy · Remote Sensing"
         }
       ],
       "nav": "cell-undertaking"
@@ -3249,7 +3297,7 @@
     {
       "id": "ib-6",
       "type": "Competence",
-      "title": "Competence verified \u2014 Space Law",
+      "title": "Competence verified — Space Law",
       "desc": "Your Space Law Wh increased by +50",
       "time": "Jul 7",
       "badge": "Verified",
@@ -3375,12 +3423,12 @@
       "type": "Grant"
     },
     {
-      "title": "Remote Sensing Analyst \u2014 RCMRD",
+      "title": "Remote Sensing Analyst — RCMRD",
       "deadline": "Aug 20",
       "type": "Position"
     },
     {
-      "title": "Call for Papers \u2014 African Space Law Journal",
+      "title": "Call for Papers — African Space Law Journal",
       "deadline": "Nov 1",
       "type": "Publication"
     }
