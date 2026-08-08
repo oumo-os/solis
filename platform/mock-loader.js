@@ -118,9 +118,9 @@ function renderDiscussionThreads() {
       + '<div class="post-title">' + t.title + '</div>'
       + '<div class="post-body">' + t.body + '</div>'
       + '<div class="post-actions">'
-      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#9825;</span><span class="count">' + t.likes + '</span></button>'
-      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
-      + '<button class="post-action" onclick="event.stopPropagation()"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>'
+      + '<button class="post-action' + ((window._likedThreads && window._likedThreads[t.id]) ? ' liked' : '') + '" onclick="event.stopPropagation();toggleThreadLike(\'' + t.id + '\')"><span>' + ((window._likedThreads && window._likedThreads[t.id]) ? '&#9829;' : '&#9825;') + '</span><span class="count">' + t.likes + '</span></button>'
+      + '<button class="post-action" onclick="event.stopPropagation();openThreadDetail(\'' + t.id + '\')"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
+      + '<button class="post-action" onclick="event.stopPropagation();shareThread(\'' + t.id + '\')"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>'
       + '</div></div>';
   }).join('');
 }

@@ -298,6 +298,10 @@ var SolisApi = (function() {
     return req('PATCH', 'stfs/' + stfId + '/candidates/' + candId, patch);
   }
 
+  function updateThread(threadId, patch) {
+    return req('PATCH', 'threads/' + threadId, patch);
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -315,6 +319,7 @@ var SolisApi = (function() {
     saveProjectApplication: saveProjectApplication,
     saveGovernanceEntry: saveGovernanceEntry,
     updateStfCandidate: updateStfCandidate,
+    updateThread: updateThread,
     addThreadReply: addThreadReply,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,

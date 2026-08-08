@@ -307,7 +307,10 @@ participant_domain {
 **Discussion features:**
 - Compose box with domain tags, file attachment, link — domain tag/link/attachment UI only (no backend fields yet); type selector preserved
 - Feed filters: My Feed, Circle Mentions, Endorsed, All
-- Post cards with: author, domain tags, title, body, engagement (like, comment, endorse, bookmark)
+- Post cards with: author, domain tags, title, body, engagement — like
+  ✅ persisted (toggle + `PATCH /api/threads/:id`), reply → opens thread
+  detail (persisted), share → copy-link toast; endorse + bookmark still
+  UI-only
 - Pinned posts
 
 ### 2.5 — Proposals

@@ -248,3 +248,20 @@ Mutating flows vs the API:
 - Verified headlessly: fresh seed feed 8 → 9 after Post, post visible in
   feed, row present via `GET /api/threads`, and feed still shows the post
   after a full iframe reload (bootstrap round-trip).
+
+## Post-card engagement persisted (2026-08-08, to_prod 2.4)
+
+- The three inert post-card action buttons are now wired:
+  - **Like** (`toggleThreadLike`): per-session toggle (`window._likedThreads`),
+    increments/decrements `thread.likes` locally (+ re-renders feed through
+    `renderDiscussionThreads`, heart fills ♥ + `.post-action.liked` red
+    class) and persists via new `SolisApi.updateThread` →
+    `PATCH /api/threads/:id`.
+  - **Reply** button → opens the thread detail (`openThreadDetail`), where
+    the reply box persists via the existing `POST .../replies`.
+  - **Share** (`shareThread`): copies `origin+path#threadId` (clipboard
+    guarded) + toast.
+- Verified headlessly: like count +1 and rerendered card carries
+  `liked` class + filled heart; `GET /api/threads/:id` shows the bumped
+  count; count survives a fresh page load while the liked state resets
+  (per-session by design).

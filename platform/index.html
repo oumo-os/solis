@@ -6810,6 +6810,25 @@ function renderDeliverables(cellId, containerId) {
 }
 
 // ─── Commons composer ────────────────────────────────────
+var _likedThreads = {};
+
+function toggleThreadLike(threadId) {
+  var t = null;
+  (MOCK.threads || []).forEach(function(x) { if (x.id === threadId) t = x; });
+  if (!t) return;
+  _likedThreads[threadId] = !_likedThreads[threadId];
+  t.likes = Math.max(0, (parseInt(t.likes, 10) || 0) + (_likedThreads[threadId] ? 1 : -1));
+  var tf = document.getElementById('threads-feed');
+  if (tf) tf.innerHTML = renderDiscussionThreads();
+  SolisApi.updateThread(threadId, { likes: t.likes }).catch(function() {});
+}
+
+function shareThread(threadId) {
+  var url = window.location.origin + window.location.pathname + '#' + threadId;
+  try { navigator.clipboard.writeText(url); } catch (e) { /* clipboard unavailable */ }
+  toast('Share link copied for this discussion.', 'success');
+}
+
 function composePost() {
   var box = document.querySelector('#view-commons .post-compose textarea');
   var text = box ? (box.value || '').trim() : '';
