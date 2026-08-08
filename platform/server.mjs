@@ -5,7 +5,7 @@
 import { createServer } from 'node:http';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync, statSync, createReadStream, existsSync } from 'node:fs';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize, sep } from 'node:path';
 import { execSync } from 'node:child_process';
@@ -22,6 +22,7 @@ if (!existsSync(DB_PATH)) {
 }
 const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+try { db.exec('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -39,7 +40,45 @@ const readBody = (req) =>
       catch { resolve({}); }
     });
   });
-const hashPassword = (pw) => createHash('sha256').update(String(pw)).digest('hex');
+// scrypt password hashing — self-describing format "scrypt$N$r$p$salt$hash".
+// Legacy sha256 hashes (pre-hardening seed data) still verify and are
+// transparently upgraded to scrypt on successful login.
+const legacyHash = (pw) => createHash('sha256').update(String(pw)).digest('hex');
+const isLegacyHash = (stored) => /^[0-9a-f]{64}$/.test(stored || '');
+const hashPassword = (pw) => {
+  const salt = randomBytes(16).toString('hex');
+  const key = scryptSync(String(pw), salt, 64, { N: 16384, r: 8, p: 1 });
+  return `scrypt$16384$8$1$${salt}$${key.toString('hex')}`;
+};
+const verifyPassword = (pw, stored) => {
+  if (!stored) return false;
+  if (stored.startsWith('scrypt$')) {
+    const [N, r, p, salt, hex] = stored.split('$').slice(1);
+    const n = parseInt(N, 10), rr = parseInt(r, 10), pp = parseInt(p, 10);
+    if (!n || !rr || !pp || !salt || !hex) return false;
+    try {
+      const expected = Buffer.from(hex, 'hex');
+      const key = scryptSync(String(pw), salt, expected.length, { N: n, r: rr, p: pp });
+      return expected.length === key.length && timingSafeEqual(expected, key);
+    } catch { return false; }
+  }
+  return timingSafeEqual(Buffer.from(legacyHash(pw), 'hex'), Buffer.from(stored, 'hex'));
+};
+
+// ── brute-force protection ───────────────────────────────
+const rateBuckets = new Map();
+const rateLimit = (key, max, windowMs) => {
+  const now = Date.now();
+  let b = rateBuckets.get(key);
+  if (!b || now - b.t > windowMs) { b = { n: 0, t: now }; }
+  b.n++;
+  b.t = now;
+  rateBuckets.set(key, b);
+  return b.n > max ? Math.ceil((b.t + windowMs - now) / 1000) : null;
+};
+const CLIENT_IP = (req) => (req.socket.remoteAddress || 'unknown').replace(/^::ffff:/, '');
+const AUTH_LIMIT = parseInt(process.env.SOLIS_AUTH_RATE || '10', 10);
+const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const genToken = () => randomBytes(48).toString('hex');
 
 // ── auth ────────────────────────────────────────────────
@@ -58,23 +97,35 @@ function authUser(req) {
 // ═════════════════════════════════════════════════════════
 
 async function authRoutes(req, res, path, method) {
-  if (method === 'POST' && path === '/api/auth/login') {
+if (method === 'POST' && path === '/api/auth/login') {
     const body = await readBody(req);
     const email = String(body.email || '').trim().toLowerCase();
+    const retry = rateLimit(`auth:${CLIENT_IP(req)}`, AUTH_LIMIT, AUTH_WINDOW_MS);
+    if (retry) return send(res, 429, { error: 'Too many attempts — please try again later', retryAfter: retry });
     const user = db.prepare('SELECT * FROM users WHERE lower(email) = ?').get(email);
-    if (!user || !user.password_hash || user.password_hash !== hashPassword(String(body.password || ''))) {
+    const pw = String(body.password || '');
+    if (!user || !user.password_hash || !verifyPassword(pw, user.password_hash)) {
+      if (user) db.prepare('UPDATE users SET failed_attempts = COALESCE(failed_attempts,0) + 1 WHERE id = ?').run(user.id);
       return send(res, 401, { error: 'Invalid email or password' });
+    }
+    if (user.failed_attempts) db.prepare('UPDATE users SET failed_attempts = 0 WHERE id = ?').run(user.id);
+    if (isLegacyHash(user.password_hash)) {
+      db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(pw), user.id);
+      user.password_hash = null;
     }
     const token = genToken();
     const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
     db.prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)').run(user.id, token, expires);
+    db.prepare("DELETE FROM auth_tokens WHERE user_id = ? AND expires_at <= datetime('now')").run(user.id);
     delete user.password_hash;
     return send(res, 200, { token, user });
   }
 
   if (method === 'POST' && path === '/api/auth/register') {
+    const retry = rateLimit(`reg:${CLIENT_IP(req)}`, AUTH_LIMIT, AUTH_WINDOW_MS);
     const body = await readBody(req);
     const { name, email, password, location, bio, essay } = body;
+    if (retry) return send(res, 429, { error: 'Too many accounts created from this address — please try again later', retryAfter: retry });
     if (!name || !email || !password) return send(res, 400, { error: 'Name, email, and password required' });
     if (String(password).length < 6) return send(res, 400, { error: 'Password must be at least 6 characters' });
     const exists = db.prepare('SELECT id FROM users WHERE lower(email) = ?').get(String(email).toLowerCase());
@@ -808,12 +859,19 @@ function staticFile(reqUrl) {
 // REQUEST HANDLER
 // ═════════════════════════════════════════════════════════
 
+const CORS_ORIGIN = process.env.SOLIS_ORIGIN || '*';
+
 const server = createServer(async (req, res) => {
   const reqUrl = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   const method = req.method;
 
   // API routes
   if (reqUrl.startsWith('/api/')) {
+    res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
+    if (method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
     let handled = await authRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await bootstrapRoute(req, res, reqUrl, method);

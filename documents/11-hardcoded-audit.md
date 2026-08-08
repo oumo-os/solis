@@ -206,3 +206,30 @@ Mutating flows vs the API:
   null-safe.
 - Server caches nothing, but holds the DB file open: after re-seeding, the
   server must be restarted to see new data.
+
+## Auth & transport hardening (2026-08-08, to_prod 1.2)
+
+- **Password hashing**: `server.mjs` `hashPassword` now scrypt
+  (`scrypt$16384$8$1$<salt>$<hash>`, node:crypto `scryptSync`, 64-byte key,
+  per-user 16-byte salt). Legacy sha256 hashes (seeded users) still verify
+  via `verifyPassword` and are transparently re-hashed to scrypt on their
+  next successful login (`isLegacyHash` → upgrade). Registration hashes
+  with scrypt directly.
+- **Brute-force protection**: in-memory sliding-window rate limiter on
+  `/api/auth/login` + `/api/auth/register` (per client IP, default 10
+  attempts / 15 min, `SOLIS_AUTH_RATE` env override); over-limit → 429 with
+  `retryAfter` seconds, regardless of credential validity. Failed logins
+  also increment `users.failed_attempts` (reset on success); column added
+  to `schema.sql` + guarded `ALTER TABLE` on boot for existing DBs.
+- **Sessions**: 24h opaque tokens (unchanged) — login now prunes that
+  user's expired tokens; logout already revokes the presented token.
+- **CORS**: `/api/*` responses carry `Access-Control-Allow-Origin`
+  (`SOLIS_ORIGIN` env, default `*`), methods, headers + 86400 max-age;
+  `OPTIONS` preflight short-circuits with 204.
+- **Deviations from to_prod 1.2**: kept email+password (no magic-link
+  infra) and opaque DB tokens (no JWT); documented in to_prod.md.
+- Verified via `/tmp/opencode/auth-battery.mjs` against a fresh seed:
+  preflight 204 + CORS headers, legacy-login→scrypt upgrade, scrypt login,
+  401 wrong password, `/me`, logout revocation, expired-token 401, register
+  201 + login + 409 duplicate, 429 lockout with `retryAfter`. Full SPA
+  smoke (login → personal / stf-astf / cell-21) still green.

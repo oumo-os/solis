@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
   essay          TEXT,
   avatar         TEXT,          -- JSON: { gold: bool, gradient: string }
   is_current     INTEGER DEFAULT 0,  -- 1 = the signed-in mock user
-  password_hash  TEXT,               -- for auth; seeded users may be null
+  password_hash  TEXT,               -- scrypt "scrypt$N$r$p$salt$hash" (legacy sha256 upgraded on login)
+  failed_attempts INTEGER DEFAULT 0, -- consecutive failed logins (brute-force ledger)
   created_at     TEXT DEFAULT (datetime('now'))
 );
 

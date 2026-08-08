@@ -124,19 +124,25 @@ publications
 events
 ```
 
-### 1.2 — Authentication
+### 1.2 — Authentication  ✅ IMPLEMENTED (2026-08-08, hardened)
 
-**Design decisions:**
-- Email + magic link (simpler, more aligned with the Commons ethos)
-- No password — Solis is not a corporate platform
+**Design decisions (implemented):**
+- Email + password retained (magic-link infra intentionally deferred;
+  self-declared identity without external email providers)
 - Registration = identity creation (self-declared, no approval)
-- Session management via JWT or Supabase built-in
+- Sessions: opaque 24h Bearer tokens in `auth_tokens` (no JWT)
 
-**Auth flow:**
-1. Landing page → "Join the Commons" or "Sign in"
-2. Email entry → magic link sent
-3. Click link → account created, redirected to registration flow
-4. Registration: 3 steps (basic info, competence declarations, interest ranking)
+**Hardening applied (2026-08-08):**
+- scrypt password hashing (`scrypt$N$r$p$salt$hash`, node:crypto), legacy
+  sha256 hashes auto-upgraded on next successful login
+- Rate limiting on login/register (10 / 15 min per IP → 429 + retryAfter)
+- `users.failed_attempts` brute-force ledger (reset on success)
+- Token expiry pruning on login; logout revokes the presented token
+- CORS preflight for /api/* (`SOLIS_ORIGIN`, default *)
+
+**Open (follow-ups, not blocking):**
+- Magic-link flow (revisit when a mail provider exists)
+- Password reset flow (out of scope for self-declared identity v1)
 
 ### 1.3 — Data Layer
 
