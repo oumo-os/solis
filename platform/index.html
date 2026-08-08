@@ -1338,7 +1338,10 @@
         <div class="card">
           <div id="td-replies"></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" placeholder="Write a reply..."></textarea>
+          <textarea class="msg-input" rows="2" placeholder="Write a reply..." id="td-reply-input" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitThreadReply();}"></textarea>
+          <div class="flex justify-end" style="margin-top:8px">
+            <button class="btn btn-primary" style="font-size:12px" onclick="submitThreadReply()">Post Reply</button>
+          </div>
         </div>
       </div>
       <div class="layout-aside">
@@ -4133,6 +4136,34 @@ function renderThreadDetail(threadId) {
     return '<div class="aside-link" onclick="openThreadDetail(\'' + x.id + '\')">' + escapeHtml(x.title || '') + '</div>';
   }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No related threads yet.</div>';
   set('td-related', relatedHtml);
+}
+
+function submitThreadReply() {
+  var input = document.getElementById('td-reply-input');
+  var body = input ? input.value.trim() : '';
+  if (!body) return;
+  var thread = null;
+  var threads = (MOCK && MOCK.threads) || [];
+  for (var i = 0; i < threads.length; i++) {
+    if (threads[i].id === currentThreadId) { thread = threads[i]; break; }
+  }
+  if (!thread) return;
+  var me = MOCK.currentUser || {};
+  var time = (MOCK.todaysDate || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })) + ', ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  var reply = {
+    author: me.name || 'You', initials: me.initials || 'YO',
+    avatar: me.avatar || null, time: time, body: body, likes: 0
+  };
+  SolisApi.addThreadReply(thread.id, reply).then(function() {
+    thread.replies = (thread.replies || 0) + 1;
+    if (!thread.repliesList) thread.repliesList = [];
+    thread.repliesList.push(reply);
+    if (input) input.value = '';
+    renderThreadDetail(currentThreadId);
+    toast('Reply posted.', 'success');
+  }).catch(function() {
+    toast('Could not post reply. Is the server running?', 'error');
+  });
 }
 
 var currentPublicationId = null;

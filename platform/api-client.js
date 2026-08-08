@@ -217,6 +217,13 @@ var SolisApi = (function() {
     });
   }
 
+  function addThreadReply(threadId, reply) {
+    return req('POST', 'threads/' + threadId + '/replies', {
+      author: reply.author, initials: reply.initials, avatar: reply.avatar || null,
+      time: reply.time, body: reply.body, likes: reply.likes || 0
+    });
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {

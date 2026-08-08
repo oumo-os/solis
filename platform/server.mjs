@@ -227,6 +227,7 @@ const childDefs = [
   { parent: 'cells', child: 'cell_votes', parentKey: 'cell_id', path: '/api/cells/:id/votes' },
   { parent: 'cells', child: 'vote_records', parentKey: 'cell_id', path: '/api/cells/:id/vote-records' },
   { parent: 'stfs', child: 'stf_candidates', parentKey: 'stf_id', path: '/api/stfs/:id/candidates' },
+  { parent: 'threads', child: 'thread_replies', parentKey: 'thread_id', path: '/api/threads/:id/replies' },
   { parent: 'circle_applications', child: 'circle_application_domains', parentKey: 'app_id', path: '/api/circle-applications/:id/domains' },
 ];
 

@@ -110,6 +110,32 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
    intentionally static. `view-domain-map` page-sub count now derived from the
    catalog ("49 knowledge + 3 affiliate domains").
 
+10. **Legacy redirect stubs audited** — the 8 `platform/*.html` shells are
+    meta-refresh redirects to SPA hash routes (kept for bookmark compat);
+    `undertaking-detail.html` pointed at a nonexistent `#undertaking-detail`
+    route → now `#undertakings`; `public/participate.html` CTA now links
+    `../platform/index.html#profile` directly.
+
+## Persistence audit (2026-08-08)
+
+Mutating flows vs the API:
+
+- **Persisted**: auth/register/profile, cells CRUD + tasks, draft resolutions
+  + versions + implementing circles, circles + domains, thread creation,
+  inbox read flags, circle/project applications, governance ledger, STF
+  candidate status, settings-as-proposals (via `saveCell`).
+- **Newly persisted**: thread replies — `POST /api/threads/:id/replies`
+  (generic child route on the existing `thread_replies` table) + reply
+  textarea/button in `view-thread-detail` (`submitThreadReply()`, Enter
+  submits); reply is merged into local `repliesList` and the count
+  increments on success. Verified: POST 201 → row in GET/list + bootstrap.
+- **Still UI-only (no backend)**: the deliberation vote sheet
+  (`updateVoteSummary` hardcodes `totalMembers = 8`, `votedCount = 5`,
+  `domainVotes` voter Ws, `absTotal = 340`; no submission flow),
+  `submitResolution()` and `closeDebate()` (confirm-modal + toast only).
+- Re-seeding twice duplicates non-keyed rows (publications/news/events have
+  no unique constraint) — always `rm -f solis.db*` before `node db/seed.js`.
+
 ## Data notes (verified against bootstrap)
 
 - `circles[].motions` is a **number** (not array); `circles[].resolutions` has
