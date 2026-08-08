@@ -233,3 +233,18 @@ Mutating flows vs the API:
   401 wrong password, `/me`, logout revocation, expired-token 401, register
   201 + login + 409 duplicate, 429 lockout with `retryAfter`. Full SPA
   smoke (login → personal / stf-astf / cell-21) still green.
+
+## Commons composer persisted (2026-08-08, to_prod 2.4)
+
+- The compose "Post" button (previously static, no handler) now calls
+  `composePost()`: reads the composer textarea + active content-type
+  (discussion/proposal/event/article/opportunity/publication → badge +
+  badgeClass), builds a thread (`thread-<ts36>` id, author/initials from
+  `MOCK.currentUser`, amber General domain tag, "Just now"), unshifts it
+  into `MOCK.threads`, re-renders `renderDiscussionThreads()`, clears the
+  box, and persists via `SolisApi.addThread` (`POST /api/threads`,
+  upsert). Feed regeneration after publish (`publishDeliverablesToCommons`)
+  unchanged.
+- Verified headlessly: fresh seed feed 8 → 9 after Post, post visible in
+  feed, row present via `GET /api/threads`, and feed still shows the post
+  after a full iframe reload (bootstrap round-trip).

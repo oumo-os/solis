@@ -301,14 +301,11 @@ participant_domain {
 ### 2.4 — Discussions (Commons)
 
 **Discussion flow:**
-1. Any participant posts a Tier 1 discussion
-2. Participants reply, like, endorse
-3. A steward may endorse (carries mandate authority)
-4. A steward may elevate to Tier 2 (requires approval for public display)
-5. Discussions can be sponsored into proposals
+1. Any participant posts a Tier 1 discussion  ✅ compose box wired (`composePost`, 2026-08-08)
+2. Participants reply, like, endorse  ✅ replies persist (`POST /api/threads/:id/replies`)
 
 **Discussion features:**
-- Compose box with domain tags, file attachment, link
+- Compose box with domain tags, file attachment, link — domain tag/link/attachment UI only (no backend fields yet); type selector preserved
 - Feed filters: My Feed, Circle Mentions, Endorsed, All
 - Post cards with: author, domain tags, title, body, engagement (like, comment, endorse, bookmark)
 - Pinned posts

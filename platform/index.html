@@ -143,7 +143,7 @@
                 <button title="Add domain tag"><i class="fa-solid fa-tag"></i></button>
                 <button title="Add link"><i class="fa-solid fa-link"></i></button>
               </div>
-              <button class="btn btn-primary btn-sm">Post</button>
+              <button class="btn btn-primary btn-sm" onclick="composePost()">Post</button>
             </div>
           </div>
         </div>
@@ -6807,6 +6807,41 @@ function renderDeliverables(cellId, containerId) {
     html += '<button onclick="publishDeliverablesToCommons(\'' + cellId + '\')" style="margin-top:10px;background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border);border-radius:6px;padding:6px 12px;font-size:11px;cursor:pointer;width:100%;text-align:center;font-weight:500"><i class="fa-solid fa-share-from-square" style="margin-right:4px"></i>Publish to Commons</button>';
   }
   el.innerHTML = html;
+}
+
+// ─── Commons composer ────────────────────────────────────
+function composePost() {
+  var box = document.querySelector('#view-commons .post-compose textarea');
+  var text = box ? (box.value || '').trim() : '';
+  if (!text) { toast('Write something first.', 'error'); return; }
+  var typeBtn = document.querySelector('#compose-type-selector .compose-type-btn.active');
+  var type = typeBtn ? typeBtn.getAttribute('data-type') : 'discussion';
+  var badgeMap = { discussion: 'Discussion', proposal: 'Proposal', event: 'Event', article: 'Article', opportunity: 'Opportunity', publication: 'Publication' };
+  var badgeClassMap = { discussion: 'b-active', proposal: 'b-pending', event: 'b-enacted', article: 'b-review', opportunity: 'b-judicial', publication: 'b-approved' };
+  var me = MOCK && MOCK.currentUser ? MOCK.currentUser : {};
+  var initials = (me.initials || (me.name || '??').split(/\s+/).map(function(w) { return w[0]; }).join('').slice(0, 2)).toUpperCase();
+  var thread = {
+    id: 'thread-' + Date.now().toString(36),
+    title: text.split('\n')[0].slice(0, 140),
+    body: text,
+    author: me.name || 'Unknown',
+    initials: initials,
+    domain: 'General',
+    domainColor: 'tag-amber',
+    badge: badgeMap[type] || 'Discussion',
+    badgeClass: badgeClassMap[type] || 'b-active',
+    replies: 0, likes: 0, shares: 0,
+    time: 'Just now',
+    pinned: 0,
+    repliesList: []
+  };
+  MOCK.threads.unshift(thread);
+  var tf = document.getElementById('threads-feed');
+  if (tf) tf.innerHTML = renderDiscussionThreads();
+  if (box) box.value = '';
+  SolisApi.addThread(thread).then(function(r) {
+    toast(r && r.id ? 'Posted to the Commons.' : 'Could not sync to server — kept locally.', r && r.id ? 'success' : 'error');
+  }).catch(function() { toast('Could not reach the server.', 'error'); });
 }
 
 function publishDeliverablesToCommons(cellId) {
