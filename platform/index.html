@@ -2099,10 +2099,9 @@
           <div style="overflow-x:auto">
             <table class="vote-table" style="min-width:600px">
               <thead>
-                <tr>
+                <tr id="vote-breakdown-head">
                   <th>Domain</th><th style="text-align:right">Share</th>
                   <th style="text-align:right" id="vs-th-yea">Yea Ws</th><th style="text-align:right" id="vs-th-nay">Nay Ws</th><th style="text-align:right">Total</th>
-                  <th style="text-align:right">AJ</th><th style="text-align:right">OK</th><th style="text-align:right">NC</th><th style="text-align:right">MT</th>
                 </tr>
               </thead>
               <tbody id="vote-breakdown-body">
@@ -2120,12 +2119,12 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Deliberating members</td><td style="font-family:var(--mono);font-weight:600">8</td>
+                  <td>Deliberating members</td><td id="vs-members-cell" style="font-family:var(--mono);font-weight:600">8</td>
                   <td>Quorum required (2/3)</td><td style="font-family:var(--mono);font-weight:600" id="vs-qrm-req-cell">6</td>
                 </tr>
                 <tr>
                   <td>Voted (Yea + Nay)</td><td style="font-family:var(--mono);font-weight:600" id="vs-voted-count-cell">4</td>
-                  <td>Abstained</td><td style="font-family:var(--mono)" id="vs-abs-count-cell">1</td>
+                  <td>Not voted</td><td style="font-family:var(--mono)" id="vs-abs-count-cell">1</td>
                 </tr>
                 <tr>
                   <td>Quorum status</td><td id="vs-quorum-status-cell" style="color:var(--red);font-weight:600">Not met</td>
@@ -2661,7 +2660,86 @@ function selectVote(btn, type) {
   var buttons = btn.parentElement.querySelectorAll('.vote-btn');
   buttons.forEach(function(b) { b.className = 'vote-btn'; });
   btn.classList.add('selected-' + type);
-  updateVoteSummary();
+  castMyVote(type);
+}
+
+function castMyVote(type) {
+  var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
+  if (!cell) return;
+  var me = MOCK.currentUser || {};
+  if (!me.initials) { toast('Sign in to vote.', 'error'); return; }
+  var part = null;
+  (MOCK.participants || []).forEach(function(p) {
+    if (p.id === me.id) part = p;
+  });
+  var declared = (part && part.domains) ? part.domains : [];
+  var votes = cell.votes;
+  var wantDomains = (votes && Array.isArray(votes.domains) && votes.domains.length)
+    ? votes.domains.map(function(d) { return d.name; })
+    : (cell.domains || []);
+  var targets = [];
+  wantDomains.forEach(function(dname) {
+    for (var i = 0; i < declared.length; i++) {
+      if (declared[i].name === dname && declared[i].ws != null && declared[i].ws > 0) {
+        targets.push({ domain: dname, ws: declared[i].ws });
+        break;
+      }
+    }
+  });
+  if (!targets.length) {
+    toast('You have no declared competence (Ws) in this deliberation\u2019s domains.', 'error');
+    return;
+  }
+  var remaining = targets.length;
+  var failed = false;
+  targets.forEach(function(t) {
+    SolisApi.castVote(cell.id, t.domain, { name: me.name, initials: me.initials, ws: t.ws, vote: type })
+      .then(function(resp) {
+        applyCastResult(cell, resp);
+        remaining--;
+        if (remaining === 0) {
+          toast(failed ? 'Some votes could not be recorded.' : 'Vote recorded for ' + targets.length + ' domain' + (targets.length > 1 ? 's' : '') + '.', failed ? 'error' : 'success');
+          updateVoteSummary();
+        }
+      })
+      .catch(function() {
+        failed = true;
+        remaining--;
+        if (remaining === 0) {
+          toast('Vote failed. Is the server running?', 'error');
+          updateVoteSummary();
+        }
+      });
+  });
+}
+
+function applyCastResult(cell, resp) {
+  if (!resp) return;
+  if (!cell.votes) cell.votes = { domains: [], summary: {} };
+  if (!Array.isArray(cell.votes.domains)) cell.votes.domains = [];
+  (resp.domains || []).forEach(function(d) {
+    var row = null;
+    cell.votes.domains.forEach(function(x) { if (x.name === d.name) row = x; });
+    if (row) {
+      row.yea = d.yea; row.nay = d.nay; row.total = d.total;
+      row.voters = row.voters || [];
+    } else {
+      cell.votes.domains.push({ name: d.name, yea: d.yea, nay: d.nay, total: d.total, voters: [] });
+      row = cell.votes.domains[cell.votes.domains.length - 1];
+      row.voters = row.voters || [];
+    }
+    if (resp.record && resp.record.domain === d.name) {
+      var found = null;
+      row.voters.forEach(function(v) { if (v.initials === resp.record.initials) found = v; });
+      var rec = { name: resp.record.name, initials: resp.record.initials, ws: resp.record.ws, vote: resp.record.vote };
+      if (found) {
+        found.name = rec.name; found.ws = rec.ws; found.vote = rec.vote;
+      } else {
+        row.voters.push(rec);
+      }
+    }
+  });
+  cell.votes.summary = resp.summary || cell.votes.summary;
 }
 
 // ─── Vote Summary & Domain Weight Calculation ───
@@ -2687,32 +2765,52 @@ function getMandateMultiplier(voterId, domain, participatingCircles) {
 }
 
 function updateVoteSummary() {
-  var totalMembers = 8;
-  var requiredFraction = 2/3;
-  var quorumReq = Math.ceil(totalMembers * requiredFraction);
-  var votedCount = 5;
-
-  // Determine if this is a publication deliberation
   var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
   var isPub = cell && cell.delibType === 'publication-approval';
   var approveLabel = isPub ? 'Approve' : 'Yea';
   var rejectLabel = isPub ? 'Not Approve' : 'Nay';
 
-  // Domain data — shares from resolution (AI-generated or default equal)
-  var res = delibResolutions[0];
-  var shares = (res && res.domainShares) ? res.domainShares : { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
-
-  var domainVotes = [
-    { tag:'LAW', name:'Space Law',     share:shares['Space Law'] || 0.33, voters:{AJ:1800,OK:1040,NC:-620} },
-    { tag:'LAW', name:'Liability',      share:shares['Liability'] || 0.33, voters:{AJ:800, OK:400, NC:-312} },
-    { tag:'RS',  name:'Remote Sensing', share:shares['Remote Sensing'] || 0.34, voters:{MT:920} }
-  ];
-
-  var absTotal = 340;
-  var absCount = totalMembers - votedCount;
-
-  // Get participating circles for mandate lookup
+  // Deliberating members — weighted by circle participation
   var participatingCircles = cell ? (cell.participatingCircles || []) : [];
+  var totalMembers = 0;
+  for (var pc = 0; pc < participatingCircles.length; pc++) totalMembers += (participatingCircles[pc].votes || 0);
+  if (!totalMembers && cell && cell.participants) totalMembers = cell.participants;
+  if (!totalMembers) totalMembers = 8;
+  var requiredFraction = 2/3;
+  var quorumReq = Math.ceil(totalMembers * requiredFraction);
+
+  // Domain data — votes from cell.votes, shares from resolution or equal split
+  var votes = cell ? cell.votes : null;
+  var voteDomains = (votes && Array.isArray(votes.domains)) ? votes.domains : [];
+  var res = delibResolutions[0];
+  var baseShares = (res && res.domainShares) || {};
+
+  var domainVotes = [];
+  var voters = [];
+  for (var vi = 0; vi < voteDomains.length; vi++) {
+    var vd = voteDomains[vi];
+    var vMap = {};
+    (vd.voters || []).forEach(function(vr) {
+      if (voters.indexOf(vr.initials) === -1) voters.push(vr.initials);
+      if (vr.vote === 'abstain') return;
+      var ws = Math.abs(Number(vr.ws) || 0);
+      vMap[vr.initials] = vr.vote === 'nay' ? -ws : ws;
+    });
+    var share = baseShares[vd.name];
+    if (share === undefined || share === null) share = voteDomains.length ? 1 / voteDomains.length : 0;
+    domainVotes.push({ name: vd.name, share: share, voters: vMap });
+  }
+
+  var votedCount = 0, absCount = 0;
+  for (var vj = 0; vj < voters.length; vj++) {
+    var hasCasted = false;
+    for (var vk = 0; vk < domainVotes.length; vk++) {
+      if (domainVotes[vk].voters[voters[vj]] !== undefined) { hasCasted = true; break; }
+    }
+    if (hasCasted) votedCount++; else absCount++;
+  }
+  var absTotal = (votes && votes.summary && votes.summary.abstain) || 0;
+  var notVoted = Math.max(0, totalMembers - votedCount);
 
   // Effective yea/nay (weighted by domain share × mandate multiplier)
   var effYea = 0, effNay = 0;
@@ -2733,7 +2831,7 @@ function updateVoteSummary() {
 
   setText('vs-yea-pct', yeaPct + '%');
   setText('vs-nay-pct', nayPct + '%');
-  setText('vs-abs-pct', absCount);
+  setText('vs-abs-pct', absTotal);
 
   // Quorum bar
   setText('vs-qrm-count', votedCount);
@@ -2770,9 +2868,10 @@ function updateVoteSummary() {
   }
 
   // Threshold table
+  setText('vs-members-cell', totalMembers);
   setText('vs-qrm-req-cell', quorumReq);
   setText('vs-voted-count-cell', votedCount);
-  setText('vs-abs-count-cell', totalMembers - votedCount);
+  setText('vs-abs-count-cell', notVoted);
   setText('vs-eff-yn-cell', fmt(Math.round(effYN)));
   setText('vs-eff-yea-cell', fmt(Math.round(effYea)));
   setText('vs-threshold-cell', fmt(Math.round(effYN / 2)));
@@ -2780,7 +2879,10 @@ function updateVoteSummary() {
   if (qrmCell) { qrmCell.textContent = qrmMet ? 'Met' : 'Not met'; qrmCell.style.color = qrmMet ? 'var(--green)' : 'var(--red)'; }
   var resultCell = document.getElementById('vs-result-cell');
   if (resultCell) {
-    if (!qrmMet) {
+    if (!voteDomains.length) {
+      resultCell.innerHTML = '<span style="color:var(--text-tertiary)">No votes recorded yet</span> — ballots will appear as members vote';
+      resultCell.style.fontStyle = 'italic';
+    } else if (!qrmMet) {
       resultCell.textContent = 'Pending — quorum not yet met';
       resultCell.style.color = 'var(--text-tertiary)';
       resultCell.style.fontStyle = 'italic';
@@ -2798,9 +2900,31 @@ function updateVoteSummary() {
   var tfoot = document.getElementById('vote-breakdown-foot');
   if (!tbody) return;
 
-  var absCount = totalMembers - votedCount;
-  var voters = ['AJ','OK','NC','MT','SR'];
-  var tagColors = { LAW:'tag-purple', RS:'tag-green', BIO:'tag-amber' };
+  // Dynamic voter header
+  var headEl = document.getElementById('vote-breakdown-head');
+  if (headEl) {
+    var headHtml = '<th>Domain</th><th style="text-align:right">Share</th>' +
+      '<th style="text-align:right">' + (isPub ? 'Approve Ws' : 'Yea Ws') + '</th>' +
+      '<th style="text-align:right">' + (isPub ? 'Not Approve Ws' : 'Nay Ws') + '</th>' +
+      '<th style="text-align:right">Total</th>';
+    voters.forEach(function(v) { headHtml += '<th style="text-align:right">' + escapeHtml(v) + '</th>'; });
+    headEl.innerHTML = headHtml;
+  }
+
+  if (!domainVotes.length) {
+    tbody.innerHTML = '<tr><td colspan="' + (5 + voters.length) + '" style="text-align:center;color:var(--text-tertiary);padding:14px;font-size:11px">No votes recorded for this cell yet. When members cast ballots, the per-domain breakdown appears here.</td></tr>';
+    if (tfoot) tfoot.innerHTML = '';
+    return;
+  }
+
+  var tagColors = { 'SL':'tag-purple', 'LA':'tag-purple', 'LI':'tag-amber', 'RS':'tag-green', 'OR':'tag-amber', 'AD':'tag-blue', 'ME':'tag-blue', 'PH':'tag-amber' };
+  function domainTag(name) {
+    var parts = name.split(/[^A-Za-z]+/).filter(Boolean);
+    var t = '';
+    for (var i = 0; i < Math.min(2, parts.length); i++) t += parts[i].charAt(0);
+    t = (t || 'D').toUpperCase();
+    return { tag: t, color: tagColors[t] || 'tag-purple' };
+  }
 
   // Compute per-voter totals (simple + effective)
   var voterSimple = {}; var voterEffective = {};
@@ -2829,9 +2953,10 @@ function updateVoteSummary() {
       if (d.voters[v] > 0) dYea += d.voters[v]; else dNay += Math.abs(d.voters[v]);
     });
     var dTotal = dYea + dNay;
+    var dt = domainTag(d.name);
 
     rows += '<tr>';
-    rows += '<td class="domain-name"><span class="tag ' + (tagColors[d.tag]||'tag-purple') + '" style="font-size:7px;margin-right:4px">' + d.tag + '</span>' + d.name + '</td>';
+    rows += '<td class="domain-name"><span class="tag ' + dt.color + '" style="font-size:7px;margin-right:4px">' + dt.tag + '</span>' + d.name + '</td>';
     rows += '<td style="text-align:right;font-family:var(--mono);font-size:10px">' + Math.round(d.share * 1000) / 10 + '%</td>';
     rows += '<td class="vote-yea-cell" style="text-align:right">' + fmt(dYea) + '</td>';
     rows += '<td class="vote-nay-cell" style="text-align:right">' + fmt(dNay) + '</td>';

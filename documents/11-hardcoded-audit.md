@@ -129,10 +129,27 @@ Mutating flows vs the API:
   textarea/button in `view-thread-detail` (`submitThreadReply()`, Enter
   submits); reply is merged into local `repliesList` and the count
   increments on success. Verified: POST 201 → row in GET/list + bootstrap.
-- **Still UI-only (no backend)**: the deliberation vote sheet
-  (`updateVoteSummary` hardcodes `totalMembers = 8`, `votedCount = 5`,
-  `domainVotes` voter Ws, `absTotal = 340`; no submission flow),
-  `submitResolution()` and `closeDebate()` (confirm-modal + toast only).
+- **Newly persisted**: deliberation votes — `POST /api/cells/:id/vote-records`
+  (specialised `voteRoutes` handler registered **before** the generic
+  `childRoutes` in the dispatch chain; `cell_votes` +
+  `cell_vote_summary` are recomputed server-side on each cast). The vote
+  sheet (`updateVoteSummary`) is now fully data-driven: `totalMembers`
+  from `participatingCircles[].votes` (fallback `cell.participants`, then
+  8), `domainVotes` from `cell.votes.domains[]` (voter Ws per domain,
+  abstains skipped from the yea/nay split), dynamic voter header th's
+  (rebuilt every render into `#vote-breakdown-head`), "Not voted" count =
+  `totalMembers − votedCount`, quorum/weight from
+  `cell.votes.summary.abstain`, and an empty-state row for vote-less
+  cells. Cast flow: `selectVote()` → `castMyVote(type)` (POSTs per domain
+  the current user has declared Ws for) → `applyCastResult()` merges the
+  server response. Verified end-to-end via harness: OS yea on cell-21 →
+  Space Law 2,840→4,040, RS 920→1,767, voted 4→5, header gains OS.
+  **Bug found & fixed during verification**: `castVote` and
+  `addThreadReply` were defined in api-client.js but never added to the
+  exported `SolisApi` object — both UI flows were silently broken
+  (`SolisApi.castVote is not a function`); both now exported.
+- **Still UI-only (no backend)**: `submitResolution()` and `closeDebate()`
+  (confirm-modal + toast only).
 - Re-seeding twice duplicates non-keyed rows (publications/news/events have
   no unique constraint) — always `rm -f solis.db*` before `node db/seed.js`.
 

@@ -305,6 +305,51 @@ async function childRoutes(req, res, reqUrl, method) {
   return null;
 }
 
+// ── voting: cast a cell vote, recompute cell aggregates + summary ──
+// POST /api/cells/:cellId/vote-records  { domain, name, initials, ws, vote }
+// vote: 'yea' | 'nay' | 'abstain' (replaces any prior vote by the same
+// initials on that cell + domain)
+async function voteRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/vote-records$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const cellId = decodeURIComponent(m[1]);
+  const body = await readBody(req);
+  if (!body || !body.domain) return send(res, 400, { error: 'domain required' });
+  const initials = String(body.initials || '').trim();
+  const vote = ['yea', 'nay', 'abstain'].includes(body.vote) ? body.vote : 'abstain';
+  const ws = Math.max(0, Number(body.ws) || 0);
+
+  db.prepare('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?')
+    .run(cellId, body.domain, initials);
+  db.prepare('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote) VALUES (?,?,?,?,?,?)')
+    .run(cellId, body.domain, body.name ?? null, initials, ws, vote);
+
+  const rows = db.prepare(`SELECT domain,
+      COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) AS yea,
+      COALESCE(SUM(CASE WHEN vote='nay' THEN ws END),0) AS nay,
+      COALESCE(SUM(CASE WHEN vote='abstain' THEN ws END),0) AS abst
+    FROM vote_records WHERE cell_id = ? GROUP BY domain`).all(cellId);
+  let totalYea = 0, totalNay = 0, totalAbst = 0;
+  for (const r of rows) {
+    r.yea = Number(r.yea); r.nay = Number(r.nay); r.abst = Number(r.abst);
+    totalYea += r.yea; totalNay += r.nay; totalAbst += r.abst;
+    db.prepare(`INSERT INTO cell_votes (cell_id, domain, yea, nay, total) VALUES (?,?,?,?,?)
+      ON CONFLICT(cell_id, domain) DO UPDATE SET yea=excluded.yea, nay=excluded.nay, total=excluded.total`)
+      .run(cellId, r.domain, r.yea, r.nay, r.yea + r.nay);
+  }
+  const summary = { yea: totalYea, nay: totalNay, abstain: totalAbst };
+  db.prepare('INSERT OR REPLACE INTO cell_vote_summary (cell_id, summary) VALUES (?,?)')
+    .run(cellId, JSON.stringify(summary));
+  const record = db.prepare('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?')
+    .get(cellId, body.domain, initials);
+  return send(res, 200, {
+    record,
+    domains: rows.map(r => ({ name: r.domain, yea: r.yea, nay: r.nay, abstain: r.abst, total: r.yea + r.nay })),
+    summary
+  });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -725,6 +770,8 @@ const server = createServer(async (req, res) => {
     let handled = await authRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await bootstrapRoute(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await voteRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

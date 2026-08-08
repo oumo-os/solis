@@ -224,6 +224,13 @@ var SolisApi = (function() {
     });
   }
 
+  function castVote(cellId, domain, vote) {
+    return req('POST', 'cells/' + cellId + '/vote-records', {
+      domain: domain, name: vote.name || null, initials: vote.initials,
+      ws: vote.ws || 0, vote: vote.vote
+    });
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -299,6 +306,8 @@ var SolisApi = (function() {
     saveCircleApplication: saveCircleApplication,
     saveProjectApplication: saveProjectApplication,
     saveGovernanceEntry: saveGovernanceEntry,
-    updateStfCandidate: updateStfCandidate
+    updateStfCandidate: updateStfCandidate,
+    addThreadReply: addThreadReply,
+    castVote: castVote
   };
 })();
