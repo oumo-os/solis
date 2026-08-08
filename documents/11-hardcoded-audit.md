@@ -148,8 +148,23 @@ Mutating flows vs the API:
   `addThreadReply` were defined in api-client.js but never added to the
   exported `SolisApi` object — both UI flows were silently broken
   (`SolisApi.castVote is not a function`); both now exported.
-- **Still UI-only (no backend)**: `submitResolution()` and `closeDebate()`
-  (confirm-modal + toast only).
+- **Newly persisted**: resolution lifecycle — `POST /api/cells/:id/draft-resolutions/:draftId/submit`
+  (draft `status` column: `draft|submitted|crystallised`; also flips
+  `cells.resolution.status` → `Submitted`; 409 on re-submit) and
+  `POST /api/cells/:id/debate/close` (crystallises the cell — sets
+  `cells.status`, resolution status → `Crystallised`, marks the draft
+  crystallised, computes the outcome from `cell_vote_summary` and writes a
+  `governance_events` row with a deterministic id stem so re-closes are
+  idempotent). Client: `SolisApi.submitDraftResolution` /
+  `SolisApi.closeDebate`; `submitResolution()`/`closeDebate()` now persist
+  and update the decision-bar buttons (`updateDelibDecisionButtons`:
+  submit disabled + "Submitted to aSTF ✓" / "Crystallised"),
+  `#res-modal-status` and the resolution slot badge show Submitted/
+  Crystallised; `renderDelibCell` restores button state from persisted
+  data. Verified: full submit → re-submit(409) → close → re-close
+  (idempotent, single event) sequence round-trips through bootstrap.
+- **Still UI-only**: none — every mutating flow now has a backend; the
+  audit list below is the full current persistence map.
 - Re-seeding twice duplicates non-keyed rows (publications/news/events have
   no unique constraint) — always `rm -f solis.db*` before `node db/seed.js`.
 

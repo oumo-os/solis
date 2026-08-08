@@ -231,6 +231,14 @@ var SolisApi = (function() {
     });
   }
 
+  function submitDraftResolution(cellId, draftId) {
+    return req('POST', 'cells/' + cellId + '/draft-resolutions/' + draftId + '/submit');
+  }
+
+  function closeDebate(cellId, participant) {
+    return req('POST', 'cells/' + cellId + '/debate/close', { participant: participant });
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -308,6 +316,8 @@ var SolisApi = (function() {
     saveGovernanceEntry: saveGovernanceEntry,
     updateStfCandidate: updateStfCandidate,
     addThreadReply: addThreadReply,
-    castVote: castVote
+    castVote: castVote,
+    submitDraftResolution: submitDraftResolution,
+    closeDebate: closeDebate
   };
 })();

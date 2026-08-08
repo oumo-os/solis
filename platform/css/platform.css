@@ -112,6 +112,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .b-active{background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)}
 .b-pending{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)}
 .b-review{background:var(--purple-soft);color:var(--purple);border:1px solid var(--purple-border)}
+.b-success{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold-border)}
 .b-enacted{background:var(--teal-soft);color:var(--teal);border:1px solid var(--teal-border)}
 .b-rejected{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}
 .b-judicial{background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)}

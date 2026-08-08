@@ -531,8 +531,8 @@
     <div class="decision-bar" id="delib-decision-bar">
       <div class="db-info" id="delib-db-info"></div>
       <div class="db-actions">
-        <button class="btn btn-primary" onclick="submitResolution()"><i class="fa-solid fa-gavel" style="margin-right:4px"></i>Submit Resolution → aSTF</button>
-        <button class="btn btn-danger" onclick="closeDebate()"><i class="fa-solid fa-xmark" style="margin-right:4px"></i>Close Debate</button>
+        <button class="btn btn-primary" id="delib-submit-btn" onclick="submitResolution()"><i class="fa-solid fa-gavel" style="margin-right:4px"></i>Submit Resolution → aSTF</button>
+        <button class="btn btn-danger" id="delib-close-btn" onclick="closeDebate()"><i class="fa-solid fa-xmark" style="margin-right:4px"></i>Close Debate</button>
       </div>
     </div>
       </div>
@@ -3063,7 +3063,11 @@ function updateResolutionSlot() {
   var typeTag = res.action ? '<span class="tag tag-gold" style="font-size:7px;margin-left:6px">' + escapeHtml(res.action) + '</span>' : '';
   var statusBadge = res.votesNullified
     ? '<span class="badge b-review" style="font-size:8px">Edited</span>'
-    : '<span class="badge b-active" style="font-size:8px">Draft</span>';
+    : res.status === 'crystallised'
+      ? '<span class="badge b-success" style="font-size:8px">Crystallised</span>'
+      : res.status === 'submitted'
+        ? '<span class="badge b-active" style="font-size:8px">Submitted</span>'
+        : '<span class="badge b-active" style="font-size:8px">Draft</span>';
   var versionText = res.versions.length + ' version' + (res.versions.length > 1 ? 's' : '');
 
   // Redraft availability
@@ -3235,7 +3239,8 @@ function openResolutionModal(idx) {
 
   // Status
   var statusEl = document.getElementById('res-modal-status');
-  statusEl.textContent = res.votesNullified ? 'Votes nullified' : 'Draft';
+  statusEl.textContent = res.votesNullified ? 'Votes nullified' :
+    (res.status === 'crystallised' ? 'Crystallised' : res.status === 'submitted' ? 'Submitted to aSTF' : 'Draft');
 
   // Redraft button in header
   var redraftBtn = document.getElementById('btn-redraft-resolution');
@@ -3498,14 +3503,61 @@ function saveResolution() {
 
 function submitResolution() {
   confirmModal('Submit this resolution to aSTF for blind adjudication? Assessors will review the resolution and vote to pass or reject.', function() {
-    toast('Resolution #' + (delibSelectedRes + 1) + ' submitted to aSTF.','success');
+    var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
+    var res = cell && delibResolutions.length ? delibResolutions[delibSelectedRes] : null;
+    if (!cell || !res || !res.rowId) { toast('No draft resolution to submit.', 'error'); return; }
+    if (res.status === 'submitted' || res.status === 'crystallised') { toast('Resolution already submitted.', 'error'); return; }
+    SolisApi.submitDraftResolution(cell.id, res.rowId).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not submit resolution. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      res.status = 'submitted';
+      if (cell.resolution) cell.resolution.status = 'Submitted';
+      toast('Resolution submitted to aSTF.', 'success');
+      updateDelibDecisionButtons(cell);
+      updateResolutionSlot();
+      renderDelibCell(cell.id);
+    }).catch(function() { toast('Could not submit resolution. Is the server running?', 'error'); });
   });
 }
 
 function closeDebate() {
   confirmModal('Close debate and crystallise this cell? The current resolution will be recorded as the final outcome (passed or failed).', function() {
-    toast('Cell crystallised. Resolution recorded.','success');
+    var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
+    if (!cell) { toast('No active deliberation.', 'error'); return; }
+    var me = MOCK.currentUser || {};
+    SolisApi.closeDebate(cell.id, me.name || me.initials || '').then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not close debate. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      cell.status = 'crystallised';
+      if (!cell.resolution) cell.resolution = {};
+      cell.resolution.status = 'Crystallised';
+      cell.resolution.outcome = r.outcome;
+      toast('Cell crystallised. Resolution ' + r.outcome + ' (yea ' + r.yea + ' / nay ' + r.nay + ').', 'success');
+      updateDelibDecisionButtons(cell);
+      updateResolutionSlot();
+      renderDelibCell(cell.id);
+    }).catch(function() { toast('Could not close debate. Is the server running?', 'error'); });
   });
+}
+
+function updateDelibDecisionButtons(cell) {
+  var submitBtn = document.getElementById('delib-submit-btn');
+  var closeBtn = document.getElementById('delib-close-btn');
+  if (!submitBtn || !closeBtn) return;
+  var sub = cell && cell.resolution && cell.resolution.status;
+  var crystallised = cell && cell.status === 'crystallised';
+  if (crystallised) {
+    submitBtn.disabled = true;
+    closeBtn.disabled = true;
+    submitBtn.textContent = 'Crystallised';
+    closeBtn.textContent = 'Closed';
+    return;
+  }
+  if (sub === 'Submitted') {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitted to aSTF ✓';
+  } else {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Resolution → aSTF';
+  }
 }
 
 // ─── System Settings ───
@@ -7415,6 +7467,7 @@ function renderDelibCell(cellId) {
   renderDelibDiscussion(cell, disc);
   renderDelibCircles(cell, circles);
   if (dbInfo) dbInfo.innerHTML = 'Quorum: ' + (cell.participants ? Math.ceil(cell.participants / 2) : 0) + '/' + (cell.participants || 0) + ' · Status: ' + status;
+  updateDelibDecisionButtons(cell);
 }
 
 function renderDelibOrigin(cell, container) {

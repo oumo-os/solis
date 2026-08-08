@@ -350,6 +350,53 @@ async function voteRoutes(req, res, reqUrl, method) {
   });
 }
 
+// ── resolution lifecycle (submit to aSTF / close debate = crystallise) ──
+async function governanceRoutes(req, res, reqUrl, method) {
+  let m = reqUrl.match(/^\/api\/cells\/([^/]+)\/draft-resolutions\/([^/]+)\/submit$/);
+  if (m && method === 'POST') {
+    const cellId = decodeURIComponent(m[1]);
+    const draftId = decodeURIComponent(m[2]);
+    const draft = db.prepare('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?').get(String(draftId), cellId);
+    if (!draft) return send(res, 404, { error: 'Not found' });
+    if (draft.status !== 'draft') return send(res, 409, { error: 'Resolution already submitted' });
+    db.prepare("UPDATE draft_resolutions SET status = 'submitted' WHERE id = ?").run(String(draftId));
+    const cell = db.prepare('SELECT resolution FROM cells WHERE id = ?').get(cellId);
+    const resJson = (cell && cell.resolution) ? JSON.parse(cell.resolution) : {};
+    resJson.status = 'Submitted';
+    db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(resJson), cellId);
+    return send(res, 200, { ok: true, status: 'submitted' });
+  }
+  m = reqUrl.match(/^\/api\/cells\/([^/]+)\/debate\/close$/);
+  if (m && method === 'POST') {
+    const cellId = decodeURIComponent(m[1]);
+    const body = await readBody(req);
+    const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+    if (!cell) return send(res, 404, { error: 'Not found' });
+    const summaryRow = db.prepare('SELECT summary FROM cell_vote_summary WHERE cell_id = ?').get(cellId);
+    const s = summaryRow ? JSON.parse(summaryRow.summary) : {};
+    const yea = Number(s.yea) || 0, nay = Number(s.nay) || 0;
+    const outcome = nay > yea ? 'failed' : 'passed';
+    const state = cell.status === 'crystallised' ? 'crystallised' : cell.status;
+    const evtStem = 'evt-crystal-' + cellId.replace(/[^A-Za-z0-9_-]/g, '_');
+    if (state === 'crystallised') {
+      const existing = db.prepare('SELECT id FROM governance_events WHERE id LIKE ?').get(evtStem + '%');
+      if (existing) return send(res, 200, { ok: true, status: 'crystallised', already: true, outcome, yea, nay });
+    }
+    let r = cell.resolution ? JSON.parse(cell.resolution) : {};
+    if (r.status === 'Draft' || r.status === 'Submitted') r.status = 'Crystallised';
+    db.prepare("UPDATE cells SET status = 'crystallised', resolution = ? WHERE id = ?").run(JSON.stringify(r), cellId);
+    db.prepare("UPDATE draft_resolutions SET status = ? WHERE cell_id = ? AND status = ?")
+      .run('crystallised', cellId, 'submitted');
+    const evtId = evtStem + '-' + Date.now();
+    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+      .run(evtId, 'cell-crystallisation', String(cell.circle || ''), new Date().toISOString().slice(0, 10),
+        '"' + String(cell.title || cellId) + '" crystallised — resolution ' + outcome + ' (yea ' + yea + ' Ws / nay ' + nay + ' Ws)',
+        String(body && body.participant || ''));
+    return send(res, 200, { ok: true, status: 'crystallised', outcome, yea, nay });
+  }
+  return null;
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -542,7 +589,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     cell.objectives = (objByCell[c.id] || []).map(o => ({ id: o.obj_id || 'o' + o.id, label: o.label, status: o.status }));
     cell.team = (teamByCell[c.id] || []).map(t => ({ name: t.name, initials: t.initials, role: t.role, focus: t.focus }));
     cell.draftResolutions = (draftByCell[c.id] || []).map(d => ({
-      id: d.res_id ?? d.id, title: d.title, text: d.text, action: d.action, votesNullified: !!d.votes_nullified,
+      id: d.res_id ?? d.id, rowId: d.id, status: d.status || 'draft', title: d.title, text: d.text, action: d.action, votesNullified: !!d.votes_nullified,
       versions: (verByDraft[d.id] || []).map(v => ({ title: v.title, text: v.text, action: v.action, author: v.author, ts: v.ts })),
       implementingCircles: (impByDraft[d.id] || []).map(i => i.circle_name),
     }));
@@ -772,6 +819,7 @@ const server = createServer(async (req, res) => {
     handled = await bootstrapRoute(req, res, reqUrl, method);
     if (handled) return;
     handled = await voteRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await governanceRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

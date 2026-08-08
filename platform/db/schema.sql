@@ -285,6 +285,7 @@ CREATE TABLE IF NOT EXISTS draft_resolutions (
   text          TEXT,
   action        TEXT,
   votes_nullified INTEGER DEFAULT 0,
+  status        TEXT DEFAULT 'draft',   -- draft | submitted | crystallised
   UNIQUE(cell_id, res_id)
 );
 
