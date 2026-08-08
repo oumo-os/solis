@@ -604,6 +604,7 @@
       <div class="layout-main">
         <div id="stf-header-vstf-steward" style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Steward Candidacy Assessment</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
+        <div id="stf-integrity-stf-vstf-steward"></div>
         <div class="sec">Candidate Profile</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
@@ -671,6 +672,7 @@
       <div class="layout-main">
         <div id="stf-header-vstf-competence" style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ vSTF — Competence Claims Assessment</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
+        <div id="stf-integrity-stf-vstf-competence"></div>
         <div class="sec">Evidence Package</div>
         <div class="evidence-shelf" style="margin-bottom:16px">
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
@@ -751,6 +753,7 @@
       <div class="layout-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">■ jSTF — Judicial Investigation</div>
         <div style="background:var(--red-soft);border:1px solid var(--red-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-family:var(--mono);font-size:10px;color:var(--red);letter-spacing:.08em;text-align:center"><i class="fa-solid fa-lock"></i> &nbsp; JUDICIAL PROCEEDING — EXTERNAL WRITE ACCESS RESTRICTED — INTEGRITY ENGINE MONITORING &nbsp; 🔒</div>
+        <div id="stf-integrity-stf-jstf"></div>
 
         <!-- Anonymous Report -->
         <div class="card" style="margin-bottom:16px;border-left:3px solid var(--red)">
@@ -913,6 +916,7 @@
       <div class="layout-main">
         <div id="stf-header-astf" style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
+        <div id="stf-integrity-stf-astf"></div>
         <div class="sec">Motion Record</div>
         <div class="card" style="margin-bottom:16px">
           <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">From Cell #Cell-21 · Crystallised Jul 21</span></div>
@@ -986,6 +990,7 @@
       <div class="layout-main" id="xstf-main">
         <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ xSTF — Execution Cell</div>
         <div class="blind-wall" id="xstf-blind"></div>
+        <div id="stf-integrity-stf-xstf"></div>
         <div class="sec">Deliberations</div>
         <div class="card" style="margin-bottom:16px">
           <div id="xstf-messages"></div>
@@ -1030,6 +1035,7 @@
       <div class="layout-main">
         <div id="stf-header-pastf" style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ p-aSTF — Periodic Circle Health Review</div>
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND REVIEWER — YOU SEE ONLY YOUR ASSIGNED MEMBERS, NOT FULL CIRCLE ROSTER &nbsp; 🔒</div>
+        <div id="stf-integrity-stf-pastf"></div>
 
         <!-- Layer 1: Circle Rubric -->
         <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 1 — Circle Rubric (30 pts)</div>
@@ -1254,7 +1260,7 @@
       </div>
       <div class="profile-standing">
         <div class="val">847</div>
-        <div class="lbl">Standing</div>
+        <div class="lbl">Ws</div>
         <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
       </div>
     </div>
@@ -6955,6 +6961,18 @@ function renderXstf(cellId) {
   }
   renderTeam(cellId, 'xstf-team');
   renderMessages(cellId, 'xstf-messages');
+  var xstf = null;
+  if (MOCK.stfs) {
+    for (var kk in MOCK.stfs) {
+      var lists = MOCK.stfs[kk];
+      if (!Array.isArray(lists)) continue;
+      for (var li = 0; li < lists.length; li++) {
+        if (lists[li] && lists[li].id === 'xstf-itu') { xstf = lists[li]; break; }
+      }
+      if (xstf) break;
+    }
+  }
+  renderStfIntegrity('stf-xstf', xstf);
 }
 
 function renderStfDetail(key) {
@@ -7005,6 +7023,40 @@ function renderStfDetail(key) {
     candName.textContent = parts[0] + ' ' + (parts[1] ? parts[1].charAt(0) + '.' : '');
     if (candIni) candIni.textContent = parts.map(function(p){ return p.charAt(0); }).join('').slice(0, 2);
   }
+  renderStfIntegrity(key, stf);
+}
+
+// Renders the Integrity Engine outcome record for an STF view (from
+// MOCK.integrityRecords), matched by STF type + subject/title; empty state
+// when nothing is on file.
+function renderStfIntegrity(key, stf) {
+  var el = document.getElementById('stf-integrity-' + key);
+  if (!el) return;
+  var recs = (MOCK && MOCK.integrityRecords) || [];
+  var typeMap = { 'stf-vstf-steward': 'vSTF', 'stf-vstf-competence': 'vSTF', 'stf-jstf': 'jSTF', 'stf-astf': 'aSTF', 'stf-xstf': 'xSTF', 'stf-pastf': 'p-aSTF' };
+  var norm = function(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  var want = typeMap[key];
+  var titleNorm = norm(stf && (stf.title || stf.candidate));
+  var best = null;
+  var bestLen = 0;
+  (recs || []).forEach(function(r) {
+    if (r.type !== want) return;
+    var subj = norm(r.subject);
+    if (!subj) return;
+    if (titleNorm && (subj.indexOf(titleNorm) >= 0 || titleNorm.indexOf(subj) >= 0) && subj.length >= bestLen) {
+      best = r; bestLen = subj.length;
+    }
+  });
+  if (!best) {
+    el.innerHTML = '<div class="card" style="margin-bottom:16px;border-left:3px solid var(--border);padding:12px 14px"><div style="font-size:11px;color:var(--text-tertiary);line-height:1.5">No integrity record on file yet — the outcome of this ' + (want || 'STF') + ' will be archived by the Integrity Engine when it concludes.</div></div>';
+    return;
+  }
+  var verdictColor = { 'Approved': 'var(--green)', 'Passed': 'var(--green)', 'Healthy': 'var(--green)', 'Exonerated': 'var(--green)', 'Failed': 'var(--red)', 'Rejected': 'var(--red)' }[best.verdict] || 'var(--amber)';
+  el.innerHTML = '<div class="card" style="margin-bottom:16px;border-left:3px solid ' + verdictColor + ';padding:14px 16px">' +
+    '<div class="flex justify-between mb-2"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)">Outcome on record — Integrity Engine</span><span class="badge" style="color:' + verdictColor + ';border:1px solid ' + verdictColor + '">' + escapeHtml(best.verdict) + '</span></div>' +
+    '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + escapeHtml(best.subject) + '</div>' +
+    '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--mono)">' + escapeHtml(best.type) + (best.circle ? ' · ' + escapeHtml(best.circle) : '') + (best.date ? ' · ' + escapeHtml(best.date) : '') + ' · ' + escapeHtml(best.id) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5">' + escapeHtml(best.text) + '</div></div>';
 }
 
 function renderProjectCell(cellId) {
@@ -7890,7 +7942,7 @@ function renderPersonalView() {
   var interest = u.interestScore != null ? fmt(u.interestScore) : '—';
   var roles = u.activeRoles != null ? fmt(u.activeRoles) : '—';
   parts.push('<div class="g4">' +
-    '<div class="card metric-card"><div class="mc-label">Standing</div><div class="mc-val">' + standing + '</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift ' + driftClass(u.standingDrift) + '">' + driftText(u.standingDrift) + '</div></div>' +
+    '<div class="card metric-card"><div class="mc-label">Total W<sub>s</sub></div><div class="mc-val">' + standing + '</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift ' + driftClass(u.standingDrift) + '">' + driftText(u.standingDrift) + '</div></div>' +
     '<div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">' + comp + '</div><div class="mc-sub">' + (u.competence != null ? 'Declared + verified' : 'Not yet declared') + '</div><div class="mc-drift ' + driftClass(u.competenceNote) + '">' + driftText(u.competenceNote) + '</div></div>' +
     '<div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">' + interest + '</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift ' + driftClass(u.interestDrift) + '">' + driftText(u.interestDrift) + '</div></div>' +
     '<div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">' + roles + '</div><div class="mc-sub">' + escapeHtml(u.rolesBreakdown || 'No active roles') + '</div><div class="mc-drift mc-flat">' + driftText(u.joined ? ('Since ' + u.joined) : null) + '</div></div>' +
@@ -7998,7 +8050,7 @@ function renderProfileView() {
     '<div class="profile-info"><h1>' + escapeHtml(u.name || 'Participant') + '</h1>' +
     '<div class="meta">' + (u.location || '') + (u.joined ? ' · Participant since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>' +
     '<div class="flex gap-1">' + tagHtml + '</div></div>' +
-    '<div class="profile-standing"><div class="val">' + standing + '</div><div class="lbl">Standing</div>' +
+    '<div class="profile-standing"><div class="val">' + standing + '</div><div class="lbl">Ws</div>' +
     '<div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>' +
   '</div>');
   parts.push('<div class="profile-bio">' + (u.bio ? escapeHtml(u.bio) : 'No bio yet.') + ' <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>');

@@ -14,7 +14,9 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
 
 - `view-stf-*` detail pages — rubric/verdict/commentary UI, match tables,
   evidence packages remain static (no data source); Assignment card + page
-  header + vSTF candidate name/initials are now hydrated from `stfs`.
+  header + vSTF candidate name/initials + Integrity-Engine outcome card are
+  now hydrated from `stfs` / `integrity_records`. (xSTF has no record on
+  file → shows the "No integrity record" empty state.)
 - `view-inbox` filter tabs "Unread / Circles" — fixed UI labels.
 - "From Discussion to Action" explainer, library cards, "How STFs Work",
   lifecycle/type explainers — fixed copy, not data.
@@ -115,6 +117,23 @@ Legend: ✅ data-driven with proper empty state · ⛔ previously hardcoded (fix
     `undertaking-detail.html` pointed at a nonexistent `#undertaking-detail`
     route → now `#undertakings`; `public/participate.html` CTA now links
     `../platform/index.html#profile` directly.
+
+11. **"Standing" label sweep (to_prod 0.4)** — all remaining "Standing"
+    references removed: profile stat row → "Ws", metric card label →
+    "Total Ws", dormant member block → "Ws" label (lbl text; the numeric
+    value is still hydrated). `grep Standing` = 0 across `index.html`.
+
+12. **STF Integrity outcome cards** — `renderStfIntegrity(key, stf)` renders
+    an "Outcome on record — Integrity Engine" card into the `stf-integrity-*`
+    container planted after each blind-wall banner in all five STF detail
+    views plus the xSTF execution cell. Record matched from
+    `integrity_records` by STF type + subject (title, or `candidate` for the
+    vSTFs which carry no title); verdict badge colored by outcome (green for
+    Approved/Passed/Healthy/Exonerated, red for Failed/Rejected), meta line
+    type · circle · date · IR id, full verdict text. xSTF (no record) and
+    any unmatched STF show the empty state. Verified headlessly: vSTF
+    Approved/Ssempa, vSTF Approved/Akello, aSTF Passed/Debris Liability,
+    jSTF Exonerated, p-aSTF Healthy 26/30, xSTF empty-state.
 
 ## Persistence audit (2026-08-08)
 
