@@ -265,3 +265,14 @@ Mutating flows vs the API:
   `liked` class + filled heart; `GET /api/threads/:id` shows the bumped
   count; count survives a fresh page load while the liked state resets
   (per-session by design).
+
+## Inbox read-state persisted (2026-08-08)
+
+- `selectInboxItem` previously cleared `item.unread` in memory only — the
+  nav badge (`#inbox-badge`, via `updateNavBadges`) revived after reload.
+  Opening an unread item now persists via `SolisApi.saveInboxItem`
+  (`PATCH /api/inbox/:id { unread: 0 }`, existing child-sync untouched) and
+  immediately refreshes the nav badge.
+- Verified headlessly: badge 3 → 2 on open, `GET /api/inbox/ib-1` shows
+  `unread: 0`, badge stays 2 after a fresh page load; item detail still
+  renders.

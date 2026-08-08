@@ -6363,9 +6363,13 @@ function selectInboxItem(itemId) {
   var item = MOCK.inbox.find(function(i) { return i.id === itemId; });
   if (!item) return;
 
-  if (item.unread) item.unread = false;
+  if (item.unread) {
+    item.unread = false;
+    SolisApi.saveInboxItem(item).catch(function() {});
+  }
 
   renderInboxList(_inboxFilter || 'all');
+  updateNavBadges();
 
   var typeIcons = {
     'vSTF': '<i class="fa-solid fa-scale-balanced"></i>',
