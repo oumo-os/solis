@@ -384,7 +384,22 @@ CREATE TABLE IF NOT EXISTS threads (
   likes        INTEGER,
   shares       INTEGER,
   time         TEXT,
-  pinned       INTEGER DEFAULT 0
+  pinned       INTEGER DEFAULT 0,
+  endorsements INTEGER DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS thread_endorsements (
+  user_id    TEXT NOT NULL,
+  thread_id  TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  created_at TEXT DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, thread_id)
+);
+
+CREATE TABLE IF NOT EXISTS thread_bookmarks (
+  user_id    TEXT NOT NULL,
+  thread_id  TEXT NOT NULL REFERENCES threads(id) ON DELETE CASCADE,
+  created_at TEXT DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, thread_id)
 );
 
 CREATE TABLE IF NOT EXISTS thread_replies (

@@ -276,3 +276,44 @@ Mutating flows vs the API:
 - Verified headlessly: badge 3 → 2 on open, `GET /api/inbox/ib-1` shows
   `unread: 0`, badge stays 2 after a fresh page load; item detail still
   renders.
+
+## Engagement tier 2 — endorse / bookmark / feed filters (2026-08-09, to_prod 2.4)
+
+- Four inactive Commons feed-filter tabs (My Feed / Circle Mentions /
+  Endorsed / All) are now wired via `filterCommonsFeed(filter, btn)` +
+  `filterCommonsThreads()`; state held in `_commonsFilter`, re-applied on
+  every `nav('commons')` and after like/endorse/bookmark re-renders.
+  - My Feed = my own posts or threads whose domain matches one of my
+    domains (alnum-normalized, so `space-law` ≈ `Space Law`).
+  - Circle Mentions = circle names (my `currentUser.circles`) matched in
+    title/body/author text.
+  - Endorsed = `endorsements > 0`; All = everything.
+  - Each non-All filter renders an empty state ("No discussions match
+    your filter.") when nothing survives.
+- **Endorse**: `toggleThreadEndorse` toggles `window._endorsedThreads`,
+  bumps the local count, and persists via `SolisApi.setThreadEndorse(id, on)`
+  → `POST/DELETE /api/threads/:id/endorsement` (new `engagementRoutes` in
+  server.mjs). Server inserts/deletes the per-user row in
+  `thread_endorsements`, recomputes `threads.endorsements`, and returns the
+  authoritative count. `.post-action.endorsed` (green ✓, count badge) marks
+  the active state.
+- **Bookmark**: `toggleThreadBookmark` + `setThreadBookmark` →
+  `POST/DELETE /api/threads/:id/bookmark` against `thread_bookmarks`;
+  `.post-action.bookmarked` (gold ◆) marks the active state; bookmarks carry
+  no aggregate count display.
+- **Per-user hydration**: bootstrap now returns `myEngagements`
+  (`[{threadId, endorsed, bookmarked}]`) computed for the Bearer user;
+  `hydrateEngagements()` rebuilds `_endorsedThreads`/`_bookmarkedThreads`
+  after every `loadApiData` success. Second-user session sees counts but no
+  per-user state — endorsement/bookmark state never leaks across accounts.
+- **Schema**: `threads.endorsements INTEGER DEFAULT 0` (guarded
+  `ALTER TABLE` in server boot for existing DBs) + `thread_endorsements`
+  and `thread_bookmarks` (PK `(user_id, thread_id)`, CASCADE on thread
+  delete) in schema.sql.
+- Verified headlessly (23-check suite): 0→1 endorse + server persistence +
+  bootstrap state + reload survival (count and filled class), bookmark
+  same, all four filters narrow the feed (6 / 1 / 1 / 8 with seed data),
+  un-endorse un-endorses to 0 server-side, unbookmark removes the class and
+  clears bootstrap state, Endorsed filter empty state renders, and a second
+  user sees counts but neither per-user state. Harness deleted after green;
+  DB re-seeded.

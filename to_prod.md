@@ -307,10 +307,16 @@ participant_domain {
 **Discussion features:**
 - Compose box with domain tags, file attachment, link — domain tag/link/attachment UI only (no backend fields yet); type selector preserved
 - Feed filters: My Feed, Circle Mentions, Endorsed, All
+  ✅ all four wired (2026-08-09) — My Feed = own posts + posts in
+  my domains, Circle Mentions = circles in body/title/author, Endorsed =
+  count > 0, empty states per filter
 - Post cards with: author, domain tags, title, body, engagement — like
   ✅ persisted (toggle + `PATCH /api/threads/:id`), reply → opens thread
-  detail (persisted), share → copy-link toast; endorse + bookmark still
-  UI-only
+  detail (persisted), share → copy-link toast; endorse ✅ persisted
+  (per-user `thread_endorsements`, `POST/DELETE /api/threads/:id/endorsement`,
+  count recomputed server-side), bookmark ✅ persisted (per-user
+  `thread_bookmarks`, `POST/DELETE /api/threads/:id/bookmark`), per-user
+  state hydrated via bootstrap `myEngagements`
 - Pinned posts
 
 ### 2.5 — Proposals

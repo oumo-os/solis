@@ -302,6 +302,14 @@ var SolisApi = (function() {
     return req('PATCH', 'threads/' + threadId, patch);
   }
 
+  function setThreadEndorse(threadId, on) {
+    return req(on ? 'POST' : 'DELETE', 'threads/' + threadId + '/endorsement');
+  }
+
+  function setThreadBookmark(threadId, on) {
+    return req(on ? 'POST' : 'DELETE', 'threads/' + threadId + '/bookmark');
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -321,6 +329,8 @@ var SolisApi = (function() {
     updateStfCandidate: updateStfCandidate,
     updateThread: updateThread,
     addThreadReply: addThreadReply,
+    setThreadEndorse: setThreadEndorse,
+    setThreadBookmark: setThreadBookmark,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate

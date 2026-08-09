@@ -363,8 +363,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .post-action:hover{background:var(--surface-raised);color:var(--text-secondary)}
 .post-action .count{font-family:var(--mono);font-size:11px}
 .post-action.liked{color:var(--red);font-weight:600}
-.post-action.liked{color:var(--red)}
 .post-action.liked:hover{background:var(--red-soft)}
+.post-action.endorsed{color:var(--green);font-weight:600}
+.post-action.endorsed:hover{background:var(--green-soft)}
+.post-action.bookmarked{color:var(--gold);font-weight:600}
+.post-action.bookmarked:hover{background:var(--amber-soft)}
 
 .post-divider{height:1px;background:var(--border-subtle);margin:12px 0}
 

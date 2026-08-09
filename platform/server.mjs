@@ -23,6 +23,7 @@ if (!existsSync(DB_PATH)) {
 const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
 try { db.exec('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE threads ADD COLUMN endorsements INTEGER DEFAULT 0'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -305,6 +306,39 @@ async function draftChildRoutes(req, res, reqUrl, method) {
       .run(String(draftId), String(body.circle_name ?? ''));
   }
   return send(res, 201, { ok: true });
+}
+
+// ── thread-engagement child routes (endorse / bookmark, per auth user) ──
+// POST/DELETE /api/threads/:id/endorsement — toggle the caller's endorsement (recomputes count)
+// POST/DELETE /api/threads/:id/bookmark    — toggle the caller's bookmark
+async function engagementRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/threads\/([^/]+)\/(endorsement|bookmark)$/);
+  if (!m) return null;
+  if (method !== 'POST' && method !== 'DELETE') return send(res, 405, { error: 'Method not allowed' });
+  const threadId = decodeURIComponent(m[1]);
+  const kind = m[2];
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare('SELECT id FROM threads WHERE id = ?').get(threadId)) {
+    return send(res, 404, { error: 'Not found' });
+  }
+  const table = kind === 'endorsement' ? 'thread_endorsements' : 'thread_bookmarks';
+  if (method === 'POST') {
+    db.prepare(`INSERT INTO ${table} (user_id, thread_id) VALUES (?,?) ON CONFLICT DO NOTHING`).run(user.id, threadId);
+  } else {
+    db.prepare(`DELETE FROM ${table} WHERE user_id = ? AND thread_id = ?`).run(user.id, threadId);
+  }
+  const active = method === 'POST';
+  const resp = { ok: true, threadId };
+  if (kind === 'endorsement') {
+    const n = db.prepare('SELECT COUNT(*) n FROM thread_endorsements WHERE thread_id = ?').get(threadId).n;
+    db.prepare('UPDATE threads SET endorsements = ? WHERE id = ?').run(n, threadId);
+    resp.endorsed = active;
+    resp.endorsements = n;
+  } else {
+    resp.bookmarked = active;
+  }
+  return send(res, 200, resp);
 }
 
 async function childRoutes(req, res, reqUrl, method) {
@@ -679,6 +713,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     id: t.id, title: t.title, body: t.body, author: t.author, initials: t.initials, avatar: j(t.avatar) || {},
     domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
     replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
+    endorsements: t.endorsements || 0,
     repliesList: (replyByThread[t.id] || []).map(r => ({
       id: r.id, author: r.author, initials: r.initials, avatar: j(r.avatar) || {},
       time: r.time, body: r.body, likes: r.likes,
@@ -759,11 +794,20 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     appliedAt: l.applied_at, status: l.status,
   }));
 
+  const myEngagements = currentRow
+    ? db.prepare(
+        `SELECT t.id, (SELECT COUNT(*) FROM thread_endorsements e WHERE e.thread_id = t.id AND e.user_id = ?) AS endorsed,
+                 (SELECT COUNT(*) FROM thread_bookmarks b WHERE b.thread_id = t.id AND b.user_id = ?) AS bookmarked
+         FROM threads t`).all(String(currentRow.id), String(currentRow.id))
+        .map(r => ({ threadId: r.id, endorsed: r.endorsed > 0, bookmarked: r.bookmarked > 0 }))
+    : [];
+
   const payload = {
     currentUser, participants, organisations, domains, domainLayout,
     circles, cells, stfs: stfShape, stfCandidates, threads, inbox, publications,
     news, events, opportunities, projects, exitReasonLabels, systemSettings, stats, registration,
     integrityRecords, governanceEvents, circleApplications, projectApplications, governanceLedger,
+    myEngagements,
   };
 
   // ?empty=1 — same shape, no data: for exploring the platform's empty state.
@@ -771,7 +815,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     for (const k of ['participants', 'organisations', 'circles', 'cells', 'threads', 'inbox',
       'publications', 'news', 'events', 'opportunities', 'projects', 'integrityRecords',
       'governanceEvents', 'circleApplications', 'projectApplications', 'governanceLedger',
-      'stfCandidates']) {
+      'stfCandidates', 'myEngagements']) {
       payload[k] = [];
     }
     payload.stfs = { pending: [], active: [], completed: [] };
@@ -884,6 +928,8 @@ const server = createServer(async (req, res) => {
     handled = await childRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await draftChildRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await engagementRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await configRoutes(req, res, reqUrl, method);
     if (handled) return;

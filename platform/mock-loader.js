@@ -85,12 +85,14 @@ function renderInboxItems() {
   }).join('');
 }
 
-function renderDiscussionThreads() {
+function renderDiscussionThreads(list, emptyMsg) {
   if (!MOCK) return '';
-  if (!MOCK.threads || !MOCK.threads.length) {
-    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No discussions yet. Start a thread above.</div></div>';
+  var items = list || MOCK.threads || [];
+  if (!items.length) {
+    var msg = emptyMsg || 'No discussions yet. Start a thread above.';
+    return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">' + msg + '</div></div>';
   }
-  return MOCK.threads.map(function(t) {
+  return items.map(function(t) {
     var avatarBg = 'background:var(--navy-light)';
     if (t.avatar && t.avatar.gradient) avatarBg = 'background:' + t.avatar.gradient;
     var badgeHtml = t.badge ? '<span class="badge ' + t.badgeClass + '" style="font-size:8px">' + t.badge + '</span>' : '';
@@ -119,6 +121,8 @@ function renderDiscussionThreads() {
       + '<div class="post-body">' + t.body + '</div>'
       + '<div class="post-actions">'
       + '<button class="post-action' + ((window._likedThreads && window._likedThreads[t.id]) ? ' liked' : '') + '" onclick="event.stopPropagation();toggleThreadLike(\'' + t.id + '\')"><span>' + ((window._likedThreads && window._likedThreads[t.id]) ? '&#9829;' : '&#9825;') + '</span><span class="count">' + t.likes + '</span></button>'
+      + '<button class="post-action' + ((window._endorsedThreads && window._endorsedThreads[t.id]) ? ' endorsed' : '') + '" onclick="event.stopPropagation();toggleThreadEndorse(\'' + t.id + '\')"><span>&#10003;</span><span class="count">' + (t.endorsements || 0) + '</span></button>'
+      + '<button class="post-action' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? ' bookmarked' : '') + '" onclick="event.stopPropagation();toggleThreadBookmark(\'' + t.id + '\')"><span>&#' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? '11035' : '11036') + ';</span></button>'
       + '<button class="post-action" onclick="event.stopPropagation();openThreadDetail(\'' + t.id + '\')"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
       + '<button class="post-action" onclick="event.stopPropagation();shareThread(\'' + t.id + '\')"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>'
       + '</div></div>';

@@ -110,10 +110,10 @@
     <div class="layout-split">
       <div class="layout-main">
         <div class="feed-filters">
-          <button class="feed-filter active">My Feed</button>
-          <button class="feed-filter">Circle Mentions</button>
-          <button class="feed-filter">Endorsed</button>
-          <button class="feed-filter">All</button>
+          <button class="feed-filter" data-filter="myfeed" onclick="filterCommonsFeed('myfeed',this)">My Feed</button>
+          <button class="feed-filter" data-filter="mentions" onclick="filterCommonsFeed('mentions',this)">Circle Mentions</button>
+          <button class="feed-filter" data-filter="endorsed" onclick="filterCommonsFeed('endorsed',this)">Endorsed</button>
+          <button class="feed-filter active" data-filter="all" onclick="filterCommonsFeed('all',this)">All</button>
         </div>
         <div class="post-compose">
           <div class="post-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px">OS</div>
@@ -4946,7 +4946,8 @@ function initApp() {
   var inboxList = document.getElementById('inbox-list');
   if (inboxList) inboxList.innerHTML = renderInboxItems();
   var threadsFeed = document.getElementById('threads-feed');
-  if (threadsFeed) threadsFeed.innerHTML = renderDiscussionThreads();
+  if (threadsFeed) renderCommonsFeed();
+  document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f) { f.classList.toggle('active', f.getAttribute('data-filter') === _commonsFilter); });
   var circlesGrid = document.getElementById('circles-grid');
   if (circlesGrid) circlesGrid.innerHTML = renderCircleCards();
   var projectsBody = document.getElementById('projects-body');
@@ -6815,6 +6816,75 @@ function renderDeliverables(cellId, containerId) {
 
 // ─── Commons composer ────────────────────────────────────
 var _likedThreads = {};
+var _endorsedThreads = {};
+var _bookmarkedThreads = {};
+var _commonsFilter = 'all';
+
+function hydrateEngagements() {
+  _endorsedThreads = {};
+  _bookmarkedThreads = {};
+  (MOCK && MOCK.myEngagements ? MOCK.myEngagements : []).forEach(function(e) {
+    if (e.endorsed) _endorsedThreads[e.threadId] = true;
+    if (e.bookmarked) _bookmarkedThreads[e.threadId] = true;
+  });
+}
+
+function toggleThreadEndorse(threadId) {
+  var t = null;
+  (MOCK.threads || []).forEach(function(x) { if (x.id === threadId) t = x; });
+  if (!t) return;
+  var on = !_endorsedThreads[threadId];
+  _endorsedThreads[threadId] = !!on;
+  t.endorsements = Math.max(0, (parseInt(t.endorsements, 10) || 0) + (on ? 1 : -1));
+  renderCommonsFeed();
+  SolisApi.setThreadEndorse(threadId, on).then(function(r) {
+    if (r && typeof r.endorsements === 'number' && t.endorsements !== r.endorsements) {
+      t.endorsements = r.endorsements;
+      renderCommonsFeed();
+    }
+  }).catch(function() { /* local state stands */ });
+}
+
+function toggleThreadBookmark(threadId) {
+  var on = !_bookmarkedThreads[threadId];
+  _bookmarkedThreads[threadId] = !!on;
+  renderCommonsFeed();
+  SolisApi.setThreadBookmark(threadId, on).catch(function() {});
+}
+
+// ─── Commons feed filters ────────────────────────────────
+function filterCommonsThreads() {
+  if (!MOCK) return [];
+  var list = MOCK.threads || [];
+  if (_commonsFilter === 'all') return list;
+  var me = MOCK.currentUser;
+  if (!me) return _commonsFilter === 'endorsed' ? list.filter(function(t) { return (t.endorsements || 0) > 0; }) : [];
+  var myDomains = me.domains ? Object.keys(me.domains) : [];
+  var myCircles = me.circles ? me.circles.map(function(c) { return c.name; }) : [];
+  return list.filter(function(t) {
+    if (_commonsFilter === 'myfeed') {
+      return t.author === me.name || myDomains.some(function(d) { return d.replace(/[^a-z0-9]/gi, '').toLowerCase() === String(t.domain || '').replace(/[^a-z0-9]/gi, '').toLowerCase(); });
+    }
+    if (_commonsFilter === 'mentions') {
+      var hay = ((t.title || '') + ' ' + (t.body || '') + ' ' + (t.author || '')).toLowerCase();
+      return myCircles.some(function(c) { return hay.indexOf(String(c).toLowerCase()) !== -1; });
+    }
+    if (_commonsFilter === 'endorsed') return (t.endorsements || 0) > 0;
+    return true;
+  });
+}
+
+function renderCommonsFeed() {
+  var tf = document.getElementById('threads-feed');
+  if (!tf) return;
+  tf.innerHTML = renderDiscussionThreads(filterCommonsThreads(), _commonsFilter !== 'all' ? 'No discussions match your filter.' : null);
+}
+
+function filterCommonsFeed(filter, btn) {
+  _commonsFilter = filter;
+  document.querySelectorAll('#view-commons .feed-filter, #view-commons .feed-filters .feed-filter').forEach(function(f) { f.classList.toggle('active', f === btn); });
+  renderCommonsFeed();
+}
 
 function toggleThreadLike(threadId) {
   var t = null;
@@ -6822,8 +6892,7 @@ function toggleThreadLike(threadId) {
   if (!t) return;
   _likedThreads[threadId] = !_likedThreads[threadId];
   t.likes = Math.max(0, (parseInt(t.likes, 10) || 0) + (_likedThreads[threadId] ? 1 : -1));
-  var tf = document.getElementById('threads-feed');
-  if (tf) tf.innerHTML = renderDiscussionThreads();
+  renderCommonsFeed();
   SolisApi.updateThread(threadId, { likes: t.likes }).catch(function() {});
 }
 
@@ -6859,8 +6928,9 @@ function composePost() {
     repliesList: []
   };
   MOCK.threads.unshift(thread);
-  var tf = document.getElementById('threads-feed');
-  if (tf) tf.innerHTML = renderDiscussionThreads();
+  _commonsFilter = 'all';
+  document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f) { f.classList.toggle('active', f.getAttribute('data-filter') === 'all'); });
+  renderCommonsFeed();
   if (box) box.value = '';
   SolisApi.addThread(thread).then(function(r) {
     toast(r && r.id ? 'Posted to the Commons.' : 'Could not sync to server — kept locally.', r && r.id ? 'success' : 'error');
@@ -7815,7 +7885,7 @@ var _origNav=nav;
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-astf'||key==='stf-pastf'){renderStfDetail(key);}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
-  if(key==='commons'){var tf=document.getElementById('threads-feed');if(tf)tf.innerHTML=renderDiscussionThreads();}
+  if(key==='commons'){renderCommonsFeed();document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f){f.classList.toggle('active',f.getAttribute('data-filter')===_commonsFilter);});}
  };
 
 function backToInboxList() {
@@ -8200,6 +8270,7 @@ function loadApiData() {
     }
     if (!data || data.error) throw new Error('API error: ' + (data.__status || 'unknown'));
     MOCK = data;
+    hydrateEngagements();
     cellsById = {};
     if (data.cells) {
       data.cells.forEach(function(c) { cellsById[c.id] = c; });
