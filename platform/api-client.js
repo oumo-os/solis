@@ -318,6 +318,10 @@ var SolisApi = (function() {
     return req('POST', 'threads/' + threadId + '/raise-proposal');
   }
 
+  function createDirectProposal(payload) {
+    return req('POST', 'proposals/direct', payload);
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -341,6 +345,7 @@ var SolisApi = (function() {
     setThreadBookmark: setThreadBookmark,
     setThreadPinned: setThreadPinned,
     raiseThreadProposal: raiseThreadProposal,
+    createDirectProposal: createDirectProposal,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate

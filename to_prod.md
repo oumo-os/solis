@@ -332,6 +332,11 @@ participant_domain {
    raise action / raised-chip with "Open deliberation"; origin card
    carries "View source discussion" back-link to the thread
 2. Direct steward proposal (no preceding thread)
+   ✅ `POST /api/proposals/direct` (2026-08-09) — steward-gated (403),
+   title-required (400), creates a Deliberation Cell (`direct-proposal`
+   origin, description + optional domain recorded); Cells view gains a
+   steward-only "＋ Direct Proposal" button (+ modal); origin card
+   renders description, domain chip, "No preceding discussion" + proposer
 3. System-bound proposal (settings or circle profile changes)
 
 **Proposal lifecycle:**
@@ -351,7 +356,7 @@ participant_domain {
 - Proposal origin card (source thread or direct proposal)
   ✅ commons-thread origin card renders title/excerpt/author + "View
   source discussion" back-link (2026-08-09); other origin card families
-  already shipped
+  already shipped; ✅ direct-proposal origin card added (2026-08-09)
 - Deliberation feed (chat-style messages)
 - Decision status bar (quorum, vote result, submit/close buttons)
 

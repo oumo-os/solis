@@ -377,3 +377,34 @@ Mutating flows vs the API:
   local link and the cell to bootstrap, origin card renders with thread
   title and click-through to the thread detail, and the link + cell
   survive a full page reload. Harness deleted after green; DB re-seeded.
+
+## Direct steward proposal (2026-08-09, to_prod 2.5 origin #2)
+
+- **Why**: proposals previously needed an existing artefact (thread, org,
+  circle, project, settings, publication). A steward should be able to open
+  a deliberation on anything — the "direct proposal (no preceding thread)"
+  path was dead code: 2.5 origin #2.
+- **Server**: `directProposalRoutes` — `POST /api/proposals/direct`:
+  auth (401), steward-only via active `circle_roster` (403), empty title
+  rejected (400). Creates a `Deliberation Cell`
+  (`delib_type 'direct-proposal'`, status `Active`, participants = active
+  user count, source JSON carries `type/proposer/description/domain`,
+  resolution `{ status: 'Draft' }`). No `circle_proposals` row is written —
+  direct proposals are not bound to a circle until they are debated.
+- **Client**: `SolisApi.createDirectProposal`; the Cells view header gains
+  a steward-only "＋ Direct Proposal" button (visibility synced on every
+  data load via `syncDirectProposalButton`), opening a modal (title,
+  description, optional domain). `submitDirectProposal()` mirrors the
+  created cell into `MOCK.cells` + `cellsById` (same rich shape as the
+  thread-raise mirror) and lands the user in the new deliberation cell.
+- **Origin card** (2.6): `renderDelibOrigin` gains a `direct-proposal`
+  branch — description, optional domain chip, "No preceding discussion"
+  marker and proposer; the Deliberation description label maps
+  `direct-proposal` → "Direct Steward Proposal".
+- Verified headlessly (32-check suite): non-steward → 403 + no button;
+  steward → button visible, 201 + `delib-` cellId; bootstrap carries the
+  cell with type/status/source (type, description, domain, proposer) and
+  Draft resolution; empty title → 400; modal flow opens a live deliberation
+  with the direct origin card (no source back-link); cells grid lists the
+  new card; everything survives a full reload. Harness deleted after green;
+  DB re-seeded.

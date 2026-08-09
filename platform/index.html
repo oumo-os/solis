@@ -362,6 +362,7 @@
           <button class="feed-filter active" onclick="filterCells('all',this)">All</button>
           <button class="feed-filter" onclick="filterCells('Active',this)">Active</button>
           <button class="feed-filter" onclick="filterCells('Archived',this)">Archived</button>
+          <button class="btn btn-primary" id="btn-direct-proposal" style="display:none;font-size:11px;padding:6px 12px;margin-left:auto" onclick="openDirectProposalModal()">＋ Direct Proposal</button>
         </div>
         <div id="cells-grid" class="g3"></div>
       </div>
@@ -2543,6 +2544,33 @@
     </div>
   </div>
 </div>
+
+  <div class="reg-modal-overlay" id="direct-proposal-modal">
+    <div class="reg-modal" style="max-width:560px">
+      <div class="modal-titlebar">
+        <div class="modal-titlebar-left">
+          <button class="modal-titlebar-btn" onclick="closeDirectProposalModal()">&times;</button>
+          <span class="modal-titlebar-title">Raise a Direct Proposal</span>
+        </div>
+      </div>
+      <div class="reg-modal-body">
+        <div class="card">
+          <div class="sec">Proposal</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">A steward-sponsored proposal without a preceding discussion. It opens immediately as a Deliberation Cell.</div>
+          <div style="margin-bottom:10px"><label class="form-label">Title</label>
+            <input class="form-input" id="dp-title" placeholder="e.g. Standardise re-entry insurance clauses"></div>
+          <div style="margin-bottom:10px"><label class="form-label">Description</label>
+            <textarea class="form-input" rows="4" id="dp-desc" placeholder="What is being proposed, and what outcome do we want?"></textarea></div>
+          <div style="margin-bottom:10px"><label class="form-label">Domain</label>
+            <input class="form-input" id="dp-domain" placeholder="Space Law, Policy, Operations... (optional)"></div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="btn" onclick="closeDirectProposalModal()" style="background:var(--surface-2);border:1px solid var(--border)">Cancel</button>
+            <button class="btn btn-primary" onclick="submitDirectProposal()">Create Proposal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="../shared/colors.js"></script>
   <script src="../shared/solmark.js"></script>
@@ -5001,6 +5029,7 @@ function initApp() {
   if (projectsBody) projectsBody.innerHTML = renderProjectRows();
   var cellsGrid = document.getElementById('cells-grid');
   if (cellsGrid) cellsGrid.innerHTML = renderCellCards();
+  syncDirectProposalButton();
   if (currentCircleCellId) renderCircleCell(currentCircleCellId);
   else {
     var firstCircleCell = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'Circle Cell'; })[0];
@@ -7673,6 +7702,7 @@ function renderDelibCell(cellId) {
       src.type === 'project-proposal' ? 'Project Proposal' :
       src.type === 'settings-proposal' ? 'System Settings Change' :
       src.type === 'publication-submission' ? 'Publication Submission' :
+      src.type === 'direct-proposal' ? 'Direct Steward Proposal' :
       'Commons Discussion';
     desc.textContent = 'Proposed by ' + (src.proposer || 'Unknown') + '. Source: ' + srcText + '.';
   }
@@ -7907,6 +7937,18 @@ function renderDelibOrigin(cell, container) {
       '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(tBody) + '</div>' +
       '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + ' · <strong>Thread author:</strong> ' + esc(tAuth) + '</div>' +
       (tid ? '<div style="margin-top:10px"><button class="btn" style="font-size:11px;padding:6px 12px" onclick="openThreadDetail(\'' + tid + '\')">View source discussion</button></div>' : '') +
+      '</div></div></div>';
+  } else if (cell.delibType === 'direct-proposal' || src.type === 'direct-proposal') {
+    var dpDesc = src.description || 'No description provided.';
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Proposal Origin — Direct Proposal</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(dpDesc) + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px">' +
+      (src.domain ? '<span class="tag tag-gold" style="font-size:8px"><i class="fa-solid fa-satellite-dish" style="margin-right:3px"></i>' + esc(src.domain) + '</span>' : '') +
+      '<span style="font-size:10px;color:var(--text-tertiary)"><i class="fa-solid fa-bullhorn" style="margin-right:3px"></i>No preceding discussion</span>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
       '</div></div></div>';
   } else {
     html = '<div class="card" style="margin-bottom:16px"><div class="sec">Proposal Origin</div>' +
@@ -8399,6 +8441,46 @@ document.addEventListener('keydown', function(e) {
   });
 });
 
+function openDirectProposalModal() {
+  document.getElementById('direct-proposal-modal').classList.add('active');
+  document.body.classList.add('modal-open');
+}
+function closeDirectProposalModal() {
+  document.getElementById('direct-proposal-modal').classList.remove('active');
+  document.body.classList.remove('modal-open');
+}
+function submitDirectProposal() {
+  const titleInput = document.getElementById('dp-title');
+  const descInput = document.getElementById('dp-desc');
+  const domInput = document.getElementById('dp-domain');
+  const title = (titleInput.value || '').trim();
+  if (!title) { toast('Proposal needs a title', 'error'); return; }
+  SolisApi.createDirectProposal({ title: title, description: descInput.value, domain: domInput.value })
+    .then(function (res) {
+      if (res && res.cellId) {
+        const cellId = res.cellId;
+        const me = MOCK.currentUser || {};
+        const cell = {
+          id: cellId, type: 'Deliberation Cell', title: title, status: 'Active', delibType: 'direct-proposal',
+          participants: (MOCK.participants || []).length || 8, members: 0, progress: 0, daysActive: 0,
+          created: 'Just now', deadline: null, domains: domInput.value ? [domInput.value] : [],
+          source: { type: 'direct-proposal', proposer: me.name, description: descInput.value, domain: domInput.value },
+          resolution: { status: 'Draft' }, messages: [], circles: [], participatingCircles: [],
+          draftResolutions: [], votes: [], voteRecords: [], voteSummary: null
+        };
+        MOCK.cells.push(cell);
+        cellsById[cellId] = cell;
+        closeDirectProposalModal();
+        titleInput.value = ''; descInput.value = ''; domInput.value = '';
+        toast('Proposal created', 'success');
+        openDelibCell(cellId);
+      } else { toast((res && res.error) || 'Could not create proposal', 'error'); }
+    });
+}
+function syncDirectProposalButton() {
+  const b = document.getElementById('btn-direct-proposal');
+  if (b) b.style.display = (MOCK.currentUser && isStewardOfAnyCircle()) ? '' : 'none';
+}
 
 </script>
 </body>

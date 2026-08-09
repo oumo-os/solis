@@ -386,6 +386,32 @@ async function raiseProposalRoutes(req, res, reqUrl, method) {
   return send(res, 201, { ok: true, threadId, cellId });
 }
 
+// ── direct proposal (to_prod 2.5 origin #2) ─────────────
+// POST /api/proposals/direct — steward raises a proposal without a source
+// thread: creates a Deliberation Cell with a direct-proposal origin.
+async function directProposalRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/proposals/direct' || method !== 'POST') {
+    if (reqUrl === '/api/proposals/direct') return send(res, 405, { error: 'Method not allowed' });
+    return null;
+  }
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  if (!inRoster) return send(res, 403, { error: 'Steward access required' });
+  const body = await readBody(req);
+  const title = String(body.title || '').trim();
+  if (!title) return send(res, 400, { error: 'title required' });
+  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const cellId = 'delib-' + Date.now().toString(36);
+  const source = {
+    type: 'direct-proposal', proposer: user.name || user.initials,
+    description: String(body.description || '').trim(), domain: String(body.domain || '').trim(),
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(cellId, 'Deliberation Cell', title, 'Active', 'direct-proposal', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }));
+  return send(res, 201, { ok: true, cellId });
+}
+
 async function childRoutes(req, res, reqUrl, method) {
   for (const d of childDefs) {
     const esc = d.path.replace(/\//g, '\\/').replace(':id', '([^/]+)');
@@ -979,6 +1005,8 @@ const server = createServer(async (req, res) => {
     handled = await pinRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await raiseProposalRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await directProposalRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await configRoutes(req, res, reqUrl, method);
     if (handled) return;
