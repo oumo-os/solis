@@ -549,6 +549,7 @@ async function voteRoutes(req, res, reqUrl, method) {
 // Both decision routes require a steward (active circle_roster) — 401
 // anonymous, 403 non-steward. Close records the outcome on the cell and
 // finalises the submitted draft as passed/failed.
+// Submit also spawns a blind aSTF cell + stfs row so the motion appears on the STF dash.
 async function governanceRoutes(req, res, reqUrl, method) {
   let m = reqUrl.match(/^\/api\/cells\/([^/]+)\/draft-resolutions\/([^/]+)\/submit$/);
   if (m && method === 'POST') {
@@ -563,11 +564,31 @@ async function governanceRoutes(req, res, reqUrl, method) {
     if (!draft) return send(res, 404, { error: 'Not found' });
     if (draft.status !== 'draft') return send(res, 409, { error: 'Resolution already submitted' });
     db.prepare("UPDATE draft_resolutions SET status = 'submitted' WHERE id = ?").run(String(draftId));
-    const cell = db.prepare('SELECT resolution FROM cells WHERE id = ?').get(cellId);
+    const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
     const resJson = (cell && cell.resolution) ? JSON.parse(cell.resolution) : {};
     resJson.status = 'Submitted';
     db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(resJson), cellId);
-    return send(res, 200, { ok: true, status: 'submitted' });
+    // spawn blind aSTF cell
+    const astfId = 'astf-' + Date.now().toString(36);
+    const originSource = cell ? JSON.parse(cell.source || '{}') : {};
+    const circleName = originSource.circleName || cell.circle || '';
+    const astfSource = {
+      type: 'motion-audit', originCellId: cellId, originTitle: cell.title || '',
+      draftId: String(draftId), draftTitle: draft.title || '', circleName,
+      submittedBy: user.name || user.initials, submittedAt: new Date().toISOString(),
+    };
+    db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .run(astfId, 'aSTF Cell', 'aSTF · ' + (draft.title || cell.title || ''), 'Blind Review', 'motion-audit',
+        cell.participants || 0, circleName, 1, cellId,
+        JSON.stringify(astfSource), JSON.stringify({ status: 'Pending' }),
+        JSON.stringify({ assessors: 3, rubric: { jurisdiction: 0, depth: 0, alignment: 0, competence: 0 } }));
+    db.prepare('UPDATE cells SET resolution_ref = ? WHERE id = ?').run(astfId, cellId);
+    const stfId = 'stf-' + astfId;
+    db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+      .run(stfId, 'aSTF', draft.title || cell.title || '', circleName, 'active', 'Blind Review',
+        draft.title || cell.title || '', new Date(Date.now() + 10*86400000).toISOString().slice(0, 10));
+    return send(res, 200, { ok: true, status: 'submitted', astfId });
   }
   m = reqUrl.match(/^\/api\/cells\/([^/]+)\/debate\/close$/);
   if (m && method === 'POST') {
@@ -604,6 +625,73 @@ async function governanceRoutes(req, res, reqUrl, method) {
     return send(res, 200, { ok: true, status: 'crystallised', outcome, yea, nay });
   }
   return null;
+}
+
+// ── aSTF verdict (to_prod 2.7) ─────────────────────────
+// POST /api/cells/:id/astf-verdict — files an adjudication verdict on a blind
+// aSTF cell. Auth required. Once filed, the cell is unblinded and the origin
+// cell's resolution is updated.
+async function astfVerdictRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/astf-verdict$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'aSTF Cell') return send(res, 400, { error: 'Not an aSTF cell' });
+  if (cell.status === 'Verdict Filed') return send(res, 409, { error: 'Verdict already filed' });
+  const body = await readBody(req);
+  const verdict = String(body.verdict || '').trim();
+  if (!['approved', 'rejected', 'revision'].includes(verdict)) {
+    return send(res, 400, { error: 'verdict must be approved, rejected, or revision' });
+  }
+  const rubric = body.rubric || {};
+  const jurisdiction = Math.min(9, Math.max(0, Number(rubric.jurisdiction) || 0));
+  const depth = Math.min(5, Math.max(0, Number(rubric.depth) || 0));
+  const alignment = Math.min(10, Math.max(0, Number(rubric.alignment) || 0));
+  const competence = Math.min(6, Math.max(0, Number(rubric.competence) || 0));
+  const total = jurisdiction + depth + alignment + competence;
+  const rationale = String(body.rationale || '').trim();
+  const flags = Array.isArray(body.flags) ? body.flags : [];
+  const source = JSON.parse(cell.source || '{}');
+  const astfResult = {
+    verdict, rationale, flags,
+    rubric: { jurisdiction, depth, alignment, competence, total },
+    adjudicator: user.name || user.initials, filedAt: new Date().toISOString(),
+  };
+  db.prepare("UPDATE cells SET status = 'Verdict Filed', resolution = ?, blind = 0 WHERE id = ?")
+    .run(JSON.stringify(astfResult), cellId);
+  // update stfs row
+  const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'aSTF' AND status = 'Blind Review' AND purpose = ?").get(source.draftTitle || '');
+  if (stfRow) {
+    db.prepare("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+  }
+  // update origin cell resolution
+  if (source.originCellId) {
+    const origin = db.prepare('SELECT * FROM cells WHERE id = ?').get(source.originCellId);
+    if (origin) {
+      const originRes = origin.resolution ? JSON.parse(origin.resolution) : {};
+      if (verdict === 'approved') {
+        originRes.status = 'Approved';
+        db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(originRes), source.originCellId);
+        db.prepare("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'")
+          .run(source.originCellId);
+      } else if (verdict === 'rejected') {
+        originRes.status = 'Rejected';
+        db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(originRes), source.originCellId);
+        db.prepare("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'")
+          .run(source.originCellId);
+      }
+    }
+    const evtId = 'evt-astf-' + cellId.replace(/[^A-Za-z0-9_-]/g, '_') + '-' + Date.now();
+    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+      .run(evtId, 'astf-verdict', String(source.circleName || ''), new Date().toISOString().slice(0, 10),
+        '"' + (cell.title || cellId) + '" — aSTF verdict: ' + verdict + ' (rubric ' + total + '/30)',
+        String(user.name || user.initials));
+  }
+  return send(res, 200, { ok: true, verdict, astfId: cellId, originCellId: source.originCellId || null, rubricTotal: total });
 }
 
 // ═════════════════════════════════════════════════════════
@@ -1046,6 +1134,7 @@ const server = createServer(async (req, res) => {
     if (handled) return;
     handled = await voteRoutes(req, res, reqUrl, method);
     if (!handled) handled = await governanceRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await astfVerdictRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

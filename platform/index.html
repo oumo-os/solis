@@ -3553,6 +3553,7 @@ function submitResolution() {
       if (!r || (r.__status && r.__status >= 400)) { toast('Could not submit resolution. ' + ((r && r.error) || 'server error'), 'error'); return; }
       res.status = 'submitted';
       if (cell.resolution) cell.resolution.status = 'Submitted';
+      if (r.astfId) { cell.astfCellId = r.astfId; cell.resolution_ref = r.astfId; }
       toast('Resolution submitted to aSTF.', 'success');
       updateDelibDecisionButtons(cell);
       updateResolutionSlot();
@@ -3580,6 +3581,37 @@ function closeDebate() {
   });
 }
 
+function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
+  SolisApi.fileAstfVerdict(cellId, { verdict: verdict, rubric: rubric, rationale: rationale, flags: flags || [] }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not file verdict. ' + ((r && r.error) || 'server error'), 'error'); return; }
+    var cell = cellsById[cellId];
+    if (cell) { cell.status = 'Verdict Filed'; cell.blind = 0; cell.resolution = { verdict: verdict, rubricTotal: r.rubricTotal }; }
+    toast('aSTF verdict filed: ' + verdict + ' (rubric ' + r.rubricTotal + '/30).', 'success');
+    renderDelibCell(cellId);
+  }).catch(function() { toast('Could not file verdict. Is the server running?', 'error'); });
+}
+
+function doAstfVerdict(verdict) {
+  var cellId = currentDelibCellId;
+  if (!cellId) { toast('No aSTF cell open.', 'error'); return; }
+  var cell = cellsById[cellId];
+  if (!cell || cell.type !== 'aSTF Cell') { toast('Not an aSTF cell.', 'error'); return; }
+  if (cell.status === 'Verdict Filed') { toast('Verdict already filed.', 'error'); return; }
+  var rubric = {
+    jurisdiction: Number(document.getElementById('astf-r-jur').value) || 0,
+    depth: Number(document.getElementById('astf-r-depth').value) || 0,
+    alignment: Number(document.getElementById('astf-r-align').value) || 0,
+    competence: Number(document.getElementById('astf-r-comp').value) || 0
+  };
+  var total = rubric.jurisdiction + rubric.depth + rubric.alignment + rubric.competence;
+  if (total > 30) { toast('Rubric total cannot exceed 30.', 'error'); return; }
+  var rationale = (document.getElementById('astf-rationale').value || '').trim();
+  if (!rationale) { toast('Rationale is required.', 'error'); return; }
+  confirmModal('File ' + verdict + ' verdict? (Rubric: ' + total + '/30)', function() {
+    fileAstfVerdict(cellId, verdict, rubric, rationale);
+  });
+}
+
 function updateDelibDecisionButtons(cell) {
   var submitBtn = document.getElementById('delib-submit-btn');
   var closeBtn = document.getElementById('delib-close-btn');
@@ -3589,7 +3621,6 @@ function updateDelibDecisionButtons(cell) {
   if (!steward && !crystallised) { submitBtn.style.display = 'none'; closeBtn.style.display = 'none'; return; }
   submitBtn.style.display = ''; closeBtn.style.display = '';
   var sub = cell && cell.resolution && cell.resolution.status;
-  var crystallised = cell && cell.status === 'crystallised';
   if (crystallised) {
     submitBtn.disabled = true;
     closeBtn.disabled = true;
@@ -3598,11 +3629,22 @@ function updateDelibDecisionButtons(cell) {
     return;
   }
   if (sub === 'Submitted') {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitted to aSTF ✓';
+    var astfId = cell.astfCellId || cell.resolution_ref || '';
+    if (astfId && cellsById[astfId]) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Open aSTF Cell →';
+      submitBtn.onclick = function() { openDelibCell(astfId); };
+    } else {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitted to aSTF ✓';
+      submitBtn.onclick = function() { submitResolution(); };
+    }
+    closeBtn.style.display = 'none';
   } else {
     submitBtn.disabled = false;
     submitBtn.textContent = 'Submit Resolution → aSTF';
+    submitBtn.onclick = function() { submitResolution(); };
+    closeBtn.style.display = '';
   }
 }
 
@@ -7712,6 +7754,61 @@ function openDelibCell(cellId) {
 function renderDelibCell(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
+
+  // aSTF cell: render blind adjudication verdict form
+  if (cell.type === 'aSTF Cell') {
+    var title = document.getElementById('delib-title');
+    var desc = document.getElementById('delib-desc');
+    var tags = document.getElementById('delib-tags');
+    var insight = document.getElementById('delib-insight');
+    var origin = document.getElementById('delib-proposal-origin');
+    var disc = document.getElementById('delib-discussion');
+    var circles = document.getElementById('delib-circles');
+    var dbInfo = document.getElementById('delib-db-info');
+    if (title) title.textContent = cell.title || 'aSTF Cell';
+    if (desc) desc.textContent = 'Blind adjudication — rubric guides, verdict determines.';
+    if (tags) tags.innerHTML = '<span class="badge b-review">aSTF Blind Review</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">#' + cell.id + '</span>';
+    if (insight) insight.innerHTML = '<div class="insight"><div class="iicon"><i class="fa-solid fa-scale-balanced"></i></div><div class="itext"><strong>aSTF Motion Adjudication:</strong> The rubric scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.</div></div>';
+    if (origin) {
+      var src = cell.source || {};
+      origin.innerHTML = '<div class="card" style="margin-bottom:16px"><div class="sec">Motion Under Review</div>' +
+        '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px">' + escapeHtml(src.draftTitle || src.originTitle || cell.title || '') + '</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary)">Commissioned by: ' + escapeHtml(src.submittedBy || '') + ' · Circle: ' + escapeHtml(src.circleName || '') + '</div></div>';
+    }
+    if (disc) disc.innerHTML = '';
+    if (circles) circles.innerHTML = '';
+    // verdict form in decision bar
+    var decisionBar = document.getElementById('delib-decision-bar');
+    if (decisionBar) {
+      var alreadyFiled = cell.status === 'Verdict Filed' || (cell.resolution && cell.resolution.verdict);
+      if (alreadyFiled) {
+        var v = cell.resolution && cell.resolution.verdict || '';
+        var rt = cell.resolution && cell.resolution.rubricTotal || 0;
+        decisionBar.innerHTML = '<div style="display:flex;align-items:center;gap:12px;width:100%">' +
+          '<span class="badge ' + (v === 'approved' ? 'b-success' : v === 'rejected' ? 'b-danger' : 'b-pending') + '">' + escapeHtml(v.charAt(0).toUpperCase() + v.slice(1)) + '</span>' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Rubric: ' + rt + '/30</span>' +
+          '<span style="font-size:11px;color:var(--text-tertiary);margin-left:auto">Verdict filed</span></div>';
+      } else {
+        decisionBar.innerHTML =
+          '<div style="width:100%">' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
+          '<div><label style="font-size:10px;color:var(--text-tertiary)">Jurisdiction (0–9)</label><input type="number" id="astf-r-jur" min="0" max="9" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+          '<div><label style="font-size:10px;color:var(--text-tertiary)">Depth/Effort (0–5)</label><input type="number" id="astf-r-depth" min="0" max="5" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+          '<div><label style="font-size:10px;color:var(--text-tertiary)">Alignment/Conflict (0–10)</label><input type="number" id="astf-r-align" min="0" max="10" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+          '<div><label style="font-size:10px;color:var(--text-tertiary)">Competence (0–6)</label><input type="number" id="astf-r-comp" min="0" max="6" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+          '</div>' +
+          '<textarea id="astf-rationale" placeholder="Rationale…" class="form-input" style="height:60px;resize:none;font-size:11px;margin-bottom:8px"></textarea>' +
+          '<div class="flex gap-2">' +
+          '<button class="btn btn-primary btn-sm" onclick="doAstfVerdict(\'approved\')">Approve (Resolution)</button>' +
+          '<button class="btn btn-sm" onclick="doAstfVerdict(\'revision\')">Revision Request</button>' +
+          '<button class="btn btn-sm" onclick="doAstfVerdict(\'rejected\')" style="color:var(--danger)">Reject</button>' +
+          '</div></div>';
+      }
+    }
+    if (dbInfo) dbInfo.innerHTML = 'Assessors: ' + (cell.meta && cell.meta.assessors || 3) + ' · Status: ' + (cell.status || 'Blind Review');
+    return;
+  }
+
   var title = document.getElementById('delib-title');
   var desc = document.getElementById('delib-desc');
   var tags = document.getElementById('delib-tags');

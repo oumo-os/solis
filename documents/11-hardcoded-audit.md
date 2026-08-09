@@ -487,3 +487,44 @@ Mutating flows vs the API:
   disabled with "Crystallised"/"Closed", Failed badge in the resolution
   slot, and a member sees the same cell with no decision buttons.
 - Harness deleted after green; DB re-seeded.
+
+## Motion lifecycle & aSTF verdict (2026-08-09, to_prod 2.7)
+
+- **Why**: a motion lifecycle existed only on paper — a passed resolution
+  had no path to blind adjudication and the aSTF machinery was limited to
+  a seeded demo page with no persistence.
+- **Server**:
+  - `submitResolution` now also spawns a blind `aSTF Cell` (type
+    `motion-audit`, `blind=1`, `commissioned_by` set to the origin cell
+    id) and inserts a matching `stfs` row (bucket `active`, status
+    `Blind Review`) so the motion appears on the STF dash.
+  - The origin cell gets `resolutionRef` set to the aSTF cell id;
+    the resolution status is recorded as `Submitted`.
+  - New endpoint: `POST /api/cells/:id/astf-verdict` — body
+    `{ verdict: approved|rejected|revision, rationale, rubric:
+    {jurisdiction, depth, alignment, competence}, flags[] }`.
+    Auth required (401), cell must be `aSTF Cell` in `Blind Review`
+    (400 if not), idempotent (409 if already filed).
+    Verdict + rubric total are stored on the cell's resolution JSON;
+    cell is unblinded (`blind=0`, status `Verdict Filed`);
+    origin cell resolution updated (`Approved`/`Rejected`);
+    `draft_resolutions` status updated (`passed`/`failed`);
+    governance event written (`evt-astf-<cellId>-<ts>`).
+    Rubric values are capped at their per-dimension max and totalled.
+  - `stfs` row is moved to `completed` / `Verdict Filed` on verdict.
+- **Client**:
+  - `fileAstfVerdict` added to `api-client.js`; `doAstfVerdict` helper
+    reads rubric inputs, validates total ≤ 30 + rationale non-empty,
+    shows confirm modal before calling the API.
+  - `renderDelibCell` detects `type === 'aSTF Cell'` and renders a
+    blind-adjudication verdict form (rubric grid, rationale, three
+    verdict buttons) instead of the normal deliberation UI.
+  - `updateDelibDecisionButtons`: after submission, shows an "Open
+    aSTF Cell →" button linking to the spawned cell; hides Close.
+- Verified headlessly (21 checks): anon submit 401, OS submit 403,
+  steward submit 200 + spawns aSTF + stfs row + resolutionRef +
+  resolution Submitted; invalid verdict 400; anon verdict 401;
+  verdict approved → aSTF unblinds, verdict+rubric stored, origin
+  Approved, draft passed, stfs completed, governance event written;
+  re-file 409; wrong-type 400.
+- Harness deleted; DB re-seeded.

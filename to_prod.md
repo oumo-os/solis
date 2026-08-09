@@ -399,14 +399,14 @@ participant_domain {
 - Aggregate: total Yea Ws vs total Nay Ws across all domains
 - Quorum: minimum participants + minimum % of members + pass threshold
 
-### 2.7 — Motions & aSTF
+### 2.7 — Motions & aSTF ✅
 
 **Motion lifecycle:**
-1. Resolution passes deliberation cell vote
-2. Submit to aSTF → spawns blind cell
-3. aSTF audits the motion in isolation (30-point rubric)
-4. aSTF verdict: Resolution (approved) or Rejection (denied)
-5. If approved → opens xSTF for execution
+1. ✅ Resolution passes deliberation cell vote (2.5 lifecycle — close-debate crystallises as passed/failed)
+2. ✅ Submit to aSTF → spawns blind cell (steward submit now creates aSTF Cell + stfs row + links origin via resolutionRef)
+3. ✅ aSTF audits the motion in isolation (30-point rubric — Jurisdiction/Depth/Alignment/Competence, capped per dimension)
+4. ✅ aSTF verdict: Resolution (approved) or Rejection (denied) → filed via POST /api/cells/:id/astf-verdict, unblinds cell, updates origin resolution + draft_resolutions status
+5. 🔄 If approved → opens xSTF for execution (2.8)
 
 **aSTF rubric (30 points):**
 - Jurisdiction (0–9): Does the circle have mandate authority?
@@ -414,6 +414,9 @@ participant_domain {
 - Alignment & Conflict (0–10): Does decision advance org tenets? Undisclosed conflicts?
 - Competence (0–6): Were the right people in deliberation?
 - Malpractice flags (separate): Participant IDs flagged for jSTF pre-referral
+
+**Endpoint:** `POST /api/cells/:id/astf-verdict` — body `{ verdict: approved|rejected|revision, rationale, rubric: { jurisdiction, depth, alignment, competence }, flags[] }`
+**Gating:** Auth required (401), idempotent (409 if already filed), wrong cell type → 400
 
 ### 2.8 — xSTF (Execution)
 

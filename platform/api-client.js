@@ -239,6 +239,10 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/debate/close', { participant: participant });
   }
 
+  function fileAstfVerdict(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/astf-verdict', payload);
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -358,6 +362,7 @@ var SolisApi = (function() {
     createCircleProposal: createCircleProposal,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
-    closeDebate: closeDebate
+    closeDebate: closeDebate,
+    fileAstfVerdict: fileAstfVerdict
   };
 })();
