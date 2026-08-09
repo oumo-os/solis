@@ -314,6 +314,10 @@ var SolisApi = (function() {
     return req(on ? 'POST' : 'DELETE', 'threads/' + threadId + '/pin');
   }
 
+  function raiseThreadProposal(threadId) {
+    return req('POST', 'threads/' + threadId + '/raise-proposal');
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -336,6 +340,7 @@ var SolisApi = (function() {
     setThreadEndorse: setThreadEndorse,
     setThreadBookmark: setThreadBookmark,
     setThreadPinned: setThreadPinned,
+    raiseThreadProposal: raiseThreadProposal,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate

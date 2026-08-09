@@ -385,7 +385,8 @@ CREATE TABLE IF NOT EXISTS threads (
   shares       INTEGER,
   time         TEXT,
   pinned       INTEGER DEFAULT 0,
-  endorsements INTEGER DEFAULT 0
+  endorsements INTEGER DEFAULT 0,
+  proposal_cell_id TEXT
 );
 
 CREATE TABLE IF NOT EXISTS thread_endorsements (

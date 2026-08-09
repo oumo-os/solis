@@ -24,6 +24,7 @@ const db = new DatabaseSync(DB_PATH);
 db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
 try { db.exec('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE threads ADD COLUMN endorsements INTEGER DEFAULT 0'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE threads ADD COLUMN proposal_cell_id TEXT'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -356,6 +357,33 @@ async function pinRoutes(req, res, reqUrl, method) {
   const pinned = method === 'POST';
   db.prepare('UPDATE threads SET pinned = ? WHERE id = ?').run(pinned ? 1 : 0, threadId);
   return send(res, 200, { ok: true, threadId, pinned });
+}
+
+// ── thread → proposal (Discussion origin, to_prod 2.5) ───
+// POST /api/threads/:id/raise-proposal — steward raises a discussion into
+// deliberation: creates a Deliberation Cell linked back to the thread.
+async function raiseProposalRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/threads\/([^/]+)\/raise-proposal$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const threadId = decodeURIComponent(m[1]);
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  if (!inRoster) return send(res, 403, { error: 'Steward access required' });
+  const t = db.prepare('SELECT * FROM threads WHERE id = ?').get(threadId);
+  if (!t) return send(res, 404, { error: 'Not found' });
+  if (t.proposal_cell_id) return send(res, 409, { error: 'Already raised as a proposal' });
+  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const cellId = 'delib-' + Date.now().toString(36);
+  const source = {
+    type: 'commons-thread', proposer: user.name || user.initials,
+    threadId: threadId, threadTitle: t.title, threadAuthor: t.author, threadBody: (t.body || '').slice(0, 600),
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(cellId, 'Deliberation Cell', t.title, 'Active', 'commons-thread', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }));
+  db.prepare('UPDATE threads SET proposal_cell_id = ? WHERE id = ?').run(cellId, threadId);
+  return send(res, 201, { ok: true, threadId, cellId });
 }
 
 async function childRoutes(req, res, reqUrl, method) {
@@ -730,7 +758,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     id: t.id, title: t.title, body: t.body, author: t.author, initials: t.initials, avatar: j(t.avatar) || {},
     domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
     replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
-    endorsements: t.endorsements || 0,
+    endorsements: t.endorsements || 0, proposalCellId: t.proposal_cell_id || null,
     repliesList: (replyByThread[t.id] || []).map(r => ({
       id: r.id, author: r.author, initials: r.initials, avatar: j(r.avatar) || {},
       time: r.time, body: r.body, likes: r.likes,
@@ -949,6 +977,8 @@ const server = createServer(async (req, res) => {
     handled = await engagementRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await pinRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await raiseProposalRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await configRoutes(req, res, reqUrl, method);
     if (handled) return;

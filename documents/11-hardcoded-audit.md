@@ -343,3 +343,37 @@ Mutating flows vs the API:
   `pinned: 1`, the order + `.pin-on` class survive a full reload, unpin
   restores the original order with `pinned: 0` server-side, and the seed
   pinned thread remains pinned. Harness deleted after green; DB re-seeded.
+
+## Thread → proposal origin (2026-08-09, to_prod 2.5 / 2.6)
+
+- Origin #1 of 2.5 ("Discussion thread → steward proposal, links back to
+  source thread") was the missing path: deliberation cells existed for
+  org/circle/project/settings/publication origins, but a Commons discussion
+  could never become a proposal, and `renderDelibOrigin` fell through to a
+  generic "Proposal Origin — Awaiting deliberation" card for
+  `source.type === 'commons-thread'`.
+- **Server**: `raiseProposalRoutes` — `POST /api/threads/:id/raise-proposal`:
+  auth (401), steward-only via active `circle_roster` membership (403,
+  same gate as pinning), 404 for unknown threads, 409 for a thread already
+  raised. Creates a `Deliberation Cell` (`delib_type 'commons-thread'`,
+  status `Active`, participants = active-user count, title = thread title,
+  source JSON carries `threadId/threadTitle/threadAuthor/threadBody`,
+  resolution `{ status: 'Draft' }`) and sets `threads.proposal_cell_id`
+  (new column, guarded ALTER for live DBs). Bootstrap now maps
+  `proposalCellId` onto each thread.
+- **Client**: `SolisApi.raiseThreadProposal`; `raiseThreadProposal()` in
+  index.html toggles the detail view's proposal zone — stewards get a
+  dashed "Raise as proposal" action, raised threads get a gold chip with
+  "Open deliberation". The new cell is mirrored into `MOCK.cells` +
+  `cellsById` so the user lands in a live deliberation view.
+- **Origin card** (2.6): `renderDelibOrigin` gains a `commons-thread`
+  branch — thread title, excerpt, proposer/author, and a "View source
+  discussion" button that `openThreadDetail`s the origin thread (a
+  back-link from proposal to thread).
+- Verified headlessly (20-check suite): non-steward → 403, steward → 201
+  with cellId, bootstrap reflects thread link + cell (type/status/source/
+  resolution), duplicate raise → 409, raised thread shows chip (and no
+  raise button) while unraised shows the raise action, UI raise adds the
+  local link and the cell to bootstrap, origin card renders with thread
+  title and click-through to the thread detail, and the link + cell
+  survive a full page reload. Harness deleted after green; DB re-seeded.

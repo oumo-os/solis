@@ -1340,6 +1340,7 @@
           </div>
         </div>
         <div class="flex gap-2" style="margin-bottom:20px" id="td-tags"></div>
+        <div id="td-proposal-zone"></div>
         <div class="sec" id="td-replies-title">Replies (0)</div>
         <div class="card">
           <div id="td-replies"></div>
@@ -3371,7 +3372,7 @@ function renderResolutionSettingsForm(cell, container) {
             '<label style="font-size:11px;color:var(--text-secondary);min-width:160px">' + esc(label) + '</label>' +
             (isChanged ? '<span style="font-size:9px;color:var(--red);text-decoration:line-through;opacity:0.7;min-width:40px">' + current + '</span><i class="fa-solid fa-arrow-right" style="font-size:8px;color:var(--amber)"></i>' : '') +
             '<input class="form-input" type="number" value="' + proposed + '" id="' + inputId + '" style="width:80px;font-size:11px;padding:3px 6px" data-section="' + section + '" data-key="' + k + '" data-type="number"></div>';
-        } else {
+} else if (cell.delibType === 'circle-settings') {
           html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:4px 8px;border-radius:var(--radius);' + highlight + '">' +
             '<label style="font-size:11px;color:var(--text-secondary);min-width:160px">' + esc(label) + '</label>' +
             (isChanged ? '<span style="font-size:9px;color:var(--red);text-decoration:line-through;opacity:0.7;min-width:40px">' + esc(String(current)) + '</span><i class="fa-solid fa-arrow-right" style="font-size:8px;color:var(--amber)"></i>' : '') +
@@ -4319,6 +4320,52 @@ function renderThreadDetail(threadId) {
     return '<div class="aside-link" onclick="openThreadDetail(\'' + x.id + '\')">' + escapeHtml(x.title || '') + '</div>';
   }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No related threads yet.</div>';
   set('td-related', relatedHtml);
+
+  var zone = document.getElementById('td-proposal-zone');
+  if (zone) {
+    var canPropose = MOCK && MOCK.currentUser && typeof isStewardOfAnyCircle === 'function' && isStewardOfAnyCircle();
+    var zoneHtml = '';
+    if (t.proposalCellId) {
+      zoneHtml = '<div style="margin-bottom:20px;padding:12px 14px;background:var(--gold-soft);border:1px solid var(--gold-border);border-radius:var(--radius);display:flex;align-items:center;gap:12px">' +
+        '<span style="font-size:16px;color:var(--gold)">&#9873;</span>' +
+        '<div style="flex:1;font-size:12px;color:var(--text-secondary)"><strong>Raised as a proposal.</strong> This discussion entered deliberation as a proposal origin.</div>' +
+        '<button class="btn btn-primary" style="font-size:11px;padding:6px 12px" onclick="openDelibCell(\'' + t.proposalCellId + '\')">Open deliberation</button></div>';
+    } else if (canPropose) {
+      zoneHtml = '<div style="margin-bottom:20px;padding:10px 14px;background:var(--surface-raised);border:1px dashed var(--border);border-radius:var(--radius);display:flex;align-items:center;gap:12px">' +
+        '<span style="font-size:14px;color:var(--amber)">&#9873;</span>' +
+        '<div style="flex:1;font-size:12px;color:var(--text-secondary)">Stewards can raise this discussion as a formal proposal — a deliberation cell will open with this thread as its origin.</div>' +
+        '<button class="btn btn-primary" style="font-size:11px;padding:6px 12px" onclick="raiseThreadProposal(\'' + t.id + '\')">Raise as proposal</button></div>';
+    }
+    zone.innerHTML = zoneHtml;
+  }
+}
+
+function raiseThreadProposal(threadId) {
+  var t = null;
+  (MOCK.threads || []).forEach(function(x) { if (x.id === threadId) t = x; });
+  if (!t) { toast('Thread not found.', 'error'); return; }
+  SolisApi.raiseThreadProposal(threadId).then(function(r) {
+    if (r && r.__status === 403) { toast('Steward access required to raise proposals.', 'error'); return; }
+    if (r && r.__status === 409) { toast('This discussion is already raised as a proposal.', 'error'); return; }
+    if (r && r.cellId) {
+      t.proposalCellId = r.cellId;
+      var me = MOCK.currentUser || {};
+      var cell = {
+        id: r.cellId, type: 'Deliberation Cell', title: t.title, status: 'Active', delibType: 'commons-thread',
+        participants: (MOCK.participants || []).length || 8, members: 0, progress: 0, daysActive: 0,
+        created: 'Just now', deadline: null, domains: t.domain ? [t.domain] : [],
+        source: { type: 'commons-thread', proposer: me.name || t.author, threadId: t.id, threadTitle: t.title, threadAuthor: t.author, threadBody: (t.body || '').slice(0, 600) },
+        resolution: { status: 'Draft' }, messages: [], circles: [], participatingCircles: [],
+        draftResolutions: [], votes: [], voteRecords: [], voteSummary: null
+      };
+      MOCK.cells.push(cell);
+      cellsById[cell.id] = cell;
+      renderThreadDetail(t.id);
+      toast('Discussion raised as a proposal.', 'success');
+    } else {
+      toast('Could not raise proposal.', 'error');
+    }
+  }).catch(function() { toast('Could not reach the server.', 'error'); });
 }
 
 function submitThreadReply() {
@@ -7847,6 +7894,19 @@ function renderDelibOrigin(cell, container) {
       (pub.domains ? pub.domains.split(',').map(function(d) { return '<span class="tag tag-purple" style="font-size:8px">' + esc(d.trim()) + '</span>'; }).join('') : '') +
       '</div>' +
       '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Submitted by:</strong> ' + esc(src.proposer || 'Unknown') + '</div>' +
+      '</div></div></div>';
+  } else if (cell.delibType === 'commons-thread' || src.type === 'commons-thread') {
+    var tid = src.threadId;
+    var ttl = src.threadTitle || (tid ? 'Untitled thread' : 'Unknown discussion');
+    var tAuth = src.threadAuthor || src.proposer || 'Unknown';
+    var tBody = src.threadBody || 'The originating discussion is no longer available.';
+    html = '<div class="card" style="margin-bottom:16px"><div class="sec">Proposal Origin — Commons Discussion</div>' +
+      '<div class="flex gap-3" style="align-items:flex-start"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue);margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">' + esc(ttl) + '</div>' +
+      '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">' + esc(tBody) + '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)"><strong>Proposed by:</strong> ' + esc(src.proposer || 'Unknown') + ' · <strong>Thread author:</strong> ' + esc(tAuth) + '</div>' +
+      (tid ? '<div style="margin-top:10px"><button class="btn" style="font-size:11px;padding:6px 12px" onclick="openThreadDetail(\'' + tid + '\')">View source discussion</button></div>' : '') +
       '</div></div></div>';
   } else {
     html = '<div class="card" style="margin-bottom:16px"><div class="sec">Proposal Origin</div>' +

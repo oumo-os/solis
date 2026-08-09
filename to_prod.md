@@ -326,6 +326,11 @@ participant_domain {
 
 **Proposal origins:**
 1. Discussion thread → steward proposal (links back to source thread)
+   ✅ `POST /api/threads/:id/raise-proposal` (2026-08-09) — steward-gated
+   (403), creates a Deliberation Cell (`commons-thread` origin, thread
+   title/excerpt/author recorded), 409 on re-raise; thread detail shows
+   raise action / raised-chip with "Open deliberation"; origin card
+   carries "View source discussion" back-link to the thread
 2. Direct steward proposal (no preceding thread)
 3. System-bound proposal (settings or circle profile changes)
 
@@ -344,6 +349,9 @@ participant_domain {
 
 **Main content:**
 - Proposal origin card (source thread or direct proposal)
+  ✅ commons-thread origin card renders title/excerpt/author + "View
+  source discussion" back-link (2026-08-09); other origin card families
+  already shipped
 - Deliberation feed (chat-style messages)
 - Decision status bar (quorum, vote result, submit/close buttons)
 
