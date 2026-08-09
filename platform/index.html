@@ -6852,6 +6852,22 @@ function toggleThreadBookmark(threadId) {
   SolisApi.setThreadBookmark(threadId, on).catch(function() {});
 }
 
+function toggleThreadPinned(threadId) {
+  var t = null;
+  (MOCK.threads || []).forEach(function(x) { if (x.id === threadId) t = x; });
+  if (!t) return;
+  var on = !t.pinned;
+  t.pinned = on;
+  renderCommonsFeed();
+  SolisApi.setThreadPinned(threadId, on).then(function(r) {
+    if (r && r.__status === 403) {
+      t.pinned = !on;
+      toast('Steward access required to pin posts.', 'error');
+      renderCommonsFeed();
+    }
+  }).catch(function() {});
+}
+
 // ─── Commons feed filters ────────────────────────────────
 function filterCommonsThreads() {
   if (!MOCK) return [];

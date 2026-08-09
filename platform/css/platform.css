@@ -368,6 +368,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .post-action.endorsed:hover{background:var(--green-soft)}
 .post-action.bookmarked{color:var(--gold);font-weight:600}
 .post-action.bookmarked:hover{background:var(--amber-soft)}
+.post-action.pin-on{color:var(--gold);font-weight:600}
+.post-action.pin-on:hover{background:var(--amber-soft)}
 
 .post-divider{height:1px;background:var(--border-subtle);margin:12px 0}
 

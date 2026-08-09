@@ -317,7 +317,10 @@ participant_domain {
   count recomputed server-side), bookmark ✅ persisted (per-user
   `thread_bookmarks`, `POST/DELETE /api/threads/:id/bookmark`), per-user
   state hydrated via bootstrap `myEngagements`
-- Pinned posts
+- Pinned posts  ✅ pin/unpin wired (2026-08-09) — steward-gated
+  (`POST/DELETE /api/threads/:id/pin`, 403 for non-roster users), pinned
+  threads float to the top of the feed (stable order within groups),
+  ★ pin icon + gold ⚑ toggle on each card
 
 ### 2.5 — Proposals
 

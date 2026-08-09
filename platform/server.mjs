@@ -341,6 +341,23 @@ async function engagementRoutes(req, res, reqUrl, method) {
   return send(res, 200, resp);
 }
 
+async function pinRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/threads\/([^/]+)\/pin$/);
+  if (!m) return null;
+  if (method !== 'POST' && method !== 'DELETE') return send(res, 405, { error: 'Method not allowed' });
+  const threadId = decodeURIComponent(m[1]);
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  if (!inRoster) return send(res, 403, { error: 'Steward access required' });
+  if (!db.prepare('SELECT id FROM threads WHERE id = ?').get(threadId)) {
+    return send(res, 404, { error: 'Not found' });
+  }
+  const pinned = method === 'POST';
+  db.prepare('UPDATE threads SET pinned = ? WHERE id = ?').run(pinned ? 1 : 0, threadId);
+  return send(res, 200, { ok: true, threadId, pinned });
+}
+
 async function childRoutes(req, res, reqUrl, method) {
   for (const d of childDefs) {
     const esc = d.path.replace(/\//g, '\\/').replace(':id', '([^/]+)');
@@ -930,6 +947,8 @@ const server = createServer(async (req, res) => {
     handled = await draftChildRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await engagementRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await pinRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await configRoutes(req, res, reqUrl, method);
     if (handled) return;

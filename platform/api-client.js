@@ -310,6 +310,10 @@ var SolisApi = (function() {
     return req(on ? 'POST' : 'DELETE', 'threads/' + threadId + '/bookmark');
   }
 
+  function setThreadPinned(threadId, on) {
+    return req(on ? 'POST' : 'DELETE', 'threads/' + threadId + '/pin');
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -331,6 +335,7 @@ var SolisApi = (function() {
     addThreadReply: addThreadReply,
     setThreadEndorse: setThreadEndorse,
     setThreadBookmark: setThreadBookmark,
+    setThreadPinned: setThreadPinned,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate

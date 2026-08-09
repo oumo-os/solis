@@ -317,3 +317,29 @@ Mutating flows vs the API:
   clears bootstrap state, Endorsed filter empty state renders, and a second
   user sees counts but neither per-user state. Harness deleted after green;
   DB re-seeded.
+
+## Pinned posts (2026-08-09, to_prod 2.4)
+
+- Pinning is the last unshipped 2.4 discussion feature; `threads.pinned`
+  always existed (seed: thread-029 pinned) but nothing re-ordered the feed
+  or toggled it.
+- **Server**: `pinRoutes` — `POST/DELETE /api/threads/:id/pin`, auth
+  required (401), and gated to users with an active `circle_roster` row
+  (`status = 'active'`) → 403 "Steward access required" otherwise. Toggle
+  writes `threads.pinned` through the dedicated route only — the generic
+  resource PATCH remains, but pinning semantics live here.
+- **Client**: `SolisApi.setThreadPinned(threadId, on)` →
+  `POST/DELETE threads/:id/pin`; `toggleThreadPinned` flips locally,
+  re-renders (reorder), syncs, and rolls back with an error toast on a
+  403. The pin toggle button (⚑, `.post-action.pin-on`) renders only when
+  `isStewardOfAnyCircle()` is true for the session user. Feed rendering
+  sorts pinned threads to the top (stable, preserves relative order) with
+  the ★ `post-pin-icon` retained on pinned cards; sorting composes with
+  the four feed filters (each filtered list is pinned-first too).
+- Verified headlessly (13-check suite): pinned seed thread renders first,
+  pin icon present; OS (non-roster) sees no button and gets
+  `403 Steward access required`; roster user sees 8 toggles, pinning a
+  thread moves it to the top immediately, `GET /api/threads` shows
+  `pinned: 1`, the order + `.pin-on` class survive a full reload, unpin
+  restores the original order with `pinned: 0` server-side, and the seed
+  pinned thread remains pinned. Harness deleted after green; DB re-seeded.
