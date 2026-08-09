@@ -354,6 +354,17 @@ participant_domain {
 5. Resolution is drafted and voted on
 6. If passes → submit to aSTF for blind adjudication
 7. If fails → close debate, record as failed resolution
+   ✅ 5–7 (2026-08-09): decision endpoints gated — submit-resolution and
+   close-debate are steward-only (401 anon / 403 member), vote-records and
+   all child writes (messages, drafts) require a session; vote identity is
+   taken from the session token; closing a debate finalises the submitted
+   draft as `passed`/`failed` per the vote outcome, records the outcome on
+   the cell resolution + governance event (idempotent). Client fix: the
+   deliberation page previously bound the resolution slot + draft list to
+   a seeded cell (cell-21) regardless of the open cell — now bound to the
+   opened cell (`renderDelibCell` → `delibResolutions` +
+   `updateResolutionSlot()`), and the decision buttons only appear for
+   stewards (crystallised cells show a disabled summary)
 
 ### 2.6 — Deliberation Cell
 

@@ -3100,9 +3100,13 @@ function updateResolutionSlot() {
     ? '<span class="badge b-review" style="font-size:8px">Edited</span>'
     : res.status === 'crystallised'
       ? '<span class="badge b-success" style="font-size:8px">Crystallised</span>'
-      : res.status === 'submitted'
-        ? '<span class="badge b-active" style="font-size:8px">Submitted</span>'
-        : '<span class="badge b-active" style="font-size:8px">Draft</span>';
+      : res.status === 'passed'
+        ? '<span class="badge b-success" style="font-size:8px">Passed</span>'
+        : res.status === 'failed'
+          ? '<span class="badge b-danger" style="font-size:8px">Failed</span>'
+          : res.status === 'submitted'
+            ? '<span class="badge b-active" style="font-size:8px">Submitted</span>'
+            : '<span class="badge b-active" style="font-size:8px">Draft</span>';
   var versionText = res.versions.length + ' version' + (res.versions.length > 1 ? 's' : '');
 
   // Redraft availability
@@ -3275,7 +3279,10 @@ function openResolutionModal(idx) {
   // Status
   var statusEl = document.getElementById('res-modal-status');
   statusEl.textContent = res.votesNullified ? 'Votes nullified' :
-    (res.status === 'crystallised' ? 'Crystallised' : res.status === 'submitted' ? 'Submitted to aSTF' : 'Draft');
+    (res.status === 'crystallised' ? 'Crystallised' :
+     res.status === 'passed' ? 'Passed — recorded' :
+     res.status === 'failed' ? 'Failed — recorded' :
+     res.status === 'submitted' ? 'Submitted to aSTF' : 'Draft');
 
   // Redraft button in header
   var redraftBtn = document.getElementById('btn-redraft-resolution');
@@ -3577,6 +3584,10 @@ function updateDelibDecisionButtons(cell) {
   var submitBtn = document.getElementById('delib-submit-btn');
   var closeBtn = document.getElementById('delib-close-btn');
   if (!submitBtn || !closeBtn) return;
+  var steward = typeof isStewardOfAnyCircle === 'function' && isStewardOfAnyCircle();
+  var crystallised = cell && cell.status === 'crystallised';
+  if (!steward && !crystallised) { submitBtn.style.display = 'none'; closeBtn.style.display = 'none'; return; }
+  submitBtn.style.display = ''; closeBtn.style.display = '';
   var sub = cell && cell.resolution && cell.resolution.status;
   var crystallised = cell && cell.status === 'crystallised';
   if (crystallised) {
@@ -7755,6 +7766,13 @@ function renderDelibCell(cellId) {
   renderDelibDiscussion(cell, disc);
   renderDelibCircles(cell, circles);
   if (dbInfo) dbInfo.innerHTML = 'Quorum: ' + (cell.participants ? Math.ceil(cell.participants / 2) : 0) + '/' + (cell.participants || 0) + ' · Status: ' + status;
+  delibResolutions = (cell.draftResolutions || []).map(function (r) { return r; });
+  delibResolutions.forEach(function (r) {
+    if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
+    if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
+  });
+  if (delibSelectedRes >= delibResolutions.length) delibSelectedRes = 0;
+  updateResolutionSlot();
   updateDelibDecisionButtons(cell);
 }
 

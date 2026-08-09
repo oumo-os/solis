@@ -456,6 +456,11 @@ async function childRoutes(req, res, reqUrl, method) {
       const rows = db.prepare(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ?`).all(parentId);
       return send(res, 200, rows);
     }
+    if (method !== 'GET') {
+      // writes require a session — anonymous writes are rejected
+      const wuser = authUser(req);
+      if (!wuser) return send(res, 401, { error: 'Unauthorized' });
+    }
     if (method === 'POST' && m) {
       const body = await readBody(req);
       const cols = db.prepare(`PRAGMA table_info(${d.child})`).all().map(c => c.name).filter(c => c !== d.parentKey && c !== 'id');
@@ -500,10 +505,13 @@ async function voteRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/vote-records$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
   const body = await readBody(req);
   if (!body || !body.domain) return send(res, 400, { error: 'domain required' });
-  const initials = String(body.initials || '').trim();
+  // identity comes from the session token, not the request body
+  const initials = String(user.initials || body.initials || '').trim();
   const vote = ['yea', 'nay', 'abstain'].includes(body.vote) ? body.vote : 'abstain';
   const ws = Math.max(0, Number(body.ws) || 0);
 
@@ -538,9 +546,17 @@ async function voteRoutes(req, res, reqUrl, method) {
 }
 
 // ── resolution lifecycle (submit to aSTF / close debate = crystallise) ──
+// Both decision routes require a steward (active circle_roster) — 401
+// anonymous, 403 non-steward. Close records the outcome on the cell and
+// finalises the submitted draft as passed/failed.
 async function governanceRoutes(req, res, reqUrl, method) {
   let m = reqUrl.match(/^\/api\/cells\/([^/]+)\/draft-resolutions\/([^/]+)\/submit$/);
   if (m && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+      return send(res, 403, { error: 'Steward access required' });
+    }
     const cellId = decodeURIComponent(m[1]);
     const draftId = decodeURIComponent(m[2]);
     const draft = db.prepare('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?').get(String(draftId), cellId);
@@ -555,6 +571,11 @@ async function governanceRoutes(req, res, reqUrl, method) {
   }
   m = reqUrl.match(/^\/api\/cells\/([^/]+)\/debate\/close$/);
   if (m && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+      return send(res, 403, { error: 'Steward access required' });
+    }
     const cellId = decodeURIComponent(m[1]);
     const body = await readBody(req);
     const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
@@ -571,9 +592,10 @@ async function governanceRoutes(req, res, reqUrl, method) {
     }
     let r = cell.resolution ? JSON.parse(cell.resolution) : {};
     if (r.status === 'Draft' || r.status === 'Submitted') r.status = 'Crystallised';
+    r.outcome = outcome;
     db.prepare("UPDATE cells SET status = 'crystallised', resolution = ? WHERE id = ?").run(JSON.stringify(r), cellId);
-    db.prepare("UPDATE draft_resolutions SET status = ? WHERE cell_id = ? AND status = ?")
-      .run('crystallised', cellId, 'submitted');
+    db.prepare("UPDATE draft_resolutions SET status = ? WHERE cell_id = ? AND status = 'submitted'")
+      .run(outcome === 'failed' ? 'failed' : 'passed', cellId);
     const evtId = evtStem + '-' + Date.now();
     db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
       .run(evtId, 'cell-crystallisation', String(cell.circle || ''), new Date().toISOString().slice(0, 10),

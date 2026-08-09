@@ -440,3 +440,50 @@ Mutating flows vs the API:
   the deliberation with the "System Settings Change" origin card showing
   the changed value; everything survives a full reload (snapshot
   re-rendered from server data). Harness deleted after green; DB re-seeded.
+
+## Resolution lifecycle integrity (2026-08-09, to_prod 2.5 #5–7 + 2.6)
+
+- **Why**: the decision routes (`draft-resolutions/:id/submit`,
+  `debate/close`) accepted unauthenticated calls and niether checked the
+  steward gate; `vote-records` and every child write (messages, drafts,
+  tasks…) had no session check, and the close flow always recorded the
+  draft as `crystallised` even when the resolution failed. On the client,
+  the Deliberation page bound its resolution slot + draft list to a seeded
+  cell (`cell-21`) at boot, so every opened deliberation (thread-raise,
+  direct, settings origins) showed another cell's resolution and voting
+  controls.
+- **Server**:
+  - `governanceRoutes` — submit + close now require auth (401) and an
+    active `circle_roster` membership (403, `Steward access required`).
+  - `debate/close` finalises the submitted draft as `passed`/`failed`
+    per the vote outcome (previously always `crystallised`), writes
+    `resolution.outcome` onto the cell, and keeps the idempotence check
+    (already-crystallised cells return `already: true` with the stored
+    outcome).
+  - `voteRoutes` — requires a session (401); the voter identity
+    (`initials`, name) now comes from the session token, not the request
+    body, so a member can't cast votes as someone else.
+  - `childRoutes` — all non-GET writes to child resources (messages,
+    drafts, tasks, votes, roster, proposals…) require a session (401).
+- **Client**:
+  - `renderDelibCell` now rebuilds `delibResolutions` from the **opened**
+    cell's `draftResolutions` and calls `updateResolutionSlot()` — the
+    2.6 "Resolution" slot (title, status badge, version count, actions)
+    finally reflects the cell you're actually in, and `submitResolution`
+    operates on that cell's draft (it reads `delibResolutions[...rowId]`).
+  - `updateDelibDecisionButtons`: Submit/Close decision buttons only
+    render for stewards (non-stewards see nothing; crystallised cells show
+    a disabled summary instead).
+  - Status vocabulary extended for the recorded outcomes:
+    `passed` → "Passed" (b-success), `failed` → "Failed" (b-danger) in the
+    slot badge and modal status line.
+- Verified headlessly (28-check suite): anonymous submit/close/vote/
+  message → 401; member OS can vote (200, identity from token) but
+  submit/close → 403; steward AJ runs the full lifecycle — draft 201,
+  nay 550 + yea 120 + abstain 0 → summary 120/550/0, submit 200,
+  re-submit 409, close → `outcome failed` (120/550), cell crystallised,
+  draft row recorded `failed`, governance event written, close idempotent.
+  UI: overlays a freshly-created direct-proposal cell — crystallised bars
+  disabled with "Crystallised"/"Closed", Failed badge in the resolution
+  slot, and a member sees the same cell with no decision buttons.
+- Harness deleted after green; DB re-seeded.
