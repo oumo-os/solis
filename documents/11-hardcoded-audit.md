@@ -598,3 +598,31 @@ Mutating flows vs the API:
   duplicate 409; competence assessment filed (1/2, complete),
   competence vSTF → Assessment Filed.
 - Harness deleted; DB re-seeded.
+
+## p-aSTF periodic review (2026-08-09, to_prod 2.10)
+
+- **Why**: circle health reviews were defined in the spec with a full
+  two-layer rubric but had no persistence or lifecycle.
+- **What**:
+  - `POST /api/cells/:id/spawn-pastf` — spawns a `p-aSTF Cell` from a
+    source cell.  Auth + steward gate (401/403), idempotent per source
+    cell (409).  Creates cell (Pending Review, circle name, minReviewers)
+    + stfs row (active).
+  - `POST /api/cells/:id/pastf-review` — file a two-layer rubric review.
+    Auth required (401), no duplicate per reviewer (409), healthTier
+    validated (400).  Layer 1: circle rubric (30 pts: activity 0–6,
+    competenceFit 0–7, discipline 0–6, cohesion 0–5, delivery 0–6).
+    Layer 2: member rubric (35 pts + 2 risk flags: effectiveness 0–5,
+    stewardship 0–7, participation 0–5, investment 0–8, productivity 0–6,
+    roleFit 0–4, replaceability 0–5 >3 → knowledge-transfer,
+    indispensable 0–5 >3 → jSTF referral).  Auto-closes at minReviewers
+    by averaging circle totals and majority-tier health.
+  - `spawnPastf` / `filePastfReview` added to `SolisApi`.
+  - `filePastfReview` reads circle/member rubric inputs from the existing
+    `#view-stf-pastf` view and calls the API.
+- Verified headlessly (17 checks): full lifecycle — login, create source
+  cell, spawn p-aSTF 201, respawn 409, p-aSTF cell in bootstrap, stfs
+  row active; anon review 401, wrong type 400, invalid tier 400;
+  reviewer 1 filed (circle=23), duplicate 409; reviewer 2 filed →
+  complete; p-aSTF cell Review Complete; stfs completed.
+- Harness deleted; DB re-seeded.

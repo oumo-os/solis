@@ -927,6 +927,119 @@ async function vstfAssessmentRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, filed: assessments.length, required: minAssessors, complete: assessments.length >= minAssessors });
 }
 
+// ── p-aSTF periodic review (to_prod 2.10) ──────────────
+// POST /api/cells/:id/spawn-pastf — spawn a p-aSTF periodic circle health
+// review cell.  Auth + steward gate.
+async function pastfSpawnRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-pastf$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  const existing = db.prepare("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND commissioned_by = ?").get(cellId);
+  if (existing) return send(res, 409, { error: 'p-aSTF already spawned' });
+  const body = await readBody(req);
+  const circleName = String(body.circleName || cell.circle || '').trim();
+  const minReviewers = Number(body.minReviewers) || 3;
+  const pastfId = 'pastf-' + Date.now().toString(36);
+  const source = {
+    type: 'periodic-review', sourceCellId: cellId, sourceTitle: cell.title || '',
+    circleName, spawnedBy: user.name || user.initials, spawnedAt: new Date().toISOString(),
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(pastfId, 'p-aSTF Cell', 'p-aSTF · ' + circleName + ' Health Review', 'Pending Review', 'periodic-review',
+      minReviewers, circleName, cellId,
+      JSON.stringify(source), JSON.stringify({ status: 'Pending' }),
+      JSON.stringify({ circleName, minReviewers, reviews: [] }));
+  const stfId = 'stf-' + pastfId;
+  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(stfId, 'p-aSTF', 'Periodic Circle Health Review', circleName, 'active', 'Pending Review',
+      circleName + ' Health', new Date(Date.now() + 30*86400000).toISOString().slice(0, 10));
+  return send(res, 201, { ok: true, pastfId });
+}
+
+// POST /api/cells/:id/pastf-review — file a p-aSTF review with two-layer
+// rubric (circle 30 pts + member 35 pts + 2 risk flags) + health tier.
+async function pastfReviewRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/pastf-review$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'p-aSTF Cell') return send(res, 400, { error: 'Not a p-aSTF cell' });
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  const reviews = meta.reviews || [];
+  const already = reviews.filter(function(r) { return r.reviewer === (user.name || user.initials); })[0];
+  if (already) return send(res, 409, { error: 'You have already filed a review' });
+  const body = await readBody(req);
+  // Layer 1: Circle rubric (30 pts)
+  const circleRubric = body.circleRubric || {};
+  const activity = Math.min(6, Math.max(0, Number(circleRubric.activity) || 0));
+  const competenceFit = Math.min(7, Math.max(0, Number(circleRubric.competenceFit) || 0));
+  const discipline = Math.min(6, Math.max(0, Number(circleRubric.discipline) || 0));
+  const cohesion = Math.min(5, Math.max(0, Number(circleRubric.cohesion) || 0));
+  const delivery = Math.min(6, Math.max(0, Number(circleRubric.delivery) || 0));
+  const circleTotal = activity + competenceFit + discipline + cohesion + delivery;
+  // Layer 2: Member rubric (35 pts + 2 risk flags)
+  const memberReviews = Array.isArray(body.memberReviews) ? body.memberReviews : [];
+  const processedMembers = memberReviews.map(function(mr) {
+    const effectiveness = Math.min(5, Math.max(0, Number(mr.effectiveness) || 0));
+    const stewardship = Math.min(7, Math.max(0, Number(mr.stewardship) || 0));
+    const participation = Math.min(5, Math.max(0, Number(mr.participation) || 0));
+    const investment = Math.min(8, Math.max(0, Number(mr.investment) || 0));
+    const productivity = Math.min(6, Math.max(0, Number(mr.productivity) || 0));
+    const roleFit = Math.min(4, Math.max(0, Number(mr.roleFit) || 0));
+    const replaceability = Math.min(5, Math.max(0, Number(mr.replaceability) || 0));
+    const indispensable = Math.min(5, Math.max(0, Number(mr.indispensable) || 0));
+    return {
+      name: mr.name || '', initials: mr.initials || '',
+      effectiveness, stewardship, participation, investment, productivity, roleFit,
+      memberTotal: effectiveness + stewardship + participation + investment + productivity + roleFit,
+      replaceability, indispensable,
+      knowledgeTransfer: replaceability > 3,
+      jstfReferral: indispensable > 3,
+    };
+  });
+  const healthTier = String(body.healthTier || 'healthy').trim();
+  if (!['healthy', 'watch', 'concern'].includes(healthTier)) {
+    return send(res, 400, { error: 'healthTier must be healthy, watch, or concern' });
+  }
+  const notes = String(body.notes || '').trim();
+  reviews.push({
+    reviewer: user.name || user.initials, filedAt: new Date().toISOString(),
+    circleRubric: { activity, competenceFit, discipline, cohesion, delivery, total: circleTotal },
+    memberReviews: processedMembers, healthTier, notes,
+  });
+  meta.reviews = reviews;
+  const minReviewers = meta.minReviewers || 3;
+  if (reviews.length >= minReviewers) {
+    // compute average circleTotal and majority health tier
+    const avgCircle = Math.round(reviews.reduce(function(s, r) { return s + r.circleRubric.total; }, 0) / reviews.length);
+    var tierCounts = { healthy: 0, watch: 0, concern: 0 };
+    reviews.forEach(function(r) { tierCounts[r.healthTier] = (tierCounts[r.healthTier] || 0) + 1; });
+    var finalTier = 'healthy';
+    if (tierCounts.concern > tierCounts.healthy && tierCounts.concern > tierCounts.watch) finalTier = 'concern';
+    else if (tierCounts.watch >= tierCounts.healthy) finalTier = 'watch';
+    db.prepare("UPDATE cells SET status = 'Review Complete', meta = ?, resolution = ? WHERE id = ?")
+      .run(JSON.stringify(meta), JSON.stringify({ status: 'Complete', avgCircle, healthTier: finalTier }), cellId);
+    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'p-aSTF' AND status = 'Pending Review'").get();
+    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+  } else {
+    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  }
+  return send(res, 200, { ok: true, filed: reviews.length, required: minReviewers, complete: reviews.length >= minReviewers, circleTotal });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1373,6 +1486,8 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await xstfReviewRoutes(req, res, reqUrl, method);
     if (!handled) handled = await vstfSpawnRoutes(req, res, reqUrl, method);
     if (!handled) handled = await vstfAssessmentRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await pastfSpawnRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await pastfReviewRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

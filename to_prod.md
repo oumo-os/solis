@@ -474,6 +474,8 @@ participant_domain {
 
 **Health tier:** healthy / watch / concern
 
+**Gating:** spawn: auth + steward (401/403), idempotent per source cell (409); review: auth (401), no duplicate per reviewer (409), healthTier validated (400), auto-closes at minReviewers
+
 ### 2.11 — jSTF (Judicial Investigation)
 
 **Trigger:**

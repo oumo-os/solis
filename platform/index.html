@@ -1131,7 +1131,7 @@
 
         <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Review Notes</div>
         <textarea placeholder="Additional observations about the Circle and assigned members..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your p-aSTF review? Scores and tier will be published; your attribution is permanently sealed.',function(){})">Submit Review</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="filePastfReview()">Submit Review</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -3722,6 +3722,64 @@ function fileVstfCompetenceAssessment() {
       toast('Assessment filed (' + r.filed + '/' + r.required + ').' + (r.complete ? ' Assessment complete!' : ''), 'success');
       if (r.complete && cell) { cell.status = 'Assessment Filed'; }
     }).catch(function() { toast('Could not file assessment. Is the server running?', 'error'); });
+  });
+}
+
+function getActivePastfCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type === 'p-aSTF Cell') return cells[i];
+  }
+  return null;
+}
+
+function filePastfReview() {
+  var cell = getActivePastfCell();
+  if (!cell) { toast('No p-aSTF cell active.', 'error'); return; }
+  var view = document.getElementById('view-stf-pastf');
+  if (!view) { toast('p-aSTF view not open.', 'error'); return; }
+  // Layer 1: Circle rubric
+  var circleInputs = view.querySelectorAll('table.tbl:first-of-type input[type="number"]');
+  var circleDims = ['activity', 'competenceFit', 'discipline', 'cohesion', 'delivery'];
+  var circleRubric = {};
+  circleDims.forEach(function(d, i) { circleRubric[d] = Number(circleInputs[i] && circleInputs[i].value) || 0; });
+  // Layer 2: Member rubric
+  var memberCards = view.querySelectorAll('.card');
+  var memberReviews = [];
+  memberCards.forEach(function(card) {
+    var nameEl = card.querySelector('div[style*="font-size:14px"]');
+    var iniEl = card.querySelector('.avatar');
+    if (!nameEl || !iniEl) return;
+    var name = (nameEl.textContent || '').trim();
+    var initials = (iniEl.textContent || '').trim();
+    var memberInputs = card.querySelectorAll('table.tbl input[type="number"]');
+    if (memberInputs.length < 8) return;
+    memberReviews.push({
+      name: name, initials: initials,
+      effectiveness: Number(memberInputs[0].value) || 0,
+      stewardship: Number(memberInputs[1].value) || 0,
+      participation: Number(memberInputs[2].value) || 0,
+      investment: Number(memberInputs[3].value) || 0,
+      productivity: Number(memberInputs[4].value) || 0,
+      roleFit: Number(memberInputs[5].value) || 0,
+      replaceability: Number(memberInputs[6].value) || 0,
+      indispensable: Number(memberInputs[7].value) || 0,
+    });
+  });
+  // Health tier
+  var healthTier = 'healthy';
+  if (document.getElementById('pastf-watch') && document.getElementById('pastf-watch').style.color === 'var(--gold)') healthTier = 'watch';
+  else if (document.getElementById('pastf-concern') && document.getElementById('pastf-concern').style.color === 'var(--red)') healthTier = 'concern';
+  // Notes
+  var notesInput = view.querySelector('textarea[placeholder*="observations"]');
+  var notes = (notesInput && notesInput.value || '').trim();
+  var circleTotal = circleDims.reduce(function(s, d) { return s + (circleRubric[d] || 0); }, 0);
+  confirmModal('Submit p-aSTF review? (Circle: ' + circleTotal + '/30, Tier: ' + healthTier + ', Members: ' + memberReviews.length + ')', function() {
+    SolisApi.filePastfReview(cell.id, { circleRubric: circleRubric, memberReviews: memberReviews, healthTier: healthTier, notes: notes }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not file review. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Review filed (' + r.filed + '/' + r.required + ').' + (r.complete ? ' Review complete!' : ''), 'success');
+      if (r.complete && cell) { cell.status = 'Review Complete'; }
+    }).catch(function() { toast('Could not file review. Is the server running?', 'error'); });
   });
 }
 
