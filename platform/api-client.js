@@ -243,6 +243,18 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/astf-verdict', payload);
   }
 
+  function spawnXstf(astfCellId, payload) {
+    return req('POST', 'cells/' + astfCellId + '/spawn-xstf', payload);
+  }
+
+  function submitDeliverable(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/submit-deliverable', payload);
+  }
+
+  function reviewDeliverable(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/review-deliverable', payload);
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -363,6 +375,9 @@ var SolisApi = (function() {
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate,
-    fileAstfVerdict: fileAstfVerdict
+    fileAstfVerdict: fileAstfVerdict,
+    spawnXstf: spawnXstf,
+    submitDeliverable: submitDeliverable,
+    reviewDeliverable: reviewDeliverable
   };
 })();

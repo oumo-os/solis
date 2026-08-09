@@ -3612,6 +3612,65 @@ function doAstfVerdict(verdict) {
   });
 }
 
+function spawnXstfFromAstf(astfCellId) {
+  var cell = cellsById[astfCellId];
+  if (!cell || cell.type !== 'aSTF Cell') { toast('Not an aSTF cell.', 'error'); return; }
+  var res = cell.resolution || {};
+  if (res.verdict !== 'approved') { toast('aSTF verdict not approved.', 'error'); return; }
+  var title = (cell.title || '').replace(/^aSTF · /, '');
+  var src = cell.source || {};
+  confirmModal('Spawn an xSTF execution cell for "' + title + '"?', function() {
+    var payload = {
+      title: title, blind: true,
+      team: [],
+      deliverableSpecs: { name: title, description: title, sections: 4, wordCount: 'TBD', language: 'Plain English', reviewProcess: 'draft-circle-final' }
+    };
+    SolisApi.spawnXstf(astfCellId, payload).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not spawn xSTF. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('xSTF spawned: ' + r.xstfId, 'success');
+      // refresh bootstrap
+      SolisApi.bootstrap().then(function(b) { if (b) { Object.assign(MOCK, b); rebuildCellsIndex(); } });
+    }).catch(function() { toast('Could not spawn xSTF. Is the server running?', 'error'); });
+  });
+}
+
+function openSubmitDeliverableModal(cellId) {
+  var title = prompt('Deliverable title:');
+  if (!title) return;
+  var content = prompt('Deliverable content / summary:');
+  if (content === null) content = '';
+  SolisApi.submitDeliverable(cellId, { title: title, content: content }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not submit deliverable. ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast('Deliverable submitted.', 'success');
+    // update local cell
+    var cell = cellsById[cellId];
+    if (cell) {
+      if (!cell.meta) cell.meta = {};
+      if (!cell.meta.deliverables) cell.meta.deliverables = [];
+      cell.meta.deliverables.push({ id: r.deliverableId, title: title, content: content, status: 'submitted', submittedBy: MOCK.currentUser && MOCK.currentUser.name || '' });
+    }
+    renderXstf(cellId);
+  }).catch(function() { toast('Could not submit deliverable. Is the server running?', 'error'); });
+}
+
+function reviewDeliverable(cellId, deliverableId, decision) {
+  var label = decision === 'approved' ? 'approve' : 'request revision for';
+  confirmModal(' ' + label + ' this deliverable?', function() {
+    var comment = prompt('Review comment (optional):') || '';
+    SolisApi.reviewDeliverable(cellId, { deliverableId: deliverableId, decision: decision, comment: comment }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not review deliverable. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Deliverable ' + decision + '.', 'success');
+      var cell = cellsById[cellId];
+      if (cell && cell.meta && cell.meta.deliverables) {
+        var del = cell.meta.deliverables.find(function(d) { return d.id === deliverableId; });
+        if (del) { del.status = decision; del.reviewComment = comment; }
+      }
+      if (decision === 'approved' && cell) { cell.status = 'Completed'; }
+      renderXstf(cellId);
+    }).catch(function() { toast('Could not review deliverable. Is the server running?', 'error'); });
+  });
+}
+
 function updateDelibDecisionButtons(cell) {
   var submitBtn = document.getElementById('delib-submit-btn');
   var closeBtn = document.getElementById('delib-close-btn');
@@ -6691,26 +6750,53 @@ function xstfCreateSubmit() {
   var lang = document.getElementById('xstf-create-lang').value.trim();
   var review = document.getElementById('xstf-create-review').value;
 
-  var cellId = 'cell-' + Date.now();
-  MOCK.cells.push({
-    id: cellId,
-    type: 'xSTF Cell',
-    title: title,
-    progress: 0,
-    deadline: deadline,
-    status: 'Active',
-    blind: blind,
-    commissionedBy: MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === _xstfCreateCircleId; })?.name || 'Circle',
-    resolutionRef: null,
-    deliverableSpecs: {
-      name: delName || title,
-      description: delDesc || desc,
-      sections: sections,
-      wordCount: wordcount || 'TBD',
-      language: lang || 'Plain English',
-      reviewProcess: review
-    },
-    tasks: [
+  // Find the aSTF cell (most recent approved aSTF in this circle) or use manual spawn
+  var astfCell = null;
+  var cells = (MOCK && MOCK.cells) || [];
+  for (var i = cells.length - 1; i >= 0; i--) {
+    var c = cells[i];
+    if (c.type === 'aSTF Cell' && c.resolution && (typeof c.resolution === 'object' ? c.resolution.verdict : null) === 'approved') {
+      astfCell = c; break;
+    }
+  }
+
+  var payload = {
+    title: title, blind: blind, deadline: deadline,
+    team: invitees.map(function(inv) { return { name: inv.name, initials: inv.initials, role: 'Team Member' }; }),
+    deliverableSpecs: { name: delName || title, description: delDesc || desc, sections: sections, wordCount: wordcount || 'TBD', language: lang || 'Plain English', reviewProcess: review }
+  };
+
+  var useApi = astfCell && astfCell.id && !astfCell.id.startsWith('cell-');
+  if (useApi) {
+    SolisApi.spawnXstf(astfCell.id, payload).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not create xSTF. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      payload.id = r.xstfId;
+      payload.type = 'xSTF Cell';
+      payload.status = 'Active';
+      payload.progress = 0;
+      payload.commissionedBy = astfCell.source && astfCell.source.circleName || '';
+      payload.resolutionRef = astfCell.id;
+      payload.deliverableSpecs = payload.deliverableSpecs;
+      payload.tasks = [];
+      payload.objectives = [];
+      payload.deliverables = [];
+      payload.messages = [];
+      MOCK.cells.push(payload);
+      cellsById[r.xstfId] = payload;
+      closeXstfCreateModal();
+      toast('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.', 'success');
+    }).catch(function() { toast('Could not create xSTF. Is the server running?', 'error'); });
+  } else {
+    // fallback: client-only creation (no aSTF link)
+    var cellId = 'xstf-' + Date.now().toString(36);
+    payload.id = cellId;
+    payload.type = 'xSTF Cell';
+    payload.status = 'Active';
+    payload.progress = 0;
+    payload.blind = blind;
+    payload.commissionedBy = MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === _xstfCreateCircleId; })?.name || 'Circle';
+    payload.resolutionRef = null;
+    payload.tasks = [
       { id: 't0', label: 'STF formulation', status: 'pending', locked: true },
       { id: 't1', label: 'Mandate comprehension', status: 'pending', locked: false },
       { id: 't2', label: 'Research & drafting', status: 'pending', locked: false },
@@ -6718,16 +6804,15 @@ function xstfCreateSubmit() {
       { id: 't4', label: 'Circle review cycle', status: 'pending', locked: false },
       { id: 't5', label: 'Finalisation', status: 'pending', locked: false },
       { id: 't6', label: 'Dissolve STF', status: 'pending', locked: true }
-    ],
-    objectives: [],
-    team: invitees.map(function(inv) { return { name: inv.name, initials: inv.initials, role: 'Team Member' }; }),
-    deliverables: [],
-    messages: []
-  });
-
-  closeXstfCreateModal();
-  toast('xSTF "' + title + '" created! ' + invitees.length + ' invitations sent silently.','success');
-  SolisApi.saveCell(MOCK.cells[MOCK.cells.length - 1]);
+    ];
+    payload.objectives = [];
+    payload.deliverables = [];
+    payload.messages = [];
+    MOCK.cells.push(payload);
+    cellsById[cellId] = payload;
+    closeXstfCreateModal();
+    toast('xSTF "' + title + '" created! (client only — link an aSTF for persistence)', 'success');
+  }
 }
 
 // -- Circle Apply --
@@ -7231,18 +7316,32 @@ function renderXstf(cellId) {
   var deliv = document.getElementById('xstf-deliverables');
   if (deliv) {
     var specs = cell.deliverableSpecs;
-    var delivs = cell.deliverables || [];
+    var meta = cell.meta || {};
+    var delivs = meta.deliverables || [];
     var html = '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">';
     html += '<div class="mb-2"><strong style="color:var(--text)">Report:</strong></div>';
     if (specs) {
       html += '<div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);font-size:10px;color:var(--text-tertiary);margin-bottom:8px">' + esc(specs.name) + ' (' + (specs.wordCount || '') + ')</div>';
     }
     if (delivs.length) {
-      html += '<div><strong style="color:var(--text)">Attachments:</strong></div><div class="flex gap-2" style="margin-top:4px">';
       delivs.forEach(function(d) {
-        html += '<span class="tag ' + (d.type === 'attachment' ? 'tag-purple' : 'tag-green') + '" style="font-size:8px"><i class="fa-solid fa-file" style="margin-right:3px"></i>' + esc(d.name) + '</span>';
+        var statusClass = d.status === 'approved' ? 'tag-green' : d.status === 'revision' ? 'tag-gold' : 'tag-purple';
+        html += '<div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);margin-bottom:6px">';
+        html += '<div class="flex justify-between"><strong style="color:var(--text)">' + esc(d.title) + '</strong>';
+        html += '<span class="tag ' + statusClass + '" style="font-size:8px">' + esc(d.status) + '</span></div>';
+        if (d.submittedBy) html += '<div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">By ' + esc(d.submittedBy) + '</div>';
+        if (d.reviewComment) html += '<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">"' + esc(d.reviewComment) + '"</div>';
+        if (d.status === 'submitted' && isStewardOfAnyCircle()) {
+          html += '<div class="flex gap-2" style="margin-top:6px">';
+          html += '<button class="btn btn-sm" style="font-size:9px" onclick="reviewDeliverable(\'' + cellId + '\',\'' + d.id + '\',\'approved\')">Approve</button>';
+          html += '<button class="btn btn-sm" style="font-size:9px" onclick="reviewDeliverable(\'' + cellId + '\',\'' + d.id + '\',\'revision\')">Request Revision</button>';
+          html += '</div>';
+        }
+        html += '</div>';
       });
-      html += '</div>';
+    }
+    if (cell.status !== 'Completed') {
+      html += '<button class="btn btn-sm" style="margin-top:8px;width:100%" onclick="openSubmitDeliverableModal(\'' + cellId + '\')">Submit Deliverable</button>';
     }
     html += '</div>';
     deliv.innerHTML = html;
@@ -7784,10 +7883,13 @@ function renderDelibCell(cellId) {
       if (alreadyFiled) {
         var v = cell.resolution && cell.resolution.verdict || '';
         var rt = cell.resolution && cell.resolution.rubricTotal || 0;
+        var spawnBtn = v === 'approved'
+          ? '<button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="spawnXstfFromAstf(\'' + cell.id + '\')">Spawn xSTF →</button>'
+          : '<span style="font-size:11px;color:var(--text-tertiary);margin-left:auto">Verdict filed</span>';
         decisionBar.innerHTML = '<div style="display:flex;align-items:center;gap:12px;width:100%">' +
           '<span class="badge ' + (v === 'approved' ? 'b-success' : v === 'rejected' ? 'b-danger' : 'b-pending') + '">' + escapeHtml(v.charAt(0).toUpperCase() + v.slice(1)) + '</span>' +
           '<span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Rubric: ' + rt + '/30</span>' +
-          '<span style="font-size:11px;color:var(--text-tertiary);margin-left:auto">Verdict filed</span></div>';
+          spawnBtn + '</div>';
       } else {
         decisionBar.innerHTML =
           '<div style="width:100%">' +

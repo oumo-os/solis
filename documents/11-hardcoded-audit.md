@@ -528,3 +528,41 @@ Mutating flows vs the API:
   Approved, draft passed, stfs completed, governance event written;
   re-file 409; wrong-type 400.
 - Harness deleted; DB re-seeded.
+
+## xSTF execution lifecycle (2026-08-09, to_prod 2.8)
+
+- **Why**: the xSTF create modal existed client-side only (pushed to
+  `MOCK.cells` with no server persistence) and there was no path from an
+  approved aSTF verdict to a live execution cell.
+- **Server**:
+  - `POST /api/cells/:id/spawn-xstf` — spawns an `xSTF Cell` from an
+    approved aSTF cell.  Auth + steward gate (401/403), cell must be
+    aSTF with verdict `approved` (400), idempotent (409 if xSTF already
+    spawned).  Creates the xSTF cell (blind, deadline, deliverableSpecs
+    stored in the `meta` JSON column, default 7-step task list), inserts
+    `cell_team` rows, and adds an `stfs` row (bucket `active`).
+  - `POST /api/cells/:id/submit-deliverable` — team member submits a
+    deliverable draft (auth required, title required, stored in
+    `meta.deliverables[]`).
+  - `POST /api/cells/:id/review-deliverable` — steward reviews a
+    submitted deliverable (auth + steward gate).  Decision `approved`
+    marks the xSTF cell `Completed`, updates stfs to `completed`;
+    decision `revision` leaves the cell active.  Idempotent (409 if
+    already reviewed).
+- **Client**:
+  - `xstfCreateSubmit` now calls `SolisApi.spawnXstf` when an aSTF cell
+    is available (falls back to client-only when not linked).
+  - `renderXstf` deliverables section reads `meta.deliverables[]`
+    (server-persisted) and renders per-deliverable status badges +
+    steward review buttons when status is `submitted`.
+  - `spawnXstfFromAstf` button appears on the aSTF verdict bar when
+    verdict is `approved`; calls spawn-xstf and refreshes bootstrap.
+  - `openSubmitDeliverableModal` + `reviewDeliverable` client functions
+    wired to the new endpoints.
+- Verified headlessly (21 checks): full lifecycle — login, create
+  deliberation cell + draft, submit to aSTF, verdict approved, spawn
+  xSTF (201 + stfs active), respawn 409; submit deliverable (201),
+  missing title 400; non-steward review 403, steward approve → xSTF
+  Completed + stfs completed, re-review 409; invalid review 400, wrong
+  type 400, anon spawn 401, anon deliverable 401.
+- Harness deleted; DB re-seeded.

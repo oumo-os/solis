@@ -694,6 +694,138 @@ async function astfVerdictRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, verdict, astfId: cellId, originCellId: source.originCellId || null, rubricTotal: total });
 }
 
+// ── xSTF execution (to_prod 2.8) ───────────────────────
+// POST /api/cells/:id/spawn-xstf — spawn an xSTF execution cell from an
+// aSTF cell that received an approved verdict.  Auth + steward gate.
+async function xstfSpawnRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-xstf$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const astfId = decodeURIComponent(m[1]);
+  const astf = db.prepare('SELECT * FROM cells WHERE id = ?').get(astfId);
+  if (!astf) return send(res, 404, { error: 'Not found' });
+  if (astf.type !== 'aSTF Cell') return send(res, 400, { error: 'Not an aSTF cell' });
+  const astfRes = astf.resolution ? JSON.parse(astf.resolution) : {};
+  if (astfRes.verdict !== 'approved') return send(res, 400, { error: 'aSTF verdict not approved' });
+  const existing = db.prepare("SELECT id FROM cells WHERE type = 'xSTF Cell' AND commissioned_by = ?").get(astfId);
+  if (existing) return send(res, 409, { error: 'xSTF already spawned' });
+  const body = await readBody(req);
+  const astfSource = JSON.parse(astf.source || '{}');
+  const title = String(body.title || astfSource.draftTitle || astf.title || '').replace(/^aSTF · /, '');
+  const team = Array.isArray(body.team) ? body.team : [];
+  const specs = body.deliverableSpecs || {};
+  const xstfId = 'xstf-' + Date.now().toString(36);
+  const blind = body.blind !== undefined ? (body.blind ? 1 : 0) : 1;
+  const deadline = String(body.deadline || '').trim() || new Date(Date.now() + 30*86400000).toISOString().slice(0, 10);
+  const deliverableSpecs = {
+    name: String(specs.name || title),
+    description: String(specs.description || ''),
+    sections: Number(specs.sections) || 4,
+    wordCount: String(specs.wordCount || 'TBD'),
+    language: String(specs.language || 'Plain English'),
+    reviewProcess: String(specs.reviewProcess || 'draft-circle-final'),
+  };
+  const defaultTasks = [
+    { id: 't0', label: 'STF formulation', status: 'pending', locked: true },
+    { id: 't1', label: 'Mandate comprehension', status: 'pending', locked: false },
+    { id: 't2', label: 'Research & drafting', status: 'pending', locked: false },
+    { id: 't3', label: 'Internal review', status: 'pending', locked: false },
+    { id: 't4', label: 'Circle review cycle', status: 'pending', locked: false },
+    { id: 't5', label: 'Finalisation', status: 'pending', locked: false },
+    { id: 't6', label: 'Dissolve STF', status: 'pending', locked: true },
+  ];
+  const xstfSource = {
+    type: 'xstf-execution', astfId, originCellId: astfSource.originCellId || null,
+    circleName: astfSource.circleName || astf.circle || '',
+    commissionedBy: user.name || user.initials, commissionedAt: new Date().toISOString(),
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(xstfId, 'xSTF Cell', title, 'Active', team.length || 3, xstfSource.circleName, blind, astfId,
+      JSON.stringify(xstfSource), JSON.stringify({ status: 'In Progress' }),
+      JSON.stringify({ tasks: defaultTasks, objectives: [] }),
+      JSON.stringify(deliverableSpecs), 0, deadline);
+  // team members
+  const insertTeam = db.prepare('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)');
+  for (const t of team) {
+    insertTeam.run(xstfId, String(t.name || ''), String(t.initials || ''), String(t.role || 'Team Member'));
+  }
+  // stfs row
+  const stfId = 'stf-' + xstfId;
+  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(stfId, 'xSTF', title, xstfSource.circleName, 'active', 'Active', title, deadline);
+  return send(res, 201, { ok: true, xstfId });
+}
+
+// POST /api/cells/:id/submit-deliverable — team submits a deliverable draft
+async function xstfDeliverableRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/submit-deliverable$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'xSTF Cell') return send(res, 400, { error: 'Not an xSTF cell' });
+  const body = await readBody(req);
+  const title = String(body.title || '').trim();
+  if (!title) return send(res, 400, { error: 'title required' });
+  const content = String(body.content || '').trim();
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  const deliverables = meta.deliverables || [];
+  deliverables.push({ id: 'del-' + Date.now(), title, content, submittedBy: user.name || user.initials, submittedAt: new Date().toISOString(), status: 'submitted' });
+  meta.deliverables = deliverables;
+  db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  return send(res, 201, { ok: true, deliverableId: deliverables[deliverables.length - 1].id });
+}
+
+// POST /api/cells/:id/review-deliverable — commissioning circle reviews
+async function xstfReviewRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/review-deliverable$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'xSTF Cell') return send(res, 400, { error: 'Not an xSTF cell' });
+  const body = await readBody(req);
+  const deliverableId = String(body.deliverableId || '').trim();
+  const decision = String(body.decision || '').trim();
+  if (!['approved', 'revision'].includes(decision)) return send(res, 400, { error: 'decision must be approved or revision' });
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  const deliverables = meta.deliverables || [];
+  const del = deliverables.find(function(d) { return d.id === deliverableId; });
+  if (!del) return send(res, 404, { error: 'Deliverable not found' });
+  if (del.status !== 'submitted') return send(res, 409, { error: 'Deliverable already reviewed' });
+  del.status = decision;
+  del.reviewedBy = user.name || user.initials;
+  del.reviewedAt = new Date().toISOString();
+  del.reviewComment = String(body.comment || '').trim();
+  meta.deliverables = deliverables;
+  // if approved, update cell status
+  if (decision === 'approved') {
+    db.prepare("UPDATE cells SET status = 'Completed', meta = ?, resolution = ? WHERE id = ?")
+      .run(JSON.stringify(meta), JSON.stringify({ status: 'Delivered' }), cellId);
+    // update stfs row
+    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'xSTF' AND title = ? AND status = 'Active'").get(cell.title || '');
+    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+  } else {
+    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  }
+  return send(res, 200, { ok: true, decision, deliverableId });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1135,6 +1267,9 @@ const server = createServer(async (req, res) => {
     handled = await voteRoutes(req, res, reqUrl, method);
     if (!handled) handled = await governanceRoutes(req, res, reqUrl, method);
     if (!handled) handled = await astfVerdictRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await xstfSpawnRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await xstfDeliverableRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await xstfReviewRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

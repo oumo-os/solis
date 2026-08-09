@@ -418,14 +418,19 @@ participant_domain {
 **Endpoint:** `POST /api/cells/:id/astf-verdict` — body `{ verdict: approved|rejected|revision, rationale, rubric: { jurisdiction, depth, alignment, competence }, flags[] }`
 **Gating:** Auth required (401), idempotent (409 if already filed), wrong cell type → 400
 
-### 2.8 — xSTF (Execution)
+### 2.8 — xSTF (Execution) ✅
 
 **xSTF lifecycle:**
-1. Commissioned by the circle that produced the resolution
-2. Blind execution cell with team members
-3. Produces deliverable per commissioning circle specs
-4. Deliverable reviewed by commissioning circle
-5. Published to Observatory if approved
+1. ✅ Commissioned by the circle that produced the resolution (spawn-xstf from approved aSTF, steward gate, 409 idempotent)
+2. ✅ Blind execution cell with team members (team stored via cell_team, stfs row active)
+3. ✅ Produces deliverable per commissioning circle specs (submit-deliverable endpoint)
+4. ✅ Deliverable reviewed by commissioning circle (review-deliverable: approved/revision, steward gate, 409 idempotent)
+5. 🔄 Published to Observatory if approved (2.10)
+
+**Endpoint:** `POST /api/cells/:id/spawn-xstf` — body `{ title, blind, deadline, team[], deliverableSpecs{} }`
+**Endpoint:** `POST /api/cells/:id/submit-deliverable` — body `{ title, content }`
+**Endpoint:** `POST /api/cells/:id/review-deliverable` — body `{ deliverableId, decision: approved|revision, comment }`
+**Gating:** spawn: auth + steward (401/403), wrong type (400), idempotent (409); submit: auth (401), title required (400); review: auth + steward (401/403)
 
 ### 2.9 — vSTF (Verification)
 
