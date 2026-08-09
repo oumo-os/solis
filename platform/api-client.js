@@ -255,6 +255,14 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/review-deliverable', payload);
   }
 
+  function spawnVstf(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/spawn-vstf', payload);
+  }
+
+  function fileVstfAssessment(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/vstf-assessment', payload);
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -378,6 +386,8 @@ var SolisApi = (function() {
     fileAstfVerdict: fileAstfVerdict,
     spawnXstf: spawnXstf,
     submitDeliverable: submitDeliverable,
-    reviewDeliverable: reviewDeliverable
+    reviewDeliverable: reviewDeliverable,
+    spawnVstf: spawnVstf,
+    fileVstfAssessment: fileVstfAssessment
   };
 })();

@@ -432,18 +432,22 @@ participant_domain {
 **Endpoint:** `POST /api/cells/:id/review-deliverable` — body `{ deliverableId, decision: approved|revision, comment }`
 **Gating:** spawn: auth + steward (401/403), wrong type (400), idempotent (409); submit: auth (401), title required (400); review: auth + steward (401/403)
 
-### 2.9 — vSTF (Verification)
+### 2.9 — vSTF (Verification) ✅
 
 **vSTF types:**
-1. **Steward Candidacy:** Evaluate candidate for circle stewardship
+1. ✅ **Steward Candidacy:** Evaluate candidate for circle stewardship
    - Auto-match: candidate Ws vs circle requirements
    - Assessor judgment: approval score (0–100) + rationale
-   - Multiple assessors, independent
+   - Multiple assessors, independent; cell auto-closes when minAssessors filed
 
-2. **Competence Claims:** Verify participant's domain competence
+2. ✅ **Competence Claims:** Verify participant's domain competence
    - Per-domain evaluation: claimed Wh vs adjusted Wh
    - Evidence review
-   - Assessor comments
+   - Assessor comments; cell auto-closes when minAssessors filed
+
+**Endpoint:** `POST /api/cells/:id/spawn-vstf` — body `{ vstfType: steward-candidacy|competence-claim, candidateName, candidateInitials, circleName, minAssessors }`
+**Endpoint:** `POST /api/cells/:id/vstf-assessment` — steward candidacy: `{ score, rationale }`; competence: `{ domainEvals[], comment }`
+**Gating:** spawn: auth + steward (401/403), idempotent per type (409); assessment: auth (401), no duplicate per assessor (409), rationale required for steward type (400)
 
 ### 2.10 — p-aSTF (Periodic Review)
 

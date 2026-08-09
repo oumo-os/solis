@@ -640,7 +640,7 @@
           <div class="text-label mb-2">Rationale</div>
           <textarea placeholder="Justify your approval score..." class="form-input" style="height:80px;resize:none"></textarea>
         </div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this steward assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfStewardAssessment()">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -723,7 +723,7 @@
         <div class="sec">Evaluation Comments</div>
         <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('File this competence assessment? It will be sealed until all assessors have filed.',function(){})">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfCompetenceAssessment()">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -3668,6 +3668,60 @@ function reviewDeliverable(cellId, deliverableId, decision) {
       if (decision === 'approved' && cell) { cell.status = 'Completed'; }
       renderXstf(cellId);
     }).catch(function() { toast('Could not review deliverable. Is the server running?', 'error'); });
+  });
+}
+
+function getActiveVstfCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type === 'vSTF Cell') return cells[i];
+  }
+  return null;
+}
+
+function fileVstfStewardAssessment() {
+  var cell = getActiveVstfCell();
+  if (!cell) { toast('No vSTF cell active.', 'error'); return; }
+  var scoreInput = document.querySelector('#view-stf-vstf-steward input[type="number"]');
+  var rationaleInput = document.querySelector('#view-stf-vstf-steward textarea');
+  var score = Number(scoreInput && scoreInput.value) || 0;
+  var rationale = (rationaleInput && rationaleInput.value || '').trim();
+  if (!rationale) { toast('Rationale is required.', 'error'); return; }
+  confirmModal('File steward assessment (score: ' + score + '/100)?', function() {
+    SolisApi.fileVstfAssessment(cell.id, { score: score, rationale: rationale }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not file assessment. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Assessment filed (' + r.filed + '/' + r.required + ').' + (r.complete ? ' Assessment complete!' : ''), 'success');
+      if (r.complete && cell) { cell.status = 'Assessment Filed'; }
+    }).catch(function() { toast('Could not file assessment. Is the server running?', 'error'); });
+  });
+}
+
+function fileVstfCompetenceAssessment() {
+  var cell = getActiveVstfCell();
+  if (!cell) { toast('No vSTF cell active.', 'error'); return; }
+  var commentInput = document.querySelector('#view-stf-vstf-competence textarea');
+  var comment = (commentInput && commentInput.value || '').trim();
+  var domainEvals = [];
+  var rows = document.querySelectorAll('#view-stf-vstf-competence table tbody tr');
+  rows.forEach(function(tr) {
+    var cells = tr.querySelectorAll('td');
+    if (cells.length >= 4) {
+      var domain = (cells[0].textContent || '').trim();
+      var claimed = (cells[1].textContent || '').replace(/,/g, '').trim();
+      var adjInput = cells[2].querySelector('input');
+      var adj = adjInput ? Number(adjInput.value) || 0 : null;
+      var checked = cells[3].querySelector('input');
+      var evaluated = checked ? checked.checked : false;
+      var reason = (cells[4].textContent || '').trim();
+      domainEvals.push({ domain: domain, claimed: Number(claimed) || 0, adjusted: adj, evaluated: evaluated, reason: evaluated ? '' : reason });
+    }
+  });
+  confirmModal('File competence assessment (' + domainEvals.length + ' domains)?', function() {
+    SolisApi.fileVstfAssessment(cell.id, { domainEvals: domainEvals, comment: comment }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not file assessment. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Assessment filed (' + r.filed + '/' + r.required + ').' + (r.complete ? ' Assessment complete!' : ''), 'success');
+      if (r.complete && cell) { cell.status = 'Assessment Filed'; }
+    }).catch(function() { toast('Could not file assessment. Is the server running?', 'error'); });
   });
 }
 

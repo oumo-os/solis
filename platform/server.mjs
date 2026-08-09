@@ -826,6 +826,107 @@ async function xstfReviewRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, decision, deliverableId });
 }
 
+// ── vSTF verification (to_prod 2.9) ────────────────────
+// POST /api/cells/:id/spawn-vstf — spawn a vSTF verification cell
+// for steward candidacy or competence claim assessment.
+async function vstfSpawnRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-vstf$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  const body = await readBody(req);
+  const vstfType = String(body.vstfType || 'steward-candidacy').trim();
+  if (!['steward-candidacy', 'competence-claim'].includes(vstfType)) {
+    return send(res, 400, { error: 'vstfType must be steward-candidacy or competence-claim' });
+  }
+  const existing = db.prepare("SELECT id FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?").get(cellId, vstfType);
+  if (existing) return send(res, 409, { error: 'vSTF already spawned' });
+  const candidateName = String(body.candidateName || '').trim();
+  const candidateInitials = String(body.candidateInitials || '').trim();
+  const circleName = String(body.circleName || cell.circle || '').trim();
+  const minAssessors = Number(body.minAssessors) || 3;
+  const vstfId = 'vstf-' + Date.now().toString(36);
+  const source = {
+    type: vstfType, candidateName, candidateInitials, circleName,
+    sourceCellId: cellId, sourceTitle: cell.title || '',
+    spawnedBy: user.name || user.initials, spawnedAt: new Date().toISOString(),
+  };
+  const domains = Array.isArray(body.domains) ? body.domains : [];
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(vstfId, 'vSTF Cell', (vstfType === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') + candidateName,
+      'Pending Assessment', vstfType, minAssessors, circleName, cellId,
+      JSON.stringify(source), JSON.stringify({ status: 'Pending', score: null }),
+      JSON.stringify({ candidateName, candidateInitials, domains, assessments: [] }));
+  const stfId = 'stf-' + vstfId;
+  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+    .run(stfId, 'vSTF', vstfType === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims',
+      circleName, 'active', 'Pending Assessment', candidateName || cell.title || '',
+      new Date(Date.now() + 14*86400000).toISOString().slice(0, 10));
+  return send(res, 201, { ok: true, vstfId });
+}
+
+// POST /api/cells/:id/vstf-assessment — file an assessment on a vSTF cell
+async function vstfAssessmentRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/vstf-assessment$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'vSTF Cell') return send(res, 400, { error: 'Not a vSTF cell' });
+  if (cell.status === 'Assessment Filed') return send(res, 409, { error: 'Assessment already filed' });
+  const body = await readBody(req);
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  const assessments = meta.assessments || [];
+  // check duplicate by same assessor
+  const already = assessments.filter(function(a) { return a.assessor === (user.name || user.initials); })[0];
+  if (already) return send(res, 409, { error: 'You have already filed an assessment' });
+  const vstfType = meta.type || (cell.source ? JSON.parse(cell.source).type : 'steward-candidacy');
+  var assessment = { assessor: user.name || user.initials, filedAt: new Date().toISOString() };
+  if (vstfType === 'steward-candidacy') {
+    const score = Math.min(100, Math.max(0, Number(body.score) || 0));
+    const rationale = String(body.rationale || '').trim();
+    if (!rationale) return send(res, 400, { error: 'rationale required' });
+    assessment.score = score;
+    assessment.rationale = rationale;
+  } else {
+    // competence-claim: per-domain evaluations
+    const domainEvals = Array.isArray(body.domainEvals) ? body.domainEvals : [];
+    const comment = String(body.comment || '').trim();
+    assessment.domainEvals = domainEvals;
+    assessment.comment = comment;
+  }
+  assessments.push(assessment);
+  meta.assessments = assessments;
+  // if enough assessments filed, close
+  const minAssessors = cell.participants || 3;
+  if (assessments.length >= minAssessors) {
+    var finalScore = null;
+    if (vstfType === 'steward-candidacy') {
+      finalScore = Math.round(assessments.reduce(function(s, a) { return s + (a.score || 0); }, 0) / assessments.length);
+    } else {
+      finalScore = assessments.length;
+    }
+    db.prepare("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?")
+      .run(JSON.stringify(meta), JSON.stringify({ status: 'Complete', score: finalScore }), cellId);
+    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'vSTF' AND status = 'Pending Assessment'").get();
+    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+  } else {
+    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  }
+  return send(res, 200, { ok: true, filed: assessments.length, required: minAssessors, complete: assessments.length >= minAssessors });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1270,6 +1371,8 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await xstfSpawnRoutes(req, res, reqUrl, method);
     if (!handled) handled = await xstfDeliverableRoutes(req, res, reqUrl, method);
     if (!handled) handled = await xstfReviewRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await vstfSpawnRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await vstfAssessmentRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

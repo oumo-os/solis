@@ -566,3 +566,35 @@ Mutating flows vs the API:
   Completed + stfs completed, re-review 409; invalid review 400, wrong
   type 400, anon spawn 401, anon deliverable 401.
 - Harness deleted; DB re-seeded.
+
+## vSTF verification lifecycle (2026-08-09, to_prod 2.9)
+
+- **Why**: the vSTF steward candidacy and competence claims views were
+  static demo pages with no persistence or lifecycle.
+- **Server**:
+  - `POST /api/cells/:id/spawn-vstf` — spawns a `vSTF Cell` (type
+    `steward-candidacy` or `competence-claim`).  Auth + steward gate
+    (401/403), idempotent per type (409).  Stores candidate info,
+    assessments array, and minAssessors in `meta` JSON.  Creates
+    matching `stfs` row (bucket `active`).
+  - `POST /api/cells/:id/vstf-assessment` — files an assessment on a
+    vSTF cell.  Auth required (401), no duplicate per assessor (409).
+    Steward candidacy: requires `score` (0–100) + `rationale` (400 if
+    empty).  Competence claim: accepts `domainEvals[]` + `comment`.
+    When `minAssessors` filed, auto-closes: steward cells average the
+    scores; competence cells count assessors.  Cell status →
+    `Assessment Filed`, stfs row → `Completed`.
+- **Client**:
+  - `fileVstfStewardAssessment` + `fileVstfCompetenceAssessment` read
+    values from the existing static forms (score input, rationale
+    textarea, domain eval table) and call `SolisApi.fileVstfAssessment`.
+  - `getActiveVstfCell` helper finds the most recent vSTF cell in
+    bootstrap.
+- Verified headlessly (21 checks): login, create source cell; anon
+  spawn 401, non-steward 403, invalid type 400; spawn steward vSTF 201,
+  respawn 409; spawn competence vSTF 201; both vSTF cells in bootstrap;
+  stfs rows active; anon assessment 401, wrong type 400, missing
+  rationale 400; steward candidacy assessment filed (1/3, 2/3),
+  duplicate 409; competence assessment filed (1/2, complete),
+  competence vSTF → Assessment Filed.
+- Harness deleted; DB re-seeded.
