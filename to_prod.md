@@ -338,6 +338,13 @@ participant_domain {
    steward-only "＋ Direct Proposal" button (+ modal); origin card
    renders description, domain chip, "No preceding discussion" + proposer
 3. System-bound proposal (settings or circle profile changes)
+   ✅ `POST /api/proposals/system` (2026-08-09) — steward-gated (403),
+   `delibType` allowlist (system-settings | circle-settings |
+   circle-creation) + title required (400); full settings snapshot is
+   stored server-side (meta round-trip) so it survives reload; the System
+   Settings "Submit as Proposal" and Circle Settings "Submit as Proposal"
+   flows now raise server-persisted cells and set the live deliberation
+   context (`currentDelibCellId`)
 
 **Proposal lifecycle:**
 1. Steward creates proposal in circle cell

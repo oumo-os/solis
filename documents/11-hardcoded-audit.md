@@ -408,3 +408,35 @@ Mutating flows vs the API:
   with the direct origin card (no source back-link); cells grid lists the
   new card; everything survives a full reload. Harness deleted after green;
   DB re-seeded.
+
+## System-bound proposal (2026-08-09, to_prod 2.5 origin #3)
+
+- **Why**: settings/circle-profile proposals existed but only as mock-local
+  cells — `submitSystemProposal()`/`submitCircleProposal()` pushed a cell
+  into `MOCK.cells` and called `saveCell`, which silently dropped the
+  snapshot (`settingsSnapshot` was not a `cells` column), so the proposal
+  never survived a reload and nothing gated it server-side.
+- **Server**: `settingsProposalRoutes` — `POST /api/proposals/system`:
+  auth (401), steward-only via active `circle_roster` (403), `delibType`
+  allowlist `['system-settings','circle-settings','circle-creation']`
+  (400) and title required (400). Creates a `Deliberation Cell`
+  (`delib_type` from allowlist, status Active, participants = active-user
+  count, source `{type: settings-proposal | circle-proposal, proposer,
+  submitter}`, resolution Draft). The full settings snapshot is stored in
+  the `meta` JSON catch-all column, which bootstrap already spreads onto
+  the cell — no schema change needed, and `settingsSnapshot` now
+  round-trips through server + reload.
+- **Client**: `SolisApi.createSettingsProposal` / `createCircleProposal`
+  (same endpoint, different semantics). Both settings submit flows became
+  server-first: 403 → toast, 400 → toast, 201 → cell mirrored locally,
+  `currentDelibCellId` set (fixing a latent gap where the deliberation
+  page's voting/drafting controls referenced no cell after a settings
+  submit), modal closed, deliberation opened.
+- Verified headlessly (28-check suite): non-steward → 403; bad `delibType`
+  and empty title → 400; system + circle proposals → 201 with `delib-`
+  ids; bootstrap round-trips delibType/source (proposer "Akello Jane")/
+  settingsSnapshot (quorum minParticipants = 9, circle name)/resolution
+  Draft; System Settings modal flow (Quorum tab, changed value 9) opens
+  the deliberation with the "System Settings Change" origin card showing
+  the changed value; everything survives a full reload (snapshot
+  re-rendered from server data). Harness deleted after green; DB re-seeded.

@@ -412,6 +412,37 @@ async function directProposalRoutes(req, res, reqUrl, method) {
   return send(res, 201, { ok: true, cellId });
 }
 
+// ── system-bound proposal (to_prod 2.5 origin #3) ────────
+// POST /api/proposals/system — steward raises a settings/circle-profile
+// change as a proposal: creates a Deliberation Cell carrying the settings
+// snapshot (stored in the meta catch-all, round-tripped by bootstrap).
+async function settingsProposalRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/proposals/system' || method !== 'POST') {
+    if (reqUrl === '/api/proposals/system') return send(res, 405, { error: 'Method not allowed' });
+    return null;
+  }
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  if (!inRoster) return send(res, 403, { error: 'Steward access required' });
+  const body = await readBody(req);
+  const allowed = ['system-settings', 'circle-settings', 'circle-creation'];
+  const delibType = String(body.delibType || '');
+  if (!allowed.includes(delibType)) return send(res, 400, { error: 'delibType required' });
+  const title = String(body.title || '').trim();
+  if (!title) return send(res, 400, { error: 'title required' });
+  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const cellId = 'delib-' + Date.now().toString(36);
+  const source = {
+    type: String(body.sourceType || 'settings-proposal'),
+    proposer: user.name || user.initials, submitter: user.id,
+  };
+  const meta = JSON.stringify({ settingsSnapshot: (body.snapshot && typeof body.snapshot === 'object') ? body.snapshot : {} });
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?)`)
+    .run(cellId, 'Deliberation Cell', title, 'Active', delibType, Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }), meta);
+  return send(res, 201, { ok: true, cellId });
+}
+
 async function childRoutes(req, res, reqUrl, method) {
   for (const d of childDefs) {
     const esc = d.path.replace(/\//g, '\\/').replace(':id', '([^/]+)');
@@ -1007,6 +1038,8 @@ const server = createServer(async (req, res) => {
     handled = await raiseProposalRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await directProposalRoutes(req, res, reqUrl, method);
+    if (handled) return;
+    handled = await settingsProposalRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await configRoutes(req, res, reqUrl, method);
     if (handled) return;

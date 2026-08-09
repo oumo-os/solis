@@ -322,6 +322,14 @@ var SolisApi = (function() {
     return req('POST', 'proposals/direct', payload);
   }
 
+  function createSettingsProposal(payload) {
+    return req('POST', 'proposals/system', payload);
+  }
+
+  function createCircleProposal(payload) {
+    return req('POST', 'proposals/system', payload);
+  }
+
   return {
     authLogin: authLogin,
     authRegister: authRegister,
@@ -346,6 +354,8 @@ var SolisApi = (function() {
     setThreadPinned: setThreadPinned,
     raiseThreadProposal: raiseThreadProposal,
     createDirectProposal: createDirectProposal,
+    createSettingsProposal: createSettingsProposal,
+    createCircleProposal: createCircleProposal,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,
     closeDebate: closeDebate

@@ -3720,24 +3720,32 @@ function submitCircleProposal() {
   };
   var existingCircleId = document.getElementById('circle-settings-modal').dataset.circleId || 'new';
   var snapshot = { type: 'circle', target: existingCircleId, status: 'pending', settings: settings };
-  var cellId = 'cell-' + Date.now().toString(36);
+  var delibType = existingCircleId === 'new' ? 'circle-creation' : 'circle-settings';
   var label = existingCircleId === 'new' ? 'Circle: ' + settings.name + ' Founding' : 'Circle: ' + settings.name + ' Settings Change';
-  MOCK.cells.push({
-    id: cellId, type: 'Deliberation Cell', delibType: existingCircleId === 'new' ? 'circle-creation' : 'circle-settings',
-    title: label, participants: 8, status: 'Active',
-    domains: settings.mandateDomains.primary.map(function(d) { return d.name; }),
-    source: { type: 'circle-proposal', proposer: MOCK.currentUser.name },
-    settingsSnapshot: snapshot,
-    circleDetails: existingCircleId === 'new' ? settings : undefined,
-    participatingCircles: [], resolution: { status: 'Draft' },
-    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed ' + (existingCircleId === 'new' ? 'founding of ' + settings.name : 'settings change for ' + settings.name) + '. Awaiting deliberation.', time: 'Just now', gold: true }]
-  });
-  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
-  closeCircleSettingsModal();
-  nav('deliberation');
-  renderDelibCell(cellId);
-  toast('Circle proposal created. Deliberation cell opened.', 'success');
-  SolisApi.saveCell(cellsById[cellId]);
+  SolisApi.createSettingsProposal({
+    delibType: delibType, title: label, snapshot: snapshot, sourceType: 'circle-proposal'
+  }).then(function (r) {
+    if (r && r.__status === 403) { toast('Steward access required to raise proposals.', 'error'); return; }
+    if (r && r.__status === 400) { toast((r.error || 'Could not raise proposal.') + '', 'error'); return; }
+    if (r && r.cellId) {
+      MOCK.cells.push({
+        id: r.cellId, type: 'Deliberation Cell', delibType: delibType,
+        title: label, participants: 8, status: 'Active',
+        domains: settings.mandateDomains.primary.map(function(d) { return d.name; }),
+        source: { type: 'circle-proposal', proposer: MOCK.currentUser.name },
+        settingsSnapshot: snapshot,
+        circleDetails: existingCircleId === 'new' ? settings : undefined,
+        participatingCircles: [], resolution: { status: 'Draft' },
+        messages: [{ author: MOCK.currentUser.initials, text: 'Proposed ' + (existingCircleId === 'new' ? 'founding of ' + settings.name : 'settings change for ' + settings.name) + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+      });
+      cellsById[r.cellId] = MOCK.cells[MOCK.cells.length - 1];
+      currentDelibCellId = r.cellId;
+      closeCircleSettingsModal();
+      nav('deliberation');
+      renderDelibCell(r.cellId);
+      toast('Circle proposal created. Deliberation cell opened.', 'success');
+    } else { toast('Could not raise proposal.', 'error'); }
+  }).catch(function () { toast('Could not reach the server.', 'error'); });
 }
 
 // ─── Organisation Modals ───
@@ -4911,25 +4919,32 @@ function submitSystemProposal() {
     };
   }
   var snapshot = { type: 'system', target: target, status: 'pending', settings: settings };
-  var cellId = 'cell-' + Date.now().toString(36);
-  MOCK.cells.push({
-    id: cellId, type: 'Deliberation Cell', delibType: 'system-settings',
-    title: 'System Settings: ' + target.charAt(0).toUpperCase() + target.slice(1) + ' configuration change',
-    participants: 8, status: 'Active',
-    domains: ['Space Law', 'Philosophy & Ethics'],
-    source: { type: 'settings-proposal', proposer: MOCK.currentUser.name },
-    settingsSnapshot: snapshot,
-    settingsChanges: [],
-    participatingCircles: [{ name: 'Space Law Circle', role: 'Lead', votes: 5, id: 'space-law' }],
-    resolution: { status: 'Draft' },
-    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed system settings change for ' + target + '. Awaiting deliberation.', time: 'Just now', gold: true }]
-  });
-  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
-  closeSettingsModal();
-  nav('deliberation');
-  renderDelibCell(cellId);
-  toast('System settings proposal created. Deliberation cell opened.', 'success');
-  SolisApi.saveCell(cellsById[cellId]);
+  var title = 'System Settings: ' + target.charAt(0).toUpperCase() + target.slice(1) + ' configuration change';
+  SolisApi.createSettingsProposal({
+    delibType: 'system-settings', title: title, snapshot: snapshot, sourceType: 'settings-proposal'
+  }).then(function (r) {
+    if (r && r.__status === 403) { toast('Steward access required to raise proposals.', 'error'); return; }
+    if (r && r.__status === 400) { toast((r.error || 'Could not raise proposal.') + '', 'error'); return; }
+    if (r && r.cellId) {
+      MOCK.cells.push({
+        id: r.cellId, type: 'Deliberation Cell', delibType: 'system-settings',
+        title: title, participants: (MOCK.participants || []).length || 8, status: 'Active',
+        domains: ['Space Law', 'Philosophy & Ethics'],
+        source: { type: 'settings-proposal', proposer: MOCK.currentUser.name },
+        settingsSnapshot: snapshot,
+        settingsChanges: [],
+        participatingCircles: [{ name: 'Space Law Circle', role: 'Lead', votes: 5, id: 'space-law' }],
+        resolution: { status: 'Draft' },
+        messages: [{ author: MOCK.currentUser.initials, text: 'Proposed system settings change for ' + target + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+      });
+      cellsById[r.cellId] = MOCK.cells[MOCK.cells.length - 1];
+      currentDelibCellId = r.cellId;
+      closeSettingsModal();
+      nav('deliberation');
+      renderDelibCell(r.cellId);
+      toast('System settings proposal created. Deliberation cell opened.', 'success');
+    } else { toast('Could not raise proposal.', 'error'); }
+  }).catch(function () { toast('Could not reach the server.', 'error'); });
 }
 
 function toggleImplementingCircle(el) {
