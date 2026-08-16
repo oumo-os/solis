@@ -866,7 +866,7 @@
           </div>
         </div>
 
-        <div style="margin-top:16px"><button class="btn btn-danger" style="width:100%" onclick="confirmModal('Finalise this investigation and forward to Meta-aSTF? This action cannot be undone.',function(){})">Finalise &amp; Forward to Meta-aSTF</button></div>
+        <div style="margin-top:16px"><button class="btn btn-danger" style="width:100%" onclick="fileJstfVerdictFlow()">Finalise &amp; Forward to aSTF</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1634,6 +1634,11 @@
               <div class="aside-stat-item"><div class="aside-stat-val" id="ir-approved" style="color:var(--green)">0</div><div class="aside-stat-lbl">Approved</div></div>
               <div class="aside-stat-item"><div class="aside-stat-val" id="ir-denied" style="color:var(--red)">0</div><div class="aside-stat-lbl">Denied</div></div>
             </div>
+          </div>
+          <div class="aside-card">
+            <div class="aside-title">Case Intake</div>
+            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px">Any member can report any member. Reports surface anonymously to stewards only, accumulating per target.</div>
+            <div id="jstf-intake"></div>
           </div>
           <div class="aside-card">
             <div class="aside-title">STF Types</div>
@@ -3783,6 +3788,199 @@ function filePastfReview() {
   });
 }
 
+// ── jSTF judicial investigation (to_prod 2.11) ───────
+function getActiveJstfCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type === 'jSTF Cell') return cells[i];
+  }
+  return null;
+}
+
+function jstfClientIsSteward() {
+  if (!MOCK || !MOCK.currentUser || !MOCK.circles) return false;
+  var uid = MOCK.currentUser.id;
+  for (var i = 0; i < MOCK.circles.length; i++) {
+    var r = MOCK.circles[i].roster || {};
+    if ((r.active || []).some(function(m) { return m.id === uid; })) return true;
+  }
+  return false;
+}
+
+function jstfMemberOptions(selectedId) {
+  return ((MOCK && MOCK.participants) || []).map(function(p) {
+    return '<option value="' + p.id + '"' + (p.id === selectedId ? ' selected' : '') + '>' + p.name + '</option>';
+  }).join('');
+}
+
+function openReportModal(targetId, targetName) {
+  var opts = jstfMemberOptions(targetId || '');
+  openModal('<div class="sec">Anonymous Report</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Any member can report any member. The report surfaces as an <strong>anonymous post on Commons, visible only to stewards</strong>; further reports on the same member accumulate in the same thread. Stewards may then escalate it into a judicial investigation.</div>' +
+    '<div class="form-group"><label class="form-label">Reported member</label><select class="form-input" id="jstf-report-target">' + opts + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Description</label><textarea class="msg-input" rows="3" id="jstf-report-desc" placeholder="What happened? Cite specifics so stewards can assess the claim..."></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="submitJstfReport()">Submit Anonymous Report</button></div>',
+    { size: 'md' });
+}
+
+function submitJstfReport() {
+  var sel = document.getElementById('jstf-report-target');
+  var desc = document.getElementById('jstf-report-desc');
+  var targetId = sel ? sel.value : '';
+  var description = desc ? desc.value.trim() : '';
+  if (!targetId) { toast('Select a reported member.', 'error'); return; }
+  if (!description) { toast('Describe the concern first.', 'error'); return; }
+  SolisApi.reportJstf({ targetId: targetId, description: description }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Report failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal();
+    toast('Anonymous report filed — thread now has ' + r.replies + ' post(s). Visible to stewards.', 'success');
+    setTimeout(function(){ window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not file report. Is the server running?', 'error'); });
+}
+
+function openAppealModal(caseId, caseTitle) {
+  openModal('<div class="sec">Appeal</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Anyone can appeal the resolution of case <strong>' + caseTitle + '</strong>. The appeal is posted anonymously on the case thread — visible only to stewards — and follows the same escalation process as a report.</div>' +
+    '<div class="form-group"><label class="form-label">Grounds of appeal</label><textarea class="msg-input" rows="3" id="jstf-appeal-desc" placeholder="Why should this resolution be revisited?..."></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitJstfAppeal(\'' + caseId + '\')">Submit Appeal</button></div>',
+    { size: 'md' });
+}
+
+function submitJstfAppeal(caseId) {
+  var desc = document.getElementById('jstf-appeal-desc');
+  var description = desc ? desc.value.trim() : '';
+  if (!description) { toast('State the grounds of appeal.', 'error'); return; }
+  SolisApi.appealJstf({ caseId: caseId, description: description }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Appeal failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal();
+    toast('Appeal posted anonymously — thread now has ' + r.replies + ' post(s).', 'success');
+    setTimeout(function(){ window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not file appeal. Is the server running?', 'error'); });
+}
+
+function escalateJstfThread(threadId) {
+  confirmModal('Escalate this anonymous report into a judicial investigation? You take responsibility as sponsor, and a jSTF team composition is formed.', function() {
+    SolisApi.escalateJstf({ threadId: threadId }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Escalation failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('jSTF investigation opened.', 'success');
+      setTimeout(function(){ window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not escalate. Is the server running?', 'error'); });
+  });
+}
+
+function toggleJstfRestriction(cellId, stance) {
+  SolisApi.voteJstf(cellId, { stance: stance }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Vote failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast('Stance: ' + stance + ' — ' + r.restrictCount + '/' + r.teamSize + ' restrict (majority ' + r.majority + ') → ' + r.state + (r.severity ? ' · ' + r.severity : ''), 'success');
+    setTimeout(function(){ window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not record vote. Is the server running?', 'error'); });
+}
+
+function openJstfVerdictModal(cell) {
+  openModal('<div class="sec">File Disciplinary Verdict — ' + (cell.targetName || cell.title) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF files a verdict as a single action (like a motion). It must cite existing policy resolutions — narrated judgements are <strong>policy-cited (non-system)</strong>; changes to system settings are <strong>system-bound</strong>. The verdict goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
+    '<div class="form-group"><label class="form-label">Verdict type</label><select class="form-input" id="jstf-verdict-type"><option value="policy-cited">Policy-cited (non-system, narrated judgement)</option><option value="system-bound">System-bound (system settings)</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Verdict</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review..."></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Cited policy resolutions (comma separated)</label><input class="form-input" id="jstf-verdict-policy" placeholder="PR-014, PR-021"></div>' +
+    '<div class="form-group"><label class="form-label">Findings</label><textarea class="msg-input" rows="3" id="jstf-verdict-findings" placeholder="Evidence summary and conclusions..."></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="submitJstfVerdict(\'' + cell.id + '\')">Finalise &amp; Forward to aSTF</button></div>',
+    { size: 'md' });
+}
+
+function submitJstfVerdict(cellId) {
+  var type = document.getElementById('jstf-verdict-type').value;
+  var desc = (document.getElementById('jstf-verdict-desc').value || '').trim();
+  var policyRefs = (document.getElementById('jstf-verdict-policy').value || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var findings = (document.getElementById('jstf-verdict-findings').value || '').trim();
+  if (!desc) { toast('State the verdict.', 'error'); return; }
+  if (!policyRefs.length) { toast('Cite at least one policy resolution.', 'error'); return; }
+  confirmModal('Finalise and forward to blind aSTF audit? The aSTF weighs the decision, never the jSTF members.', function() {
+    SolisApi.fileJstfVerdict(cellId, { type: type, description: desc, policyRefs: policyRefs, findings: findings }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Verdict failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      closeModal();
+      toast('Verdict filed. aSTF audit opened.', 'success');
+      setTimeout(function(){ window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not file verdict. Is the server running?', 'error'); });
+  });
+}
+
+function fileJstfVerdictFlow() {
+  var cell = getActiveJstfCell();
+  if (!cell) { toast('No active jSTF case.', 'error'); return; }
+  if (!jstfClientIsSteward()) { toast('Only stewards may file a verdict.', 'error'); return; }
+  openJstfVerdictModal(cell);
+}
+
+function renderJstfPanel() {
+  var host = document.getElementById('stf-integrity-stf-jstf');
+  if (!host) return;
+  var cell = getActiveJstfCell();
+  var html = '';
+  var isSteward = jstfClientIsSteward();
+  var pending = ((MOCK && MOCK.threads) || []).filter(function(t) { return t.visibility === 'stewards-only' && !t.jstfCellId; });
+  if (isSteward && pending.length) {
+    html += '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--red)"><div class="sec">Pending Escalation (stewards only)</div>';
+    pending.forEach(function(t) {
+      html += '<div class="flex gap-2" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + t.title + ' <span class="tag tag-red" style="font-size:8px">' + t.replies + ' post' + (t.replies > 1 ? 's' : '') + '</span></div><div style="font-size:11px;color:var(--text-tertiary)">' + (t.body || '') + '</div></div><button class="btn btn-sm btn-danger" onclick="escalateJstfThread(\'' + t.id + '\')">Escalate</button></div>';
+    });
+    html += '</div>';
+  }
+  if (!cell) {
+    html += '<div class="card" style="margin-bottom:12px"><div class="sec">Judicial Proceedings</div><div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">No open investigation. Any member can report any member; reports are posted anonymously to Commons, visible only to stewards, and accumulate per target until a steward escalates.</div><button class="btn btn-sm" onclick="openReportModal()">Report a Member</button></div>';
+    host.innerHTML = html;
+    return;
+  }
+  var restriction = cell.restriction || {};
+  var verdict = cell.verdict || null;
+  var resolution = cell.resolution || {};
+  var onTeam = (cell.team || []).some(function(t) { return t.initials === ((MOCK && MOCK.currentUser) || {}).initials; });
+  var severityBadge = restriction.severity === 'frozen' ? '<span class="badge b-judicial">privileges frozen</span>' : restriction.severity === 'readonly' ? '<span class="badge b-judicial">readonly</span>' : '';
+  html += '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--teal)">'
+    + '<div class="flex justify-between mb-2"><span style="font-size:12px;font-weight:600;color:var(--text)">' + (cell.title || cell.id) + '</span><span class="badge b-active">' + (cell.status || '') + '</span></div>'
+    + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Target: <strong>' + (cell.targetName || '') + '</strong>' + (cell.targetIsSteward ? ' · steward' : ' · member') + (cell.revisionOf ? ' · recomposed' : '') + '</div>';
+  html += '<div style="font-size:10px;font-family:var(--mono);color:var(--text-tertiary);margin-bottom:8px">Team: ' + (cell.team || []).map(function(t){ return t.name + ' (' + t.initials + ')'; }).join(' · ') + '</div>';
+  if (restriction.state) {
+    html += '<div style="font-size:11px;line-height:1.6;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px">'
+      + '<div><span style="color:var(--text-secondary)">Activity restriction:</span> <strong style="color:' + (restriction.state === 'restricted' ? 'var(--amber)' : 'var(--green)') + '">' + restriction.state + '</strong> ' + severityBadge + '</div>'
+      + '<div style="margin-top:4px"><span style="color:var(--text-secondary)">Team tally:</span> <strong>' + (restriction.restrictCount || 0) + '</strong>/' + restriction.teamSize + ' restrict · majority ' + restriction.majority + '</div>'
+      + (onTeam ? '<div class="flex gap-2" style="margin-top:8px"><button class="btn btn-sm" onclick="toggleJstfRestriction(\'' + cell.id + '\',\'restrict\')">Vote restrict</button><button class="btn btn-sm" onclick="toggleJstfRestriction(\'' + cell.id + '\',\'lift\')">Vote lift</button></div>' : '')
+      + '</div>';
+  }
+  if (verdict) {
+    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--text-secondary)">Verdict:</span> <strong>' + verdict.type + '</strong> · ' + verdict.description + (verdict.policyRefs && verdict.policyRefs.length ? ' · cites ' + verdict.policyRefs.join(', ') : '') + '</div>';
+  }
+  if (resolution.status === 'Applied') {
+    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--green);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--green)">✓ Resolution applied</span>' + ((resolution.implementation || {}).actions || []).map(function(a){ return '<div>' + a + '</div>'; }).join('') + '</div>';
+  }
+  if (resolution.status === 'Revision Ordered') {
+    html += '<div style="font-size:11px;padding:8px 10px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--amber)">△ aSTF revision — composition shuffled, investigation continues</span><div style="color:var(--text-tertiary);margin-top:4px">' + (resolution.revisionNotes || '') + '</div></div>';
+  }
+  if ((cell.revisions || []).length) {
+    html += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--mono)">Revisions: ' + cell.revisions.length + '</div>';
+  }
+  if (cell.status === 'Under Investigation' && !verdict && isSteward) {
+    html += '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="fileJstfVerdictFlow()">File Disciplinary Verdict</button>';
+  }
+  if (cell.status === 'Finalised' && isSteward) {
+    html += '<div style="font-size:11px;color:var(--amber);margin-top:8px">Awaiting aSTF audit.</div>';
+  }
+  html += '</div>';
+  html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="openAppealModal(\'' + cell.id + '\',\'' + (cell.title || '').replace(/'/g, '\\\'') + '\')">Appeal Resolution</button></div>';
+  host.innerHTML = html;
+}
+
+function renderJstfIntake() {
+  var host = document.getElementById('jstf-intake');
+  if (!host) return;
+  var cases = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'jSTF Cell'; });
+  var active = cases.length ? cases[0] : null;
+  var html = '<div class="flex gap-2" style="flex-direction:column;gap:6px">'
+    + '<button class="btn btn-sm" onclick="openReportModal()">Report a Member</button>'
+    + (active ? '<button class="btn btn-sm" onclick="openAppealModal(\'' + active.id + '\',\'' + (active.title || '').replace(/'/g, '\\\'') + '\')">Appeal a Resolution</button>' : '')
+    + '</div>';
+  host.innerHTML = html;
+}
+
 function updateDelibDecisionButtons(cell) {
   var submitBtn = document.getElementById('delib-submit-btn');
   var closeBtn = document.getElementById('delib-close-btn');
@@ -4487,6 +4685,7 @@ function renderStfAssignments() {
 
 function stfNavKey(stfId) {
   var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf', 'xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
+  if (stfId.indexOf('stf-jstf-') === 0 || stfId === 'stf-jstf') return 'stf-jstf';
   return map[stfId] || 'stf-' + stfId;
 }
 
@@ -5282,6 +5481,8 @@ function initApp() {
   renderStfSummary();
   renderCommonsAside();
   renderYourCells();
+  renderJstfPanel();
+  renderJstfIntake();
   renderParticipantsAside();
   updateNavBadges();
   renderThreadDetail(currentThreadId);

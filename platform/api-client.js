@@ -271,6 +271,26 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/pastf-review', payload);
   }
 
+  function reportJstf(payload) {
+    return req('POST', 'jstf/report', payload);
+  }
+
+  function appealJstf(payload) {
+    return req('POST', 'jstf/appeal', payload);
+  }
+
+  function escalateJstf(payload) {
+    return req('POST', 'jstf/escalate', payload);
+  }
+
+  function voteJstf(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/jstf-vote', payload);
+  }
+
+  function fileJstfVerdict(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/jstf-verdict', payload);
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -398,6 +418,11 @@ var SolisApi = (function() {
     spawnVstf: spawnVstf,
     fileVstfAssessment: fileVstfAssessment,
     spawnPastf: spawnPastf,
-    filePastfReview: filePastfReview
+    filePastfReview: filePastfReview,
+    reportJstf: reportJstf,
+    appealJstf: appealJstf,
+    escalateJstf: escalateJstf,
+    voteJstf: voteJstf,
+    fileJstfVerdict: fileJstfVerdict
   };
 })();

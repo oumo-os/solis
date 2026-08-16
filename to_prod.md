@@ -478,19 +478,21 @@ participant_domain {
 
 ### 2.11 — jSTF (Judicial Investigation)
 
-**Trigger:**
-Any member can report any member. Report surfaced as anonymous post to Commons, visible to stewards. Any steward can sponsor, activating jSTF.
-
-**jSTF powers during investigation:**
-1. Restrict reported user activity (suspend steward privileges, limit participation)
-2. Select punitive action (must cite policy precedent)
-3. Push disciplinary motion → goes to aSTF for audit
+**Lifecycle:**
+1. **Report** — any member reports any member → anonymous thread on target (stewards-only, accumulates as thread posts)
+2. **Escalate** — steward sponsors → jSTF cell spawned (team = 3 active stewards)
+3. **Restrict** — jSTF team live majority toggle (reversible both ways). Severity: steward → `frozen`; member or unanimous → `readonly`
+4. **Verdict** — single filing (policy-cited or system-bound, cites policy resolutions)
+5. **aSTF audit** — approved → resolution applied + implementation; disapproval → same jSTF cell continues with shuffled composition
+6. **Appeal** — anyone → anonymous post on case thread → steward escalation (same as reporting)
 
 **Resolution types:**
 - System-bound: remove from circle, trigger fresh vSTF, freeze Ws
-- Non-system disciplinary: applied per policy resolutions cited as precedent
+- Non-system (policy-cited): narrated judgement applied per cited policy resolutions
 
 **Key principle:** aSTF never sees jSTF members — audits the decision, not the people.
+
+**Gating:** report: auth (401); escalate: auth + steward (401/403), 409 if thread already escalated; vote: auth + jSTF team only (403), stance must be restrict/lift (400); verdict: auth + steward (401/403), 409 idempotent, type validated (400), description required (400); aSTF audit: approved/revision/rejected handled in astfVerdictRoutes for judicial-audit source type
 
 ### 2.12 — Membership & Stewardship
 

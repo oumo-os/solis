@@ -623,6 +623,77 @@ Mutating flows vs the API:
 - Verified headlessly (17 checks): full lifecycle — login, create source
   cell, spawn p-aSTF 201, respawn 409, p-aSTF cell in bootstrap, stfs
   row active; anon review 401, wrong type 400, invalid tier 400;
-  reviewer 1 filed (circle=23), duplicate 409; reviewer 2 filed →
-  complete; p-aSTF cell Review Complete; stfs completed.
+   reviewer 1 filed (circle=23), duplicate 409; reviewer 2 filed →
+   complete; p-aSTF cell Review Complete; stfs completed.
+- Harness deleted; DB re-seeded.
+
+## jSTF judicial investigation lifecycle (2026-08-17, to_prod 2.11)
+
+- **Why**: the jSTF judicial investigation view was entirely static demo
+  content with no persistence, report/escalate flow, restriction vote
+  mechanism, verdict filing, aSTF audit, or appeal path.
+- **What**:
+  - `POST /api/jstf/report` — any member reports any member.  Creates
+    (or appends to) an anonymous report thread on the target, stewards-only.
+    Reports on the same target accumulate as replies (thread post count).
+    Auth (401), targetId required (400), description required (400),
+    cannot self-report (400), target must exist (404).
+  - `POST /api/jstf/appeal` — anyone appeals a resolution.  Same thread
+    machinery against the case, stewards-only.  Auth (401), caseId
+    required (400), case must be a jSTF cell (404).  Accumulates on
+    same case.
+  - `POST /api/jstf/escalate` — a steward sponsors/escalates an
+    anonymous thread, spawning the jSTF cell + team composition.  Auth
+    + steward gate (401/403), thread must exist (404), not already
+    escalated (409).  Team = 3 active stewards (JOINed against users
+    to ensure authenticatable members).  Creates jSTF cell (Under
+    Investigation), cell_team rows, stfs row, links thread via
+    jstf_cell_id, governance event.
+  - `POST /api/cells/:id/jstf-vote` — live majority restriction toggle.
+    Each jSTF team member can set restrict/lift at any time (upsert via
+    vote_records).  State flips instantly when count crosses majority
+    threshold; fully reversible in both directions.  Severity: target
+    is steward -> `frozen`; member target or unanimous -> `readonly`.
+    Auth + team membership (403), stance validated (400), status must
+    be Under Investigation (400).
+  - `POST /api/cells/:id/jstf-verdict` — single filing by the jSTF
+    (same as a deliberation motion).  Auth + steward (401/403), must
+    be Under Investigation (400), no existing verdict (409), type must
+    be system-bound or policy-cited (400), description required (400).
+    Finalises jSTF cell, spawns blind aSTF audit cell (judicial-audit
+    source type -- decision only, never jSTF member names), stfs rows
+    updated, governance event.
+  - Extended `astfVerdictRoutes` for `source.type === 'judicial-audit'`:
+    approved -> jSTF cell `Resolution Applied` with implementation
+    actions; revision or rejected -> same jSTF cell continues with
+    shuffled composition via `jstfShuffleComposition()` (team rotated,
+    old verdict superseded into revisions history, meta.verdict reset,
+    restriction votes pruned for removed members, stfs row restored
+    to Under Investigation).
+  - `threads` schema extended: `visibility TEXT DEFAULT 'public'` and
+    `jstf_cell_id TEXT` added via ALTER TABLE migrations.
+  - `reportJstf` / `appealJstf` / `escalateJstf` / `voteJstf` /
+    `fileJstfVerdict` added to `SolisApi`.
+  - `renderJstfPanel()` hydrates `#stf-integrity-stf-jstf` with pending
+    steward threads + escalate buttons, active case panel (restriction
+    toggle, team roster, verdict form, appeal), status badges.
+  - `renderJstfIntake()` renders Report + Appeal buttons into the
+    Integrity page aside card.
+  - Report chip added to each participant card in `mock-loader.js`.
+  - `stfNavKey` updated so all `stf-jstf-*` ids route to `stf-jstf`
+    view.
+  - Finalise button wired to `fileJstfVerdictFlow()`.
+- Verified headlessly (42 checks): login (3 users), report gates
+  (401/400x3), report 201 new thread, report accumulated (replies=2),
+  thread stewards-only + not linked, escalate gates (401/403/400/404),
+  escalate 201 cell created, re-escalate 409, jSTF cell in bootstrap
+  with team=3, thread linked to jSTF, stfs active; login 3 team
+  members, non-team vote 403, invalid stance 400, aj restrict 1/3
+  relaxed, 2nd restrict 2/3 restricted, unanimous 3/3 readonly, 1 lift
+  still restricted, aj lifts relaxed, aj re-restricts restricted;
+  verdict gates (401/403/400x2), verdict filed + aSTF audit spawned,
+  re-file 409, jSTF Finalised + aSTF Blind Review, stfs Finalised +
+  active; aSTF approve -> jSTF Resolution Applied; appeal gates
+  (401/400), appeal 201 new thread, appeal accumulated, appeal thread
+  stewards-only.
 - Harness deleted; DB re-seeded.

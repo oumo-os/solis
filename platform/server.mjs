@@ -25,6 +25,8 @@ db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
 try { db.exec('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE threads ADD COLUMN endorsements INTEGER DEFAULT 0'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE threads ADD COLUMN proposal_cell_id TEXT'); } catch { /* already present */ }
+try { db.exec("ALTER TABLE threads ADD COLUMN visibility TEXT DEFAULT 'public'"); } catch { /* already present */ }
+try { db.exec('ALTER TABLE threads ADD COLUMN jstf_cell_id TEXT'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -668,6 +670,45 @@ async function astfVerdictRoutes(req, res, reqUrl, method) {
   if (stfRow) {
     db.prepare("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
   }
+  // jSTF judicial audit — aSTF reviews the decision, never the jSTF members
+  if (source.type === 'judicial-audit' && source.sourceCellId) {
+    const jstf = db.prepare('SELECT * FROM cells WHERE id = ?').get(source.sourceCellId);
+    if (jstf) {
+      const jstfMeta = jstf.meta ? JSON.parse(jstf.meta) : {};
+      const jstfRes = jstf.resolution ? JSON.parse(jstf.resolution) : {};
+      jstfRes.audit = astfResult;
+      if (verdict === 'approved') {
+        // resolution applied + implementation
+        jstfRes.status = 'Applied';
+        const verdictInfo = source.verdict || jstfMeta.verdict || {};
+        jstfRes.implementation = {
+          type: verdictInfo.type || 'policy-cited',
+          actions: verdictInfo.type === 'system-bound'
+            ? ['target role/privileges updated per system settings', 'Ws recalculated', 'fresh vSTF composition triggered']
+            : ['applied per cited policy resolutions: ' + (verdictInfo.policyRefs || []).join(', ')],
+        };
+        db.prepare("UPDATE cells SET status = 'Resolution Applied', resolution = ? WHERE id = ?")
+          .run(JSON.stringify(jstfRes), source.sourceCellId);
+      } else {
+        // disapproval: the SAME jSTF cell continues — the team composition
+        // is shuffled and the investigation resumes where it stopped.
+        jstfRes.status = 'Revision Ordered';
+        jstfRes.revisionNotes = rationale;
+        db.prepare("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?")
+          .run(JSON.stringify(jstfRes), source.sourceCellId);
+        jstfShuffleComposition(source.sourceCellId, jstf, jstfMeta, rationale, user.name || user.initials);
+      }
+      const evtId = 'evt-jstf-audit-' + Date.now().toString(36);
+      db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+        .run(evtId, 'jstf-audit', '', new Date().toISOString().slice(0, 10),
+          '"' + (jstf.title || jstf.id) + '" — aSTF audit: ' + verdict + ' (rubric ' + total + '/30)',
+          String(user.name || user.initials));
+    }
+    // update stfs row
+    const auditStf = db.prepare("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?").get('aSTF Audit — ' + (source.targetName || ''));
+    if (auditStf) db.prepare("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?").run(auditStf.id);
+    return send(res, 200, { ok: true, verdict, astfId: cellId, sourceCellId: source.sourceCellId, rubricTotal: total });
+  }
   // update origin cell resolution
   if (source.originCellId) {
     const origin = db.prepare('SELECT * FROM cells WHERE id = ?').get(source.originCellId);
@@ -1040,6 +1081,351 @@ async function pastfReviewRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, filed: reviews.length, required: minReviewers, complete: reviews.length >= minReviewers, circleTotal });
 }
 
+// ── jSTF judicial investigation (to_prod 2.11) ─────────
+// Lifecycle: any member → anonymous report thread on target (accumulates
+// as thread posts, stewards-only) → steward escalates → jSTF cell spawned →
+// jSTF team live majority toggle on activity restriction (reversible) →
+// single disciplinary verdict filing (policy-cited or system-bound, cited
+// policy resolutions) → aSTF audit (decision only, never the jSTF members) →
+// resolution applied + implementation; disapproval → same jSTF cell
+// continues with a shuffled composition (revision notes, verdict re-fileable).
+// Appeal: anyone → anonymous post on the case thread → steward escalation,
+// same process as reporting.
+
+function jstfReportThread(link) {
+  return db.prepare("SELECT * FROM threads WHERE proposal_cell_id = ? AND badge = 'b-judicial'").get(link);
+}
+
+function jstfAppendAnonymousPost(threadId, bodyText) {
+  db.prepare(`INSERT INTO thread_replies (id, thread_id, author, initials, time, body, likes)
+    VALUES (?,?,?,?,?,?,0)`)
+    .run('jstf-reply-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+      threadId, 'Anonymous', '?', new Date().toISOString().slice(0, 10), bodyText);
+  db.prepare('UPDATE threads SET replies = replies + 1 WHERE id = ?').run(threadId);
+  return db.prepare('SELECT replies FROM threads WHERE id = ?').get(threadId).replies;
+}
+
+function jstfTeamSelection() {
+  return db.prepare(`SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r
+    JOIN users u ON u.id = r.member_id
+    WHERE r.status = 'active' ORDER BY r.name LIMIT 3`).all();
+}
+
+function jstfIsNotSteward(userId) {
+  return !db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(userId);
+}
+
+// aSTF disapproval → shuffle the jSTF composition inside the same cell.
+// Investigation continues where it stopped: prior verdict superseded,
+// team members rotated, restriction tallies recomputed for the new team.
+function jstfShuffleComposition(cellId, cell, meta, revisionNotes, by) {
+  const prevTeam = (cell.source ? JSON.parse(cell.source).team : null) || [];
+  const prevIds = prevTeam.map(function(t) { return t.id; });
+  let stewards = jstfTeamSelection();
+  let fresh = stewards.filter(function(s) { return !prevIds.includes(s.id); });
+  if (fresh.length < 2) fresh = stewards.slice(1).concat(stewards.slice(0, 1));
+  const team = fresh;
+  const source = cell.source ? JSON.parse(cell.source) : {};
+  source.team = team.map(function(t) { return { id: t.id, name: t.name, initials: t.initials }; });
+  const revisions = meta.revisions || (meta.revisions = []);
+  revisions.push({
+    at: new Date().toISOString(), by, notes: revisionNotes,
+    supersededVerdict: meta.verdict || null,
+  });
+  meta.verdict = null;
+  db.prepare('DELETE FROM cell_team WHERE cell_id = ?').run(cellId);
+  team.forEach(function(t, i) {
+    db.prepare('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)')
+      .run(cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review');
+  });
+  const teamSize = team.length;
+  const majority = Math.floor(teamSize / 2) + 1;
+  const teamInitials = team.map(function(t) { return t.initials; });
+  db.prepare(`DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction'
+    AND initials NOT IN (${teamInitials.map(function() { return '?'; }).join(',') || 'NULL'})`)
+    .run(cellId, ...teamInitials);
+  const restrictCount = db.prepare(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`).get(cellId).n;
+  const cur = meta.restriction || { state: 'relaxed', restrictCount: 0, teamSize, majority, severity: null, history: [] };
+  cur.restrictCount = restrictCount;
+  cur.teamSize = teamSize;
+  cur.majority = majority;
+  cur.state = restrictCount >= majority ? 'restricted' : 'relaxed';
+  if (cur.state === 'restricted') {
+    cur.severity = (meta.targetIsSteward && restrictCount < teamSize) ? 'frozen' : 'readonly';
+  } else {
+    cur.severity = null;
+  }
+  cur.history = cur.history || [];
+  cur.history.push({ prev: 'composition-shuffle', next: cur.state, at: new Date().toISOString(), by });
+  meta.restriction = cur;
+  db.prepare('UPDATE cells SET participants = ?, source = ?, meta = ? WHERE id = ?')
+    .run(teamSize, JSON.stringify(source), JSON.stringify(meta), cellId);
+  db.prepare("UPDATE stfs SET status = 'Under Investigation', bucket = 'active' WHERE id = ?").run('stf-' + cellId);
+  const evtId = 'evt-jstf-' + Date.now().toString(36);
+  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+    .run(evtId, 'jstf-recomposition', '', new Date().toISOString().slice(0, 10),
+      (meta.targetName || '') + ' case — jSTF recomposed (' + teamSize + ' investigators) after aSTF revision',
+      String(by));
+}
+
+// POST /api/jstf/report — any member reports any member.  Creates (or
+// appends to) an anonymous report thread on the target, stewards-only.
+// Accumulated thread post count is returned (replies on same target).
+async function jstfReportRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/jstf\/report$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const body = await readBody(req);
+  const targetId = String(body.targetId || '').trim();
+  const description = String(body.description || '').trim();
+  if (!targetId) return send(res, 400, { error: 'targetId required' });
+  if (!description) return send(res, 400, { error: 'description required' });
+  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+  if (!target) return send(res, 404, { error: 'Target member not found' });
+  if (targetId === user.id) return send(res, 400, { error: 'Cannot report yourself' });
+  const link = 'user:' + targetId;
+  const existing = jstfReportThread(link);
+  if (existing) {
+    const replies = jstfAppendAnonymousPost(existing.id, description);
+    return send(res, 200, { ok: true, threadId: existing.id, replies, accumulated: true });
+  }
+  const threadId = 'thread-jstf-' + Date.now().toString(36);
+  db.prepare(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(threadId, 'Anonymous Report — ' + (target.name || target.initials), description,
+      'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0,
+      new Date().toISOString().slice(0, 10), 'stewards-only', link);
+  return send(res, 201, { ok: true, threadId, replies: 1, accumulated: false });
+}
+
+// POST /api/jstf/appeal — anyone can appeal a resolution.  Same machinery
+// as reporting: anonymous thread on the case, visible to stewards only.
+async function jstfAppealRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/jstf\/appeal$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const body = await readBody(req);
+  const caseId = String(body.caseId || '').trim();
+  const description = String(body.description || '').trim();
+  if (!caseId) return send(res, 400, { error: 'caseId required' });
+  if (!description) return send(res, 400, { error: 'description required' });
+  const caseCell = db.prepare('SELECT * FROM cells WHERE id = ?').get(caseId);
+  if (!caseCell || caseCell.type !== 'jSTF Cell') return send(res, 404, { error: 'Case not found' });
+  const link = 'case:' + caseId;
+  const existing = jstfReportThread(link);
+  if (existing) {
+    const replies = jstfAppendAnonymousPost(existing.id, description);
+    return send(res, 200, { ok: true, threadId: existing.id, replies, accumulated: true });
+  }
+  const threadId = 'thread-appeal-' + Date.now().toString(36);
+  db.prepare(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(threadId, 'Appeal — ' + (caseCell.title || caseId), description,
+      'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0,
+      new Date().toISOString().slice(0, 10), 'stewards-only', link);
+  return send(res, 201, { ok: true, threadId, replies: 1, accumulated: false });
+}
+
+// POST /api/jstf/escalate — a steward sponsors/escalates an anonymous
+// report or appeal thread, spawning the jSTF cell + team composition.
+async function jstfEscalateRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/jstf\/escalate$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
+  const body = await readBody(req);
+  const threadId = String(body.threadId || '').trim();
+  if (!threadId) return send(res, 400, { error: 'threadId required' });
+  const thread = db.prepare('SELECT * FROM threads WHERE id = ?').get(threadId);
+  if (!thread) return send(res, 404, { error: 'Thread not found' });
+  if (thread.jstf_cell_id) return send(res, 409, { error: 'Thread already escalated' });
+  if (!thread.proposal_cell_id || !thread.proposal_cell_id.startsWith('user:') && !thread.proposal_cell_id.startsWith('case:')) {
+    return send(res, 400, { error: 'Thread is not a judicial thread' });
+  }
+  const isAppeal = thread.proposal_cell_id.startsWith('case:');
+  const link = thread.proposal_cell_id;
+  let targetId = null, targetName = thread.title.replace(/^Anonymous Report — /, '').replace(/^Appeal — /, '');
+  if (isAppeal) {
+    const origCaseId = link.slice(5);
+    const orig = db.prepare('SELECT * FROM cells WHERE id = ?').get(origCaseId);
+    if (!orig) return send(res, 404, { error: 'Original case not found' });
+    const origMeta = orig.meta ? JSON.parse(orig.meta) : {};
+    targetId = origMeta.targetId || null;
+    targetName = origMeta.targetName || orig.title || targetName;
+  } else {
+    targetId = link.slice(5);
+    const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+    if (target) targetName = target.name || target.initials;
+  }
+  const cellId = 'jstf-' + Date.now().toString(36);
+  // Team composition: active stewards, escalator guaranteed first.
+  let team = jstfTeamSelection();
+  if (!team.some(function(t) { return t.id === user.id; })) {
+    team = [{ id: user.id, name: user.name, initials: user.initials }].concat(team).slice(0, 3);
+  }
+  const source = {
+    type: 'judicial-investigation', threadId, isAppeal, targetId, targetName,
+    escalatedBy: user.name || user.initials, escalatedAt: new Date().toISOString(),
+    revisionOf: isAppeal ? link.slice(5) : null, team: team.map(function(t) { return { id: t.id, name: t.name, initials: t.initials }; }),
+  };
+  const meta = {
+    targetId, targetName, threadId, isAppeal,
+    targetIsSteward: targetId ? !!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(targetId) : false,
+    revisionOf: source.revisionOf,
+    restriction: { state: 'relaxed', restrictCount: 0, teamSize: team.length, majority: Math.floor(team.length / 2) + 1, severity: null, history: [] },
+    verdict: null,
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(cellId, 'jSTF Cell', 'jSTF — ' + targetName, 'Under Investigation', 'judicial-investigation',
+      team.length, '', user.id,
+      JSON.stringify(source), JSON.stringify({ status: 'Under Investigation' }), JSON.stringify(meta));
+  team.forEach(function(t, i) {
+    db.prepare('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)')
+      .run(cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review');
+  });
+  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+    .run('stf-' + cellId, 'jSTF', 'Judicial Investigation', targetName || '', 'active', 'Under Investigation',
+      'jSTF — ' + targetName, new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));
+  db.prepare('UPDATE threads SET jstf_cell_id = ? WHERE id = ?').run(cellId, threadId);
+  const evtId = 'evt-jstf-' + Date.now().toString(36);
+  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+    .run(evtId, 'jstf-escalation', '', new Date().toISOString().slice(0, 10),
+      'jSTF opened against ' + targetName + ' (' + (isAppeal ? 'appeal' : 'report') + ') — ' + team.length + ' investigators',
+      String(user.name || user.initials));
+  return send(res, 201, { ok: true, jstfId: cellId });
+}
+
+// POST /api/cells/:id/jstf-vote — live restriction toggle.  Each jSTF team
+// member can set their stance restrict/lift at any time; the state flips to
+// 'restricted' the moment the count reaches a simple majority and relaxes
+// the moment it drops below — fully reversible in both directions.
+async function jstfVoteRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/jstf-vote$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'jSTF Cell') return send(res, 400, { error: 'Not a jSTF cell' });
+  if (cell.status !== 'Under Investigation') return send(res, 400, { error: 'Not under investigation' });
+  const onTeam = db.prepare('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?').get(cellId, user.initials);
+  if (!onTeam) return send(res, 403, { error: 'Only the jSTF team may vote' });
+  const body = await readBody(req);
+  const stance = String(body.stance || '').trim();
+  if (!['restrict', 'lift'].includes(stance)) return send(res, 400, { error: 'stance must be restrict or lift' });
+  const teamSize = cell.participants || db.prepare('SELECT COUNT(*) n FROM cell_team WHERE cell_id = ?').get(cellId).n;
+  const majority = Math.floor(teamSize / 2) + 1;
+  db.prepare("DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND initials = ?")
+    .run(cellId, user.initials);
+  db.prepare("INSERT INTO vote_records (cell_id, domain, name, initials, vote) VALUES (?,?,?,?,?)")
+    .run(cellId, 'restriction', user.name || user.initials, user.initials, stance);
+  const restrictCount = db.prepare(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`).get(cellId).n;
+  const restricted = restrictCount >= majority;
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  const cur = meta.restriction || { state: 'relaxed', restrictCount: 0, teamSize, majority, severity: null, history: [] };
+  const severity = restricted
+    ? (meta.targetIsSteward && restrictCount < teamSize ? 'frozen' : 'readonly')
+    : null;
+  const changed = cur.state !== (restricted ? 'restricted' : 'relaxed');
+  const votes = db.prepare(`SELECT name, initials, vote FROM vote_records WHERE cell_id = ? AND domain = 'restriction'`).all(cellId);
+  if (changed) {
+    cur.history = cur.history || [];
+    cur.history.push({
+      prev: cur.state, next: restricted ? 'restricted' : 'relaxed',
+      at: new Date().toISOString(), votedBy: user.name || user.initials,
+    });
+  }
+  cur.state = restricted ? 'restricted' : 'relaxed';
+  cur.restrictCount = restrictCount;
+  cur.teamSize = teamSize;
+  cur.majority = majority;
+  if (severity) cur.severity = severity;
+  cur.votes = votes;
+  meta.restriction = cur;
+  if (changed) {
+    const evtId = 'evt-jstf-' + Date.now().toString(36);
+    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+      .run(evtId, 'jstf-restriction', '', new Date().toISOString().slice(0, 10),
+        (meta.targetName || 'target') + ' activity ' + cur.state + ' (' + restrictCount + '/' + teamSize + ' → ' + severity + ')',
+        String(user.name || user.initials));
+  }
+  db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  return send(res, 200, {
+    ok: true, state: cur.state, restrictCount, teamSize, majority,
+    severity: cur.severity, changed,
+  });
+}
+
+// POST /api/cells/:id/jstf-verdict — single filing by the jSTF (same as a
+// deliberation motion / resolution draft).  Verdict cites policy
+// resolutions: narrated judgements → policy-cited (non-system), system
+// settings → system-bound.  Submits to a blind aSTF audit cell.
+async function jstfVerdictRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/jstf-verdict$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
+  const cellId = decodeURIComponent(m[1]);
+  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  if (!cell) return send(res, 404, { error: 'Not found' });
+  if (cell.type !== 'jSTF Cell') return send(res, 400, { error: 'Not a jSTF cell' });
+  const meta = cell.meta ? JSON.parse(cell.meta) : {};
+  if (meta.verdict) return send(res, 409, { error: 'Verdict already filed' });
+  if (cell.status !== 'Under Investigation') return send(res, 400, { error: 'Not under investigation' });
+  const body = await readBody(req);
+  const type = String(body.type || '').trim(); // 'system-bound' or 'policy-cited'
+  const description = String(body.description || '').trim();
+  const policyRefs = Array.isArray(body.policyRefs) ? body.policyRefs : [];
+  const findings = String(body.findings || '').trim();
+  if (!['system-bound', 'policy-cited'].includes(type)) {
+    return send(res, 400, { error: 'type must be system-bound or policy-cited' });
+  }
+  if (!description) return send(res, 400, { error: 'description required' });
+  meta.verdict = {
+    type, description, policyRefs: policyRefs.map(String), findings,
+    filedBy: user.name || user.initials, filedAt: new Date().toISOString(),
+  };
+  const source = cell.source ? JSON.parse(cell.source) : {};
+  source.verdict = meta.verdict;
+  db.prepare("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?")
+    .run(JSON.stringify(meta), JSON.stringify(source), cellId);
+  // aSTF audit — sees the decision, never the jSTF members.
+  const astfId = 'astf-audit-' + Date.now().toString(36);
+  const astfSource = {
+    type: 'judicial-audit', sourceCellId: cellId, sourceTitle: 'jSTF Disciplinary Verdict',
+    targetId: meta.targetId, targetName: meta.targetName,
+    verdict: { type, description, policyRefs: meta.verdict.policyRefs, findings },
+  };
+  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
+    .run(astfId, 'aSTF Cell', 'aSTF Audit — ' + (meta.targetName || ''), 'Blind Review', 'judicial-audit',
+      1, '', cellId,
+      JSON.stringify(astfSource), JSON.stringify({ status: 'Pending' }),
+      JSON.stringify({ blind: 1, targetName: meta.targetName, verdict: meta.verdict }));
+  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
+    .run('stf-' + astfId, 'aSTF', 'Judicial Audit', meta.targetName || '', 'active', 'Blind Review',
+      'aSTF Audit — ' + (meta.targetName || ''), new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));
+  db.prepare('UPDATE cells SET resolution_ref = ? WHERE id = ?').run(astfId, cellId);
+  db.prepare("UPDATE stfs SET status = 'Finalised', bucket = 'completed' WHERE id = ?").run('stf-' + cellId);
+  const evtId = 'evt-jstf-' + Date.now().toString(36);
+  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
+    .run(evtId, 'jstf-verdict', '', new Date().toISOString().slice(0, 10),
+      'jSTF verdict filed vs ' + (meta.targetName || '') + ' — ' + type + ' (' + policyRefs.length + ' policies cited)',
+      String(user.name || user.initials));
+  return send(res, 200, { ok: true, jstfId: cellId, astfId, type });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1272,6 +1658,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
     replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
     endorsements: t.endorsements || 0, proposalCellId: t.proposal_cell_id || null,
+    visibility: t.visibility || 'public', jstfCellId: t.jstf_cell_id || null,
     repliesList: (replyByThread[t.id] || []).map(r => ({
       id: r.id, author: r.author, initials: r.initials, avatar: j(r.avatar) || {},
       time: r.time, body: r.body, likes: r.likes,
@@ -1488,6 +1875,11 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await vstfAssessmentRoutes(req, res, reqUrl, method);
     if (!handled) handled = await pastfSpawnRoutes(req, res, reqUrl, method);
     if (!handled) handled = await pastfReviewRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await jstfReportRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await jstfAppealRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await jstfEscalateRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await jstfVoteRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await jstfVerdictRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

@@ -22,7 +22,7 @@ function renderParticipantCards() {
       + '<div class="pc-body">'
       + '<div class="pc-top"><div class="pc-name">' + p.name + '</div><div class="pc-sub">' + p.location + ' · ' + p.joined + '</div></div>'
       + '<div class="pc-domains">' + domains + '</div>'
-      + '<div class="pc-bottom">' + bottom.join('') + '</div>'
+      + '<div class="pc-bottom">' + bottom.join('') + '<span class="tag tag-red" style="font-size:6px;cursor:pointer" onclick="event.stopPropagation();openReportModal(\'' + p.id + '\',\'' + p.name.replace(/'/g, '\\\'') + '\')">Report</span></div>'
       + '</div></div>';
   }).join('');
 }
