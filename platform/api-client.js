@@ -291,6 +291,30 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/jstf-verdict', payload);
   }
 
+  function resignCircle(circleId) {
+    return req('POST', 'circles/' + circleId + '/resign');
+  }
+
+  function removeMember(circleId, payload) {
+    return req('POST', 'circles/' + circleId + '/remove-member', payload);
+  }
+
+  function flushCircle(circleId, payload) {
+    return req('POST', 'circles/' + circleId + '/flush', payload);
+  }
+
+  function disbandCircle(circleId) {
+    return req('POST', 'circles/' + circleId + '/disband');
+  }
+
+  function driftCheck(circleId, payload) {
+    return req('POST', 'circles/' + circleId + '/drift-check', payload);
+  }
+
+  function checkExpiry(circleId) {
+    return req('POST', 'circles/' + circleId + '/check-expiry');
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -423,6 +447,12 @@ var SolisApi = (function() {
     appealJstf: appealJstf,
     escalateJstf: escalateJstf,
     voteJstf: voteJstf,
-    fileJstfVerdict: fileJstfVerdict
+    fileJstfVerdict: fileJstfVerdict,
+    resignCircle: resignCircle,
+    removeMember: removeMember,
+    flushCircle: flushCircle,
+    disbandCircle: disbandCircle,
+    driftCheck: driftCheck,
+    checkExpiry: checkExpiry
   };
 })();

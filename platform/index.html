@@ -3981,6 +3981,128 @@ function renderJstfIntake() {
   host.innerHTML = html;
 }
 
+// ── 2.12 Membership & Stewardship ───────────────────
+function openResignModal(circleId, circleName) {
+  openModal('<div class="sec">Resign from ' + escapeHtml(circleName) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">You will be moved to the former members list. This action is recorded and visible to all stewards.</div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmResign(\'' + circleId + '\')">Confirm Resignation</button></div>',
+    { size: 'sm' });
+}
+
+function confirmResign(circleId) {
+  SolisApi.resignCircle(circleId).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Resignation failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('You have resigned from the circle.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not resign. Is the server running?', 'error'); });
+}
+
+function openRemoveMemberModal(circleId, circleName) {
+  var members = [];
+  var circles = (MOCK && MOCK.circles) || [];
+  var c = circles.filter(function(x) { return x.id === circleId; })[0];
+  if (c && c.roster) members = (c.roster.active || []);
+  var opts = members.map(function(m) { return '<option value="' + m.id + '">' + m.name + '</option>'; }).join('');
+  openModal('<div class="sec">Remove Member from ' + escapeHtml(circleName) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">jSTF forced removal. The member will be moved to former members with reason "jstf-removal".</div>' +
+    '<div class="form-group"><label class="form-label">Member to remove</label><select class="form-input" id="remove-member-select">' + opts + '</select></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmRemoveMember(\'' + circleId + '\')">Remove Member</button></div>',
+    { size: 'sm' });
+}
+
+function confirmRemoveMember(circleId) {
+  var sel = document.getElementById('remove-member-select');
+  var memberId = sel ? sel.value : '';
+  if (!memberId) { toast('Select a member.', 'error'); return; }
+  SolisApi.removeMember(circleId, { memberId: memberId }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Removal failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Member removed (jstf-removal).', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not remove member. Is the server running?', 'error'); });
+}
+
+function openFlushModal(circleId, circleName) {
+  openModal('<div class="sec">jSTF Full Circle Flush — ' + escapeHtml(circleName) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">All active members except yourself will be removed from the circle. This is a drastic measure used by the jSTF.</div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmFlush(\'' + circleId + '\')">Flush Circle</button></div>',
+    { size: 'sm' });
+}
+
+function confirmFlush(circleId) {
+  SolisApi.flushCircle(circleId).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Flush failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Circle flushed — ' + (r.removed || 0) + ' members removed.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not flush circle. Is the server running?', 'error'); });
+}
+
+function openDisbandModal(circleId, circleName) {
+  openModal('<div class="sec">Disband ' + escapeHtml(circleName) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The circle will be archived and all active members moved to former. This cannot be undone.</div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmDisband(\'' + circleId + '\')">Disband Circle</button></div>',
+    { size: 'sm' });
+}
+
+function confirmDisband(circleId) {
+  SolisApi.disbandCircle(circleId).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Disband failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Circle disbanded — ' + (r.removed || 0) + ' members moved to former.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not disband circle. Is the server running?', 'error'); });
+}
+
+function confirmDriftCheck(circleId) {
+  SolisApi.driftCheck(circleId, { threshold: 50 }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Drift check failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast('Drift check complete — ' + (r.drifted || 0) + ' members moved for competence drift.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not run drift check. Is the server running?', 'error'); });
+}
+
+function confirmCheckExpiry(circleId) {
+  SolisApi.checkExpiry(circleId).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Expiry check failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast('Expiry check complete — ' + (r.expired || 0) + ' members expired (term: ' + (r.termMonths || 12) + ' months).', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not run expiry check. Is the server running?', 'error'); });
+}
+
+function renderCircleMembership(circleId) {
+  var circles = (MOCK && MOCK.circles) || [];
+  var circle = circles.filter(function(c) { return c.id === circleId; })[0];
+  if (!circle) return '';
+  var roster = circle.roster || {};
+  var active = roster.active || [];
+  var former = roster.former || [];
+  var isSteward = jstfClientIsSteward();
+  var html = '<div class="sec">Active Stewards (' + active.length + ')</div>';
+  active.forEach(function(m) {
+    html += '<div class="hrow"><div class="hav" style="background:' + (m.color || 'var(--purple)') + ';width:32px;height:32px">' + (m.initials || '') + '</div>' +
+      '<div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">' + escapeHtml(m.name || '') + '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)">Ws: ' + (m.ws || '—') + ' · ' + escapeHtml(m.topDomain || 'General') + ' · joined ' + escapeHtml(m.joined || '—') + '</div></div></div>';
+  });
+  if (former.length) {
+    html += '<div class="sec" style="margin-top:12px">Former Stewards (' + former.length + ')</div>';
+    former.forEach(function(m) {
+      html += '<div class="hrow" style="opacity:0.7"><div class="hav" style="background:var(--text-tertiary);width:32px;height:32px">' + (m.initials || '') + '</div>' +
+        '<div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">' + escapeHtml(m.name || '') + '</div>' +
+        '<div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml(m.leftReason || '—') + ' · served ' + escapeHtml(m.joined || '?') + ' → ' + escapeHtml(m.left || '?') + '</div></div></div>';
+    });
+  }
+  if (isSteward) {
+    html += '<div style="margin-top:12px;border-top:1px solid var(--border-subtle);padding-top:12px"><div class="sec">Steward Actions</div>' +
+      '<div class="flex gap-2" style="flex-wrap:wrap">' +
+      '<button class="btn btn-sm" onclick="openRemoveMemberModal(\'' + circleId + '\',\'' + (circle.name || '').replace(/'/g, "\\'") + '\')">Remove Member</button>' +
+      '<button class="btn btn-sm" onclick="openFlushModal(\'' + circleId + '\',\'' + (circle.name || '').replace(/'/g, "\\'") + '\')">Flush Circle</button>' +
+      '<button class="btn btn-sm" onclick="openDisbandModal(\'' + circleId + '\',\'' + (circle.name || '').replace(/'/g, "\\'") + '\')">Disband</button>' +
+      '<button class="btn btn-sm" onclick="confirmDriftCheck(\'' + circleId + '\')">Drift Check</button>' +
+      '<button class="btn btn-sm" onclick="confirmCheckExpiry(\'' + circleId + '\')">Check Expiry</button>' +
+      '</div></div>';
+  }
+  html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="openResignModal(\'' + circleId + '\',\'' + (circle.name || '').replace(/'/g, "\\'") + '\')">Resign</button></div>';
+  return html;
+}
+
 function updateDelibDecisionButtons(cell) {
   var submitBtn = document.getElementById('delib-submit-btn');
   var closeBtn = document.getElementById('delib-close-btn');

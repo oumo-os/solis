@@ -498,7 +498,7 @@ participant_domain {
 
 **One role, no hierarchy.** Everyone in a circle is a steward.
 
-**Ways a steward loses title:**
+**6 ways a steward loses title:**
 1. Term expiry
 2. Resignation
 3. jSTF forced removal
@@ -510,6 +510,8 @@ participant_domain {
 - Active stewards list with Ws, domains, last active
 - Former stewards with departure reason and service period
 - Per-member detail: mandate overlap, competence bars (primary domains), history timeline
+
+**Gating:** resign: auth (401), must be active roster member (400); remove: auth + steward (401/403), target must exist (404), cannot self-remove (400); flush/disband/drift-check/check-expiry: auth + steward (401/403); drift-check: circle must have primary mandate domains (400)
 
 ---
 

@@ -695,5 +695,43 @@ Mutating flows vs the API:
   re-file 409, jSTF Finalised + aSTF Blind Review, stfs Finalised +
   active; aSTF approve -> jSTF Resolution Applied; appeal gates
   (401/400), appeal 201 new thread, appeal accumulated, appeal thread
-  stewards-only.
+   stewards-only.
+- Harness deleted; DB re-seeded.
+
+## Membership & stewardship lifecycle (2026-08-17, to_prod 2.12)
+
+- **Why**: the circle detail view showed roster data from the seed but had
+  no mechanisms for membership changes — resignation, jSTF forced
+  removal, circle flush, disbandment, competence drift, or term expiry
+  were not implemented.
+- **What**:
+  - `POST /api/circles/:id/resign` — any active member may resign.
+    Auth (401), must be active roster member (400).  Records resignation
+    with date and reason in `circle_roster`.
+  - `POST /api/circles/:id/remove-member` — steward removes a member
+    (jSTF forced removal).  Auth + steward gate (401/403), target must
+    be active (404), cannot remove self (400), memberId required (400).
+  - `POST /api/circles/:id/flush` — jSTF full circle flush.  All active
+    members except the executing steward removed.  Auth + steward gate.
+  - `POST /api/circles/:id/disband` — steward disbands the circle.
+    All roster moved to former, circle marked Archived.
+  - `POST /api/circles/:id/drift-check` — checks all active members
+    against circle primary mandate.  Members with Ws < threshold and
+    top domain outside mandate moved to former for 'competence-drift'.
+    Auth + steward gate, circle must have primary mandate domains.
+  - `POST /api/circles/:id/check-expiry` — checks active members against
+    `system_settings.steward_term_months`.  Expired members moved to
+    former for 'term-expiry'.  Auth + steward gate.
+  - `resignCircle` / `removeMember` / `flushCircle` / `disbandCircle` /
+    `driftCheck` / `checkExpiry` added to `SolisApi`.
+  - `renderCircleMembership()` renders active/former stewards with Ws,
+    domains, departure reasons, service periods.
+  - Membership modals for resign, remove, flush, disband with confirm
+    dialogs.  Steward action buttons (remove, flush, disband, drift
+    check, expiry check) on circle detail.
+- Verified headlessly (18 checks): login (3 users), resign gates
+  (401/400), mt resign 200; remove gates (401/403/400/400), sd remove
+  200; non-steward drift 403, drift check 200; expiry gates (401),
+  expiry check 200 (5 expired, 12mo term); mt former with resignation,
+  sd former with jstf-removal, roster state verified.
 - Harness deleted; DB re-seeded.

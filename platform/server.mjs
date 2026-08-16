@@ -1426,6 +1426,172 @@ async function jstfVerdictRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, jstfId: cellId, astfId, type });
 }
 
+// ── 2.12 Membership & Stewardship ──────────────────────
+// 6 ways a steward loses title: term expiry, resignation, jSTF forced
+// removal, jSTF full circle flush, circle disbandment, competence drift.
+
+async function membershipRoutes(req, res, reqUrl, method) {
+  let h;
+  if ((h = await membershipResignRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await membershipRemoveRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await membershipFlushRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await membershipDisbandRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await membershipDriftRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await membershipExpiryRoutes(req, res, reqUrl, method))) return h;
+  return null;
+}
+
+function membershipMarkFormer(rosterId, reason) {
+  const now = new Date().toISOString().slice(0, 10);
+  db.prepare("UPDATE circle_roster SET status = 'former', left = ?, left_reason = ? WHERE id = ?")
+    .run(now, reason, rosterId);
+}
+
+// POST /api/circles/:id/resign — any active member may resign.
+async function membershipResignRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/resign$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  const row = db.prepare('SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = ?')
+    .get(circleId, user.id, 'active');
+  if (!row) return send(res, 400, { error: 'Not an active member of this circle' });
+  membershipMarkFormer(row.id, 'resignation');
+  return send(res, 200, { ok: true, reason: 'resignation' });
+}
+
+// POST /api/circles/:id/remove-member — steward removes another member
+// (jSTF forced removal).  Body: { memberId }.
+async function membershipRemoveRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/remove-member$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const body = await readBody(req);
+  const targetId = String(body.memberId || '').trim();
+  if (!targetId) return send(res, 400, { error: 'memberId required' });
+  if (targetId === user.id) return send(res, 400, { error: 'Cannot remove yourself' });
+  const target = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'")
+    .get(circleId, targetId);
+  if (!target) return send(res, 404, { error: 'Target not an active member' });
+  membershipMarkFormer(target.id, 'jstf-removal');
+  return send(res, 200, { ok: true, reason: 'jstf-removal', memberId: targetId });
+}
+
+// POST /api/circles/:id/flush — jSTF full circle flush.  Removes all
+// active members except the executing steward.  Body: { keepMemberId? }.
+async function membershipFlushRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/flush$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const body = await readBody(req);
+  const keepId = String(body.keepMemberId || user.id).trim();
+  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  let removed = 0;
+  for (const r of rows) {
+    if (r.member_id !== keepId) {
+      membershipMarkFormer(r.id, 'jstf-circle-flush');
+      removed++;
+    }
+  }
+  return send(res, 200, { ok: true, reason: 'jstf-circle-flush', removed });
+}
+
+// POST /api/circles/:id/disband — steward disbands the circle.
+// All roster members move to former, circle marked Archived.
+async function membershipDisbandRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/disband$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  let removed = 0;
+  for (const r of rows) {
+    membershipMarkFormer(r.id, 'circle-disbandment');
+    removed++;
+  }
+  db.prepare("UPDATE circles SET status = 'Archived' WHERE id = ?").run(circleId);
+  return send(res, 200, { ok: true, reason: 'circle-disbandment', removed });
+}
+
+// POST /api/circles/:id/drift-check — check all active members against
+// circle competence mandate.  Members whose top domain is not in the
+// circle's primary mandate AND whose Ws < threshold (default 50) are
+// moved to former for 'competence-drift'.
+async function membershipDriftRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/drift-check$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const body = await readBody(req);
+  const threshold = Number(body.threshold) || 50;
+  const mandateDomains = db.prepare("SELECT domain FROM circle_domains WHERE circle_id = ? AND mandate = 'primary'").all(circleId).map(d => d.domain);
+  if (!mandateDomains.length) return send(res, 400, { error: 'Circle has no primary mandate domains' });
+  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  let drifted = 0;
+  for (const r of rows) {
+    const topDomain = r.top_domain || '';
+    const ws = r.ws || 0;
+    if (ws < threshold && !mandateDomains.includes(topDomain)) {
+      membershipMarkFormer(r.id, 'competence-drift');
+      drifted++;
+    }
+  }
+  return send(res, 200, { ok: true, reason: 'competence-drift', drifted, threshold, mandateDomains });
+}
+
+// POST /api/circles/:id/check-expiry — check all active members against
+// steward_term_months.  Expired members moved to former for 'term-expiry'.
+async function membershipExpiryRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/check-expiry$/);
+  if (!m) return null;
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const circleId = decodeURIComponent(m[1]);
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const ss = db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {};
+  const termMonths = ss.steward_term_months || 12;
+  const now = Date.now();
+  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  let expired = 0;
+  for (const r of rows) {
+    if (!r.joined) continue;
+    const joinedMs = new Date(r.joined).getTime();
+    const termMs = termMonths * 30.44 * 86400000;
+    if (now - joinedMs > termMs) {
+      membershipMarkFormer(r.id, 'term-expiry');
+      expired++;
+    }
+  }
+  return send(res, 200, { ok: true, reason: 'term-expiry', expired, termMonths });
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1880,6 +2046,7 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await jstfEscalateRoutes(req, res, reqUrl, method);
     if (!handled) handled = await jstfVoteRoutes(req, res, reqUrl, method);
     if (!handled) handled = await jstfVerdictRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await membershipRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;
