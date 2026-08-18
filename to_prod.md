@@ -535,6 +535,8 @@ The competence weight system is the mathematical backbone of Solis.
 - Ws is used for vote weighting in deliberation cells
 - Ws determines circle competence fit in p-aSTF
 
+**Gating:** ws-drift: auth + steward (401/403); endorse: auth + steward (401/403), target/domain required (400), target exists (404), member has competence row (404)
+
 ### 3.2 — Wh (Hard Competence)
 
 **Declared by participant:**
@@ -547,12 +549,16 @@ The competence weight system is the mathematical backbone of Solis.
 - Knowledge: None → Elementary → Highschool → Self-taught → Bachelors → Masters → PhD → Professional → Expert
 - Experiential: Explored → Familiar → Experienced → Fluent → Native → Professional
 
+**Gating:** declare-wh: auth (401), domain required (400), wh 0–3000 (400), evidence required (400); verify-wh: auth + steward (401/403), target/domain required (400), competence row exists (404)
+
 ### 3.3 — Interest Score
 
 **Ranked priority total:**
 - Each participant ranks up to 10 domains by interest
 - Rank #1 = 10 points, #10 = 1 point
 - Interest score = weighted sum of interest ranks
+
+**Gating:** auth (401), ranks required (400), max 10 (400), rank must be integer 1–10 (400), no duplicate domains (400)
 
 ### 3.4 — Standing
 
@@ -562,6 +568,8 @@ Used for:
 - Circle competence fit calculation
 - Vote weighting (intersection of Ws with deliberation domains)
 - p-aSTF member rubric inputs
+
+**Gating:** standing: auth (401)
 
 ---
 

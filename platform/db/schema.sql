@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS user_competence (
   color      TEXT,
   rank       INTEGER,
   kind       TEXT DEFAULT 'roster', -- 'roster' = participants[].domains; 'self' = currentUser.domains
+  evidence   TEXT,
+  verified   INTEGER DEFAULT 0,     -- 1 = Wh locked by vSTF verification
   UNIQUE(user_id, domain)
 );
 

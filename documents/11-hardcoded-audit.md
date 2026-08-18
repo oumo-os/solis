@@ -735,3 +735,50 @@ Mutating flows vs the API:
   expiry check 200 (5 expired, 12mo term); mt former with resignation,
   sd former with jstf-removal, roster state verified.
 - Harness deleted; DB re-seeded.
+
+## Competence & weight system (2026-08-18, to_prod 3.1–3.4)
+
+- **Why**: competence data existed in `user_competence` but Ws had no
+  drift, Wh could not be declared or vSTF-verified, interest rankings
+  were not persisted, and standing was not computed from Ws.
+- **What**:
+  - `user_competence` extended with `evidence TEXT` and
+    `verified INTEGER DEFAULT 0` (ALTER TABLE + schema.sql).
+  - `POST /api/competence/ws-drift` — steward runs the drift pass.
+    Recent activity (≤30d) increases Ws by 10; inactivity (>90d or no
+    record) decreases by 10; Ws capped 0–3000.  Returns updated count
+    and per-row changes.  Auth + steward gate (401/403).
+  - `POST /api/competence/endorse` — steward endorses a member's
+    domain, Ws +50 (capped 3000).  Auth + steward (401/403), params
+    required (400), target exists (404), member has competence row
+    (404).
+  - `POST /api/competence/declare-wh` — member declares hard
+    competence: domain + Wh 0–3000 + evidence.  Upserts
+    `user_competence` with verified = 0.  Auth (401), domain required
+    (400), wh bounds (400), evidence required (400).
+  - `POST /api/competence/verify-wh` — steward/vSTF locks Wh
+    (verified = 0/1).  Auth + steward (401/403), params required
+    (400), competence row exists (404).
+  - `POST /api/competence/interest` — member ranks up to 10 domains.
+    Rank #1 = 10 pts … #10 = 1 pt; `users.interest_score` = sum,
+    per-domain `interest` persisted.  Auth (401), ranks required
+    (400), max 10 (400), rank integer 1–10 (400), no duplicates (400).
+  - `GET /api/competence/standing` — standing = sum of all Ws per
+    user, sorted descending, with per-domain detail (ws/wh/interest/
+    evidence/verified).  Auth (401).
+  - Bootstrap: participants[].domains and currentUser.domains now
+    expose `evidence` and `verified`.
+  - `runWsDrift` / `endorseCompetence` / `declareWh` / `verifyWh` /
+    `rankInterests` / `fetchStanding` added to `SolisApi`.
+  - Integrity page aside gains a Competence & Weight card (Standing
+    modal, Declare Wh, Rank Interests); standing modal shows steward
+    Endorse actions per domain; Run Ws Drift for stewards.
+- Verified headlessly (34 checks): login (2 users), standing anon 401,
+  standing computed (sum = Σ Ws) + ranked list; drift gates (401/403),
+  drift run (14 rows); endorse gates (401/403/400/404/404), endorse
+  +50 with prev/next; declare gates (401/400/400/400/400), declare wh
+  200 verified=0; verify gates (401/403/400/404), verify locks 200;
+  interest gates (401/400/>10/rank11/duplicate), score 27 for ranks
+  1-3; bootstrap exposure of wh/verified/interestScore;
+  standing reflects verified Wh.
+- Harness deleted; DB re-seeded.

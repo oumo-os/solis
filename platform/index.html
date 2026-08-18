@@ -1641,6 +1641,15 @@
             <div id="jstf-intake"></div>
           </div>
           <div class="aside-card">
+            <div class="aside-title">Competence & Weight</div>
+            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px">Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws.</div>
+            <div class="flex gap-2" style="flex-direction:column;gap:6px" id="competence-card">
+              <button class="btn btn-sm" onclick="openStandingModal()">Standing & Competence</button>
+              <button class="btn btn-sm" onclick="openDeclareWhModal()">Declare Wh</button>
+              <button class="btn btn-sm" onclick="openInterestModal()">Rank Interests</button>
+            </div>
+          </div>
+          <div class="aside-card">
             <div class="aside-title">STF Types</div>
             <div style="font-size:10px;color:var(--text-secondary);line-height:1.6">
               <div style="margin-bottom:4px"><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of candidacies and competence claims</div>
@@ -3736,6 +3745,116 @@ function getActivePastfCell() {
     if (cells[i].type === 'p-aSTF Cell') return cells[i];
   }
   return null;
+}
+
+// ── Phase 3: Competence & Weight System ───────────────
+function competenceIsClientSteward() { return jstfClientIsSteward(); }
+
+function openStandingModal() {
+  openModal('<div class="sec">Standing & Competence</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Standing = sum of all Ws across domains. Ws drifts with activity; Wh is hard competence, locked by vSTF verification.</div>' +
+    (competenceIsClientSteward() ? '<div class="flex gap-2" style="margin-bottom:10px"><button class="btn btn-sm" onclick="confirmRunDrift()">Run Ws Drift</button></div>' : '') +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn btn-sm" onclick="closeModal()">Close</button></div>',
+    { size: 'lg', onOpen: function(el) { renderStandingInto(el); } });
+}
+
+function renderStandingInto(container) {
+  SolisApi.fetchStanding().then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not load standing.', 'error'); return; }
+    var html = '';
+    (r.standings || []).slice(0, 20).forEach(function(s, i) {
+      html += '<div class="hrow"><div class="hav" style="background:var(--teal);width:30px;height:30px">' + (s.initials || '') + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+        '<div class="flex items-center gap-2"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (i + 1) + '. ' + escapeHtml(s.name || '') + '</div><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">Ws ' + s.standing + '</span></div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">' + (s.domains || []).map(function(d) {
+          return escapeHtml(d.domain) + ' ' + d.ws + (d.verified ? ' <span style="color:var(--green)">✓vSTF</span>' : '') + (competenceIsClientSteward() ? ' <button class="btn btn-sm" style="padding:1px 6px;font-size:9px" onclick="openEndorseModal(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Endorse</button>' : '') : '';
+        }).join('') + '</div></div></div>';
+    });
+    container.querySelector('.modal-body').innerHTML += '<div style="max-height:380px;overflow:auto">' + (html || '<div style="font-size:11px;color:var(--text-tertiary);text-align:center;padding:16px">No competence data.</div>') + '</div>';
+  }).catch(function() { toast('Could not load standing. Is the server running?', 'error'); });
+}
+
+function confirmRunDrift() {
+  confirmModal('Run the Ws drift pass? Active members gain +10, inactive members lose 10.', function() {
+    SolisApi.runWsDrift().then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Drift failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Ws drift complete — ' + (r.updated || 0) + ' rows updated.', 'success');
+      setTimeout(function() { window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not run drift. Is the server running?', 'error'); });
+  });
+}
+
+function openEndorseModal(targetId, domain, name) {
+  confirmModal('Endorse ' + escapeHtml(name) + ' in ' + escapeHtml(domain) + '? Their Ws increases by 50.', function() {
+    SolisApi.endorseCompetence({ targetId: targetId, domain: domain }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Endorsement failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Endorsed — Ws ' + r.prev + ' → ' + r.next + '.', 'success');
+      setTimeout(function() { window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not endorse. Is the server running?', 'error'); });
+  });
+}
+
+function openDeclareWhModal() {
+  var domains = Object.keys((MOCK && MOCK.domains) || {}).length
+    ? Object.keys(MOCK.domains).map(function(k) { var d = MOCK.domains[k]; return '<option value="' + (d.label || k).replace(/'/g, '\\\'') + '">' + (d.label || k) + '</option>'; }).join('')
+    : '<option>Space Law</option>';
+  openModal('<div class="sec">Declare Wh (Hard Competence)</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">State a domain, Wh value (0–3000) and evidence. Wh stays unverified until a vSTF locks it. While unverified, Ws may still drift.</div>' +
+    '<div class="form-group"><label class="form-label">Domain</label><select class="form-input" id="wh-domain">' + domains + '</select></div>' +
+    '<div class="form-group"><label class="form-label">Wh (0–3000)</label><input class="form-input" type="number" id="wh-value" min="0" max="3000" value="1200"></div>' +
+    '<div class="form-group"><label class="form-label">Evidence (URL or text)</label><textarea class="msg-input" rows="2" id="wh-evidence" placeholder="e.g. course certificate URL, publication link..."></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="confirmDeclareWh()">Declare</button></div>',
+    { size: 'md' });
+}
+
+function confirmDeclareWh() {
+  var sel = document.getElementById('wh-domain');
+  var domain = sel ? sel.value : '';
+  var wh = Number((document.getElementById('wh-value') || {}).value);
+  var evidence = ((document.getElementById('wh-evidence') || {}).value || '').trim();
+  if (!domain) { toast('Select a domain.', 'error'); return; }
+  if (!Number.isFinite(wh) || wh < 0 || wh > 3000) { toast('Wh must be between 0 and 3000.', 'error'); return; }
+  if (!evidence) { toast('Describe evidence first.', 'error'); return; }
+  SolisApi.declareWh({ domain: domain, wh: wh, evidence: evidence }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Declaration failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Wh declared — awaiting vSTF verification.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not declare Wh. Is the server running?', 'error'); });
+}
+
+function openInterestModal() {
+  var domains = Object.keys((MOCK && MOCK.domains) || {}).length
+    ? Object.keys(MOCK.domains).map(function(k) { var d = MOCK.domains[k]; return '<option value="' + (d.label || k).replace(/'/g, '\\\'') + '">' + (d.label || k) + '</option>'; }).join('')
+    : '<option>Space Law</option>';
+  var rows = '';
+  for (var i = 1; i <= 5; i++) {
+    rows += '<div class="flex gap-2" style="margin-bottom:6px;align-items:center"><select class="form-input" id="int-domain-' + i + '" style="flex:1">' + domains + '</select><input class="form-input" id="int-rank-' + i + '" type="number" min="1" max="10" value="' + i + '" style="width:70px;text-align:center"></div>';
+  }
+  openModal('<div class="sec">Rank Interests</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Rank up to 10 domains by interest. Rank #1 = 10 pts, #10 = 1 pt; score is the sum.</div>' + rows +
+    '<div class="flex gap-2" style="justify-content:flex-end;margin-top:8px"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="confirmInterest()">Save Ranks</button></div>',
+    { size: 'md' });
+}
+
+function confirmInterest() {
+  var ranks = [];
+  for (var i = 1; i <= 5; i++) {
+    var domainEl = document.getElementById('int-domain-' + i);
+    var rankEl = document.getElementById('int-rank-' + i);
+    if (!domainEl || !rankEl) continue;
+    var domain = domainEl.value;
+    var rank = Number(rankEl.value);
+    if (rank >= 1 && rank <= 10 && ranks.indexOfDomain === undefined) {}
+    if (rank >= 1 && rank <= 10 && !ranks.some(function(r) { return r.domain === domain; })) {
+      ranks.push({ domain: domain, rank: rank });
+    }
+  }
+  if (!ranks.length) { toast('Rank at least one domain.', 'error'); return; }
+  SolisApi.rankInterests({ ranks: ranks }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Ranking failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Interests ranked — score ' + r.interestScore + '.', 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not rank interests. Is the server running?', 'error'); });
 }
 
 function filePastfReview() {

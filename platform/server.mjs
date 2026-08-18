@@ -27,6 +27,8 @@ try { db.exec('ALTER TABLE threads ADD COLUMN endorsements INTEGER DEFAULT 0'); 
 try { db.exec('ALTER TABLE threads ADD COLUMN proposal_cell_id TEXT'); } catch { /* already present */ }
 try { db.exec("ALTER TABLE threads ADD COLUMN visibility TEXT DEFAULT 'public'"); } catch { /* already present */ }
 try { db.exec('ALTER TABLE threads ADD COLUMN jstf_cell_id TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE user_competence ADD COLUMN evidence TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE user_competence ADD COLUMN verified INTEGER DEFAULT 0'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -1592,6 +1594,173 @@ async function membershipExpiryRoutes(req, res, reqUrl, method) {
   return send(res, 200, { ok: true, reason: 'term-expiry', expired, termMonths });
 }
 
+// ── Phase 3: Competence & Weight System ───────────────
+// 3.1 Ws (perceived competence, drifts), 3.2 Wh (hard competence,
+// declared + vSTF-verified), 3.3 Interest score, 3.4 Standing.
+
+// POST /api/competence/ws-drift — steward runs the drift pass.
+// Recent activity (last 30d) increases Ws; inactivity (>90d) decreases it.
+// Ws capped 0–3000.  Applied to roster competence rows.
+async function competenceDriftRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/ws-drift' || method !== 'POST') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const now = Date.now();
+  const DAY = 86400000;
+  const rows = db.prepare("SELECT * FROM user_competence WHERE kind = 'roster'").all();
+  const changes = [];
+  let updated = 0;
+  for (const r of rows) {
+    const last = db.prepare('SELECT MAX(time) t FROM user_activity WHERE user_id = ?').get(r.user_id);
+    let delta = 0;
+    if (last && last.t) {
+      const days = (now - new Date(last.t).getTime()) / DAY;
+      if (days <= 30) delta = 10;          // active → +10
+      else if (days > 90) delta = -10;     // inactive → −10
+    } else {
+      delta = -10;                          // no activity record → decay
+    }
+    if (delta === 0) continue;
+    const prev = r.ws || 0;
+    const next = Math.max(0, Math.min(3000, prev + delta));
+    if (next === prev) continue;
+    db.prepare('UPDATE user_competence SET ws = ? WHERE id = ?').run(next, r.id);
+    updated++;
+    changes.push({ userId: r.user_id, domain: r.domain, prev, next, delta });
+  }
+  return send(res, 200, { ok: true, updated, changes });
+}
+
+// POST /api/competence/endorse — domain steward endorses a member's
+// domain, increasing their Ws by 50.
+async function competenceEndorseRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/endorse' || method !== 'POST') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const body = await readBody(req);
+  const targetId = String(body.targetId || '').trim();
+  const domain = String(body.domain || '').trim();
+  if (!targetId || !domain) return send(res, 400, { error: 'targetId and domain required' });
+  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+  if (!target) return send(res, 404, { error: 'Target member not found' });
+  const row = db.prepare('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?').get(targetId, domain);
+  if (!row) return send(res, 404, { error: 'Member has no competence in that domain' });
+  const prev = row.ws || 0;
+  const next = Math.min(3000, prev + 50);
+  db.prepare('UPDATE user_competence SET ws = ? WHERE id = ?').run(next, row.id);
+  return send(res, 200, { ok: true, targetId, domain, prev, next, delta: next - prev });
+}
+
+// POST /api/competence/declare-wh — member declares hard competence for
+// a domain (0–3000) with evidence.  Sets verified = 0 until vSTF locks.
+async function competenceDeclareRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/declare-wh' || method !== 'POST') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const body = await readBody(req);
+  const domain = String(body.domain || '').trim();
+  const wh = Number(body.wh);
+  const evidence = String(body.evidence || '').trim();
+  if (!domain) return send(res, 400, { error: 'domain required' });
+  if (!Number.isFinite(wh) || wh < 0 || wh > 3000) return send(res, 400, { error: 'wh must be between 0 and 3000' });
+  if (!evidence) return send(res, 400, { error: 'evidence required' });
+  db.prepare(`INSERT INTO user_competence (user_id, domain, wh, evidence, verified, kind)
+    VALUES (?,?,?,?,0,'self')
+    ON CONFLICT(user_id, domain) DO UPDATE SET wh = excluded.wh, evidence = excluded.evidence, verified = 0, kind = 'self', ws = excluded.wh`)
+    .run(user.id, domain, wh, evidence);
+  return send(res, 200, { ok: true, domain, wh, verified: 0 });
+}
+
+// POST /api/competence/verify-wh — vSTF/steward locks or unlocks Wh.
+async function competenceVerifyRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/verify-wh' || method !== 'POST') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+    return send(res, 403, { error: 'Steward access required' });
+  }
+  const body = await readBody(req);
+  const targetId = String(body.targetId || '').trim();
+  const domain = String(body.domain || '').trim();
+  const verified = body.verified ? 1 : 0;
+  if (!targetId || !domain) return send(res, 400, { error: 'targetId and domain required' });
+  const row = db.prepare('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?').get(targetId, domain);
+  if (!row) return send(res, 404, { error: 'No competence row for target domain' });
+  db.prepare('UPDATE user_competence SET verified = ? WHERE id = ?').run(verified, row.id);
+  return send(res, 200, { ok: true, targetId, domain, verified: verified === 1 });
+}
+
+// POST /api/competence/interest — member ranks up to 10 domains by
+// interest.  Rank #1 = 10 pts … #10 = 1 pt.  interest_score is the sum.
+async function competenceInterestRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/interest' || method !== 'POST') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const body = await readBody(req);
+  const ranks = Array.isArray(body.ranks) ? body.ranks : [];
+  if (!ranks.length) return send(res, 400, { error: 'ranks required' });
+  if (ranks.length > 10) return send(res, 400, { error: 'Max 10 ranked domains' });
+  const seen = new Set();
+  let score = 0;
+  for (const entry of ranks) {
+    const domain = String(entry.domain || '').trim();
+    const rank = Number(entry.rank);
+    if (!domain) return send(res, 400, { error: 'domain required per rank' });
+    if (!Number.isInteger(rank) || rank < 1 || rank > 10) return send(res, 400, { error: 'rank must be an integer 1–10' });
+    if (seen.has(domain)) return send(res, 400, { error: 'Duplicate domain ranked' });
+    seen.add(domain);
+    const pts = 11 - rank;
+    score += pts;
+    db.prepare(`INSERT INTO user_competence (user_id, domain, interest, rank, kind)
+      VALUES (?,?,?,?,'self')
+      ON CONFLICT(user_id, domain) DO UPDATE SET interest = excluded.interest, rank = excluded.rank, kind = 'self'`)
+      .run(user.id, domain, pts, rank);
+  }
+  db.prepare("UPDATE users SET interest_score = ?, interest_drift = ? WHERE id = ?").run(score, 'ranked', user.id);
+  return send(res, 200, { ok: true, scored: ranks.length, interestScore: score });
+}
+
+// GET /api/competence/standing — standing = sum of all Ws per user.
+async function competenceStandingRoutes(req, res, reqUrl, method) {
+  if (reqUrl !== '/api/competence/standing' || method !== 'GET') return null;
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  const rows = db.prepare('SELECT * FROM user_competence ORDER BY user_id, domain').all();
+  const byUser = new Map();
+  for (const r of rows) {
+    if (!byUser.has(r.user_id)) byUser.set(r.user_id, []);
+    byUser.get(r.user_id).push({ domain: r.domain, ws: r.ws || 0, wh: r.wh ?? null, interest: r.interest ?? null, evidence: r.evidence ?? null, verified: !!r.verified });
+  }
+  const users = db.prepare('SELECT id, name, initials, standing, interest_score FROM users').all();
+  const standings = users.map(u => {
+    const comps = byUser.get(u.id) || [];
+    const total = comps.reduce((s, c) => s + (c.ws || 0), 0);
+    return {
+      id: u.id, name: u.name, initials: u.initials,
+      standing: total, storedStanding: u.standing ?? null,
+      interestScore: u.interest_score ?? null, domains: comps,
+    };
+  }).sort((a, b) => b.standing - a.standing);
+  return send(res, 200, { ok: true, standings });
+}
+
+async function competenceRoutes(req, res, reqUrl, method) {
+  let h;
+  if ((h = await competenceDriftRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await competenceEndorseRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await competenceDeclareRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await competenceVerifyRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await competenceInterestRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await competenceStandingRoutes(req, res, reqUrl, method))) return h;
+  return null;
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -1639,7 +1808,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     return {
       id: u.id, name: u.name, initials: u.initials, location: dir.location ?? u.location,
       joined: dir.joined ?? u.joined, avatar: j(u.avatar) || {},
-      domains: (compByUser[u.id] || []).filter(c => c.kind === 'roster').map(c => ({ name: c.domain, ws: c.ws, color: c.color })),
+      domains: (compByUser[u.id] || []).filter(c => c.kind === 'roster').map(c => ({ name: c.domain, ws: c.ws, color: c.color, evidence: c.evidence ?? null, verified: !!c.verified })),
       circles: (cirByUser[u.id] || []).filter(c => c.kind === 'roster').map(c => c.circle),
       orgs: (orgByUser[u.id] || []).map(o => o.org_acronym),
       bio: dir.bio ?? u.bio,
@@ -1664,7 +1833,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     // Users without a self-kind profile fall back to their directory (roster) data
     const compSrc = selfComp.length ? selfComp : (compByUser[currentRow.id] || []).filter(c => c.kind === 'roster');
     for (const c of compSrc) {
-      currentUser.domains[c.domain] = { ws: c.ws, wh: c.wh, interest: c.interest, barWs: c.bar_ws, barWh: c.bar_wh, members: c.members };
+      currentUser.domains[c.domain] = { ws: c.ws, wh: c.wh, interest: c.interest, barWs: c.bar_ws, barWh: c.bar_wh, members: c.members, evidence: c.evidence ?? null, verified: !!c.verified };
     }
     if (!currentUser.circles.length) {
       currentUser.circles = (cirByUser[currentRow.id] || []).filter(c => c.kind === 'roster').map(c => ({ name: c.circle, status: 'Active', since: c.since }));
@@ -2047,6 +2216,7 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await jstfVoteRoutes(req, res, reqUrl, method);
     if (!handled) handled = await jstfVerdictRoutes(req, res, reqUrl, method);
     if (!handled) handled = await membershipRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await competenceRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

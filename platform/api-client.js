@@ -315,6 +315,30 @@ var SolisApi = (function() {
     return req('POST', 'circles/' + circleId + '/check-expiry');
   }
 
+  function runWsDrift() {
+    return req('POST', 'competence/ws-drift');
+  }
+
+  function endorseCompetence(payload) {
+    return req('POST', 'competence/endorse', payload);
+  }
+
+  function declareWh(payload) {
+    return req('POST', 'competence/declare-wh', payload);
+  }
+
+  function verifyWh(payload) {
+    return req('POST', 'competence/verify-wh', payload);
+  }
+
+  function rankInterests(payload) {
+    return req('POST', 'competence/interest', payload);
+  }
+
+  function fetchStanding() {
+    return req('GET', 'competence/standing');
+  }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -453,6 +477,12 @@ var SolisApi = (function() {
     flushCircle: flushCircle,
     disbandCircle: disbandCircle,
     driftCheck: driftCheck,
-    checkExpiry: checkExpiry
+    checkExpiry: checkExpiry,
+    runWsDrift: runWsDrift,
+    endorseCompetence: endorseCompetence,
+    declareWh: declareWh,
+    verifyWh: verifyWh,
+    rankInterests: rankInterests,
+    fetchStanding: fetchStanding
   };
 })();
