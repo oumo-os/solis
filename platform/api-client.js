@@ -339,6 +339,20 @@ var SolisApi = (function() {
     return req('GET', 'competence/standing');
   }
 
+  function obsNewsList() { return req('GET', 'observatory/news'); }
+  function obsNewsCreate(payload) { return req('POST', 'observatory/news', payload); }
+  function obsEventsList() { return req('GET', 'observatory/events'); }
+  function obsEventsCreate(payload) { return req('POST', 'observatory/events', payload); }
+  function obsEventsImport(payload) { return req('POST', 'observatory/events/import', payload); }
+  function obsLibraryList() { return req('GET', 'observatory/library'); }
+  function obsLibraryCreate(payload) { return req('POST', 'observatory/library', payload); }
+  function obsPublicationsList() { return req('GET', 'observatory/publications'); }
+  function obsPublicationsPending() { return req('GET', 'observatory/publications/pending'); }
+  function obsPublicationsSubmit(payload) { return req('POST', 'observatory/publications', payload); }
+  function obsPublicationDecide(id, action) { return req('POST', 'observatory/publications/' + id + '/' + action); }
+  function obsOrganisationsList() { return req('GET', 'observatory/organisations'); }
+  function obsOrganisationsCreate(payload) { return req('POST', 'observatory/organisations', payload); }
+
   function saveInboxItem(item) {
     if (!item || !item.id) return Promise.resolve(null);
     return req('PATCH', 'inbox/' + item.id, {
@@ -483,6 +497,19 @@ var SolisApi = (function() {
     declareWh: declareWh,
     verifyWh: verifyWh,
     rankInterests: rankInterests,
-    fetchStanding: fetchStanding
+    fetchStanding: fetchStanding,
+    obsNewsList: obsNewsList,
+    obsNewsCreate: obsNewsCreate,
+    obsEventsList: obsEventsList,
+    obsEventsCreate: obsEventsCreate,
+    obsEventsImport: obsEventsImport,
+    obsLibraryList: obsLibraryList,
+    obsLibraryCreate: obsLibraryCreate,
+    obsPublicationsList: obsPublicationsList,
+    obsPublicationsPending: obsPublicationsPending,
+    obsPublicationsSubmit: obsPublicationsSubmit,
+    obsPublicationDecide: obsPublicationDecide,
+    obsOrganisationsList: obsOrganisationsList,
+    obsOrganisationsCreate: obsOrganisationsCreate
   };
 })();

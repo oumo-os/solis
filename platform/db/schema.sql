@@ -454,7 +454,11 @@ CREATE TABLE IF NOT EXISTS publications (
   downloads INTEGER,
   type      TEXT,
   abstract  TEXT,
-  tags      TEXT             -- JSON array
+  tags      TEXT,             -- JSON array
+  domain    TEXT,
+  status    TEXT DEFAULT 'approved',  -- 'pending' = Tier 2, steward approval required
+  author    TEXT,
+  created_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS publication_authors (
@@ -463,18 +467,33 @@ CREATE TABLE IF NOT EXISTS publication_authors (
   PRIMARY KEY (publication_id, author)
 );
 
+CREATE TABLE IF NOT EXISTS library_items (
+  id        INTEGER PRIMARY KEY AUTOINCREMENT,
+  title     TEXT,
+  category  TEXT,
+  item_type TEXT,
+  domain    TEXT,
+  link      TEXT,
+  curated_by TEXT
+);
+
 CREATE TABLE IF NOT EXISTS news (
   id     INTEGER PRIMARY KEY AUTOINCREMENT,
   title  TEXT,
   time   TEXT,
-  source TEXT
+  source TEXT,
+  domain TEXT,
+  body   TEXT,
+  curated_by TEXT
 );
 
 CREATE TABLE IF NOT EXISTS events (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,
   title    TEXT,
   date     TEXT,
-  location TEXT
+  location TEXT,
+  domain   TEXT,
+  type     TEXT
 );
 
 CREATE TABLE IF NOT EXISTS opportunities (

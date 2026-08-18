@@ -576,31 +576,46 @@ Used for:
 ## Phase 4: Observatory & Public Space (Weeks 10–12)
 
 ### 4.1 — News
+
 - Curated space sector coverage
 - Filtered by domain
 - Updated by Knowledge & Observatory steward circle
 - Public access (no login required)
 
+**Gating:** GET public; POST steward (401/403), title + body required (400), curated_by recorded
+
 ### 4.2 — Calendar
+
 - Global launches, conferences, deadlines
 - Domain-tagged
 - Import from external sources (API or manual)
 
+**Gating:** GET public; POST steward (401/403), title + date required (400); bulk import steward (401/403), events array required (400)
+
 ### 4.3 — Library
+
 - Books, courses, podcasts, career guides, tools
 - Domain-categorised
 - Curated by stewards
 
+**Gating:** GET public; POST steward (401/403), title + link required (400)
+
 ### 4.4 — Publications
+
 - Essays, reports, analysis from participants
 - Tier 2 (requires steward approval for public display)
 - Linked to domain, author, date
 - Public access
 
+**Gating:** GET public (approved only); POST member (401), title + abstract required (400), status pending; approve/reject steward (401/403), publication exists (404); pending list steward-only (401/403)
+
 ### 4.5 — Organisations
+
 - Affiliated organisations
 - Their events, publications, members
 - Independent governance within the Commons
+
+**Gating:** GET public; POST steward (401/403), name required (400)
 
 ---
 

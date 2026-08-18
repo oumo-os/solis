@@ -29,6 +29,15 @@ try { db.exec("ALTER TABLE threads ADD COLUMN visibility TEXT DEFAULT 'public'")
 try { db.exec('ALTER TABLE threads ADD COLUMN jstf_cell_id TEXT'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE user_competence ADD COLUMN evidence TEXT'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE user_competence ADD COLUMN verified INTEGER DEFAULT 0'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE publications ADD COLUMN status TEXT DEFAULT \'approved\''); } catch { /* already present */ }
+try { db.exec('ALTER TABLE publications ADD COLUMN domain TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE publications ADD COLUMN author TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE publications ADD COLUMN created_at TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE news ADD COLUMN domain TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE news ADD COLUMN body TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE news ADD COLUMN curated_by TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE events ADD COLUMN domain TEXT'); } catch { /* already present */ }
+try { db.exec('ALTER TABLE events ADD COLUMN type TEXT'); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -1761,6 +1770,171 @@ async function competenceRoutes(req, res, reqUrl, method) {
   return null;
 }
 
+// ── Phase 4: Observatory & Public Space ────────────────
+// Public read endpoints (no auth) + steward curation writes.
+
+function observatorySteward(user) {
+  return !!user && !!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id);
+}
+
+// NEWS — GET public, POST steward-curated.
+async function obsNewsRoutes(req, res, reqUrl, method) {
+  if (reqUrl === '/api/observatory/news' && method === 'GET') {
+    const rows = db.prepare('SELECT * FROM news ORDER BY time DESC').all();
+    return send(res, 200, { ok: true, news: rows });
+  }
+  if (reqUrl === '/api/observatory/news' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const body = await readBody(req);
+    const title = String(body.title || '').trim();
+    const domain = String(body.domain || '').trim();
+    const bodyText = String(body.body || '').trim();
+    const source = String(body.source || '').trim();
+    if (!title || !bodyText) return send(res, 400, { error: 'title and body required' });
+    const id = db.prepare('INSERT INTO news (title, time, source, domain, body, curated_by) VALUES (?,?,?,?,?,?)')
+      .run(title, new Date().toISOString().slice(0, 10), source || null, domain || null, bodyText, user.name || user.initials).lastInsertRowid;
+    return send(res, 201, { ok: true, id });
+  }
+  return null;
+}
+
+// EVENTS — GET public, POST + bulk import steward-curated.
+async function obsEventsRoutes(req, res, reqUrl, method) {
+  if (reqUrl === '/api/observatory/events' && method === 'GET') {
+    const rows = db.prepare('SELECT * FROM events ORDER BY date DESC').all();
+    return send(res, 200, { ok: true, events: rows });
+  }
+  if (reqUrl === '/api/observatory/events/import' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const body = await readBody(req);
+    const items = Array.isArray(body.events) ? body.events : [];
+    if (!items.length) return send(res, 400, { error: 'events array required' });
+    let imported = 0;
+    for (const e of items) {
+      if (!e.title || !e.date) continue;
+      db.prepare('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)')
+        .run(String(e.title), String(e.date), String(e.location || ''), String(e.domain || ''), String(e.type || ''));
+      imported++;
+    }
+    return send(res, 201, { ok: true, imported });
+  }
+  if (reqUrl === '/api/observatory/events' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const body = await readBody(req);
+    const title = String(body.title || '').trim();
+    const date = String(body.date || '').trim();
+    if (!title || !date) return send(res, 400, { error: 'title and date required' });
+    const id = db.prepare('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)')
+      .run(title, date, String(body.location || '').trim(), String(body.domain || '').trim(), String(body.type || '').trim()).lastInsertRowid;
+    return send(res, 201, { ok: true, id });
+  }
+  return null;
+}
+
+// LIBRARY — GET public, POST steward-curated.
+async function obsLibraryRoutes(req, res, reqUrl, method) {
+  if (reqUrl === '/api/observatory/library' && method === 'GET') {
+    const rows = db.prepare('SELECT * FROM library_items ORDER BY id DESC').all();
+    return send(res, 200, { ok: true, library: rows });
+  }
+  if (reqUrl === '/api/observatory/library' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const body = await readBody(req);
+    const title = String(body.title || '').trim();
+    const link = String(body.link || '').trim();
+    if (!title || !link) return send(res, 400, { error: 'title and link required' });
+    const id = db.prepare('INSERT INTO library_items (title, category, item_type, domain, link, curated_by) VALUES (?,?,?,?,?,?)')
+      .run(title, String(body.category || '').trim(), String(body.itemType || 'book').trim(),
+        String(body.domain || '').trim(), link, user.name || user.initials).lastInsertRowid;
+    return send(res, 201, { ok: true, id });
+  }
+  return null;
+}
+
+// PUBLICATIONS — public reads approved only (Tier 2); members submit
+// (pending); stewards approve/reject.
+async function obsPublicationRoutes(req, res, reqUrl, method) {
+  const pend = reqUrl.match(/^\/api\/observatory\/publications\/([^/]+)\/(approve|reject)$/);
+  if (pend) {
+    if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const id = Number(pend[1]);
+    const pub = db.prepare('SELECT * FROM publications WHERE id = ?').get(id);
+    if (!pub) return send(res, 404, { error: 'Publication not found' });
+    db.prepare('UPDATE publications SET status = ? WHERE id = ?').run(pend[2] === 'approve' ? 'approved' : 'rejected', id);
+    return send(res, 200, { ok: true, id, status: pend[2] === 'approve' ? 'approved' : 'rejected' });
+  }
+  if (reqUrl === '/api/observatory/publications/pending' && method === 'GET') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const rows = db.prepare("SELECT * FROM publications WHERE status = 'pending' ORDER BY created_at DESC").all();
+    return send(res, 200, { ok: true, pending: rows });
+  }
+  if (reqUrl === '/api/observatory/publications' && method === 'GET') {
+    const rows = db.prepare("SELECT * FROM publications WHERE status = 'approved' ORDER BY date DESC").all();
+    return send(res, 200, { ok: true, publications: rows });
+  }
+  if (reqUrl === '/api/observatory/publications' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    const body = await readBody(req);
+    const title = String(body.title || '').trim();
+    const abstract = String(body.abstract || '').trim();
+    if (!title || !abstract) return send(res, 400, { error: 'title and abstract required' });
+    const id = db.prepare('INSERT INTO publications (title, journal, date, type, abstract, tags, domain, status, author, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)')
+      .run(title, String(body.journal || '').trim(), new Date().toISOString().slice(0, 10),
+        String(body.type || 'essay').trim(), abstract,
+        JSON.stringify(Array.isArray(body.tags) ? body.tags : []),
+        String(body.domain || '').trim(), 'pending', user.name || user.initials,
+        new Date().toISOString()).lastInsertRowid;
+    return send(res, 201, { ok: true, id, status: 'pending' });
+  }
+  return null;
+}
+
+// ORGANISATIONS — GET public, POST steward.
+async function obsOrganisationRoutes(req, res, reqUrl, method) {
+  if (reqUrl === '/api/observatory/organisations' && method === 'GET') {
+    const rows = db.prepare('SELECT * FROM organisations ORDER BY name').all();
+    return send(res, 200, { ok: true, organisations: rows });
+  }
+  if (reqUrl === '/api/observatory/organisations' && method === 'POST') {
+    const user = authUser(req);
+    if (!user) return send(res, 401, { error: 'Unauthorized' });
+    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    const body = await readBody(req);
+    const name = String(body.name || '').trim();
+    if (!name) return send(res, 400, { error: 'name required' });
+    const id = 'org-' + Date.now().toString(36);
+    db.prepare('INSERT INTO organisations (id, name, acronym, location, summary, status, website) VALUES (?,?,?,?,?,?,?)')
+      .run(id, name, String(body.acronym || '').trim(), String(body.location || '').trim(),
+        String(body.summary || '').trim(), 'Active', String(body.website || '').trim());
+    return send(res, 201, { ok: true, id });
+  }
+  return null;
+}
+
+async function observatoryRoutes(req, res, reqUrl, method) {
+  let h;
+  if ((h = await obsNewsRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await obsEventsRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await obsLibraryRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await obsPublicationRoutes(req, res, reqUrl, method))) return h;
+  if ((h = await obsOrganisationRoutes(req, res, reqUrl, method))) return h;
+  return null;
+}
+
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT — reassembles the full MOCK-shaped payload
 // (read model for the frontend; writes stay on granular routes)
@@ -2217,6 +2391,7 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await jstfVerdictRoutes(req, res, reqUrl, method);
     if (!handled) handled = await membershipRoutes(req, res, reqUrl, method);
     if (!handled) handled = await competenceRoutes(req, res, reqUrl, method);
+    if (!handled) handled = await observatoryRoutes(req, res, reqUrl, method);
     if (handled) return;
     handled = await resourceRoutes(req, res, reqUrl, method);
     if (handled) return;

@@ -221,7 +221,10 @@
   <div class="view" id="view-observatory">
     <div class="page-title">Observatory</div>
     <div class="page-sub">The public knowledge space · Open to all</div>
-    <div class="insight"><div class="iicon">◆</div><div class="itext"><strong>Observatory:</strong> Curated knowledge for the curious. No participation required — entirely open.</div></div>
+    <div class="flex items-center justify-between gap-3" style="margin-bottom:10px">
+      <div class="insight" style="flex:1;margin-bottom:0"><div class="iicon">◆</div><div class="itext"><strong>Observatory:</strong> Curated knowledge for the curious. No participation required — entirely open.</div></div>
+      <button class="btn btn-sm" onclick="openObservatoryPublishModal()">Publish</button>
+    </div>
     <div class="layout-split">
       <div class="layout-main">
         <div class="g4" style="margin-bottom:20px">
@@ -3855,6 +3858,156 @@ function confirmInterest() {
     closeModal(); toast('Interests ranked — score ' + r.interestScore + '.', 'success');
     setTimeout(function() { window.location.reload(); }, 900);
   }).catch(function() { toast('Could not rank interests. Is the server running?', 'error'); });
+}
+
+// ── Phase 4: Observatory & Public Space ───────────────
+function val(id) {
+  var el = document.getElementById(id);
+  return el ? (el.value || '').trim() : '';
+}
+
+function openObservatoryPublishModal() {
+  var isSteward = jstfClientIsSteward();
+  var tabs = '<div class="settings-tab-bar" style="margin-bottom:12px">' +
+    '<div class="settings-tab active" onclick="obsSwitchTab(0,this)">News</div>' +
+    '<div class="settings-tab" onclick="obsSwitchTab(1,this)">Event</div>' +
+    '<div class="settings-tab" onclick="obsSwitchTab(2,this)">Library</div>' +
+    (isSteward ? '<div class="settings-tab" onclick="obsSwitchTab(3,this)">Organisation</div>' : '') +
+    '<div class="settings-tab" onclick="obsSwitchTab(4,this)">Publication</div>' +
+    (isSteward ? '<div class="settings-tab" onclick="obsSwitchTab(5,this)">Pending</div>' : '') +
+    '</div>';
+  openModal('<div class="sec">Observatory Publish</div>' + tabs +
+    '<div id="obs-publish-body">' + obsNewsForm() + '</div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end;margin-top:12px"><button class="btn btn-sm" onclick="closeModal()">Close</button></div>',
+    { size: 'md' });
+}
+
+function obsSwitchTab(i, btn) {
+  var body = document.getElementById('obs-publish-body');
+  if (!body) return;
+  var tabs = btn.parentElement.querySelectorAll('.settings-tab');
+  tabs.forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  if (i === 0) body.innerHTML = obsNewsForm();
+  else if (i === 1) body.innerHTML = obsEventForm();
+  else if (i === 2) body.innerHTML = obsLibraryForm();
+  else if (i === 3) body.innerHTML = obsOrganisationForm();
+  else if (i === 4) body.innerHTML = obsPublicationForm();
+  else if (i === 5) { body.innerHTML = '<div class="sec">Pending Approvals (Tier 2)</div><div id="obs-pending-list">Loading…</div>'; renderObsPendingApprovals(); }
+}
+
+function obsDomainSelect(id) {
+  var ids = Object.keys((MOCK && MOCK.domains) || {});
+  var opts = ids.length ? ids.map(function(k) { var d = MOCK.domains[k]; return '<option value="' + (d.label || k).replace(/'/g, '\\\'') + '">' + (d.label || k) + '</option>'; }).join('') : '<option>Space Law</option>';
+  return '<select class="form-input" id="' + id + '">' + opts + '</select>';
+}
+
+function obsNewsForm() {
+  return '<div class="form-group"><label class="form-label">Headline</label><input class="form-input" id="obs-n-title" placeholder="e.g. New launch window announced"></div>' +
+    '<div class="form-group"><label class="form-label">Domain</label>' + obsDomainSelect('obs-n-domain') + '</div>' +
+    '<div class="form-group"><label class="form-label">Body</label><textarea class="msg-input" rows="3" id="obs-n-body" placeholder="Summary…"></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Source URL</label><input class="form-input" id="obs-n-source" placeholder="https://…"></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="confirmObsPublish(\'news\')">Publish News</button></div>';
+}
+
+function obsEventForm() {
+  return '<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="obs-e-title" placeholder="e.g. Space Law Summit 2027"></div>' +
+    '<div class="form-group"><label class="form-label">Date</label><input class="form-input" id="obs-e-date" placeholder="2027-03-15"></div>' +
+    '<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="obs-e-location" placeholder="Kampala, Uganda"></div>' +
+    '<div class="form-group"><label class="form-label">Domain</label>' + obsDomainSelect('obs-e-domain') + '</div>' +
+    '<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="obs-e-type"><option>launch</option><option>conference</option><option>deadline</option></select></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="confirmObsPublish(\'event\')">Add Event</button></div>';
+}
+
+function obsLibraryForm() {
+  return '<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="obs-l-title" placeholder="e.g. Handbook of Space Law"></div>' +
+    '<div class="form-group"><label class="form-label">Category</label><input class="form-input" id="obs-l-category" placeholder="books / courses / podcasts / guides / tools"></div>' +
+    '<div class="form-group"><label class="form-label">Type</label><input class="form-input" id="obs-l-type" value="book"></div>' +
+    '<div class="form-group"><label class="form-label">Domain</label>' + obsDomainSelect('obs-l-domain') + '</div>' +
+    '<div class="form-group"><label class="form-label">Link</label><input class="form-input" id="obs-l-link" placeholder="https://…"></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="confirmObsPublish(\'library\')">Add to Library</button></div>';
+}
+
+function obsOrganisationForm() {
+  return '<div class="form-group"><label class="form-label">Name</label><input class="form-input" id="obs-o-name" placeholder="e.g. African Space Agency"></div>' +
+    '<div class="form-group"><label class="form-label">Acronym</label><input class="form-input" id="obs-o-acronym" placeholder="AfSA"></div>' +
+    '<div class="form-group"><label class="form-label">Location</label><input class="form-input" id="obs-o-location"></div>' +
+    '<div class="form-group"><label class="form-label">Summary</label><textarea class="msg-input" rows="2" id="obs-o-summary"></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Website</label><input class="form-input" id="obs-o-website" placeholder="https://…"></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="confirmObsPublish(\'organisation\')">Register Organisation</button></div>';
+}
+
+function obsPublicationForm() {
+  return '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">Any member can submit an essay/report. Tier 2: it shows publicly only after steward approval.</div>' +
+    '<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="obs-p-title"></div>' +
+    '<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="obs-p-type"><option>essay</option><option>report</option><option>analysis</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Domain</label>' + obsDomainSelect('obs-p-domain') + '</div>' +
+    '<div class="form-group"><label class="form-label">Abstract</label><textarea class="msg-input" rows="3" id="obs-p-abstract" placeholder="Summary…"></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" onclick="confirmObsPublicationSubmit()">Submit (pending)</button></div>';
+}
+
+function renderObsPendingApprovals() {
+  var host = document.getElementById('obs-pending-list');
+  if (!host) return;
+  SolisApi.obsPublicationsPending().then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { host.innerHTML = '<div style="font-size:11px;color:var(--red)">Could not load pending publications.</div>'; return; }
+    var pubs = r.pending || [];
+    if (!pubs.length) { host.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary);text-align:center;padding:12px">No pending publications.</div>'; return; }
+    host.innerHTML = pubs.map(function(p) {
+      return '<div class="hrow"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--text)">' + escapeHtml(p.title || '') + '</div><div style="font-size:10px;color:var(--text-tertiary)">by ' + escapeHtml(p.author || '') + ' · ' + escapeHtml(p.domain || '') + '</div></div>' +
+        '<div class="flex gap-2"><button class="btn btn-sm btn-primary" onclick="decideObsPublication(' + p.id + ',\'approve\')">Approve</button><button class="btn btn-sm" onclick="decideObsPublication(' + p.id + ',\'reject\')">Reject</button></div></div>';
+    }).join('');
+  }).catch(function() { host.innerHTML = '<div style="font-size:11px;color:var(--red)">Server error.</div>'; });
+}
+
+function confirmObsPublish(kind) {
+  var payload = null, label = '';
+  if (kind === 'news') {
+    payload = { title: val('obs-n-title'), domain: val('obs-n-domain'), body: val('obs-n-body'), source: val('obs-n-source') };
+    label = 'Publish this news item?';
+  } else if (kind === 'event') {
+    payload = { title: val('obs-e-title'), date: val('obs-e-date'), location: val('obs-e-location'), domain: val('obs-e-domain'), type: val('obs-e-type') };
+    label = 'Add this event to the calendar?';
+  } else if (kind === 'library') {
+    payload = { title: val('obs-l-title'), category: val('obs-l-category'), itemType: val('obs-l-type'), domain: val('obs-l-domain'), link: val('obs-l-link') };
+    label = 'Add this item to the library?';
+  } else if (kind === 'organisation') {
+    payload = { name: val('obs-o-name'), acronym: val('obs-o-acronym'), location: val('obs-o-location'), summary: val('obs-o-summary'), website: val('obs-o-website') };
+    label = 'Register this organisation?';
+  }
+  if (!payload) return;
+  var call = kind === 'news' ? SolisApi.obsNewsCreate(payload)
+    : kind === 'event' ? SolisApi.obsEventsCreate(payload)
+    : kind === 'library' ? SolisApi.obsLibraryCreate(payload)
+    : SolisApi.obsOrganisationsCreate(payload);
+  confirmModal(label, function() {
+    call.then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Publish failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      closeModal(); toast(kind.charAt(0).toUpperCase() + kind.slice(1) + ' published.', 'success');
+      setTimeout(function() { window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not publish. Is the server running?', 'error'); });
+  });
+}
+
+function confirmObsPublicationSubmit() {
+  var title = val('obs-p-title');
+  var abstract = val('obs-p-abstract');
+  if (!title || !abstract) { toast('Title and abstract required.', 'error'); return; }
+  confirmModal('Submit this publication? It will be public only after a steward approves it (Tier 2).', function() {
+    SolisApi.obsPublicationsSubmit({ title: title, type: val('obs-p-type'), domain: val('obs-p-domain'), abstract: abstract }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Submit failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      closeModal(); toast('Publication submitted — pending steward approval.', 'success');
+      setTimeout(function() { window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not submit. Is the server running?', 'error'); });
+  });
+}
+
+function decideObsPublication(id, action) {
+  SolisApi.obsPublicationDecide(id, action).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Decision failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast('Publication ' + (action === 'approve' ? 'approved — now public.' : 'rejected.'), 'success');
+    setTimeout(function() { window.location.reload(); }, 900);
+  }).catch(function() { toast('Could not decide. Is the server running?', 'error'); });
 }
 
 function filePastfReview() {

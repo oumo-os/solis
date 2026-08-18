@@ -782,3 +782,40 @@ Mutating flows vs the API:
   1-3; bootstrap exposure of wh/verified/interestScore;
   standing reflects verified Wh.
 - Harness deleted; DB re-seeded.
+
+## Observatory & public space (2026-08-18, to_prod 4.1–4.5)
+
+- **Why**: the Observatory tabs rendered seeded news/events/
+  publications but had no create, import, curation, or Tier-2 approval
+  lifecycle, and no library collection at all.
+- **What**:
+  - Schema: `publications` gains domain/status/author/created_at;
+    `news` gains domain/body/curated_by; `events` gains domain/type;
+    new `library_items` table (title, category, item_type, domain,
+    link, curated_by).  ALTER TABLE migrations + schema.sql.
+  - News: `GET /api/observatory/news` public; `POST` steward-only
+    (title + body required), records `curated_by`.
+  - Events: `GET` public; `POST` steward-only (title + date required);
+    `POST /api/observatory/events/import` steward-only bulk import.
+  - Library: `GET` public; `POST` steward-only (title + link required).
+  - Publications: `GET` public shows **approved only** (Tier 2);
+    `POST` any member submits with status `pending`; `GET
+    /publications/pending` steward-only; `POST
+    /publications/:id/approve|reject` steward-only; 404 if missing.
+  - Organisations: `GET` public; `POST` steward-only (name required).
+  - Dispatcher: `observatoryRoutes` after `competenceRoutes`.
+  - `SolisApi`: obsNewsList/Create, obsEventsList/Create/Import,
+    obsLibraryList/Create, obsPublicationsList/Pending/Submit/Decide,
+    obsOrganisationsList/Create.
+  - Observatory page gains a Publish button → modal with News / Event /
+    Library / Organisation / Publication / Pending (steward) tabs;
+    pending table with Approve/Reject per row.
+- Verified headlessly (34 checks): news GET public, POST gates
+  (401/403/400), publish 201 + curated_by visible; events GET public,
+  gates, publish 201, import empty 400 + 2-item 201; library GET
+  public, gates (403/400), publish 201; publications GET public
+  (3 seed), submit gates (401/400), submit 201 pending, pending list
+  member 403 / steward lists, approve anon 401 + member 403, approve
+  200 → appears in public list, reject 200; organisations GET public,
+  gates (403/400), register 201, visible publicly.
+- Harness deleted; DB re-seeded.
