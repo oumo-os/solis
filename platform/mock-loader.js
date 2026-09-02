@@ -12,17 +12,17 @@ function renderParticipantCards() {
     if (p.avatar.gradient) avatarStyle += ';background:' + p.avatar.gradient + ';color:#fff';
     if (p.avatar.gold) avatarStyle += ';background:var(--gold)';
     var domains = p.domains.map(function(d) {
-      return '<span class="tag ' + d.color + '" style="font-size:6px">' + d.name + ' ' + d.ws + '</span>';
+      return '<span class="tag tag-xs ' + d.color + '">' + d.name + ' ' + d.ws + '</span>';
     }).join('');
     var bottom = [];
-    p.circles.forEach(function(c) { bottom.push('<span class="tag tag-green" style="font-size:6px">' + c + '</span>'); });
-    p.orgs.forEach(function(o) { bottom.push('<span class="tag tag-default" style="font-size:6px">' + o + '</span>'); });
+    p.circles.forEach(function(c) { bottom.push('<span class="tag tag-xs tag-green">' + c + '</span>'); });
+    p.orgs.forEach(function(o) { bottom.push('<span class="tag tag-xs tag-default">' + o + '</span>'); });
     return '<div class="card participant-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="openParticipantModal(\'' + p.name + '\',\'' + p.bio + '\',\'' + p.location + '\',\'' + p.joined + '\',\'' + p.initials + '\')">'
       + '<div class="avatar avatar-square" style="' + avatarStyle + '">' + p.initials + '</div>'
       + '<div class="pc-body">'
       + '<div class="pc-top"><div class="pc-name">' + p.name + '</div><div class="pc-sub">' + p.location + ' · ' + p.joined + '</div></div>'
       + '<div class="pc-domains">' + domains + '</div>'
-      + '<div class="pc-bottom">' + bottom.join('') + '<span class="tag tag-red" style="font-size:6px;cursor:pointer" onclick="event.stopPropagation();openReportModal(\'' + p.id + '\',\'' + p.name.replace(/'/g, '\\\'') + '\')">Report</span></div>'
+      + '<div class="pc-bottom">' + bottom.join('') + '<span class="tag tag-xs tag-red" style="cursor:pointer" onclick="event.stopPropagation();openReportModal(\'' + p.id + '\',\'' + p.name.replace(/'/g, '\\\'') + '\')">Report</span></div>'
       + '</div></div>';
   }).join('');
 }
@@ -58,7 +58,12 @@ function filterCircles(filter, btn) {
 
 function renderSTFRows() {
   if (!MOCK) return '';
-  var all = MOCK.stfs.pending.concat(MOCK.stfs.active, MOCK.stfs.completed);
+  var s = MOCK.stfs;
+  // normalise: may be {pending,active,completed} or array or missing (anon)
+  if (Array.isArray(s)) s = { pending: [], active: s, completed: [] };
+  s = s || { pending: [], active: [], completed: [] };
+  s.pending = s.pending || []; s.active = s.active || []; s.completed = s.completed || [];
+  var all = s.pending.concat(s.active, s.completed);
   if (!all.length) return '<tr><td colspan="5" style="text-align:center;padding:20px;font-size:12px;color:var(--text-tertiary)">No STFs currently active.</td></tr>';
   return all.map(function(s) {
     var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : 'tag-blue';

@@ -5,7 +5,7 @@
 :root{
   --navy:#0E1E34;--navy-mid:#1A3255;--navy-light:#243D5E;
   --gold:#C8960E;--gold-soft:#FDF6E8;--gold-border:#F0D8A0;
-  --bg:#F8F9FB;--surface:#FFF;--surface-raised:#F2F5F9;
+  --bg:#F2F5F9;--surface:#FFF;--surface-raised:#F8FAFB;
   --border:#DDE3EC;--border-subtle:#EBF0F6;
   --text:#18293D;--text-secondary:#526070;--text-tertiary:#8A9DB0;
   --blue:#1A5296;--blue-soft:#EBF3FC;--blue-border:#C4D9F0;
@@ -111,6 +111,11 @@ blockquote{border-left:3px solid var(--gold);padding-left:var(--space-5);margin:
 
 /* ── Mobile nav ── */
 .nav-links{transition:max-height .25s ease,opacity .2s ease;overflow:hidden}
+
+/* ── Wide (≤1320px) ── */
+@media(max-width:1320px){
+  #opportunities{grid-template-columns:1fr 1fr 1fr !important}
+}
 
 /* ── Tablet (≤768px) ── */
 @media(max-width:768px){

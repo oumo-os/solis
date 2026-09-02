@@ -105,7 +105,7 @@
     document.getElementById('stats').innerHTML = stats.map(function(s,i) {
       return '<div style="padding:var(--space-2) var(--space-4);display:flex;justify-content:space-between;align-items:center;'+(i<stats.length-1?'border-bottom:1px solid var(--border-subtle)':'')+'">' +
         '<span class="text-xs" style="color:var(--text-secondary)">'+s[1]+'</span>' +
-        '<span class="serif" style="font-size:20px;font-weight:700;color:var(--navy)">'+s[0]+'</span></div>';
+        '<span class="serif" style="font-size:18px;font-weight:700;color:var(--navy)">'+s[0]+'</span></div>';
     }).join('');
 
     var sectorNews = [

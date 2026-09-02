@@ -3770,7 +3770,7 @@ function renderStandingInto(container) {
         '<div style="flex:1;min-width:0">' +
         '<div class="flex items-center gap-2"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (i + 1) + '. ' + escapeHtml(s.name || '') + '</div><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">Ws ' + s.standing + '</span></div>' +
         '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">' + (s.domains || []).map(function(d) {
-          return escapeHtml(d.domain) + ' ' + d.ws + (d.verified ? ' <span style="color:var(--green)">✓vSTF</span>' : '') + (competenceIsClientSteward() ? ' <button class="btn btn-sm" style="padding:1px 6px;font-size:9px" onclick="openEndorseModal(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Endorse</button>' : '') : '';
+          return escapeHtml(d.domain) + ' ' + d.ws + (d.verified ? ' <span style="color:var(--green)">✓vSTF</span>' : '') + (competenceIsClientSteward() ? ' <button class="btn btn-xs" onclick="openEndorseModal(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Endorse</button>' : '');
         }).join('') + '</div></div></div>';
     });
     container.querySelector('.modal-body').innerHTML += '<div style="max-height:380px;overflow:auto">' + (html || '<div style="font-size:11px;color:var(--text-tertiary);text-align:center;padding:16px">No competence data.</div>') + '</div>';
@@ -5919,11 +5919,12 @@ function startApp() {
   if (SOLIS_TOKEN) {
     loadApiData().then(function() { initApp(); }).catch(function() { initApp(); });
   } else {
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
     initApp();
   }
 }
-startApp();
+// Defer until all var inits (DM, DM_LAYOUT, etc. defined ~line 6930) have executed
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', startApp); else setTimeout(startApp, 0);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REGISTRATION
@@ -6928,6 +6929,9 @@ DM_IDS.forEach(function(id){DM_drift[id]={x:DM_LAYOUT[id].x,y:DM_LAYOUT[id].y};}
 var DM_vel={};
 (function(){var rng=dmMkRng(7);DM_IDS.forEach(function(id){DM_vel[id]={vx:(rng()-0.5)*0.02,vy:(rng()-0.5)*0.02};});})();
 
+// State — must be before dmReinit because startApp→initApp→dmReinit runs before later var inits reach this point
+var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2};
+
 function dmReinit(){
   DM_LAYOUT=dmLayout();
   DM_STATS=dmStats();
@@ -6935,12 +6939,9 @@ function dmReinit(){
     DM_drift[id]={x:DM_LAYOUT[id].x,y:DM_LAYOUT[id].y};
     DM_vel[id]={vx:(Math.random()-0.5)*0.02,vy:(Math.random()-0.5)*0.02};
   });
-  DM_EDGES=dmEdges(DM.mode);
+  DM_EDGES=dmEdges(DM && DM.mode || 'membership');
   dmRender();
 }
-
-// State
-var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:0.5},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2};
 
 function dmSpikeLen(pw){return 4+(pw/3000)*18;}
 function dmStarR(pw){return 0.8+(pw/3000)*1.4;}
@@ -9313,7 +9314,7 @@ function renderProfileView() {
 
 function loadApiData() {
   if (!SOLIS_TOKEN) {
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
     return Promise.resolve();
   }
   return SolisApi.bootstrap(EMPTY_VIEW)
@@ -9322,7 +9323,7 @@ function loadApiData() {
       // Token expired — clear
       SOLIS_TOKEN = null;
       localStorage.removeItem('solisToken');
-      MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+      MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
       return;
     }
     if (!data || data.error) throw new Error('API error: ' + (data.__status || 'unknown'));
@@ -9335,7 +9336,7 @@ function loadApiData() {
   })
   .catch(function(e) {
     console.error('loadApiData failed:', e);
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
   });
 }
 
