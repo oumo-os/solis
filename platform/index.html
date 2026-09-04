@@ -253,11 +253,8 @@
           <div class="card">
             <div class="sec">Library</div>
             <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Books, courses, podcasts, career guides, and tools</div>
-            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Law Fundamentals</div><span class="tag tag-purple" style="font-size:8px">Guide</span></div>
-            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Orbital Mechanics 101</div><span class="tag tag-blue" style="font-size:8px">Course</span></div>
-            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Remote Sensing Data Handbook</div><span class="tag tag-green" style="font-size:8px">Reference</span></div>
-            <div class="hrow"><div style="flex:1;font-size:13px;color:var(--text)">Space Economy Report 2026</div><span class="tag tag-amber" style="font-size:8px">Report</span></div>
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">200+ resources across all domains</div>
+            <div id="obs-library-list"></div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px" id="obs-library-count"></div>
           </div>
           <div class="card">
             <div class="sec">Publications</div>
@@ -1044,63 +1041,7 @@
         <div class="sec" style="font-size:13px;font-weight:600;color:var(--text)">Layer 2 — Member Rubric (35 pts + 2 risk flags)</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Filed only for your assigned members. You see their public governance records AND their deliberation contributions within the Circle.</div>
 
-        <!-- Member 1 -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md">AJ</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Circle · Steward · Joined Jan 2026</div></div></div>
-          <table class="tbl" style="margin-bottom:12px">
-            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-            <tr><td style="font-weight:500">Effectiveness</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Responsive to matters that concern the Circle</td></tr>
-            <tr><td style="font-weight:500">Stewardship</td><td class="m">7</td><td><input type="number" value="6" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Projects the org's vision in their work</td></tr>
-            <tr><td style="font-weight:500">Participation</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Present and active</td></tr>
-            <tr><td style="font-weight:500">Investment</td><td class="m">8</td><td><input type="number" value="7" min="0" max="8" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Genuine skin in the game vs. seat-filling</td></tr>
-            <tr><td style="font-weight:500">Productivity</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Adds unique value</td></tr>
-            <tr><td style="font-weight:500">Role Fit</td><td class="m">4</td><td><input type="number" value="3" min="0" max="4" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Understands what the Circle requires of them</td></tr>
-          </table>
-          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Health Subtotal</span>
-            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">29 / 35</span>
-          </div>
-          <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Risk Flags</div>
-          <div class="g2" style="margin-bottom:0">
-            <div>
-              <div class="text-label mb-1">Replaceability (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer</span></div>
-            </div>
-            <div>
-              <div class="text-label mb-1">Indispensable (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers jSTF pre-referral</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Member 2 -->
-        <div class="card" style="margin-bottom:16px">
-          <div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Space Law Circle · Member · Joined Mar 2026</div></div></div>
-          <table class="tbl" style="margin-bottom:12px">
-            <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-            <tr><td style="font-weight:500">Effectiveness</td><td class="m">5</td><td><input type="number" value="3" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Responsive to matters that concern the Circle</td></tr>
-            <tr><td style="font-weight:500">Stewardship</td><td class="m">7</td><td><input type="number" value="4" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Projects the org's vision in their work</td></tr>
-            <tr><td style="font-weight:500">Participation</td><td class="m">5</td><td><input type="number" value="2" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Present and active</td></tr>
-            <tr><td style="font-weight:500">Investment</td><td class="m">8</td><td><input type="number" value="3" min="0" max="8" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Genuine skin in the game vs. seat-filling</td></tr>
-            <tr><td style="font-weight:500">Productivity</td><td class="m">6</td><td><input type="number" value="3" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Adds unique value</td></tr>
-            <tr><td style="font-weight:500">Role Fit</td><td class="m">4</td><td><input type="number" value="2" min="0" max="4" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Understands what the Circle requires of them</td></tr>
-          </table>
-          <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
-            <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Health Subtotal</span>
-            <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--gold)">17 / 35</span>
-          </div>
-          <div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Risk Flags</div>
-          <div class="g2" style="margin-bottom:0">
-            <div>
-              <div class="text-label mb-1">Replaceability (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="1" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer</span></div>
-            </div>
-            <div>
-              <div class="text-label mb-1">Indispensable (0–5)</div>
-              <div class="flex items-center gap-2"><input type="number" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"><span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers jSTF pre-referral</span></div>
-            </div>
-          </div>
-        </div>
+        <div id="pastf-members"></div>
 
         <div class="divider" style="margin:20px 0"></div>
 
@@ -1124,8 +1065,8 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Profile</div>
-          <div class="flex items-center gap-3 mb-2"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Founded Mar 2026 · 8 members</div></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Mandate: Space Law &amp; Policy, Telecommunications, Debris Tracking, Regulatory Compliance</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" id="pastf-circle-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="pastf-circle-name">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)" id="pastf-circle-sub">Founded Mar 2026 · 8 members</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="pastf-circle-mandate">Mandate: Space Law &amp; Policy, Telecommunications, Debris Tracking, Regulatory Compliance</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 1 — Circle Rubric</div>
@@ -1139,7 +1080,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 2 — Member Scores</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8" id="pastf-member-scores">
             <div class="flex justify-between mb-2"><span><strong>Akello J.</strong></span><span style="color:var(--text)">29/35</span></div>
             <div class="flex justify-between"><span><strong>Ssempa D.</strong></span><span style="color:var(--amber)">17/35</span></div>
           </div>
@@ -3838,6 +3779,68 @@ function getActivePastfCell() {
   return null;
 }
 
+// Layer-2 member cards + circle profile + score list, driven by the active
+// p-aSTF cell's circle roster (replaces the fixed demo members). Keeps the
+// exact DOM shape filePastfReview() reads (name div, .avatar, 8 tbl inputs).
+function renderPastfMembers() {
+  var container = document.getElementById('pastf-members');
+  var cell = getActivePastfCell();
+  var circle = null;
+  if (cell) {
+    var circles = (MOCK && MOCK.circles) || [];
+    for (var i = 0; i < circles.length; i++) {
+      if (circles[i].name === cell.circle || circles[i].id === cell.circle) { circle = circles[i]; break; }
+    }
+    if (!circle && cell.circle) {
+      var short = String(cell.circle).replace(/ Circle$/, '');
+      for (var j = 0; j < circles.length; j++) {
+        if (circles[j].name === short || circles[j].name.indexOf(short) === 0) { circle = circles[j]; break; }
+      }
+    }
+  }
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };
+  var roster = (circle && circle.roster && circle.roster.active) || [];
+  if (circle) {
+    var words = (circle.name || '').split(/\s+/).filter(Boolean);
+    setText('pastf-circle-icon', words.length >= 2 ? (words[0].charAt(0) + words[1].charAt(0)).toUpperCase() : (circle.name || 'SL').slice(0, 2).toUpperCase());
+    setText('pastf-circle-name', circle.name || '');
+    setText('pastf-circle-sub', 'Founded ' + (circle.founded || '—') + ' · ' + (circle.members || roster.length) + ' members');
+    var mandate = ((circle.mandate && circle.mandate.primary) || []).concat((circle.mandate && circle.mandate.secondary) || []);
+    setText('pastf-circle-mandate', mandate.length ? 'Mandate: ' + mandate.join(', ') : '');
+  }
+  setHtml('pastf-member-scores', roster.length ? roster.map(function(m) {
+    return '<div class="flex justify-between" style="margin-bottom:2px"><span><strong>' + escapeHtml(m.initials || m.name || '') + '</strong></span><span style="color:var(--text-tertiary)">—</span></div>';
+  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No members to score yet.</div>');
+  if (!container) return;
+  if (!cell) { container.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No active p-aSTF review. A steward can spawn one from the STF Dash.</div></div>'; return; }
+  if (!roster.length) { container.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No circle members found for this review.</div></div>'; return; }
+  var dims = [
+    ['Effectiveness', 5, 'Responsive to matters that concern the Circle'],
+    ['Stewardship', 7, 'Projects the org vision in their work'],
+    ['Participation', 5, 'Present and active'],
+    ['Investment', 8, 'Genuine skin in the game vs. seat-filling'],
+    ['Productivity', 6, 'Adds unique value'],
+    ['Role Fit', 4, 'Understands what the Circle requires of them']
+  ];
+  var num = function(max) { return '<input type="number" value="0" min="0" max="' + max + '" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px">'; };
+  container.innerHTML = roster.map(function(m) {
+    var rows = dims.map(function(d) {
+      return '<tr><td style="font-weight:500">' + d[0] + '</td><td class="m">' + d[1] + '</td><td>' + num(d[1]) + '</td><td style="font-size:10px;color:var(--text-tertiary)">' + d[2] + '</td></tr>';
+    }).join('');
+    return '<div class="card" style="margin-bottom:16px">' +
+      '<div class="flex items-center gap-3 mb-3"><div class="avatar avatar-md" style="background:' + (m.color || 'var(--navy-light)') + ';color:#fff">' + escapeHtml(m.initials || '?') + '</div>' +
+      '<div><div style="font-size:14px;font-weight:500;color:var(--text)">' + escapeHtml(m.name || '') + '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml((circle ? circle.name : '') + ' · ' + (m.topDomain || 'General') + ' · Joined ' + (m.joined || '—')) + '</div></div></div>' +
+      '<table class="tbl" style="margin-bottom:12px"><tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>' + rows + '</table>' +
+      '<div class="sec" style="font-size:11px;font-weight:600;color:var(--text)">Risk Flags</div>' +
+      '<div class="g2" style="margin-bottom:0"><div><div class="text-label mb-1">Replaceability (0–5)</div>' +
+      '<div class="flex items-center gap-2">' + num(5) + '<span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers knowledge-transfer</span></div></div>' +
+      '<div><div class="text-label mb-1">Indispensable (0–5)</div>' +
+      '<div class="flex items-center gap-2">' + num(5) + '<span style="font-size:10px;color:var(--text-tertiary)">&gt;3 triggers jSTF pre-referral</span></div></div></div></div>';
+  }).join('');
+}
+
 // ── Phase 3: Competence & Weight System ───────────────
 function competenceIsClientSteward() { return jstfClientIsSteward(); }
 
@@ -4083,10 +4086,9 @@ function refreshObservatoryLists() {
       orgs = MOCK.organisations;
     }
   }).catch(function() {}));
-  // Note: obsLibraryList has no display target yet (no library view reads it);
-  // the endpoint + client wrapper stay as the reserved path for one.
   return Promise.all(calls).then(function() {
     renderObservatoryNews();
+    renderLibraryCards();
     renderObservatoryCalendar();
     renderObservatoryOpportunities();
     renderObservatoryCounts();
@@ -4094,6 +4096,7 @@ function refreshObservatoryLists() {
     renderOrganisations();
   }, function() {
     renderObservatoryNews();
+    renderLibraryCards();
     renderObservatoryCalendar();
     renderObservatoryOpportunities();
     renderObservatoryCounts();
@@ -5616,6 +5619,33 @@ function renderObservatoryHomePubs() {
   }).join('');
 }
 
+// Library shelf on the observatory home: served by GET
+// /api/observatory/library (curated via the steward publish form).
+function renderLibraryCards() {
+  var el = document.getElementById('obs-library-list');
+  var countEl = document.getElementById('obs-library-count');
+  if (!el) return;
+  el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Loading library…</div>';
+  SolisApi.obsLibraryList().then(function(r) {
+    var items = (r && Array.isArray(r.library)) ? r.library : [];
+    if (!items.length) {
+      el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No library items yet — stewards can add some via Publish.</div>';
+      if (countEl) countEl.textContent = '';
+      return;
+    }
+    el.innerHTML = items.slice(0, 6).map(function(it) {
+      var inner = '<div style="flex:1;font-size:13px;color:var(--text)">' + escapeHtml(it.title || '') + '</div>' +
+        '<span class="tag tag-purple" style="font-size:8px">' + escapeHtml(it.category || it.item_type || 'Resource') + '</span>';
+      return it.link
+        ? '<a class="hrow" style="cursor:pointer;text-decoration:none" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+        : '<div class="hrow">' + inner + '</div>';
+    }).join('');
+    if (countEl) countEl.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '') + ' across all domains';
+  }).catch(function() {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Library unavailable offline.</div>';
+  });
+}
+
 function renderObservatoryPublications(filter) {
   var el = document.getElementById('observatory-publications-list');
   if (!el) return;
@@ -6010,6 +6040,7 @@ function initApp() {
   if (stfBody) stfBody.innerHTML = renderSTFRows();
   renderStfAssignments();
   renderStfSummary();
+  renderPastfMembers();
   renderCommonsAside();
   renderYourCells();
   renderJstfPanel();
@@ -6038,6 +6069,7 @@ function initApp() {
   renderEventsList();
   renderObservatoryPublications();
   renderObservatoryNews();
+  renderLibraryCards();
   renderObservatoryCalendar();
   renderObservatoryOpportunities();
   renderObservatoryCounts();

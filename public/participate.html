@@ -20,6 +20,8 @@
       <div class="nav-links">
         <a href="about.html" class="nav-link">About</a>
         <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
         <a href="stewards.html" class="nav-link">Stewards</a>
         <a href="organisations.html" class="nav-link">Organisations</a>
       </div>
@@ -31,11 +33,16 @@
     <div class="nav-line"></div>
   </nav>
 
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="part-orbit" style="width:380px;height:380px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Participate</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Join the Commons</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:520px">The Commons is open. No application, no approval, no credentials required. You participate, and the Commons is there.</p>
+    </div>
+  </section>
   <div class="container">
-    <div style="padding:var(--space-7) 0 var(--space-8);max-width:600px">
-      <p class="text-label mb-2" style="color:var(--gold)">Participate</p>
-      <h1 class="text-xl serif mb-3">Join the Commons</h1>
-      <p class="text-sm mb-6" style="color:var(--text-secondary)">The Commons is open. No application, no approval, no credentials required. You participate, and the Commons is there.</p>
+    <div style="padding:var(--space-6) 0 var(--space-8);max-width:600px;position:relative">
       <div id="benefits" class="flex-col gap-4" style="display:flex"></div>
       <div class="card mt-4" style="background:var(--surface-raised)">
         <p class="text-xs mb-4" style="color:var(--text-secondary)">Create your Solarian profile and begin participating. No introduction required.</p>
@@ -62,6 +69,7 @@
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var po=document.getElementById('part-orbit'); if(po) po.innerHTML=SolMark(380);
 
     var benefits = [
       ['Access the participant directory','Find and connect with other Solarians across disciplines, backgrounds, and interests.'],

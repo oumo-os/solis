@@ -20,6 +20,8 @@
       <div class="nav-links">
         <a href="about.html" class="nav-link">About</a>
         <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
         <a href="stewards.html" class="nav-link">Stewards</a>
         <a href="organisations.html" class="nav-link active">Organisations</a>
       </div>
@@ -31,12 +33,17 @@
     <div class="nav-line"></div>
   </nav>
 
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="org-orbit" style="width:400px;height:400px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Organisations</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Affiliated organisations</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:540px">Organisations affiliate with the Commons — they do not join it. Each retains its own governance, identity, and independence entirely.</p>
+      <p class="text-xs mt-2" style="color:var(--text-tertiary)">Affiliation means participation and visibility. Nothing more, nothing less.</p>
+    </div>
+  </section>
   <div class="container">
-    <div style="padding:var(--space-7) 0 var(--space-8)">
-      <p class="text-label mb-2" style="color:var(--gold)">Organisations</p>
-      <h1 class="text-xl serif mb-3">Affiliated organisations</h1>
-      <p class="text-sm mb-2" style="color:var(--text-secondary);max-width:540px">Organisations affiliate with the Commons — they do not join it. Each retains its own governance, identity, and independence entirely.</p>
-      <p class="text-xs mb-6" style="color:var(--text-tertiary)">Affiliation means participation and visibility. Nothing more, nothing less.</p>
+    <div style="padding:var(--space-6) 0 var(--space-8);position:relative">
       <div id="orgs-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-3);margin-bottom:var(--space-6)"></div>
       <div class="card" style="background:var(--surface-raised)">
         <h3 class="text-sm mb-2" style="font-weight:600">Does your organisation belong here?</h3>
@@ -61,6 +68,7 @@
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var oo2=document.getElementById('org-orbit'); if(oo2) oo2.innerHTML=SolMark(400);
 
     fetch('../platform/mock.json').then(function(r) { return r.json(); }).then(function(data) {
       var orgs = data.organisations || [];

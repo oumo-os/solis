@@ -20,6 +20,8 @@
       <div class="nav-links">
         <a href="about.html" class="nav-link">About</a>
         <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
         <a href="stewards.html" class="nav-link active">Stewards</a>
         <a href="organisations.html" class="nav-link">Organisations</a>
       </div>
@@ -31,12 +33,17 @@
     <div class="nav-line"></div>
   </nav>
 
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="stew-orbit" style="width:400px;height:400px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Stewards</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Current Stewards</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:540px">Stewards are participants entrusted by the community with specific responsibilities — moderation, domain curation, event coordination, archive maintenance, and more. One role, defined by mandate, earned through contribution.</p>
+      <p class="text-xs mt-2" style="color:var(--text-tertiary)">All past stewardships are archived. The full participant directory is available to participants.</p>
+    </div>
+  </section>
   <div class="container">
-    <div style="padding:var(--space-7) 0 var(--space-8);max-width:800px">
-      <p class="text-label mb-2" style="color:var(--gold)">Stewards</p>
-      <h1 class="text-xl serif mb-3">Current Stewards</h1>
-      <p class="text-sm mb-2" style="color:var(--text-secondary);max-width:540px">Stewards are participants entrusted by the community with specific responsibilities — moderation, domain curation, event coordination, archive maintenance, and more. One role, defined by mandate, earned through contribution.</p>
-      <p class="text-xs mb-6" style="color:var(--text-tertiary)">All past stewardships are archived. The full participant directory is available to participants.</p>
+    <div style="padding:var(--space-6) 0 var(--space-8);max-width:800px;position:relative">
       <span class="text-label mb-4" style="display:block">Active stewards</span>
       <div id="stewards-list" class="flex-col gap-2" style="display:flex"></div>
       <p class="text-xs mt-4" style="color:var(--text-tertiary);line-height:1.6">Stewardship mandates are bounded — they end when their purpose is concluded. The record of every past stewardship is preserved in the archive.</p>
@@ -58,6 +65,7 @@
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var so=document.getElementById('stew-orbit'); if(so) so.innerHTML=SolMark(400);
 
     var stewards = [
       {domain:'Commons & Knowledge',name:'Akello J.',since:'Mar 2026',note:'Maintains the Observatory and domain taxonomy'},

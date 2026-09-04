@@ -20,6 +20,8 @@
       <div class="nav-links">
         <a href="about.html" class="nav-link">About</a>
         <a href="observatory.html" class="nav-link active">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
         <a href="stewards.html" class="nav-link">Stewards</a>
         <a href="organisations.html" class="nav-link">Organisations</a>
       </div>
@@ -31,13 +33,18 @@
     <div class="nav-line"></div>
   </nav>
 
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="obs-orbit" style="width:400px;height:400px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Observatory</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Knowledge for the curious</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:520px">The Commons' public knowledge space. Entirely open — no participation required.</p>
+      <p class="text-xs mt-2" style="color:var(--text-tertiary);font-style:italic">An observatory is where you go to see further.</p>
+    </div>
+  </section>
   <div class="container">
-    <div style="padding:var(--space-7) 0 var(--space-8)">
-      <p class="text-label mb-2" style="color:var(--gold)">Observatory</p>
-      <h1 class="text-xl serif mb-3">Knowledge for the curious</h1>
-      <p class="text-sm mb-2" style="color:var(--text-secondary);max-width:520px">The Commons' public knowledge space. Entirely open — no participation required.</p>
-      <p class="text-xs mb-6" style="color:var(--text-tertiary);font-style:italic">An observatory is where you go to see further.</p>
-      <div id="observatory-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);margin-bottom:var(--space-7)"></div>
+    <div style="padding:var(--space-6) 0 var(--space-8);position:relative">
+      <div id="observatory-cards" class="opps-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);margin-bottom:var(--space-7)"></div>
       <div style="border-top:1px solid var(--border);padding-top:var(--space-6)">
         <span class="text-label mb-4" style="display:block">Recent publications</span>
         <div id="publications" class="flex-col gap-3" style="display:flex"></div>
@@ -60,6 +67,7 @@
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var oo=document.getElementById('obs-orbit'); if(oo) oo.innerHTML=SolMark(400);
 
     var observatory = [
       {cat:'News',desc:'Curated space sector coverage, filtered for signal',count:'Updated daily'},
