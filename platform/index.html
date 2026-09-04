@@ -589,20 +589,22 @@
         <div id="stf-integrity-stf-vstf-steward"></div>
         <div class="sec">Candidate Profile</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)">Kampala · Joined Mar 2026</div></div></div>
+          <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)" id="vstf-stew-meta">Kampala · Joined Mar 2026</div></div></div>
           <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
-          <table class="tbl" style="margin-bottom:12px">
+          <table class="tbl" style="margin-bottom:12px" id="vstf-stew-matchtbl">
             <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
+            <tbody id="vstf-stew-match">
             <tr><td>Space Law &amp; Policy</td><td class="m">≥ 800</td><td class="m">900</td><td style="color:var(--green)">✓ Pass</td></tr>
             <tr><td>Telecommunications</td><td class="m">≥ 800</td><td class="m">320</td><td style="color:var(--red)">✗ Gap</td></tr>
             <tr><td>Debris Tracking</td><td class="m">≥ 600</td><td class="m">760</td><td style="color:var(--green)">✓ Pass</td></tr>
             <tr><td>Regulatory Compliance</td><td class="m">≥ 600</td><td class="m">640</td><td style="color:var(--green)">✓ Pass</td></tr>
+            </tbody>
           </table>
           <div class="text-label mb-1">Affiliations</div>
-          <div class="flex gap-2"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
+          <div class="flex gap-2" id="vstf-stew-affil"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
         </div>
         <div class="sec">Evidence Package</div>
-        <div class="evidence-shelf" style="margin-bottom:16px">
+        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-stew-evidence">
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Policy Brief Publication</div><div class="ev-meta">Submitted Jul 11 · PDF · 340KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — UAS Membership Letter</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
@@ -630,7 +632,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Mandate</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-mandate">
             <div class="mb-2"><strong style="color:var(--text)">Knowledge domains:</strong></div>
             <div class="flex gap-1 mb-2"><span class="tag tag-purple" style="font-size:8px">Space Law &amp; Policy</span><span class="tag tag-purple" style="font-size:8px">Telecommunications</span></div>
             <div class="mb-2"><strong style="color:var(--text)">Experiential domains:</strong></div>
@@ -641,7 +643,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Auto-Match Summary</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">3 of 4 domains pass. Telecommunications has a significant gap (320 vs 800 required). Assess whether this gap is disqualifying or can be addressed through mentorship.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-summary">3 of 4 domains pass. Telecommunications has a significant gap (320 vs 800 required). Assess whether this gap is disqualifying or can be addressed through mentorship.</div>
         </div>
       </div>
     </div>
@@ -656,15 +658,16 @@
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div id="stf-integrity-stf-vstf-competence"></div>
         <div class="sec">Evidence Package</div>
-        <div class="evidence-shelf" style="margin-bottom:16px">
+        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-comp-evidence">
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
           <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
         </div>
         <div class="sec">Wh Assessment Table</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Investigate, evaluate, and assess whether claims are acceptable. Adjust where necessary. Leave non-evaluated claims unmarked with reason.</div>
-        <table class="tbl" style="margin-bottom:16px">
+        <table class="tbl" style="margin-bottom:16px" id="vstf-comp-table">
           <tr><th>Domain</th><th>Claimed Wh</th><th>Adjusted Wh</th><th>Evaluated</th><th>Reason (if unmarked)</th></tr>
+          <tbody id="vstf-comp-rows">
           <tr>
             <td>Space Law &amp; Policy</td>
             <td class="m">1,800</td>
@@ -700,9 +703,10 @@
             <td><input type="checkbox"></td>
             <td style="font-size:10px;color:var(--text-tertiary)">Unable to evaluate — outside expertise</td>
           </tr>
+          </tbody>
         </table>
         <div class="sec">Evaluation Comments</div>
-        <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <textarea id="vstf-comp-comment" placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
         <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfCompetenceAssessment()">File Assessment</button><button class="btn" onclick="saveViewDraft('view-stf-vstf-competence')">Save Draft</button></div>
       </div>
@@ -713,8 +717,8 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Candidate Profile</div>
-          <div class="flex items-center gap-3 mb-2"><div class="avatar avatar-md">AJ</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:10px;color:var(--text-tertiary)">Nairobi · Joined Jan 2026</div></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Current total Ws: 2,840. Claims to add 5 domains. 3 have evidence, 2 are unsupported.</div>
+          <div class="flex items-center gap-3 mb-2" id="vstf-comp-prof"><div class="avatar avatar-md">AJ</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:10px;color:var(--text-tertiary)">Nairobi · Joined Jan 2026</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-comp-sum">Current total Ws: 2,840. Claims to add 5 domains. 3 have evidence, 2 are unsupported.</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Evaluation Rules</div>
@@ -743,11 +747,11 @@
           <div class="flex gap-3" style="align-items:flex-start">
             <div style="width:40px;height:40px;border-radius:50%;background:var(--border-subtle);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-tertiary);flex-shrink:0">?</div>
             <div style="flex:1">
-              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">Anonymous member report — Credential misrepresentation</div>
-              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px">A member reported that Daniel J. appeared to misrepresent space law credentials during steward candidacy evaluation. The report was posted anonymously to the Commons, visible to stewards. Any steward could sponsor it — Akello J. took responsibility for sponsoring this claim.</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px" id="jstf-case-title">Anonymous member report — Credential misrepresentation</div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px" id="jstf-case-desc">A member reported that Daniel J. appeared to misrepresent space law credentials during steward candidacy evaluation. The report was posted anonymously to the Commons, visible to stewards. Any steward could sponsor it — Akello J. took responsibility for sponsoring this claim.</div>
               <div class="flex gap-2" style="align-items:center">
                 <span class="tag tag-red" style="font-size:8px">Anonymous</span>
-                <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Reported Jul 10 · Sponsored Jul 12</span>
+                <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)" id="jstf-case-meta">Reported Jul 10 · Sponsored Jul 12</span>
               </div>
             </div>
           </div>
@@ -769,9 +773,9 @@
 
         <div class="sec">Case Record</div>
         <div class="accused-row">
-          <div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
-          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">Daniel Jørgensen</div><div style="font-size:11px;color:var(--text-tertiary)">Former Space Law Circle member · Under Review status</div></div>
-          <span class="badge b-judicial">Under investigation</span>
+          <div class="hav" id="jstf-accused-ini" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
+          <div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500" id="jstf-accused-name">Daniel Jørgensen</div><div style="font-size:11px;color:var(--text-tertiary)" id="jstf-accused-sub">Former Space Law Circle member · Under Review status</div></div>
+          <span class="badge b-judicial" id="jstf-accused-badge">Under investigation</span>
         </div>
         <div class="court-record">
           <div class="court-charge">Trigger: Integrity Engine anomaly flag</div>
@@ -856,8 +860,8 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Accused</div>
-          <div class="flex items-center gap-3 mb-2"><div class="hav" style="background:linear-gradient(135deg,var(--red),#5a1010);width:28px;height:28px;font-size:10px">DJ</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Daniel Jørgensen</div><div style="font-size:10px;color:var(--text-tertiary)">Former Space Law Circle</div></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Status: Under Review. Accused of credential misrepresentation and integrity violations.</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" id="jstf-aside-ini" style="background:linear-gradient(135deg,var(--red),#5a1010);width:28px;height:28px;font-size:10px">DJ</div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="jstf-aside-name">Daniel Jørgensen</div><div style="font-size:10px;color:var(--text-tertiary)" id="jstf-aside-sub">Former Space Law Circle</div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="jstf-aside-desc">Status: Under Review. Accused of credential misrepresentation and integrity violations.</div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Trigger</div>
@@ -901,9 +905,9 @@
         <div id="stf-integrity-stf-astf"></div>
         <div class="sec">Motion Record</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">From Cell #Cell-21 · Crystallised Jul 21</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Debris Liability Framework — Allocation of Responsibility</div>
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Proposes that liability for debris-generating manoeuvres be assigned to the operator of the spacecraft that created the debris, with a secondary liability pathway for manufacturers when hardware failure is the proximate cause. Establishes a mandatory debris reporting window of 24 hours.</div>
+          <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)" id="astf-motion-from">From Cell #Cell-21 · Crystallised Jul 21</span></div>
+          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px" id="astf-motion-title">Debris Liability Framework — Allocation of Responsibility</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6" id="astf-motion-body">Proposes that liability for debris-generating manoeuvres be assigned to the operator of the spacecraft that created the debris, with a secondary liability pathway for manufacturers when hardware failure is the proximate cause. Establishes a mandatory debris reporting window of 24 hours.</div>
         </div>
         <div class="sec">4-Dimension Rubric (30 pts max)</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
@@ -3539,6 +3543,35 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
 
 // Static aSTF view (hardcoded demo content) files against the newest open
 // aSTF cell, reusing the live fileAstfVerdict path (persist + snapshot apply).
+// aSTF motion record: bind the static card to the newest aSTF cell's origin
+// deliberation cell (title, status, submitted draft text).
+function renderAstfMotion() {
+  var cells = (MOCK && MOCK.cells) || [];
+  var astf = null;
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type === 'aSTF Cell') { astf = cells[i]; break; }
+  }
+  if (!astf) return;
+  var src = astf.source || {};
+  var origin = (cellsById && src.originCellId && cellsById[src.originCellId]) || null;
+  if (!origin) {
+    for (var j = 0; j < cells.length; j++) {
+      if (cells[j].id === src.originCellId) { origin = cells[j]; break; }
+    }
+  }
+  if (!origin) return;
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  setText('astf-motion-from', 'From ' + (origin.id || '') + ' · ' + (origin.status || ''));
+  setText('astf-motion-title', origin.title || '');
+  var body = '';
+  var drafts = origin.draftResolutions || [];
+  for (var k = drafts.length - 1; k >= 0; k--) {
+    if (drafts[k].status === 'submitted' || drafts[k].status === 'passed' || drafts[k].status === 'crystallised') { body = drafts[k].text || drafts[k].title || ''; break; }
+  }
+  if (!body && drafts.length) body = drafts[drafts.length - 1].text || drafts[drafts.length - 1].title || '';
+  if (body) setText('astf-motion-body', body);
+}
+
 function submitStaticAstfAdjudication() {
   var cells = (MOCK && MOCK.cells) || [];
   var cell = null;
@@ -3769,6 +3802,161 @@ function fileVstfCompetenceAssessment() {
       if (r.complete && cell) { cell.status = 'Assessment Filed'; }
     }).catch(function() { toast('Could not file assessment. Is the server running?', 'error'); });
   });
+}
+
+// vSTF view binding: resolve the live vSTF cell (preferring the matching
+// delib_type), its candidate record, circle roster entry and participant.
+// Name matching tolerates "Ssempa D." vs "Ssempa David" vs initials.
+function vstfNameParts(name) {
+  var words = String(name || '').split(/\s+/).filter(Boolean);
+  return {
+    first: words[0] || '',
+    lastInitial: words.length > 1 ? words[words.length - 1].charAt(0).toUpperCase() : '',
+    initials: words.map(function(w) { return w.charAt(0); }).join('').toUpperCase().slice(0, 2)
+  };
+}
+
+function vstfSamePerson(name, m) {
+  if (!name || !m) return false;
+  if (m.name === name) return true;
+  var a = vstfNameParts(name);
+  var b = vstfNameParts(m.name || '');
+  if (a.initials && a.initials === (m.initials || b.initials)) return true;
+  return !!(a.first && b.first && a.first.toLowerCase() === b.first.toLowerCase() && a.lastInitial && a.lastInitial === b.lastInitial);
+}
+
+function findVstfContext(vstfType) {
+  var cells = (MOCK && MOCK.cells) || [];
+  var cell = null, fallback = null;
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type !== 'vSTF Cell') continue;
+    if (!fallback) fallback = cells[i];
+    if (cells[i].delibType === vstfType) { cell = cells[i]; break; }
+  }
+  cell = cell || fallback;
+  if (!cell) return null;
+  var src = cell.source || {};
+  var name = cell.candidateName || src.candidateName || '';
+  var ctx = { cell: cell, name: name, cand: null, circle: null, entry: null, person: null };
+  ((MOCK && MOCK.stfCandidates) || []).forEach(function(c) {
+    if (!ctx.cand && (c.name === name || vstfSamePerson(name, c))) ctx.cand = c;
+  });
+  ((MOCK && MOCK.circles) || []).forEach(function(c) {
+    ((c.roster && c.roster.active) || []).forEach(function(m) {
+      if (!ctx.entry && vstfSamePerson(name, m)) { ctx.entry = m; ctx.circle = c; }
+    });
+  });
+  if (!ctx.circle && cell.circle) {
+    var short = String(cell.circle).replace(/ Circle$/, '');
+    ((MOCK && MOCK.circles) || []).forEach(function(c) {
+      if (!ctx.circle && (c.name === cell.circle || c.id === cell.circle || c.name === short || c.name.indexOf(short) === 0)) ctx.circle = c;
+    });
+  }
+  ((MOCK && MOCK.participants) || []).forEach(function(p) {
+    if (!ctx.person && vstfSamePerson(name, p)) ctx.person = p;
+  });
+  return ctx;
+}
+
+function vstfEvidenceHtml(name) {
+  return '<div class="card" style="text-align:center;padding:20px"><div style="font-size:12px;color:var(--text-tertiary)">No evidence package on file for ' + escapeHtml(name || 'this candidate') + ' yet.</div></div>';
+}
+
+// Steward-candidacy view: profile meta, auto-match table, affiliations,
+// mandate card and summary from the live candidate + circle.
+function renderVstfSteward() {
+  var ctx = findVstfContext('steward-candidacy');
+  if (!ctx) return;
+  var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  var loc = (ctx.person && ctx.person.location) || '';
+  var joined = (ctx.entry && ctx.entry.joined) || (ctx.person && ctx.person.joined) || '';
+  setText('vstf-stew-meta', [loc, joined ? 'Joined ' + joined : ''].filter(Boolean).join(' · ') || '—');
+  var affils = [];
+  ((ctx.person && ctx.person.orgs) || []).forEach(function(o) { affils.push(o + ' — Member'); });
+  ((ctx.person && ctx.person.circles) || []).forEach(function(c) { affils.push(c); });
+  if (affils.length) setHtml('vstf-stew-affil', affils.map(function(a) { return '<span class="tag tag-purple" style="font-size:9px">' + escapeHtml(a) + '</span>'; }).join(''));
+  setHtml('vstf-stew-evidence', vstfEvidenceHtml(ctx.name));
+  var mandate = (ctx.circle && ctx.circle.mandate) || {};
+  var primary = mandate.primary || [];
+  var secondary = mandate.secondary || [];
+  var desired = (ctx.circle && ctx.circle.desiredWs) || {};
+  var wsByDomain = {};
+  ((ctx.entry && ctx.entry.domains) || []).forEach(function(d, idx) {
+    wsByDomain[d] = (ctx.entry.domainWs || [])[idx] || 0;
+  });
+  var domains = [];
+  primary.concat(secondary, Object.keys(wsByDomain), ((ctx.cand && ctx.cand.matchedDomains) || [])).forEach(function(d) {
+    if (d && domains.indexOf(d) === -1) domains.push(d);
+  });
+  if (domains.length) {
+    var pass = 0;
+    setHtml('vstf-stew-match', domains.map(function(d) {
+      var req = desired[d];
+      var have = wsByDomain[d];
+      var ok = (req == null || have == null) ? null : have >= req;
+      if (ok) pass++;
+      var verdict = ok == null ? '<span style="color:var(--text-tertiary)">—</span>'
+        : ok ? '<span style="color:var(--green)">✓ Pass</span>' : '<span style="color:var(--red)">✗ Gap</span>';
+      return '<tr><td>' + escapeHtml(d) + '</td><td class="m">' + (req != null ? '≥ ' + fmt(req) : '—') + '</td><td class="m">' + (have != null ? fmt(have) : '—') + '</td><td>' + verdict + '</td></tr>';
+    }).join(''));
+    var gaps = domains.filter(function(d) { return desired[d] != null && wsByDomain[d] != null && wsByDomain[d] < desired[d]; });
+    setText('vstf-stew-summary', pass + ' of ' + domains.length + ' domains pass.' + (gaps.length ? ' ' + gaps[0] + ' shows a gap (' + fmt(wsByDomain[gaps[0]]) + ' vs ' + fmt(desired[gaps[0]]) + ' required). Assess whether this gap is disqualifying or can be addressed through mentorship.' : ''));
+  }
+  var tag = function(list, cls) {
+    return (list || []).map(function(d) { return '<span class="tag ' + cls + '" style="font-size:8px">' + escapeHtml(d) + '</span>'; }).join('');
+  };
+  var order = {};
+  Object.keys((MOCK && MOCK.domains) || {}).forEach(function(k) { var l = ((MOCK.domains[k] || {}).label || k); order[l] = k; order[k] = k; });
+  var splitByType = function(list) {
+    var kn = [], ex = [];
+    (list || []).forEach(function(d) {
+      var meta = (MOCK && MOCK.domains && (MOCK.domains[d] || MOCK.domains[order[d]])) || {};
+      ((meta.type === 'experiential') ? ex : kn).push((meta.label || d));
+    });
+    return { kn: kn, ex: ex };
+  };
+  var p = splitByType(primary), s = splitByType(secondary);
+  if (primary.length || secondary.length) {
+    setHtml('vstf-stew-mandate',
+      '<div class="mb-2"><strong style="color:var(--text)">Knowledge domains:</strong></div>' +
+      '<div class="flex gap-1 mb-2">' + (tag(p.kn, 'tag-purple') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>' +
+      '<div class="mb-2"><strong style="color:var(--text)">Experiential domains:</strong></div>' +
+      '<div class="flex gap-1 mb-2">' + (tag(p.ex.concat(s.ex), 'tag-green') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>' +
+      '<div class="mb-2"><strong style="color:var(--text)">Affiliations:</strong></div>' +
+      '<div class="flex gap-1">' + (tag(affils, 'tag-amber') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>');
+  }
+}
+
+// Competence-claims view: eval table from the candidate's roster domains,
+// profile aside and comment placeholder bound to the live candidate.
+function renderVstfCompetence() {
+  var ctx = findVstfContext('competence-claim');
+  if (!ctx) return;
+  var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  var num = function(v, max) { return '<input type="number" value="' + v + '" min="0" max="' + max + '" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px">'; };
+  var domains = ((ctx.entry && ctx.entry.domains) || []).slice();
+  ((ctx.cand && ctx.cand.matchedDomains) || []).forEach(function(d) { if (domains.indexOf(d) === -1) domains.push(d); });
+  if (domains.length) {
+    setHtml('vstf-comp-rows', domains.map(function(d) {
+      var idx = ((ctx.entry && ctx.entry.domains) || []).indexOf(d);
+      var claimed = idx !== -1 ? (((ctx.entry || {}).domainWs || [])[idx] || 0) : 0;
+      return '<tr><td>' + escapeHtml(d) + '</td><td class="m">' + fmt(claimed) + '</td><td>' + num(claimed, 3000) + '</td>' +
+        '<td><input type="checkbox"></td><td style="font-size:10px;color:var(--text-tertiary)"></td></tr>';
+    }).join(''));
+  }
+  setHtml('vstf-comp-evidence', vstfEvidenceHtml(ctx.name));
+  var short = ctx.name ? ctx.name.split(/\s+/)[0] + ' ' + (ctx.name.split(/\s+/)[1] ? ctx.name.split(/\s+/)[1].charAt(0) + '.' : '') : 'candidate';
+  var comment = document.getElementById('vstf-comp-comment');
+  if (comment) comment.placeholder = 'Overall assessment of ' + short + String.fromCharCode(39) + 's competence claims...';
+  var totalWs = (((ctx.entry && ctx.entry.domains) || []).length && ctx.entry.domainWs) ? ctx.entry.domainWs.reduce(function(s, w) { return s + (Number(w) || 0); }, 0) : null;
+  var loc = (ctx.person && ctx.person.location) || '';
+  var joined = (ctx.entry && ctx.entry.joined) || (ctx.person && ctx.person.joined) || '';
+  setHtml('vstf-comp-prof', '<div class="avatar avatar-md">' + escapeHtml((ctx.cand && ctx.cand.initials) || vstfNameParts(ctx.name).initials || '?') + '</div>' +
+    '<div><div style="font-size:13px;font-weight:500;color:var(--text)">' + escapeHtml(ctx.name || 'Candidate') + '</div>' +
+    '<div style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml([loc, joined ? 'Joined ' + joined : ''].filter(Boolean).join(' · ') || '—') + '</div></div>');
+  setText('vstf-comp-sum', 'Current total Ws: ' + (totalWs != null ? fmt(totalWs) : '—') + '. Claims across ' + domains.length + ' domain' + (domains.length !== 1 ? 's' : '') + '.');
 }
 
 function getActivePastfCell() {
@@ -4212,6 +4400,42 @@ function getActiveJstfCell() {
     if (cells[i].type === 'jSTF Cell') return cells[i];
   }
   return null;
+}
+
+// jSTF case header: bind accused name, status and report meta to the newest
+// live case + its judicial thread. The long-form narrative below stays as
+// case copy until case notes have a data source.
+function renderJstfCase() {
+  var cell = getActiveJstfCell();
+  if (!cell) return;
+  var src = cell.source || {};
+  var target = src.targetName || cell.title || '';
+  var thread = null;
+  ((MOCK && MOCK.threads) || []).forEach(function(t) {
+    if (!thread && (t.jstfCellId === cell.id || t.proposal_cell_id === ('case:' + cell.id))) thread = t;
+  });
+  if (!thread) {
+    ((MOCK && MOCK.threads) || []).forEach(function(t) {
+      if (!thread && t.badgeClass === 'b-judicial') thread = t;
+    });
+  }
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  var displayName = target.replace(/^Anonymous Report — /, '').replace(/^Appeal — /, '') || 'Member report';
+  setText('jstf-case-title', 'Anonymous member report — ' + displayName);
+  var meta = [];
+  if (thread && thread.time) meta.push('Reported ' + thread.time);
+  if (thread && thread.replies != null) meta.push(thread.replies + ' posts');
+  if (meta.length) setText('jstf-case-meta', meta.join(' · '));
+  var words = String(displayName).split(/\s+/).filter(Boolean);
+  var ini = words.length >= 2 ? (words[0].charAt(0) + words[1].charAt(0)).toUpperCase() : displayName.slice(0, 2).toUpperCase();
+  setText('jstf-accused-ini', ini);
+  setText('jstf-accused-name', displayName);
+  setText('jstf-accused-sub', (cell.status || 'Under investigation'));
+  setText('jstf-accused-badge', cell.status || 'Under investigation');
+  setText('jstf-aside-ini', ini);
+  setText('jstf-aside-name', displayName);
+  setText('jstf-aside-sub', cell.status || '');
+  setText('jstf-aside-desc', 'Status: ' + (cell.status || 'Under Review') + '.');
 }
 
 function jstfClientIsSteward() {
@@ -9136,6 +9360,10 @@ var _origNav=nav;
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){renderXstf('cell-19');}
   if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-astf'||key==='stf-pastf'){renderStfDetail(key);}
+  if(key==='stf-vstf-steward'){renderVstfSteward();}
+  if(key==='stf-vstf-competence'){renderVstfCompetence();}
+  if(key==='stf-astf'){renderAstfMotion();}
+  if(key==='stf-jstf'){renderJstfCase();}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
   if(key==='commons'){renderCommonsFeed();document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f){f.classList.toggle('active',f.getAttribute('data-filter')===_commonsFilter);});}
  };
