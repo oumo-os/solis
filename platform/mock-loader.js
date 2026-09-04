@@ -30,7 +30,7 @@ function renderParticipantCards() {
 function renderCircleCards(filter) {
   if (!MOCK) return '';
   filter = filter || 'all';
-  var circles = MOCK.circles.filter(function(c) { return filter === 'all' || c.status === filter; });
+  var circles = (MOCK.circles || []).filter(function(c) { return filter === 'all' || c.status === filter; });
   if (circles.length === 0) {
     return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No circles match this filter.</div></div>';
   }
@@ -80,7 +80,8 @@ function renderSTFRows() {
 
 function renderInboxItems() {
   if (!MOCK) return '';
-  return MOCK.inbox.map(function(item) {
+  var items = MOCK.inbox || [];
+  return items.map(function(item) {
     return '<div class="inbox-item">'
       + '<div class="inbox-icon">' + (item.type === 'vSTF' ? '◆' : item.type === 'aSTF' ? '◆' : item.type === 'Deliberation' ? '◎' : item.type === 'xSTF' ? '◆' : item.type === 'Cell' ? '⬡' : '✓') + '</div>'
       + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text)">' + item.title + '</div>'
@@ -158,7 +159,7 @@ function renderProjectRows() {
 function renderCellCards(filter) {
   if (!MOCK) return '';
   filter = filter || 'all';
-  var cells = MOCK.cells.filter(function(c) { return filter === 'all' || c.status === filter; });
+  var cells = (MOCK.cells || []).filter(function(c) { return filter === 'all' || c.status === filter; });
   if (cells.length === 0) {
     return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No cells match this filter.</div></div>';
   }
@@ -186,7 +187,7 @@ function filterCells(filter, btn) {
 
 function renderNewsCards() {
   if (!MOCK) return '';
-  return MOCK.news.map(function(n) {
+  return (MOCK.news || []).map(function(n) {
     return '<div class="card"><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">' + n.title + '</div>'
       + '<div style="font-size:10px;color:var(--text-tertiary)">' + n.source + ' · ' + n.time + '</div></div>';
   }).join('');
@@ -194,7 +195,7 @@ function renderNewsCards() {
 
 function renderEventCards() {
   if (!MOCK) return '';
-  return MOCK.events.map(function(e) {
+  return (MOCK.events || []).map(function(e) {
     return '<div class="card"><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">' + e.title + '</div>'
       + '<div style="font-size:10px;color:var(--text-tertiary)">' + e.date + ' · ' + e.location + '</div></div>';
   }).join('');
@@ -202,7 +203,7 @@ function renderEventCards() {
 
 function renderOpportunityCards() {
   if (!MOCK) return '';
-  return MOCK.opportunities.map(function(o) {
+  return (MOCK.opportunities || []).map(function(o) {
     return '<div class="card"><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">' + o.title + '</div>'
       + '<div style="font-size:10px;color:var(--text-tertiary)">' + o.type + ' · Deadline ' + o.deadline + '</div></div>';
   }).join('');

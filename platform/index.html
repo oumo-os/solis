@@ -262,27 +262,7 @@
           <div class="card">
             <div class="sec">Publications</div>
             <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Essays, reports, and analysis from participants</div>
-            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-              <div style="flex:1">
-                <div style="font-size:13px;color:var(--text);font-weight:500">Why East Africa Needs a Space Economy Strategy</div>
-                <div style="font-size:11px;color:var(--text-tertiary)">Okello M. · Jul 9, 2026</div>
-              </div>
-              <span class="tag tag-pub" style="font-size:8px">Essay</span>
-            </div>
-            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-              <div style="flex:1">
-                <div style="font-size:13px;color:var(--text);font-weight:500">Understanding the Outer Space Treaty — A Plain Language Guide</div>
-                <div style="font-size:11px;color:var(--text-tertiary)">Ssempa D. · Jun 22, 2026</div>
-              </div>
-              <span class="tag tag-pub" style="font-size:8px">Guide</span>
-            </div>
-            <div class="hrow" style="cursor:pointer" onclick="nav('publication-detail')">
-              <div style="flex:1">
-                <div style="font-size:13px;color:var(--text);font-weight:500">AfricaSpace 2026 — What the Summit Means for East Africa</div>
-                <div style="font-size:11px;color:var(--text-tertiary)">Nakabugo B. · Jun 15, 2026</div>
-              </div>
-              <span class="tag tag-pub" style="font-size:8px">Report</span>
-            </div>
+            <div id="obs-home-pubs"></div>
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px"><span id="obs-published-total">0</span> published pieces · <span style="color:var(--gold);cursor:pointer" onclick="nav('observatory-publications')">View all publications →</span></div>
           </div>
         </div>
@@ -596,6 +576,7 @@
         <div class="aside-card">
           <div class="aside-title">How STFs Work</div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">STFs operate in <strong>blind isolated cells</strong> — members don't know each other's identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body.</div>
+          <div class="flex gap-2" style="margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm" onclick="openVstfSpawnModal()">Spawn vSTF</button><button class="btn btn-sm" onclick="spawnPastfFromStfDash()">Spawn p-aSTF</button></div>
         </div>
       </div>
     </div>
@@ -643,7 +624,7 @@
           <div class="text-label mb-2">Rationale</div>
           <textarea placeholder="Justify your approval score..." class="form-input" style="height:80px;resize:none"></textarea>
         </div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfStewardAssessment()">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfStewardAssessment()">File Assessment</button><button class="btn" onclick="saveViewDraft('view-stf-vstf-steward')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -726,7 +707,7 @@
         <div class="sec">Evaluation Comments</div>
         <textarea placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfCompetenceAssessment()">File Assessment</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfCompetenceAssessment()">File Assessment</button><button class="btn" onclick="saveViewDraft('view-stf-vstf-competence')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -931,10 +912,10 @@
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
         <table class="tbl" style="margin-bottom:12px">
           <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
-          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
-          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
-          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
+          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
+          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
+          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" id="astf-s-align" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
+          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" id="astf-s-comp" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
         </table>
         <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
           <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
@@ -943,18 +924,18 @@
         <div class="divider" style="margin:12px 0"></div>
         <div class="sec">Verdict</div>
         <div class="flex gap-2 mb-3">
-          <button class="btn btn-primary btn-sm" id="astf-approve" onclick="document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
-          <button class="btn btn-sm" id="astf-revision" onclick="document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
-          <button class="btn btn-sm" id="astf-reject" onclick="document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
+          <button class="btn btn-primary btn-sm" id="astf-approve" onclick="window._astfStaticVerdict='approved';document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
+          <button class="btn btn-sm" id="astf-revision" onclick="window._astfStaticVerdict='revision';document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
+          <button class="btn btn-sm" id="astf-reject" onclick="window._astfStaticVerdict='rejected';document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
         </div>
         <div class="text-label mb-2">Rationale</div>
-        <textarea placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <textarea id="astf-s-rationale" placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div class="divider" style="margin:12px 0"></div>
         <div class="sec">Malpractice Flagging (optional)</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
-        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="confirmModal('Submit your adjudication? It will be sealed until all 3 adjudicators have filed.',function(){})">Submit Adjudication</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div></div>
+        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft('view-stf-astf')">Save Draft</button></div></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1134,7 +1115,7 @@
 
         <div class="sec" style="font-size:12px;font-weight:600;color:var(--text)">Review Notes</div>
         <textarea placeholder="Additional observations about the Circle and assigned members..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
-        <div class="flex gap-2"><button class="btn btn-primary" onclick="filePastfReview()">Submit Review</button><button class="btn" onclick="toast('Draft saved.','success')">Save Draft</button></div>
+        <div class="flex gap-2"><button class="btn btn-primary" onclick="filePastfReview()">Submit Review</button><button class="btn" onclick="saveViewDraft('view-stf-pastf')">Save Draft</button></div>
       </div>
       <div class="layout-aside">
         <div class="aside-card">
@@ -1442,6 +1423,7 @@
           <div class="aside-title" id="cd-copledge-title">Stewards</div>
           <div style="display:flex;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-subtle)" id="cd-copledge-stats"></div>
           <div id="cd-copledge-list"></div>
+          <div id="cd-steward-actions"></div>
           <div style="font-size:10px;color:var(--text-tertiary);margin-top:6px;padding-top:6px;border-top:1px solid var(--border-subtle)"><span style="cursor:pointer;color:var(--gold)" onclick="openMembersModal()">View all members →</span></div>
         </div>
         <div class="aside-card">
@@ -1457,7 +1439,7 @@
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" id="cd-enter-cell" onclick="nav('cell-circle')">Enter Circle Cell</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openCircleSettingsModal()">Circle Settings</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start">View Domain Map</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('domain-map')">View Domain Map</button>
           </div>
         </div>
       </div>
@@ -3604,8 +3586,65 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
     var cell = cellsById[cellId];
     if (cell) { cell.status = 'Verdict Filed'; cell.blind = 0; cell.resolution = { verdict: verdict, rubricTotal: r.rubricTotal }; }
     toast('aSTF verdict filed: ' + verdict + ' (rubric ' + r.rubricTotal + '/30).', 'success');
+    if (verdict === 'approved' && cell && cell.source && cell.source.originCellId) {
+      var origin = cellsById[cell.source.originCellId];
+      if (origin && origin.settingsSnapshot && typeof applySettingsSnapshot === 'function') {
+        if (applySettingsSnapshot(origin.settingsSnapshot)) toast('Settings snapshot applied.', 'success');
+      }
+    }
     renderDelibCell(cellId);
   }).catch(function() { toast('Could not file verdict. Is the server running?', 'error'); });
+}
+
+// Static aSTF view (hardcoded demo content) files against the newest open
+// aSTF cell, reusing the live fileAstfVerdict path (persist + snapshot apply).
+function submitStaticAstfAdjudication() {
+  var cells = (MOCK && MOCK.cells) || [];
+  var cell = null;
+  for (var i = cells.length - 1; i >= 0; i--) {
+    if (cells[i].type === 'aSTF Cell' && cells[i].status !== 'Verdict Filed') { cell = cells[i]; break; }
+  }
+  if (!cell) { toast('No open aSTF cell to file against.', 'error'); return; }
+  var num = function(id) { var el = document.getElementById(id); return el ? (Number(el.value) || 0) : 0; };
+  var rubric = { jurisdiction: num('astf-s-jur'), depth: num('astf-s-depth'), alignment: num('astf-s-align'), competence: num('astf-s-comp') };
+  var total = rubric.jurisdiction + rubric.depth + rubric.alignment + rubric.competence;
+  if (total > 30) { toast('Rubric total cannot exceed 30.', 'error'); return; }
+  var rationale = ((document.getElementById('astf-s-rationale') || {}).value || '').trim();
+  if (!rationale) { toast('Rationale is required.', 'error'); return; }
+  var verdict = window._astfStaticVerdict || 'approved';
+  confirmModal('Submit your adjudication (' + verdict + ', rubric ' + total + '/30)? It will be sealed until all 3 adjudicators have filed.', function() {
+    fileAstfVerdict(cell.id, verdict, rubric, rationale);
+  });
+}
+
+// Local drafts for the static assessment views (no server draft endpoint:
+// persist inputs per view, restore on boot).
+function saveViewDraft(viewId) {
+  var view = document.getElementById(viewId);
+  if (!view) return;
+  var data = [];
+  view.querySelectorAll('input,textarea,select').forEach(function(el) {
+    data.push(el.type === 'checkbox' ? (el.checked ? 1 : 0) : (el.value == null ? '' : el.value));
+  });
+  try { localStorage.setItem('solisDraft:' + viewId, JSON.stringify(data)); } catch (e) {}
+  toast('Draft saved.', 'success');
+}
+
+function restoreViewDrafts() {
+  ['view-stf-vstf-steward', 'view-stf-vstf-competence', 'view-stf-astf', 'view-stf-pastf'].forEach(function(viewId) {
+    var raw = null;
+    try { raw = localStorage.getItem('solisDraft:' + viewId); } catch (e) { return; }
+    if (!raw) return;
+    var data = null;
+    try { data = JSON.parse(raw); } catch (e) { return; }
+    var view = document.getElementById(viewId);
+    if (!view || !data) return;
+    view.querySelectorAll('input,textarea,select').forEach(function(el, idx) {
+      if (idx >= data.length) return;
+      if (el.type === 'checkbox') el.checked = !!data[idx];
+      else el.value = data[idx];
+    });
+  });
 }
 
 function doAstfVerdict(verdict) {
@@ -3648,6 +3687,55 @@ function spawnXstfFromAstf(astfCellId) {
       // refresh bootstrap
       SolisApi.bootstrap().then(function(b) { if (b) { Object.assign(MOCK, b); rebuildCellsIndex(); } });
     }).catch(function() { toast('Could not spawn xSTF. Is the server running?', 'error'); });
+  });
+}
+
+function openVstfSpawnModal() {
+  if (typeof isStewardOfAnyCircle === 'function' && !isStewardOfAnyCircle()) { toast('Steward access required to spawn a vSTF.', 'error'); return; }
+  openModal('<div class="sec">Spawn vSTF</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Create a verification cell attached to the latest active cell. Steward-gated.</div>' +
+    '<div class="form-group"><label class="form-label">Candidate name</label><input class="form-input" id="vstf-spawn-name" placeholder="e.g. Ssempa D."></div>' +
+    '<div class="form-group"><label class="form-label">Type</label><select class="form-input" id="vstf-spawn-type"><option value="steward-candidacy">Steward candidacy</option><option value="competence-claim">Competence claim</option></select></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="confirmVstfSpawn()">Spawn</button></div>',
+    { size: 'md' });
+}
+
+function latestSpawnSourceCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  for (var i = cells.length - 1; i >= 0; i--) {
+    var t = cells[i].type || '';
+    if (t !== 'vSTF Cell' && t !== 'p-aSTF Cell' && t !== 'xSTF Cell' && t !== 'jSTF Cell' && t !== 'aSTF Cell') return cells[i];
+  }
+  return cells.length ? cells[cells.length - 1] : null;
+}
+
+function confirmVstfSpawn() {
+  var name = ((document.getElementById('vstf-spawn-name') || {}).value || '').trim();
+  var type = ((document.getElementById('vstf-spawn-type') || {}).value || 'steward-candidacy');
+  if (!name) { toast('Enter a candidate name.', 'error'); return; }
+  var src = latestSpawnSourceCell();
+  if (!src) { toast('No source cell to attach the vSTF to.', 'error'); return; }
+  var me = (MOCK && MOCK.currentUser) || {};
+  confirmModal('Spawn a vSTF (' + type + ') for ' + name + ' from "' + (src.title || src.id) + '"?', function() {
+    SolisApi.spawnVstf(src.id, { vstfType: type, candidateName: name, candidateInitials: me.initials || '', circleName: src.circle || '' }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not spawn vSTF. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      closeModal();
+      toast('vSTF spawned: ' + r.vstfId, 'success');
+      SolisApi.bootstrap().then(function(b) { if (b) { Object.assign(MOCK, b); rebuildCellsIndex(); } });
+    }).catch(function() { toast('Could not spawn vSTF. Is the server running?', 'error'); });
+  });
+}
+
+function spawnPastfFromStfDash() {
+  if (typeof isStewardOfAnyCircle === 'function' && !isStewardOfAnyCircle()) { toast('Steward access required to spawn a p-aSTF.', 'error'); return; }
+  var src = latestSpawnSourceCell();
+  if (!src) { toast('No source cell to attach the p-aSTF to.', 'error'); return; }
+  confirmModal('Spawn a p-aSTF circle-health review from "' + (src.title || src.id) + '"?', function() {
+    SolisApi.spawnPastf(src.id, { circleName: src.circle || '' }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Could not spawn p-aSTF. ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('p-aSTF spawned: ' + r.pastfId, 'success');
+      SolisApi.bootstrap().then(function(b) { if (b) { Object.assign(MOCK, b); rebuildCellsIndex(); } });
+    }).catch(function() { toast('Could not spawn p-aSTF. Is the server running?', 'error'); });
   });
 }
 
@@ -3770,7 +3858,7 @@ function renderStandingInto(container) {
         '<div style="flex:1;min-width:0">' +
         '<div class="flex items-center gap-2"><div style="font-size:12px;font-weight:600;color:var(--text)">' + (i + 1) + '. ' + escapeHtml(s.name || '') + '</div><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">Ws ' + s.standing + '</span></div>' +
         '<div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">' + (s.domains || []).map(function(d) {
-          return escapeHtml(d.domain) + ' ' + d.ws + (d.verified ? ' <span style="color:var(--green)">✓vSTF</span>' : '') + (competenceIsClientSteward() ? ' <button class="btn btn-xs" onclick="openEndorseModal(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Endorse</button>' : '');
+          return escapeHtml(d.domain) + ' ' + d.ws + (d.verified ? ' <span style="color:var(--green)">✓vSTF</span>' : '') + (competenceIsClientSteward() ? ' <button class="btn btn-xs" onclick="openEndorseModal(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Endorse</button>' + (d.verified ? '' : ' <button class="btn btn-xs" onclick="confirmVerifyWh(\'' + s.id + '\',\'' + d.domain.replace(/'/g, '\\\'') + '\',\'' + s.name.replace(/'/g, '\\\'') + '\')">Verify</button>') : '');
         }).join('') + '</div></div></div>';
     });
     container.querySelector('.modal-body').innerHTML += '<div style="max-height:380px;overflow:auto">' + (html || '<div style="font-size:11px;color:var(--text-tertiary);text-align:center;padding:16px">No competence data.</div>') + '</div>';
@@ -3794,6 +3882,16 @@ function openEndorseModal(targetId, domain, name) {
       toast('Endorsed — Ws ' + r.prev + ' → ' + r.next + '.', 'success');
       setTimeout(function() { window.location.reload(); }, 900);
     }).catch(function() { toast('Could not endorse. Is the server running?', 'error'); });
+  });
+}
+
+function confirmVerifyWh(targetId, domain, name) {
+  confirmModal('Mark ' + escapeHtml(name) + ' verified in ' + escapeHtml(domain) + '?', function() {
+    SolisApi.verifyWh({ targetId: targetId, domain: domain, verified: true }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Verification failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      toast('Verified — ' + domain + ' locked by steward.', 'success');
+      setTimeout(function() { window.location.reload(); }, 900);
+    }).catch(function() { toast('Could not verify. Is the server running?', 'error'); });
   });
 }
 
@@ -3960,6 +4058,50 @@ function renderObsPendingApprovals() {
   }).catch(function() { host.innerHTML = '<div style="font-size:11px;color:var(--red)">Server error.</div>'; });
 }
 
+// Refresh observatory collections from the list endpoints (same shapes as
+// /api/bootstrap) and re-render, avoiding a full page reload after publishes.
+function refreshObservatoryLists() {
+  var calls = [];
+  calls.push(SolisApi.obsNewsList().then(function(r) {
+    if (r && Array.isArray(r.news)) MOCK.news = r.news.map(function(n) { return { title: n.title, time: n.time, source: n.source }; });
+  }).catch(function() {}));
+  calls.push(SolisApi.obsEventsList().then(function(r) {
+    if (r && Array.isArray(r.events)) MOCK.events = r.events.map(function(e) { return { title: e.title, date: e.date, location: e.location }; });
+  }).catch(function() {}));
+  calls.push(SolisApi.obsPublicationsList().then(function(r) {
+    if (r && Array.isArray(r.publications)) MOCK.publications = r.publications.map(function(p) {
+      var tags = [];
+      try { tags = JSON.parse(p.tags || '[]'); } catch (e) { tags = []; }
+      return { id: p.id, title: p.title, journal: p.journal, date: p.date, type: p.type, abstract: p.abstract, tags: tags, authors: p.author ? [p.author] : [] };
+    });
+  }).catch(function() {}));
+  calls.push(SolisApi.obsOrganisationsList().then(function(r) {
+    if (r && Array.isArray(r.organisations)) {
+      MOCK.organisations = r.organisations.map(function(o) {
+        return { id: o.id, name: o.name, acronym: o.acronym, shortname: o.shortname, location: o.location, summary: o.summary, status: o.status, founded: o.founded, foundingCell: o.founding_cell, memberCount: o.member_count, website: o.website, logo: o.logo, knowledgeDomains: o.knowledgeDomains || [] };
+      });
+      orgs = MOCK.organisations;
+    }
+  }).catch(function() {}));
+  // Note: obsLibraryList has no display target yet (no library view reads it);
+  // the endpoint + client wrapper stay as the reserved path for one.
+  return Promise.all(calls).then(function() {
+    renderObservatoryNews();
+    renderObservatoryCalendar();
+    renderObservatoryOpportunities();
+    renderObservatoryCounts();
+    renderObservatoryPublications();
+    renderOrganisations();
+  }, function() {
+    renderObservatoryNews();
+    renderObservatoryCalendar();
+    renderObservatoryOpportunities();
+    renderObservatoryCounts();
+    renderObservatoryPublications();
+    renderOrganisations();
+  });
+}
+
 function confirmObsPublish(kind) {
   var payload = null, label = '';
   if (kind === 'news') {
@@ -3984,7 +4126,7 @@ function confirmObsPublish(kind) {
     call.then(function(r) {
       if (!r || (r.__status && r.__status >= 400)) { toast('Publish failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
       closeModal(); toast(kind.charAt(0).toUpperCase() + kind.slice(1) + ' published.', 'success');
-      setTimeout(function() { window.location.reload(); }, 900);
+      refreshObservatoryLists();
     }).catch(function() { toast('Could not publish. Is the server running?', 'error'); });
   });
 }
@@ -3997,7 +4139,7 @@ function confirmObsPublicationSubmit() {
     SolisApi.obsPublicationsSubmit({ title: title, type: val('obs-p-type'), domain: val('obs-p-domain'), abstract: abstract }).then(function(r) {
       if (!r || (r.__status && r.__status >= 400)) { toast('Submit failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
       closeModal(); toast('Publication submitted — pending steward approval.', 'success');
-      setTimeout(function() { window.location.reload(); }, 900);
+      refreshObservatoryLists();
     }).catch(function() { toast('Could not submit. Is the server running?', 'error'); });
   });
 }
@@ -4006,7 +4148,7 @@ function decideObsPublication(id, action) {
   SolisApi.obsPublicationDecide(id, action).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Decision failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     toast('Publication ' + (action === 'approve' ? 'approved — now public.' : 'rejected.'), 'success');
-    setTimeout(function() { window.location.reload(); }, 900);
+    refreshObservatoryLists();
   }).catch(function() { toast('Could not decide. Is the server running?', 'error'); });
 }
 
@@ -4422,29 +4564,6 @@ function closeSettingsModal() {
   document.body.classList.remove('modal-open');
 }
 
-function addMandateDomain() {
-  var i = document.getElementById('new-domain-input');
-  if (!i.value.trim()) return;
-  var container = document.getElementById('primary-domains');
-  var span = document.createElement('span');
-  span.className = 'mandate-tag primary';
-  span.style.cssText = 'background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)';
-  var name = document.createTextNode(i.value.trim() + ' ');
-  var num = document.createElement('input');
-  num.type = 'number'; num.value = '1000';
-  num.style.cssText = 'width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center';
-  num.title = 'Desired Ws';
-  var down = document.createElement('span');
-  down.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; down.textContent = '\u2193';
-  down.onclick = function() { moveDomainToSecondary(span); };
-  var rm = document.createElement('span');
-  rm.style.cssText = 'cursor:pointer;opacity:.4;font-size:13px'; rm.textContent = '\u00d7';
-  rm.onclick = function() { span.remove(); };
-  span.appendChild(name); span.appendChild(num); span.appendChild(down); span.appendChild(rm);
-  container.appendChild(span);
-  i.value = '';
-}
-
 function moveDomainToSecondary(el) {
   el.className = 'mandate-tag secondary';
   el.style.background = 'var(--surface-raised)';
@@ -4538,7 +4657,7 @@ function submitCircleProposal() {
   var snapshot = { type: 'circle', target: existingCircleId, status: 'pending', settings: settings };
   var delibType = existingCircleId === 'new' ? 'circle-creation' : 'circle-settings';
   var label = existingCircleId === 'new' ? 'Circle: ' + settings.name + ' Founding' : 'Circle: ' + settings.name + ' Settings Change';
-  SolisApi.createSettingsProposal({
+  SolisApi.createCircleProposal({
     delibType: delibType, title: label, snapshot: snapshot, sourceType: 'circle-proposal'
   }).then(function (r) {
     if (r && r.__status === 403) { toast('Steward access required to raise proposals.', 'error'); return; }
@@ -4557,7 +4676,7 @@ function submitCircleProposal() {
       cellsById[r.cellId] = MOCK.cells[MOCK.cells.length - 1];
       currentDelibCellId = r.cellId;
       closeCircleSettingsModal();
-      nav('deliberation');
+      nav('cell-delib');
       renderDelibCell(r.cellId);
       toast('Circle proposal created. Deliberation cell opened.', 'success');
     } else { toast('Could not raise proposal.', 'error'); }
@@ -4659,7 +4778,7 @@ function submitOrgSettingsProposal() {
   });
   cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
   closeOrgSettingsModal();
-  nav('deliberation');
+  nav('cell-delib');
   renderDelibCell(cellId);
   toast('Organisation settings proposal created. Deliberation cell opened.', 'success');
   SolisApi.saveCell(cellsById[cellId]);
@@ -5073,7 +5192,8 @@ function renderStfAssignments() {
       '<div class="flex justify-between mb-2"><span class="badge b-pending">' + escapeHtml(c.status === 'invited' ? 'Invitation' : c.status) + '</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">Due ' + escapeHtml(s.deadline || '—') + '</span></div>' +
       '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + escapeHtml(s.type || 'STF') + ': ' + escapeHtml(s.purpose || '') + ' — ' + escapeHtml(c.name || '') + '</div>' +
       '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">' + escapeHtml(typeLabels[s.type] || 'Short-term facilitator assignment') + ' · Match ' + (c.matchScore != null ? c.matchScore + '%' : '—') + '</div>' +
-      '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + escapeHtml((s.type || '') + ' · ' + (s.circle || '')) + '</div></div>';
+      '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + escapeHtml((s.type || '') + ' · ' + (s.circle || '')) + '</div>' +
+      ((s.type === 'xSTF' && c.status === 'invited') ? '<div style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openXstfInviteModal(\'' + c.id + '\')">Review Invite</button></div>' : '') + '</div>';
   }).join('');
 }
 
@@ -5455,6 +5575,7 @@ function renderObservatoryCounts() {
   var news = (MOCK && MOCK.news) || [];
   var events = (MOCK && MOCK.events) || [];
   var opportunities = (MOCK && MOCK.opportunities) || [];
+  renderObservatoryHomePubs();
   var pubs = ((MOCK && MOCK.publications) || []).length + resolutionsData.filter(function(r) { return r.status === 'enacted' && r.forPublication; }).length;
   function set(id, text) { var el = document.getElementById(id); if (el) el.textContent = text; }
   set('obs-count-events', events.length + ' event' + (events.length !== 1 ? 's' : ''));
@@ -5477,6 +5598,22 @@ function renderObservatoryCounts() {
     }).join('');
     upcoming.innerHTML = evRows || '<div style="font-size:11px;color:var(--text-tertiary)">No upcoming events.</div>';
   }
+}
+
+function renderObservatoryHomePubs() {
+  var el = document.getElementById('obs-home-pubs');
+  if (!el) return;
+  var pubs = ((MOCK && MOCK.publications) || []).slice(0, 3);
+  if (!pubs.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No publications yet.</div>';
+    return;
+  }
+  el.innerHTML = pubs.map(function(p) {
+    return '<div class="hrow" style="cursor:pointer" onclick="openPublicationDetail(' + p.id + ')">' +
+      '<div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">' + escapeHtml(p.title || '') + '</div>' +
+      '<div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml(((p.authors || []).join(', ')) + (p.date ? ' · ' + p.date : '')) + '</div></div>' +
+      '<span class="tag tag-pub" style="font-size:8px">' + escapeHtml(p.type || 'Essay') + '</span></div>';
+  }).join('');
 }
 
 function renderObservatoryPublications(filter) {
@@ -5522,7 +5659,7 @@ var formerMembers = [];
 var successionCandidates = [];
 
 function openMembersModal() {
-  var circleId = 'space-law';
+  var circleId = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law';
   var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] || {};
   successionCandidates = (MOCK.circleApplications || []).filter(function(a){ return a.circleId === circleId && a.status === 'pending'; });
   var mandateText = 'Mandate: ' + (circle.domains || []).join(', ');
@@ -5757,7 +5894,7 @@ function submitSystemProposal() {
       cellsById[r.cellId] = MOCK.cells[MOCK.cells.length - 1];
       currentDelibCellId = r.cellId;
       closeSettingsModal();
-      nav('deliberation');
+      nav('cell-delib');
       renderDelibCell(r.cellId);
       toast('System settings proposal created. Deliberation cell opened.', 'success');
     } else { toast('Could not raise proposal.', 'error'); }
@@ -5892,6 +6029,7 @@ function initApp() {
     dmSub.textContent = 'Membership constellation across ' + dmK + ' knowledge + ' + dmA + ' affiliate domains';
   }
   layoutParticipantCards();
+  restoreViewDrafts();
   resolutionsData = buildResolutionsData();
   renderResolutionsList();
   integrityData = MOCK.integrityRecords || [];
@@ -5919,7 +6057,7 @@ function startApp() {
   if (SOLIS_TOKEN) {
     loadApiData().then(function() { initApp(); }).catch(function() { initApp(); });
   } else {
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
+    MOCK = emptyMock();
     initApp();
   }
 }
@@ -6348,29 +6486,8 @@ function autoLinkOrgs(text) {
   return result;
 }
 
-// Inbox modals
-function modalInvitation(){
-  openModal('<div class="modal-header">vSTF Invitation</div>'+
-    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">You have been selected to serve as a vSTF assessor for <strong>Candidate Verification — Policy &amp; Advocacy</strong>.</div>'+
-    '<div style="margin:12px 0;font-size:12px"><strong>Estimated time:</strong> 4–6 hours<br><strong>Expires:</strong> Jul 19, 2026<br><strong>Blind parallel:</strong> Each assessor sees the same evidence independently</div>'+
-    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Decline</button>'+
-    '<button class="btn btn-primary" onclick="closeModal();nav(\'stf-vstf\')">Accept</button></div>',{size:'sm'});
-}
-function modalVote(){
-  openModal('<div class="modal-header">Vote Requested</div>'+
-    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">A motion has been raised in the <strong>Space Law Circle</strong> and requires your vote.</div>'+
-    '<div style="margin:12px 0;font-size:12px"><strong>Motion:</strong> Debris liability framework standards<br><strong>Circle:</strong> Space Law Circle<br><strong>Closes in:</strong> 5 days</div>'+
-    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Later</button>'+
-    '<button class="btn btn-primary" onclick="closeModal();nav(\'circle-detail\')">View Motion</button></div>',{size:'sm'});
-}
-function modalCuriosityMatch(){
-  openModal('<div class="modal-header">Curiosity Match</div>'+
-    '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6">A new Cell is forming that matches your interest profile.</div>'+
-    '<div style="margin:12px 0;font-size:12px"><strong>Cell:</strong> #14 — East Africa space mapping<br><strong>Match:</strong> Remote Sensing 87%<br><strong>Type:</strong> Project Cell</div>'+
-    '<div class="modal-footer"><button class="btn btn-sm" onclick="closeModal()">Dismiss</button>'+
-    '<button class="btn btn-primary" onclick="closeModal();nav(\'cells\')">View Cells</button></div>',{size:'sm'});
-}
-
+// Inbox modals removed: legacy static demos (invitation/vote/curiosity) had no
+// triggers — inbox actions route via handleInboxAction + nav instead.
 function submitThreadForPublication() {
   if (!isStewardOfAnyCircle()) {
      toast('Only circle stewards can submit threads for publication.','error');
@@ -6629,6 +6746,50 @@ function regAutofillCompetences(){
       var val=parseInt(slider.value);
       slider.nextElementSibling.textContent=val.toLocaleString();
     });
+  });
+}
+
+// Gather Step-3 competences + interests for persistence at registration.
+// Claims: [{domain, wh, evidence}]. Interests: [{domain, rank}].
+function regGatherSubmission() {
+  var claims = [];
+  document.querySelectorAll('#reg-competences .reg-comp-row').forEach(function(row) {
+    var domainEl = row.querySelector('.reg-comp-domain');
+    var slider = row.querySelector('.reg-slider');
+    if (!domainEl || !slider) return;
+    var domain = (domainEl.textContent || '').trim();
+    if (!domain) return;
+    var wh = Math.max(0, Math.min(3000, parseInt(slider.value, 10) || 0));
+    var ref = row.querySelector('.ref-link');
+    var proofInput = row.querySelector('.reg-comp-proof input');
+    var evidence = ref ? (ref.getAttribute('title') || '').trim()
+      : proofInput ? (proofInput.value || '').trim()
+      : '';
+    if (!evidence) evidence = 'Self-declared during registration — evidence pending';
+    claims.push({ domain: domain, wh: wh, evidence: evidence });
+  });
+  var ranks = [];
+  document.querySelectorAll('#reg-interests .reg-interest-row').forEach(function(row) {
+    var box = row.querySelector('input[type="checkbox"]');
+    if (!box || !box.checked) return;
+    var label = row.querySelector('span');
+    var domain = row.dataset.domain || ((label && label.textContent || '').trim());
+    var rank = parseInt(((row.querySelector('.reg-rank-num') || {}).textContent || '').trim(), 10);
+    if (domain && rank >= 1 && rank <= 10) ranks.push({ domain: domain, rank: rank });
+  });
+  return { claims: claims, ranks: ranks.slice(0, 10) };
+}
+
+function regPersistSubmission(done) {
+  var sub = regGatherSubmission();
+  var calls = sub.claims.map(function(c) {
+    return SolisApi.declareWh(c).catch(function() { return null; });
+  });
+  if (sub.ranks.length) calls.push(SolisApi.rankInterests({ ranks: sub.ranks }).catch(function() { return null; }));
+  if (!calls.length) { done(); return; }
+  var settled = 0;
+  calls.forEach(function(p) {
+    p.then(function() { if (++settled === calls.length) done(); }, function() { if (++settled === calls.length) done(); });
   });
 }
 
@@ -8420,6 +8581,7 @@ function renderCircleDetail(circleId) {
     return '<div class="aside-member"><div class="aside-member-avatar" style="background:' + (m.color || 'var(--navy-light)') + ';color:#fff">' + escapeHtml(m.initials || '?') + '</div><div><div style="font-weight:500">' + escapeHtml(m.name || '') + '</div><div style="font-size:9px;color:var(--text-tertiary)">Ws ' + fmt(m.ws != null ? m.ws : 0) + ' · ' + escapeHtml(m.lastActive || '—') + '</div></div></div>';
   }).join('');
   setHtml('cd-copledge-list', memberRows || '<div style="font-size:11px;color:var(--text-tertiary)">No members listed.</div>');
+  setHtml('cd-steward-actions', renderCircleMembership(circle.id));
 
   var domHtml = (circle.domains || []).map(function(d, i) {
     return '<span class="tag ' + tagColors[i % tagColors.length] + '" style="font-size:9px">' + escapeHtml(d) + '</span>';
@@ -9035,9 +9197,12 @@ function doRegister(apiData) {
     }
     SOLIS_TOKEN = res.token;
     localStorage.setItem('solisToken', SOLIS_TOKEN);
-    toast('Registered! Welcome to the Commons.', 'success');
-    closeRegModal();
-    window.location.reload();
+    // Persist Step-3 competences + interests before reloading into the app.
+    regPersistSubmission(function() {
+      toast('Registered! Welcome to the Commons.', 'success');
+      closeRegModal();
+      window.location.reload();
+    });
   })
   .catch(function() {
     toast('Network error. Is the server running?', 'error');
@@ -9049,7 +9214,7 @@ function doLogout() {
   SolisApi.authLogout().catch(function() {});
   SOLIS_TOKEN = null;
   localStorage.removeItem('solisToken');
-  MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: [], threads: [], inbox: [], projects: [] };
+  MOCK = emptyMock();
   renderAuthSidebar();
   closeSidebar();
   nav('commons');
@@ -9312,9 +9477,19 @@ function renderProfileView() {
   view.innerHTML = parts.join('');
 }
 
+function emptyMock() {
+  return { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [], organisations: [], publications: [], news: [], events: [], opportunities: [], domains: {} };
+}
+
+// The page is sometimes served by a static host (no /api/*). A 404 HTML page
+// parses as {__status:404} — never accept that as bootstrap data.
+function isBootstrapData(data) {
+  return data && Array.isArray(data.cells) && Array.isArray(data.threads);
+}
+
 function loadApiData() {
   if (!SOLIS_TOKEN) {
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
+    MOCK = emptyMock();
     return Promise.resolve();
   }
   return SolisApi.bootstrap(EMPTY_VIEW)
@@ -9323,10 +9498,17 @@ function loadApiData() {
       // Token expired — clear
       SOLIS_TOKEN = null;
       localStorage.removeItem('solisToken');
-      MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
+      MOCK = emptyMock();
       return;
     }
-    if (!data || data.error) throw new Error('API error: ' + (data.__status || 'unknown'));
+    if (!isBootstrapData(data)) {
+      // Static host / server down: stay logged out but keep the token so a
+      // later reload (with the API up) retries transparently.
+      console.warn('loadApiData: unexpected bootstrap response (status ' + (data && data.__status) + '). Is the API server running?');
+      MOCK = emptyMock();
+      setTimeout(function() { toast('API unreachable — showing offline view. Start it with: node server.mjs', 'warn'); }, 0);
+      return;
+    }
     MOCK = data;
     hydrateEngagements();
     cellsById = {};
@@ -9336,7 +9518,7 @@ function loadApiData() {
   })
   .catch(function(e) {
     console.error('loadApiData failed:', e);
-    MOCK = { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [] };
+    MOCK = emptyMock();
   });
 }
 
