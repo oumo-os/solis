@@ -263,6 +263,14 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/vstf-assessment', payload);
   }
 
+  function stfEvidenceList(cellId) {
+    return req('GET', 'cells/' + cellId + '/evidence');
+  }
+
+  function stfEvidenceCreate(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/evidence', payload);
+  }
+
   function spawnPastf(cellId, payload) {
     return req('POST', 'cells/' + cellId + '/spawn-pastf', payload);
   }
@@ -479,6 +487,8 @@ var SolisApi = (function() {
     reviewDeliverable: reviewDeliverable,
     spawnVstf: spawnVstf,
     fileVstfAssessment: fileVstfAssessment,
+    stfEvidenceList: stfEvidenceList,
+    stfEvidenceCreate: stfEvidenceCreate,
     spawnPastf: spawnPastf,
     filePastfReview: filePastfReview,
     reportJstf: reportJstf,

@@ -38,6 +38,10 @@ try { db.exec('ALTER TABLE news ADD COLUMN body TEXT'); } catch { /* already pre
 try { db.exec('ALTER TABLE news ADD COLUMN curated_by TEXT'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE events ADD COLUMN domain TEXT'); } catch { /* already present */ }
 try { db.exec('ALTER TABLE events ADD COLUMN type TEXT'); } catch { /* already present */ }
+try { db.exec(`CREATE TABLE IF NOT EXISTS stf_evidence (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, cell_id TEXT NOT NULL, candidate TEXT,
+  title TEXT NOT NULL, detail TEXT, link TEXT, status TEXT DEFAULT 'pending',
+  submitted_by TEXT, submitted_at TEXT)`); } catch { /* already present */ }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -982,6 +986,37 @@ async function vstfAssessmentRoutes(req, res, reqUrl, method) {
 // ── p-aSTF periodic review (to_prod 2.10) ──────────────
 // POST /api/cells/:id/spawn-pastf — spawn a p-aSTF periodic circle health
 // review cell.  Auth + steward gate.
+// ── vSTF evidence packages ─────────────────────────────
+// GET /api/cells/:id/evidence — public read (assessors need it).
+// POST /api/cells/:id/evidence — steward attaches an item
+//   {candidate, title, detail, link, status}. No seed data: shelves start
+//   empty until stewards attach real evidence.
+async function stfEvidenceRoutes(req, res, reqUrl, method) {
+  const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/evidence$/);
+  if (!m) return null;
+  const cellId = decodeURIComponent(m[1]);
+  if (method === 'GET') {
+    const rows = db.prepare('SELECT * FROM stf_evidence WHERE cell_id = ? ORDER BY id').all(cellId);
+    return send(res, 200, { ok: true, evidence: rows });
+  }
+  if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
+  const user = authUser(req);
+  if (!user) return send(res, 401, { error: 'Unauthorized' });
+  if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+  if (!db.prepare('SELECT id FROM cells WHERE id = ?').get(cellId)) return send(res, 404, { error: 'Cell not found' });
+  const body = await readBody(req);
+  const title = String(body.title || '').trim();
+  if (!title) return send(res, 400, { error: 'title required' });
+  const status = ['pending', 'under-review', 'verified'].includes(body.status) ? body.status : 'pending';
+  const id = db.prepare(`INSERT INTO stf_evidence
+    (cell_id, candidate, title, detail, link, status, submitted_by, submitted_at)
+    VALUES (?,?,?,?,?,?,?,?)`).run(cellId,
+    String(body.candidate || '').trim() || null, title,
+    String(body.detail || '').trim() || null, String(body.link || '').trim() || null,
+    status, user.name || user.initials, new Date().toISOString()).lastInsertRowid;
+  return send(res, 201, { ok: true, id });
+}
+
 async function pastfSpawnRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-pastf$/);
   if (!m) return null;
@@ -2191,6 +2226,10 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   }));
 
   const news = all('SELECT * FROM news').map(n => ({ title: n.title, time: n.time, source: n.source }));
+  const library = all('SELECT * FROM library_items ORDER BY id DESC').map(l => ({
+    id: l.id, title: l.title, category: l.category, itemType: l.item_type,
+    domain: l.domain, link: l.link, curatedBy: l.curated_by,
+  }));
   const events = all('SELECT * FROM events').map(e => ({ title: e.title, date: e.date, location: e.location }));
   const opportunities = all('SELECT * FROM opportunities').map(o => ({ title: o.title, deadline: o.deadline, type: o.type }));
   const domByProject = groupBy(all('SELECT * FROM project_domains'), 'project_id');
@@ -2259,7 +2298,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   const payload = {
     currentUser, participants, organisations, domains, domainLayout,
     circles, cells, stfs: stfShape, stfCandidates, threads, inbox, publications,
-    news, events, opportunities, projects, exitReasonLabels, systemSettings, stats, registration,
+    news, events, opportunities, projects, library, exitReasonLabels, systemSettings, stats, registration,
     integrityRecords, governanceEvents, circleApplications, projectApplications, governanceLedger,
     myEngagements,
   };
@@ -2267,7 +2306,7 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   // ?empty=1 — same shape, no data: for exploring the platform's empty state.
   if (empty) {
     for (const k of ['participants', 'organisations', 'circles', 'cells', 'threads', 'inbox',
-      'publications', 'news', 'events', 'opportunities', 'projects', 'integrityRecords',
+      'publications', 'news', 'events', 'opportunities', 'projects', 'library', 'integrityRecords',
       'governanceEvents', 'circleApplications', 'projectApplications', 'governanceLedger',
       'stfCandidates', 'myEngagements']) {
       payload[k] = [];
@@ -2381,8 +2420,9 @@ const server = createServer(async (req, res) => {
     if (!handled) handled = await xstfDeliverableRoutes(req, res, reqUrl, method);
     if (!handled) handled = await xstfReviewRoutes(req, res, reqUrl, method);
     if (!handled) handled = await vstfSpawnRoutes(req, res, reqUrl, method);
-    if (!handled) handled = await vstfAssessmentRoutes(req, res, reqUrl, method);
-    if (!handled) handled = await pastfSpawnRoutes(req, res, reqUrl, method);
+  if (!handled) handled = await vstfAssessmentRoutes(req, res, reqUrl, method);
+  if (!handled) handled = await stfEvidenceRoutes(req, res, reqUrl, method);
+  if (!handled) handled = await pastfSpawnRoutes(req, res, reqUrl, method);
     if (!handled) handled = await pastfReviewRoutes(req, res, reqUrl, method);
     if (!handled) handled = await jstfReportRoutes(req, res, reqUrl, method);
     if (!handled) handled = await jstfAppealRoutes(req, res, reqUrl, method);

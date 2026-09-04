@@ -3862,6 +3862,66 @@ function vstfEvidenceHtml(name) {
   return '<div class="card" style="text-align:center;padding:20px"><div style="font-size:12px;color:var(--text-tertiary)">No evidence package on file for ' + escapeHtml(name || 'this candidate') + ' yet.</div></div>';
 }
 
+function vstfCanCurate() {
+  return (typeof isStewardOfAnyCircle === 'function' && isStewardOfAnyCircle()) ||
+    (typeof competenceIsClientSteward === 'function' && competenceIsClientSteward());
+}
+
+// Evidence shelf for a vSTF cell: served by GET /api/cells/:id/evidence.
+// Stewards get an attach button (POST, steward-gated server-side too).
+function loadVstfEvidence(shelfId, cellId, name) {
+  var el = document.getElementById(shelfId);
+  if (!el) return;
+  var attach = function() {
+    if (!vstfCanCurate() || !cellId) return '';
+    return '<div style="margin-top:8px"><button class="btn btn-sm" onclick="openEvidenceModal(\'' + String(cellId).replace(/'/g, '\\\'') + '\',\'' + String(name || '').replace(/'/g, '\\\'') + '\')">＋ Attach evidence</button></div>';
+  };
+  var empty = function() { el.innerHTML = vstfEvidenceHtml(name) + attach(); };
+  if (!cellId) { empty(); return; }
+  SolisApi.stfEvidenceList(cellId).then(function(r) {
+    var items = (r && Array.isArray(r.evidence)) ? r.evidence : [];
+    if (!items.length) { empty(); return; }
+    var badge = { 'verified': 'b-active', 'under-review': 'b-review', 'pending': 'b-pending' };
+    el.innerHTML = items.map(function(it) {
+      var st = it.status || 'pending';
+      var label = st === 'verified' ? 'Verified' : st === 'under-review' ? 'Under review' : 'Pending';
+      var head = escapeHtml(((it.candidate || name) ? ((it.candidate || name) + ' — ') : '') + (it.title || ''));
+      var meta = escapeHtml([it.detail, it.submitted_by].filter(Boolean).join(' · '));
+      var inner = '<div style="flex:1"><div class="ev-name">' + head + '</div>' + (meta ? '<div class="ev-meta">' + meta + '</div>' : '') + '</div>' +
+        '<div class="ev-status"><span class="badge ' + (badge[st] || 'b-pending') + '">' + label + '</span></div>';
+      var icon = '<div class="ev-icon"><i class="fa-solid fa-' + (it.link ? 'link' : 'file-lines') + '"></i></div>';
+      return it.link
+        ? '<a class="evidence-item" style="text-decoration:none" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + icon + inner + '</a>'
+        : '<div class="evidence-item">' + icon + inner + '</div>';
+    }).join('') + attach();
+  }).catch(function() { empty(); });
+}
+
+function openEvidenceModal(cellId, name) {
+  openModal('<div class="sec">Attach Evidence</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Attach evidence for ' + escapeHtml(name || 'this candidate') + '. Visible to assessors of this vSTF cell.</div>' +
+    '<div class="form-group"><label class="form-label">Title</label><input class="form-input" id="ev-title" placeholder="e.g. Space Law Certificate (Makerere)"></div>' +
+    '<div class="form-group"><label class="form-label">Detail (optional)</label><input class="form-input" id="ev-detail" placeholder="e.g. PDF · 2.1MB"></div>' +
+    '<div class="form-group"><label class="form-label">Link (optional)</label><input class="form-input" id="ev-link" placeholder="https://…"></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="confirmEvidenceCreate(\'' + String(cellId).replace(/'/g, '\\\'') + '\')">Attach</button></div>',
+    { size: 'md' });
+}
+
+function confirmEvidenceCreate(cellId) {
+  var title = ((document.getElementById('ev-title') || {}).value || '').trim();
+  if (!title) { toast('Enter a title.', 'error'); return; }
+  var payload = {
+    title: title,
+    detail: ((document.getElementById('ev-detail') || {}).value || '').trim(),
+    link: ((document.getElementById('ev-link') || {}).value || '').trim()
+  };
+  SolisApi.stfEvidenceCreate(cellId, payload).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Attach failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    closeModal(); toast('Evidence attached.', 'success');
+    renderVstfSteward(); renderVstfCompetence();
+  }).catch(function() { toast('Could not attach. Is the server running?', 'error'); });
+}
+
 // Steward-candidacy view: profile meta, auto-match table, affiliations,
 // mandate card and summary from the live candidate + circle.
 function renderVstfSteward() {
@@ -3876,7 +3936,7 @@ function renderVstfSteward() {
   ((ctx.person && ctx.person.orgs) || []).forEach(function(o) { affils.push(o + ' — Member'); });
   ((ctx.person && ctx.person.circles) || []).forEach(function(c) { affils.push(c); });
   if (affils.length) setHtml('vstf-stew-affil', affils.map(function(a) { return '<span class="tag tag-purple" style="font-size:9px">' + escapeHtml(a) + '</span>'; }).join(''));
-  setHtml('vstf-stew-evidence', vstfEvidenceHtml(ctx.name));
+  loadVstfEvidence('vstf-stew-evidence', ctx.cell.id, ctx.name);
   var mandate = (ctx.circle && ctx.circle.mandate) || {};
   var primary = mandate.primary || [];
   var secondary = mandate.secondary || [];
@@ -3946,7 +4006,7 @@ function renderVstfCompetence() {
         '<td><input type="checkbox"></td><td style="font-size:10px;color:var(--text-tertiary)"></td></tr>';
     }).join(''));
   }
-  setHtml('vstf-comp-evidence', vstfEvidenceHtml(ctx.name));
+  loadVstfEvidence('vstf-comp-evidence', ctx.cell.id, ctx.name);
   var short = ctx.name ? ctx.name.split(/\s+/)[0] + ' ' + (ctx.name.split(/\s+/)[1] ? ctx.name.split(/\s+/)[1].charAt(0) + '.' : '') : 'candidate';
   var comment = document.getElementById('vstf-comp-comment');
   if (comment) comment.placeholder = 'Overall assessment of ' + short + String.fromCharCode(39) + 's competence claims...';
@@ -5843,30 +5903,41 @@ function renderObservatoryHomePubs() {
   }).join('');
 }
 
-// Library shelf on the observatory home: served by GET
-// /api/observatory/library (curated via the steward publish form).
-function renderLibraryCards() {
+// Library shelf on the observatory home: first paint from bootstrap
+// (MOCK.library), then refreshed from GET /api/observatory/library.
+function paintLibraryCards(items) {
   var el = document.getElementById('obs-library-list');
   var countEl = document.getElementById('obs-library-count');
   if (!el) return;
-  el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Loading library…</div>';
+  if (!items.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No library items yet — stewards can add some via Publish.</div>';
+    if (countEl) countEl.textContent = '';
+    return;
+  }
+  el.innerHTML = items.slice(0, 6).map(function(it) {
+    var inner = '<div style="flex:1;font-size:13px;color:var(--text)">' + escapeHtml(it.title || '') + '</div>' +
+      '<span class="tag tag-purple" style="font-size:8px">' + escapeHtml(it.category || it.itemType || it.item_type || 'Resource') + '</span>';
+    var link = it.link;
+    return link
+      ? '<a class="hrow" style="cursor:pointer;text-decoration:none" href="' + escapeHtml(link) + '" target="_blank" rel="noopener">' + inner + '</a>'
+      : '<div class="hrow">' + inner + '</div>';
+  }).join('');
+  if (countEl) countEl.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '') + ' across all domains';
+}
+
+function renderLibraryCards() {
+  var el = document.getElementById('obs-library-list');
+  if (!el) return;
+  paintLibraryCards((MOCK && MOCK.library) || []);
   SolisApi.obsLibraryList().then(function(r) {
-    var items = (r && Array.isArray(r.library)) ? r.library : [];
-    if (!items.length) {
-      el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No library items yet — stewards can add some via Publish.</div>';
-      if (countEl) countEl.textContent = '';
-      return;
+    if (r && Array.isArray(r.library)) {
+      MOCK.library = r.library;
+      paintLibraryCards(r.library);
     }
-    el.innerHTML = items.slice(0, 6).map(function(it) {
-      var inner = '<div style="flex:1;font-size:13px;color:var(--text)">' + escapeHtml(it.title || '') + '</div>' +
-        '<span class="tag tag-purple" style="font-size:8px">' + escapeHtml(it.category || it.item_type || 'Resource') + '</span>';
-      return it.link
-        ? '<a class="hrow" style="cursor:pointer;text-decoration:none" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener">' + inner + '</a>'
-        : '<div class="hrow">' + inner + '</div>';
-    }).join('');
-    if (countEl) countEl.textContent = items.length + ' resource' + (items.length !== 1 ? 's' : '') + ' across all domains';
   }).catch(function() {
-    el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Library unavailable offline.</div>';
+    if (!((MOCK && MOCK.library) || []).length) {
+      el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Library unavailable offline.</div>';
+    }
   });
 }
 
@@ -9738,7 +9809,7 @@ function renderProfileView() {
 }
 
 function emptyMock() {
-  return { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [], organisations: [], publications: [], news: [], events: [], opportunities: [], domains: {} };
+  return { currentUser: null, participants: [], circles: [], cells: [], stfs: { pending: [], active: [], completed: [] }, threads: [], inbox: [], projects: [], organisations: [], publications: [], news: [], events: [], opportunities: [], library: [], domains: {} };
 }
 
 // The page is sometimes served by a static host (no /api/*). A 404 HTML page

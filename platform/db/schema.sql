@@ -367,6 +367,18 @@ CREATE TABLE IF NOT EXISTS stf_candidate_domains (
   UNIQUE(candidate_id, domain)
 );
 
+CREATE TABLE IF NOT EXISTS stf_evidence (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  cell_id      TEXT NOT NULL,             -- vSTF cell this evidence belongs to
+  candidate    TEXT,                      -- display name of the candidate
+  title        TEXT NOT NULL,             -- e.g. "Space Law Certificate (Makerere)"
+  detail       TEXT,                      -- e.g. "PDF · 2.1MB" or a short note
+  link         TEXT,                      -- optional URL
+  status       TEXT DEFAULT 'pending',    -- pending | under-review | verified
+  submitted_by TEXT,
+  submitted_at TEXT
+);
+
 -- ═══════════════════════════════════════════════════════════════
 -- THREADS / INBOX / PUBLICATIONS / NEWS / EVENTS / OPPORTUNITIES
 -- ═══════════════════════════════════════════════════════════════
