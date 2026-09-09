@@ -3,45 +3,34 @@
 // Serves static files (platform/) + granular REST API backed by SQLite.
 // Usage: node server.mjs   →  http://localhost:3000
 import { createServer } from 'node:http';
-import { DatabaseSync } from 'node:sqlite';
+import mysql from 'mysql2/promise';
 import { readFileSync, statSync, createReadStream, existsSync } from 'node:fs';
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, extname, normalize, sep } from 'node:path';
-import { execSync } from 'node:child_process';
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PLATFORM_DIR = join(__dirname);
 const SHARED_DIR = join(PLATFORM_DIR, '..', 'shared');
-const DB_PATH = process.env.SOLIS_DB || join(PLATFORM_DIR, 'solis.db');
 const PORT = process.env.PORT || 3000;
 
-// ── DB bootstrap ────────────────────────────────────────
-if (!existsSync(DB_PATH)) {
-  execSync(`node ${join(__dirname, 'db', 'seed.js')}`, { env: { ...process.env, SOLIS_DB: DB_PATH } });
-}
-const db = new DatabaseSync(DB_PATH);
-db.exec('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
-try { db.exec('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE threads ADD COLUMN endorsements INTEGER DEFAULT 0'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE threads ADD COLUMN proposal_cell_id TEXT'); } catch { /* already present */ }
-try { db.exec("ALTER TABLE threads ADD COLUMN visibility TEXT DEFAULT 'public'"); } catch { /* already present */ }
-try { db.exec('ALTER TABLE threads ADD COLUMN jstf_cell_id TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE user_competence ADD COLUMN evidence TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE user_competence ADD COLUMN verified INTEGER DEFAULT 0'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE publications ADD COLUMN status TEXT DEFAULT \'approved\''); } catch { /* already present */ }
-try { db.exec('ALTER TABLE publications ADD COLUMN domain TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE publications ADD COLUMN author TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE publications ADD COLUMN created_at TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE news ADD COLUMN domain TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE news ADD COLUMN body TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE news ADD COLUMN curated_by TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE events ADD COLUMN domain TEXT'); } catch { /* already present */ }
-try { db.exec('ALTER TABLE events ADD COLUMN type TEXT'); } catch { /* already present */ }
-try { db.exec(`CREATE TABLE IF NOT EXISTS stf_evidence (
-  id INTEGER PRIMARY KEY AUTOINCREMENT, cell_id TEXT NOT NULL, candidate TEXT,
-  title TEXT NOT NULL, detail TEXT, link TEXT, status TEXT DEFAULT 'pending',
-  submitted_by TEXT, submitted_at TEXT)`); } catch { /* already present */ }
+// ── MySQL pool ────────────────────────────────────────
+const pool = mysql.createPool({
+  host: process.env.SOLIS_MYSQL_HOST || 'localhost',
+  port: parseInt(process.env.SOLIS_MYSQL_PORT || '3306', 10),
+  user: process.env.SOLIS_MYSQL_USER || 'root',
+  password: process.env.SOLIS_MYSQL_PASS || '',
+  database: process.env.SOLIS_MYSQL_DB || 'solis',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  charset: 'utf8mb4',
+});
+
+async function dbGet(sql, params) { const [rows] = await pool.query(sql, params || []); return rows[0] || null; }
+async function dbAll(sql, params) { const [rows] = await pool.query(sql, params || []); return rows; }
+async function dbRun(sql, params) { const [result] = await pool.query(sql, params || []); return result; }
 
 // ── helpers ─────────────────────────────────────────────
 const send = (res, code, obj) => {
@@ -101,13 +90,12 @@ const AUTH_WINDOW_MS = 15 * 60 * 1000;
 const genToken = () => randomBytes(48).toString('hex');
 
 // ── auth ────────────────────────────────────────────────
-function authUser(req) {
+async function authUser(req) {
   const h = req.headers.authorization || '';
   const m = h.match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
-  const row = db.prepare(
-    `SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id
-     WHERE t.token = ? AND t.expires_at > datetime('now')`).get(m[1]);
+  const row = await dbGet(`SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id
+     WHERE t.token = ? AND t.expires_at > NOW()`, [m[1]]);
   return row || null;
 }
 
@@ -121,21 +109,21 @@ if (method === 'POST' && path === '/api/auth/login') {
     const email = String(body.email || '').trim().toLowerCase();
     const retry = rateLimit(`auth:${CLIENT_IP(req)}`, AUTH_LIMIT, AUTH_WINDOW_MS);
     if (retry) return send(res, 429, { error: 'Too many attempts — please try again later', retryAfter: retry });
-    const user = db.prepare('SELECT * FROM users WHERE lower(email) = ?').get(email);
+    const user = await dbGet('SELECT * FROM users WHERE lower(email) = ?', [email]);
     const pw = String(body.password || '');
     if (!user || !user.password_hash || !verifyPassword(pw, user.password_hash)) {
-      if (user) db.prepare('UPDATE users SET failed_attempts = COALESCE(failed_attempts,0) + 1 WHERE id = ?').run(user.id);
+      if (user) await dbRun('UPDATE users SET failed_attempts = COALESCE(failed_attempts,0) + 1 WHERE id = ?', [user.id]);
       return send(res, 401, { error: 'Invalid email or password' });
     }
-    if (user.failed_attempts) db.prepare('UPDATE users SET failed_attempts = 0 WHERE id = ?').run(user.id);
+    if (user.failed_attempts) await dbRun('UPDATE users SET failed_attempts = 0 WHERE id = ?', [user.id]);
     if (isLegacyHash(user.password_hash)) {
-      db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hashPassword(pw), user.id);
+      await dbRun('UPDATE users SET password_hash = ? WHERE id = ?', [hashPassword(pw), user.id]);
       user.password_hash = null;
     }
     const token = genToken();
     const expires = new Date(Date.now() + 24 * 3600 * 1000).toISOString();
-    db.prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)').run(user.id, token, expires);
-    db.prepare("DELETE FROM auth_tokens WHERE user_id = ? AND expires_at <= datetime('now')").run(user.id);
+    await dbRun('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)', [user.id, token, expires]);
+    await dbRun("DELETE FROM auth_tokens WHERE user_id = ? AND expires_at <= NOW()", [user.id]);
     delete user.password_hash;
     return send(res, 200, { token, user });
   }
@@ -147,30 +135,28 @@ if (method === 'POST' && path === '/api/auth/login') {
     if (retry) return send(res, 429, { error: 'Too many accounts created from this address — please try again later', retryAfter: retry });
     if (!name || !email || !password) return send(res, 400, { error: 'Name, email, and password required' });
     if (String(password).length < 6) return send(res, 400, { error: 'Password must be at least 6 characters' });
-    const exists = db.prepare('SELECT id FROM users WHERE lower(email) = ?').get(String(email).toLowerCase());
+    const exists = await dbGet('SELECT id FROM users WHERE lower(email) = ?', [String(email).toLowerCase()]);
     if (exists) return send(res, 409, { error: 'Email already registered' });
     const id = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'user-' + Date.now();
     const initials = String(name).split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
     const joined = new Date().toISOString().slice(0, 10);
-    db.prepare(`INSERT INTO users (id,name,initials,email,location,bio,essay,joined,status,is_current,password_hash)
-                VALUES (?,?,?,?,?,?,?,?,?,0,?)`)
-      .run(id, name, initials, String(email).toLowerCase(), location || '', bio || '', essay || '', joined, 'Active', hashPassword(password));
+    await dbRun(`INSERT INTO users (id,name,initials,email,location,bio,essay,joined,status,is_current,password_hash)
+                VALUES (?,?,?,?,?,?,?,?,?,0,?)`, [id, name, initials, String(email).toLowerCase(), location || '', bio || '', essay || '', joined, 'Active', hashPassword(password)]);
     const token = genToken();
-    db.prepare('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)')
-      .run(id, token, new Date(Date.now() + 24 * 3600 * 1000).toISOString());
-    const user = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
+    await dbRun('INSERT INTO auth_tokens (user_id, token, expires_at) VALUES (?,?,?)', [id, token, new Date(Date.now() + 24 * 3600 * 1000).toISOString()]);
+    const user = await dbGet('SELECT * FROM users WHERE id = ?', [id]);
     delete user.password_hash;
     return send(res, 201, { token, user });
   }
 
   if (method === 'POST' && path === '/api/auth/logout') {
     const m = (req.headers.authorization || '').match(/^Bearer\s+(.+)$/i);
-    if (m) db.prepare('DELETE FROM auth_tokens WHERE token = ?').run(m[1]);
+    if (m) await dbRun('DELETE FROM auth_tokens WHERE token = ?', [m[1]]);
     return send(res, 200, { ok: true });
   }
 
   if (method === 'GET' && path === '/api/auth/me') {
-    const u = authUser(req);
+    const u = await authUser(req);
     if (!u) return send(res, 401, { error: 'Unauthorized' });
     delete u.password_hash;
     return send(res, 200, { user: u });
@@ -221,11 +207,11 @@ async function resourceRoutes(req, res, reqUrl, method) {
       if (method === 'GET') {
         const idParam = parseId(reqUrl, r.path);
         if (idParam !== null) {
-          const row = db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(idParam);
+          const row = await dbGet(`SELECT * FROM ${r.table} WHERE id = ?`, [idParam]);
           if (!row) return send(res, 404, { error: 'Not found' });
           return send(res, 200, row);
         }
-        const rows = db.prepare(`SELECT * FROM ${r.table}`).all();
+        const rows = await dbAll(`SELECT * FROM ${r.table}`);
         return send(res, 200, rows);
       }
       // POST → create
@@ -233,8 +219,8 @@ async function resourceRoutes(req, res, reqUrl, method) {
         const body = await readBody(req);
         if (!body.id) return send(res, 400, { error: 'id required' });
         try {
-          db.prepare(`INSERT INTO ${r.table} (id) VALUES (?) ON CONFLICT(id) DO NOTHING`).run(String(body.id));
-          const ok = updateRow(r.table, body);
+          await dbRun(`INSERT INTO ${r.table} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id`, [String(body.id)]);
+          const ok = await updateRow(r.table, body);
           return send(res, ok ? 201 : 409, { ok: !!ok, id: body.id });
         } catch (e) {
           return send(res, 400, { error: e.message });
@@ -243,15 +229,15 @@ async function resourceRoutes(req, res, reqUrl, method) {
       // PATCH/PUT → update
       if (method === 'PATCH' || method === 'PUT') {
         const body = await readBody(req);
-        const row = db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(id);
+        const row = await dbGet(`SELECT * FROM ${r.table} WHERE id = ?`, [id]);
         if (!row) return send(res, 404, { error: 'Not found' });
-        updateRow(r.table, body, id);
-        return send(res, 200, db.prepare(`SELECT * FROM ${r.table} WHERE id = ?`).get(id));
+        await updateRow(r.table, body, id);
+        return send(res, 200, await dbGet(`SELECT * FROM ${r.table} WHERE id = ?`, [id]));
       }
       // DELETE
       if (method === 'DELETE') {
-        const out = db.prepare(`DELETE FROM ${r.table} WHERE id = ?`).run(id);
-        return send(res, out.changes ? 200 : 404, { ok: out.changes > 0 });
+        const out = await dbRun(`DELETE FROM ${r.table} WHERE id = ?`, [id]);
+        return send(res, out.affectedRows ? 200 : 404, { ok: out.affectedRows > 0 });
       }
       return send(res, 405, { error: 'Method not allowed' });
     }
@@ -266,16 +252,16 @@ function bindVal(v) {
 }
 
 // Apply a flat JSON body to a row's columns (only known columns).
-function updateRow(table, body, id) {
-  const cols = db.prepare(`PRAGMA table_info(${table})`).all().map(c => c.name);
+async function updateRow(table, body, id) {
+  const cols = (await dbAll(`SHOW COLUMNS FROM \`${table}\``)).map(c => c.Field);
   const entries = Object.entries(body).filter(([k]) => cols.includes(k) && k !== 'id');
   if (!entries.length) return false;
   const sets = entries.map(([k]) => `${k} = ?`).join(', ');
   const vals = entries.map(([, v]) => bindVal(v));
   if (id) {
-    db.prepare(`UPDATE ${table} SET ${sets} WHERE id = ?`).run(...vals, String(id));
+    await dbRun(`UPDATE ${table} SET ${sets} WHERE id = ?`, [...vals, String(id)]);
   } else {
-    db.prepare(`UPDATE ${table} SET ${sets} WHERE id = ?`).run(...vals, String(body.id));
+    await dbRun(`UPDATE ${table} SET ${sets} WHERE id = ?`, [...vals, String(body.id)]);
   }
   return true;
 }
@@ -312,16 +298,14 @@ async function draftChildRoutes(req, res, reqUrl, method) {
   const draftId = decodeURIComponent(m[2]);
   const kind = m[3];
   const body = await readBody(req);
-  const draft = db.prepare('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?').get(String(draftId), cellId);
+  const draft = await dbGet('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?', [String(draftId), cellId]);
   if (!draft) return send(res, 404, { error: 'Not found' });
   if (kind === 'versions') {
     const cols = ['draft_id', 'title', 'text', 'action', 'author', 'ts'];
     const keys = ['draft_id', ...cols.filter(k => k !== 'draft_id' && body[k] !== undefined)];
-    db.prepare(`INSERT INTO resolution_versions (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`)
-      .run(...keys.map(k => (k === 'draft_id' ? String(draftId) : bindVal(body[k]))));
+    await dbRun(`INSERT INTO resolution_versions (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`, [...keys.map(k => (k === 'draft_id' ? String(draftId) : bindVal(body[k])))]);
   } else {
-    db.prepare('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON CONFLICT DO NOTHING')
-      .run(String(draftId), String(body.circle_name ?? ''));
+    await dbRun('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1', [String(draftId), String(body.circle_name ?? '')]);
   }
   return send(res, 201, { ok: true });
 }
@@ -335,22 +319,22 @@ async function engagementRoutes(req, res, reqUrl, method) {
   if (method !== 'POST' && method !== 'DELETE') return send(res, 405, { error: 'Method not allowed' });
   const threadId = decodeURIComponent(m[1]);
   const kind = m[2];
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare('SELECT id FROM threads WHERE id = ?').get(threadId)) {
+  if (!await dbGet('SELECT id FROM threads WHERE id = ?', [threadId])) {
     return send(res, 404, { error: 'Not found' });
   }
   const table = kind === 'endorsement' ? 'thread_endorsements' : 'thread_bookmarks';
   if (method === 'POST') {
-    db.prepare(`INSERT INTO ${table} (user_id, thread_id) VALUES (?,?) ON CONFLICT DO NOTHING`).run(user.id, threadId);
+    await dbRun(`INSERT INTO ${table} (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1`, [user.id, threadId]);
   } else {
-    db.prepare(`DELETE FROM ${table} WHERE user_id = ? AND thread_id = ?`).run(user.id, threadId);
+    await dbRun(`DELETE FROM ${table} WHERE user_id = ? AND thread_id = ?`, [user.id, threadId]);
   }
   const active = method === 'POST';
   const resp = { ok: true, threadId };
   if (kind === 'endorsement') {
-    const n = db.prepare('SELECT COUNT(*) n FROM thread_endorsements WHERE thread_id = ?').get(threadId).n;
-    db.prepare('UPDATE threads SET endorsements = ? WHERE id = ?').run(n, threadId);
+    const n = await dbGet('SELECT COUNT(*) n FROM thread_endorsements WHERE thread_id = ?', [threadId]).n;
+    await dbRun('UPDATE threads SET endorsements = ? WHERE id = ?', [n, threadId]);
     resp.endorsed = active;
     resp.endorsements = n;
   } else {
@@ -364,15 +348,15 @@ async function pinRoutes(req, res, reqUrl, method) {
   if (!m) return null;
   if (method !== 'POST' && method !== 'DELETE') return send(res, 405, { error: 'Method not allowed' });
   const threadId = decodeURIComponent(m[1]);
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  const inRoster = await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n;
   if (!inRoster) return send(res, 403, { error: 'Steward access required' });
-  if (!db.prepare('SELECT id FROM threads WHERE id = ?').get(threadId)) {
+  if (!await dbGet('SELECT id FROM threads WHERE id = ?', [threadId])) {
     return send(res, 404, { error: 'Not found' });
   }
   const pinned = method === 'POST';
-  db.prepare('UPDATE threads SET pinned = ? WHERE id = ?').run(pinned ? 1 : 0, threadId);
+  await dbRun('UPDATE threads SET pinned = ? WHERE id = ?', [pinned ? 1 : 0, threadId]);
   return send(res, 200, { ok: true, threadId, pinned });
 }
 
@@ -384,22 +368,21 @@ async function raiseProposalRoutes(req, res, reqUrl, method) {
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
   const threadId = decodeURIComponent(m[1]);
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  const inRoster = await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n;
   if (!inRoster) return send(res, 403, { error: 'Steward access required' });
-  const t = db.prepare('SELECT * FROM threads WHERE id = ?').get(threadId);
+  const t = await dbGet('SELECT * FROM threads WHERE id = ?', [threadId]);
   if (!t) return send(res, 404, { error: 'Not found' });
   if (t.proposal_cell_id) return send(res, 409, { error: 'Already raised as a proposal' });
-  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const memberCount = (await dbGet(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).n) || 0;
   const cellId = 'delib-' + Date.now().toString(36);
   const source = {
     type: 'commons-thread', proposer: user.name || user.initials,
     threadId: threadId, threadTitle: t.title, threadAuthor: t.author, threadBody: (t.body || '').slice(0, 600),
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`)
-    .run(cellId, 'Deliberation Cell', t.title, 'Active', 'commons-thread', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }));
-  db.prepare('UPDATE threads SET proposal_cell_id = ? WHERE id = ?').run(cellId, threadId);
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`, [cellId, 'Deliberation Cell', t.title, 'Active', 'commons-thread', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' })]);
+  await dbRun('UPDATE threads SET proposal_cell_id = ? WHERE id = ?', [cellId, threadId]);
   return send(res, 201, { ok: true, threadId, cellId });
 }
 
@@ -411,21 +394,20 @@ async function directProposalRoutes(req, res, reqUrl, method) {
     if (reqUrl === '/api/proposals/direct') return send(res, 405, { error: 'Method not allowed' });
     return null;
   }
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  const inRoster = await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n;
   if (!inRoster) return send(res, 403, { error: 'Steward access required' });
   const body = await readBody(req);
   const title = String(body.title || '').trim();
   if (!title) return send(res, 400, { error: 'title required' });
-  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const memberCount = (await dbGet(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).n) || 0;
   const cellId = 'delib-' + Date.now().toString(36);
   const source = {
     type: 'direct-proposal', proposer: user.name || user.initials,
     description: String(body.description || '').trim(), domain: String(body.domain || '').trim(),
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`)
-    .run(cellId, 'Deliberation Cell', title, 'Active', 'direct-proposal', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }));
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)`, [cellId, 'Deliberation Cell', title, 'Active', 'direct-proposal', Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' })]);
   return send(res, 201, { ok: true, cellId });
 }
 
@@ -438,9 +420,9 @@ async function settingsProposalRoutes(req, res, reqUrl, method) {
     if (reqUrl === '/api/proposals/system') return send(res, 405, { error: 'Method not allowed' });
     return null;
   }
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  const inRoster = db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n;
+  const inRoster = await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n;
   if (!inRoster) return send(res, 403, { error: 'Steward access required' });
   const body = await readBody(req);
   const allowed = ['system-settings', 'circle-settings', 'circle-creation'];
@@ -448,15 +430,14 @@ async function settingsProposalRoutes(req, res, reqUrl, method) {
   if (!allowed.includes(delibType)) return send(res, 400, { error: 'delibType required' });
   const title = String(body.title || '').trim();
   if (!title) return send(res, 400, { error: 'title required' });
-  const memberCount = (db.prepare(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).get().n) || 0;
+  const memberCount = (await dbGet(`SELECT COUNT(*) n FROM users WHERE status = 'Active'`).n) || 0;
   const cellId = 'delib-' + Date.now().toString(36);
   const source = {
     type: String(body.sourceType || 'settings-proposal'),
     proposer: user.name || user.initials, submitter: user.id,
   };
   const meta = JSON.stringify({ settingsSnapshot: (body.snapshot && typeof body.snapshot === 'object') ? body.snapshot : {} });
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?)`)
-    .run(cellId, 'Deliberation Cell', title, 'Active', delibType, Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }), meta);
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?)`, [cellId, 'Deliberation Cell', title, 'Active', delibType, Math.max(memberCount, 4), JSON.stringify(source), JSON.stringify({ status: 'Draft' }), meta]);
   return send(res, 201, { ok: true, cellId });
 }
 
@@ -470,42 +451,42 @@ async function childRoutes(req, res, reqUrl, method) {
     if (!m && !cm) continue;
     const parentId = decodeURIComponent((m || cm)[1]);
     if (method === 'GET' && m) {
-      const rows = db.prepare(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ?`).all(parentId);
+      const rows = await dbAll(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ?`, [parentId]);
       return send(res, 200, rows);
     }
     if (method !== 'GET') {
       // writes require a session — anonymous writes are rejected
-      const wuser = authUser(req);
+      const wuser = await authUser(req);
       if (!wuser) return send(res, 401, { error: 'Unauthorized' });
     }
     if (method === 'POST' && m) {
       const body = await readBody(req);
-      const cols = db.prepare(`PRAGMA table_info(${d.child})`).all().map(c => c.name).filter(c => c !== d.parentKey && c !== 'id');
+      const cols = (await dbAll(`SHOW COLUMNS FROM \`${d.child}\``)).map(c => c.Field).filter(c => c !== d.parentKey && c !== 'id');
       const entries = Object.entries(body).filter(([k]) => cols.includes(k));
       const keys = [d.parentKey, ...entries.map(([k]) => k)];
       const vals = [parentId, ...entries.map(([, v]) => bindVal(v))];
       try {
-        db.prepare(`INSERT INTO ${d.child} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`).run(...vals);
+        await dbRun(`INSERT INTO ${d.child} (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`, [...vals]);
       } catch (e) {
         return send(res, 400, { error: e.message });
       }
-      const created = db.prepare(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ? ORDER BY id DESC LIMIT 1`).get(parentId);
+      const created = await dbGet(`SELECT * FROM ${d.child} WHERE ${d.parentKey} = ? ORDER BY id DESC LIMIT 1`, [parentId]);
       return send(res, 201, created);
     }
     if (cm) {
       const childId = decodeURIComponent(cm[2]);
       if (method === 'PATCH' || method === 'PUT') {
         const body = await readBody(req);
-        const cols = db.prepare(`PRAGMA table_info(${d.child})`).all().map(c => c.name).filter(c => c !== 'id');
+        const cols = (await dbAll(`SHOW COLUMNS FROM \`${d.child}\``)).map(c => c.Field).filter(c => c !== 'id');
         const entries = Object.entries(body).filter(([k]) => cols.includes(k));
-        if (!entries.length) return send(res, 200, db.prepare(`SELECT * FROM ${d.child} WHERE id = ?`).get(childId));
+        if (!entries.length) return send(res, 200, await dbGet(`SELECT * FROM ${d.child} WHERE id = ?`, [childId]));
         const sets = entries.map(([k]) => `${k} = ?`).join(', ');
-        db.prepare(`UPDATE ${d.child} SET ${sets} WHERE id = ?`).run(...entries.map(([, v]) => bindVal(v)), String(childId));
-        return send(res, 200, db.prepare(`SELECT * FROM ${d.child} WHERE id = ?`).get(childId));
+        await dbRun(`UPDATE ${d.child} SET ${sets} WHERE id = ?`, [...entries.map(([, v]) => bindVal(v)), String(childId)]);
+        return send(res, 200, await dbGet(`SELECT * FROM ${d.child} WHERE id = ?`, [childId]));
       }
       if (method === 'DELETE') {
-        const out = db.prepare(`DELETE FROM ${d.child} WHERE id = ?`).run(String(childId));
-        return send(res, out.changes ? 200 : 404, { ok: out.changes > 0 });
+        const out = await dbRun(`DELETE FROM ${d.child} WHERE id = ?`, [String(childId)]);
+        return send(res, out.affectedRows ? 200 : 404, { ok: out.affectedRows > 0 });
       }
       return send(res, 405, { error: 'Method not allowed' });
     }
@@ -522,7 +503,7 @@ async function voteRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/vote-records$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
   const body = await readBody(req);
@@ -532,29 +513,24 @@ async function voteRoutes(req, res, reqUrl, method) {
   const vote = ['yea', 'nay', 'abstain'].includes(body.vote) ? body.vote : 'abstain';
   const ws = Math.max(0, Number(body.ws) || 0);
 
-  db.prepare('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?')
-    .run(cellId, body.domain, initials);
-  db.prepare('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote) VALUES (?,?,?,?,?,?)')
-    .run(cellId, body.domain, body.name ?? null, initials, ws, vote);
+  await dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?', [cellId, body.domain, initials]);
+  await dbRun('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote) VALUES (?,?,?,?,?,?)', [cellId, body.domain, body.name ?? null, initials, ws, vote]);
 
-  const rows = db.prepare(`SELECT domain,
+  const rows = await dbAll(`SELECT domain,
       COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) AS yea,
       COALESCE(SUM(CASE WHEN vote='nay' THEN ws END),0) AS nay,
       COALESCE(SUM(CASE WHEN vote='abstain' THEN ws END),0) AS abst
-    FROM vote_records WHERE cell_id = ? GROUP BY domain`).all(cellId);
+    FROM vote_records WHERE cell_id = ? GROUP BY domain`, [cellId]);
   let totalYea = 0, totalNay = 0, totalAbst = 0;
   for (const r of rows) {
     r.yea = Number(r.yea); r.nay = Number(r.nay); r.abst = Number(r.abst);
     totalYea += r.yea; totalNay += r.nay; totalAbst += r.abst;
-    db.prepare(`INSERT INTO cell_votes (cell_id, domain, yea, nay, total) VALUES (?,?,?,?,?)
-      ON CONFLICT(cell_id, domain) DO UPDATE SET yea=excluded.yea, nay=excluded.nay, total=excluded.total`)
-      .run(cellId, r.domain, r.yea, r.nay, r.yea + r.nay);
+    await dbRun(`INSERT INTO cell_votes (cell_id, domain, yea, nay, total) VALUES (?,?,?,?,?)
+      ON CONFLICT(cell_id, domain) DO UPDATE SET yea=excluded.yea, nay=excluded.nay, total=excluded.total`, [cellId, r.domain, r.yea, r.nay, r.yea + r.nay]);
   }
   const summary = { yea: totalYea, nay: totalNay, abstain: totalAbst };
-  db.prepare('INSERT OR REPLACE INTO cell_vote_summary (cell_id, summary) VALUES (?,?)')
-    .run(cellId, JSON.stringify(summary));
-  const record = db.prepare('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?')
-    .get(cellId, body.domain, initials);
+  await dbRun('REPLACE INTO cell_vote_summary (cell_id, summary) VALUES (?,?)', [cellId, JSON.stringify(summary)]);
+  const record = await dbGet('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?', [cellId, body.domain, initials]);
   return send(res, 200, {
     record,
     domains: rows.map(r => ({ name: r.domain, yea: r.yea, nay: r.nay, abstain: r.abst, total: r.yea + r.nay })),
@@ -570,21 +546,21 @@ async function voteRoutes(req, res, reqUrl, method) {
 async function governanceRoutes(req, res, reqUrl, method) {
   let m = reqUrl.match(/^\/api\/cells\/([^/]+)\/draft-resolutions\/([^/]+)\/submit$/);
   if (m && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
       return send(res, 403, { error: 'Steward access required' });
     }
     const cellId = decodeURIComponent(m[1]);
     const draftId = decodeURIComponent(m[2]);
-    const draft = db.prepare('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?').get(String(draftId), cellId);
+    const draft = await dbGet('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?', [String(draftId), cellId]);
     if (!draft) return send(res, 404, { error: 'Not found' });
     if (draft.status !== 'draft') return send(res, 409, { error: 'Resolution already submitted' });
-    db.prepare("UPDATE draft_resolutions SET status = 'submitted' WHERE id = ?").run(String(draftId));
-    const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+    await dbRun("UPDATE draft_resolutions SET status = 'submitted' WHERE id = ?", [String(draftId)]);
+    const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
     const resJson = (cell && cell.resolution) ? JSON.parse(cell.resolution) : {};
     resJson.status = 'Submitted';
-    db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(resJson), cellId);
+    await dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [JSON.stringify(resJson), cellId]);
     // spawn blind aSTF cell
     const astfId = 'astf-' + Date.now().toString(36);
     const originSource = cell ? JSON.parse(cell.source || '{}') : {};
@@ -594,51 +570,47 @@ async function governanceRoutes(req, res, reqUrl, method) {
       draftId: String(draftId), draftTitle: draft.title || '', circleName,
       submittedBy: user.name || user.initials, submittedAt: new Date().toISOString(),
     };
-    db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
-      .run(astfId, 'aSTF Cell', 'aSTF · ' + (draft.title || cell.title || ''), 'Blind Review', 'motion-audit',
+    await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, [astfId, 'aSTF Cell', 'aSTF · ' + (draft.title || cell.title || ''), 'Blind Review', 'motion-audit',
         cell.participants || 0, circleName, 1, cellId,
         JSON.stringify(astfSource), JSON.stringify({ status: 'Pending' }),
-        JSON.stringify({ assessors: 3, rubric: { jurisdiction: 0, depth: 0, alignment: 0, competence: 0 } }));
-    db.prepare('UPDATE cells SET resolution_ref = ? WHERE id = ?').run(astfId, cellId);
+        JSON.stringify({ assessors: 3, rubric: { jurisdiction: 0, depth: 0, alignment: 0, competence: 0 } })]);
+    await dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [astfId, cellId]);
     const stfId = 'stf-' + astfId;
-    db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-      .run(stfId, 'aSTF', draft.title || cell.title || '', circleName, 'active', 'Blind Review',
-        draft.title || cell.title || '', new Date(Date.now() + 10*86400000).toISOString().slice(0, 10));
+    await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, [stfId, 'aSTF', draft.title || cell.title || '', circleName, 'active', 'Blind Review',
+        draft.title || cell.title || '', new Date(Date.now() + 10*86400000).toISOString().slice(0, 10)]);
     return send(res, 200, { ok: true, status: 'submitted', astfId });
   }
   m = reqUrl.match(/^\/api\/cells\/([^/]+)\/debate\/close$/);
   if (m && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+    if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
       return send(res, 403, { error: 'Steward access required' });
     }
     const cellId = decodeURIComponent(m[1]);
     const body = await readBody(req);
-    const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+    const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
     if (!cell) return send(res, 404, { error: 'Not found' });
-    const summaryRow = db.prepare('SELECT summary FROM cell_vote_summary WHERE cell_id = ?').get(cellId);
+    const summaryRow = await dbGet('SELECT summary FROM cell_vote_summary WHERE cell_id = ?', [cellId]);
     const s = summaryRow ? JSON.parse(summaryRow.summary) : {};
     const yea = Number(s.yea) || 0, nay = Number(s.nay) || 0;
     const outcome = nay > yea ? 'failed' : 'passed';
     const state = cell.status === 'crystallised' ? 'crystallised' : cell.status;
     const evtStem = 'evt-crystal-' + cellId.replace(/[^A-Za-z0-9_-]/g, '_');
     if (state === 'crystallised') {
-      const existing = db.prepare('SELECT id FROM governance_events WHERE id LIKE ?').get(evtStem + '%');
+      const existing = await dbGet('SELECT id FROM governance_events WHERE id LIKE ?', [evtStem + '%']);
       if (existing) return send(res, 200, { ok: true, status: 'crystallised', already: true, outcome, yea, nay });
     }
     let r = cell.resolution ? JSON.parse(cell.resolution) : {};
     if (r.status === 'Draft' || r.status === 'Submitted') r.status = 'Crystallised';
     r.outcome = outcome;
-    db.prepare("UPDATE cells SET status = 'crystallised', resolution = ? WHERE id = ?").run(JSON.stringify(r), cellId);
-    db.prepare("UPDATE draft_resolutions SET status = ? WHERE cell_id = ? AND status = 'submitted'")
-      .run(outcome === 'failed' ? 'failed' : 'passed', cellId);
+    await dbRun("UPDATE cells SET status = 'crystallised', resolution = ? WHERE id = ?", [JSON.stringify(r), cellId]);
+    await dbRun("UPDATE draft_resolutions SET status = ? WHERE cell_id = ? AND status = 'submitted'", [outcome === 'failed' ? 'failed' : 'passed', cellId]);
     const evtId = evtStem + '-' + Date.now();
-    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-      .run(evtId, 'cell-crystallisation', String(cell.circle || ''), new Date().toISOString().slice(0, 10),
+    await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'cell-crystallisation', String(cell.circle || ''), new Date().toISOString().slice(0, 10),
         '"' + String(cell.title || cellId) + '" crystallised — resolution ' + outcome + ' (yea ' + yea + ' Ws / nay ' + nay + ' Ws)',
-        String(body && body.participant || ''));
+        String(body && body.participant || '')]);
     return send(res, 200, { ok: true, status: 'crystallised', outcome, yea, nay });
   }
   return null;
@@ -652,10 +624,10 @@ async function astfVerdictRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/astf-verdict$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'aSTF Cell') return send(res, 400, { error: 'Not an aSTF cell' });
   if (cell.status === 'Verdict Filed') return send(res, 409, { error: 'Verdict already filed' });
@@ -678,16 +650,15 @@ async function astfVerdictRoutes(req, res, reqUrl, method) {
     rubric: { jurisdiction, depth, alignment, competence, total },
     adjudicator: user.name || user.initials, filedAt: new Date().toISOString(),
   };
-  db.prepare("UPDATE cells SET status = 'Verdict Filed', resolution = ?, blind = 0 WHERE id = ?")
-    .run(JSON.stringify(astfResult), cellId);
+  await dbRun("UPDATE cells SET status = 'Verdict Filed', resolution = ?, blind = 0 WHERE id = ?", [JSON.stringify(astfResult), cellId]);
   // update stfs row
-  const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'aSTF' AND status = 'Blind Review' AND purpose = ?").get(source.draftTitle || '');
+  const stfRow = await dbGet("SELECT id FROM stfs WHERE type = 'aSTF' AND status = 'Blind Review' AND purpose = ?", [source.draftTitle || '']);
   if (stfRow) {
-    db.prepare("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+    await dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", [stfRow.id]);
   }
   // jSTF judicial audit — aSTF reviews the decision, never the jSTF members
   if (source.type === 'judicial-audit' && source.sourceCellId) {
-    const jstf = db.prepare('SELECT * FROM cells WHERE id = ?').get(source.sourceCellId);
+    const jstf = await dbGet('SELECT * FROM cells WHERE id = ?', [source.sourceCellId]);
     if (jstf) {
       const jstfMeta = jstf.meta ? JSON.parse(jstf.meta) : {};
       const jstfRes = jstf.resolution ? JSON.parse(jstf.resolution) : {};
@@ -702,50 +673,44 @@ async function astfVerdictRoutes(req, res, reqUrl, method) {
             ? ['target role/privileges updated per system settings', 'Ws recalculated', 'fresh vSTF composition triggered']
             : ['applied per cited policy resolutions: ' + (verdictInfo.policyRefs || []).join(', ')],
         };
-        db.prepare("UPDATE cells SET status = 'Resolution Applied', resolution = ? WHERE id = ?")
-          .run(JSON.stringify(jstfRes), source.sourceCellId);
+        await dbRun("UPDATE cells SET status = 'Resolution Applied', resolution = ? WHERE id = ?", [JSON.stringify(jstfRes), source.sourceCellId]);
       } else {
         // disapproval: the SAME jSTF cell continues — the team composition
         // is shuffled and the investigation resumes where it stopped.
         jstfRes.status = 'Revision Ordered';
         jstfRes.revisionNotes = rationale;
-        db.prepare("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?")
-          .run(JSON.stringify(jstfRes), source.sourceCellId);
-        jstfShuffleComposition(source.sourceCellId, jstf, jstfMeta, rationale, user.name || user.initials);
+        await dbRun("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?", [JSON.stringify(jstfRes), source.sourceCellId]);
+        await jstfShuffleComposition(source.sourceCellId, jstf, jstfMeta, rationale, user.name || user.initials);
       }
       const evtId = 'evt-jstf-audit-' + Date.now().toString(36);
-      db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-        .run(evtId, 'jstf-audit', '', new Date().toISOString().slice(0, 10),
+      await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'jstf-audit', '', new Date().toISOString().slice(0, 10),
           '"' + (jstf.title || jstf.id) + '" — aSTF audit: ' + verdict + ' (rubric ' + total + '/30)',
-          String(user.name || user.initials));
+          String(user.name || user.initials)]);
     }
     // update stfs row
-    const auditStf = db.prepare("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?").get('aSTF Audit — ' + (source.targetName || ''));
-    if (auditStf) db.prepare("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?").run(auditStf.id);
+    const auditStf = await dbGet("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?", ['aSTF Audit — ' + (source.targetName || '')]);
+    if (auditStf) await dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", [auditStf.id]);
     return send(res, 200, { ok: true, verdict, astfId: cellId, sourceCellId: source.sourceCellId, rubricTotal: total });
   }
   // update origin cell resolution
   if (source.originCellId) {
-    const origin = db.prepare('SELECT * FROM cells WHERE id = ?').get(source.originCellId);
+    const origin = await dbGet('SELECT * FROM cells WHERE id = ?', [source.originCellId]);
     if (origin) {
       const originRes = origin.resolution ? JSON.parse(origin.resolution) : {};
       if (verdict === 'approved') {
         originRes.status = 'Approved';
-        db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(originRes), source.originCellId);
-        db.prepare("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'")
-          .run(source.originCellId);
+        await dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [JSON.stringify(originRes), source.originCellId]);
+        await dbRun("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'", [source.originCellId]);
       } else if (verdict === 'rejected') {
         originRes.status = 'Rejected';
-        db.prepare('UPDATE cells SET resolution = ? WHERE id = ?').run(JSON.stringify(originRes), source.originCellId);
-        db.prepare("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'")
-          .run(source.originCellId);
+        await dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [JSON.stringify(originRes), source.originCellId]);
+        await dbRun("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'", [source.originCellId]);
       }
     }
     const evtId = 'evt-astf-' + cellId.replace(/[^A-Za-z0-9_-]/g, '_') + '-' + Date.now();
-    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-      .run(evtId, 'astf-verdict', String(source.circleName || ''), new Date().toISOString().slice(0, 10),
+    await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'astf-verdict', String(source.circleName || ''), new Date().toISOString().slice(0, 10),
         '"' + (cell.title || cellId) + '" — aSTF verdict: ' + verdict + ' (rubric ' + total + '/30)',
-        String(user.name || user.initials));
+        String(user.name || user.initials)]);
   }
   return send(res, 200, { ok: true, verdict, astfId: cellId, originCellId: source.originCellId || null, rubricTotal: total });
 }
@@ -757,18 +722,18 @@ async function xstfSpawnRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-xstf$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+  if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const astfId = decodeURIComponent(m[1]);
-  const astf = db.prepare('SELECT * FROM cells WHERE id = ?').get(astfId);
+  const astf = await dbGet('SELECT * FROM cells WHERE id = ?', [astfId]);
   if (!astf) return send(res, 404, { error: 'Not found' });
   if (astf.type !== 'aSTF Cell') return send(res, 400, { error: 'Not an aSTF cell' });
   const astfRes = astf.resolution ? JSON.parse(astf.resolution) : {};
   if (astfRes.verdict !== 'approved') return send(res, 400, { error: 'aSTF verdict not approved' });
-  const existing = db.prepare("SELECT id FROM cells WHERE type = 'xSTF Cell' AND commissioned_by = ?").get(astfId);
+  const existing = await dbGet("SELECT id FROM cells WHERE type = 'xSTF Cell' AND commissioned_by = ?", [astfId]);
   if (existing) return send(res, 409, { error: 'xSTF already spawned' });
   const body = await readBody(req);
   const astfSource = JSON.parse(astf.source || '{}');
@@ -800,21 +765,18 @@ async function xstfSpawnRoutes(req, res, reqUrl, method) {
     circleName: astfSource.circleName || astf.circle || '',
     commissionedBy: user.name || user.initials, commissionedAt: new Date().toISOString(),
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(xstfId, 'xSTF Cell', title, 'Active', team.length || 3, xstfSource.circleName, blind, astfId,
+  await dbRun(`INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [xstfId, 'xSTF Cell', title, 'Active', team.length || 3, xstfSource.circleName, blind, astfId,
       JSON.stringify(xstfSource), JSON.stringify({ status: 'In Progress' }),
       JSON.stringify({ tasks: defaultTasks, objectives: [] }),
-      JSON.stringify(deliverableSpecs), 0, deadline);
+      JSON.stringify(deliverableSpecs), 0, deadline]);
   // team members
-  const insertTeam = db.prepare('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)');
   for (const t of team) {
-    insertTeam.run(xstfId, String(t.name || ''), String(t.initials || ''), String(t.role || 'Team Member'));
+    await dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [xstfId, String(t.name || ''), String(t.initials || ''), String(t.role || 'Team Member')]);
   }
   // stfs row
   const stfId = 'stf-' + xstfId;
-  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-    .run(stfId, 'xSTF', title, xstfSource.circleName, 'active', 'Active', title, deadline);
+  await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, [stfId, 'xSTF', title, xstfSource.circleName, 'active', 'Active', title, deadline]);
   return send(res, 201, { ok: true, xstfId });
 }
 
@@ -823,10 +785,10 @@ async function xstfDeliverableRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/submit-deliverable$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'xSTF Cell') return send(res, 400, { error: 'Not an xSTF cell' });
   const body = await readBody(req);
@@ -837,7 +799,7 @@ async function xstfDeliverableRoutes(req, res, reqUrl, method) {
   const deliverables = meta.deliverables || [];
   deliverables.push({ id: 'del-' + Date.now(), title, content, submittedBy: user.name || user.initials, submittedAt: new Date().toISOString(), status: 'submitted' });
   meta.deliverables = deliverables;
-  db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  await dbRun('UPDATE cells SET meta = ? WHERE id = ?', [JSON.stringify(meta), cellId]);
   return send(res, 201, { ok: true, deliverableId: deliverables[deliverables.length - 1].id });
 }
 
@@ -846,13 +808,13 @@ async function xstfReviewRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/review-deliverable$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+  if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'xSTF Cell') return send(res, 400, { error: 'Not an xSTF cell' });
   const body = await readBody(req);
@@ -871,13 +833,12 @@ async function xstfReviewRoutes(req, res, reqUrl, method) {
   meta.deliverables = deliverables;
   // if approved, update cell status
   if (decision === 'approved') {
-    db.prepare("UPDATE cells SET status = 'Completed', meta = ?, resolution = ? WHERE id = ?")
-      .run(JSON.stringify(meta), JSON.stringify({ status: 'Delivered' }), cellId);
+    await dbRun("UPDATE cells SET status = 'Completed', meta = ?, resolution = ? WHERE id = ?", [JSON.stringify(meta), JSON.stringify({ status: 'Delivered' }), cellId]);
     // update stfs row
-    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'xSTF' AND title = ? AND status = 'Active'").get(cell.title || '');
-    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+    const stfRow = await dbGet("SELECT id FROM stfs WHERE type = 'xSTF' AND title = ? AND status = 'Active'", [cell.title || '']);
+    if (stfRow) await dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", [stfRow.id]);
   } else {
-    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+    await dbRun('UPDATE cells SET meta = ? WHERE id = ?', [JSON.stringify(meta), cellId]);
   }
   return send(res, 200, { ok: true, decision, deliverableId });
 }
@@ -889,20 +850,20 @@ async function vstfSpawnRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-vstf$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+  if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   const body = await readBody(req);
   const vstfType = String(body.vstfType || 'steward-candidacy').trim();
   if (!['steward-candidacy', 'competence-claim'].includes(vstfType)) {
     return send(res, 400, { error: 'vstfType must be steward-candidacy or competence-claim' });
   }
-  const existing = db.prepare("SELECT id FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?").get(cellId, vstfType);
+  const existing = await dbGet("SELECT id FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?", [cellId, vstfType]);
   if (existing) return send(res, 409, { error: 'vSTF already spawned' });
   const candidateName = String(body.candidateName || '').trim();
   const candidateInitials = String(body.candidateInitials || '').trim();
@@ -915,17 +876,15 @@ async function vstfSpawnRoutes(req, res, reqUrl, method) {
     spawnedBy: user.name || user.initials, spawnedAt: new Date().toISOString(),
   };
   const domains = Array.isArray(body.domains) ? body.domains : [];
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(vstfId, 'vSTF Cell', (vstfType === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') + candidateName,
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [vstfId, 'vSTF Cell', (vstfType === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') + candidateName,
       'Pending Assessment', vstfType, minAssessors, circleName, cellId,
       JSON.stringify(source), JSON.stringify({ status: 'Pending', score: null }),
-      JSON.stringify({ candidateName, candidateInitials, domains, assessments: [] }));
+      JSON.stringify({ candidateName, candidateInitials, domains, assessments: [] })]);
   const stfId = 'stf-' + vstfId;
-  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-    .run(stfId, 'vSTF', vstfType === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims',
+  await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, [stfId, 'vSTF', vstfType === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims',
       circleName, 'active', 'Pending Assessment', candidateName || cell.title || '',
-      new Date(Date.now() + 14*86400000).toISOString().slice(0, 10));
+      new Date(Date.now() + 14*86400000).toISOString().slice(0, 10)]);
   return send(res, 201, { ok: true, vstfId });
 }
 
@@ -934,10 +893,10 @@ async function vstfAssessmentRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/vstf-assessment$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'vSTF Cell') return send(res, 400, { error: 'Not a vSTF cell' });
   if (cell.status === 'Assessment Filed') return send(res, 409, { error: 'Assessment already filed' });
@@ -973,12 +932,11 @@ async function vstfAssessmentRoutes(req, res, reqUrl, method) {
     } else {
       finalScore = assessments.length;
     }
-    db.prepare("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?")
-      .run(JSON.stringify(meta), JSON.stringify({ status: 'Complete', score: finalScore }), cellId);
-    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'vSTF' AND status = 'Pending Assessment'").get();
-    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+    await dbRun("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?", [JSON.stringify(meta), JSON.stringify({ status: 'Complete', score: finalScore }), cellId]);
+    const stfRow = await dbGet("SELECT id FROM stfs WHERE type = 'vSTF' AND status = 'Pending Assessment'");
+    if (stfRow) await dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", [stfRow.id]);
   } else {
-    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+    await dbRun('UPDATE cells SET meta = ? WHERE id = ?', [JSON.stringify(meta), cellId]);
   }
   return send(res, 200, { ok: true, filed: assessments.length, required: minAssessors, complete: assessments.length >= minAssessors });
 }
@@ -996,24 +954,24 @@ async function stfEvidenceRoutes(req, res, reqUrl, method) {
   if (!m) return null;
   const cellId = decodeURIComponent(m[1]);
   if (method === 'GET') {
-    const rows = db.prepare('SELECT * FROM stf_evidence WHERE cell_id = ? ORDER BY id').all(cellId);
+    const rows = await dbAll('SELECT * FROM stf_evidence WHERE cell_id = ? ORDER BY id', [cellId]);
     return send(res, 200, { ok: true, evidence: rows });
   }
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
-  if (!db.prepare('SELECT id FROM cells WHERE id = ?').get(cellId)) return send(res, 404, { error: 'Cell not found' });
+  if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
+  if (!await dbGet('SELECT id FROM cells WHERE id = ?', [cellId])) return send(res, 404, { error: 'Cell not found' });
   const body = await readBody(req);
   const title = String(body.title || '').trim();
   if (!title) return send(res, 400, { error: 'title required' });
   const status = ['pending', 'under-review', 'verified'].includes(body.status) ? body.status : 'pending';
-  const id = db.prepare(`INSERT INTO stf_evidence
+  const id = await dbRun(`INSERT INTO stf_evidence
     (cell_id, candidate, title, detail, link, status, submitted_by, submitted_at)
-    VALUES (?,?,?,?,?,?,?,?)`).run(cellId,
+    VALUES (?,?,?,?,?,?,?,?)`, [cellId,
     String(body.candidate || '').trim() || null, title,
     String(body.detail || '').trim() || null, String(body.link || '').trim() || null,
-    status, user.name || user.initials, new Date().toISOString()).lastInsertRowid;
+    status, user.name || user.initials, new Date().toISOString()]).insertId;
   return send(res, 201, { ok: true, id });
 }
 
@@ -1021,15 +979,15 @@ async function pastfSpawnRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/spawn-pastf$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`).get(user.id).n) {
+  if (!await dbGet(`SELECT COUNT(*) n FROM circle_roster WHERE member_id = ? AND status = 'active'`, [user.id]).n) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
-  const existing = db.prepare("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND commissioned_by = ?").get(cellId);
+  const existing = await dbGet("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND commissioned_by = ?", [cellId]);
   if (existing) return send(res, 409, { error: 'p-aSTF already spawned' });
   const body = await readBody(req);
   const circleName = String(body.circleName || cell.circle || '').trim();
@@ -1039,16 +997,14 @@ async function pastfSpawnRoutes(req, res, reqUrl, method) {
     type: 'periodic-review', sourceCellId: cellId, sourceTitle: cell.title || '',
     circleName, spawnedBy: user.name || user.initials, spawnedAt: new Date().toISOString(),
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(pastfId, 'p-aSTF Cell', 'p-aSTF · ' + circleName + ' Health Review', 'Pending Review', 'periodic-review',
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [pastfId, 'p-aSTF Cell', 'p-aSTF · ' + circleName + ' Health Review', 'Pending Review', 'periodic-review',
       minReviewers, circleName, cellId,
       JSON.stringify(source), JSON.stringify({ status: 'Pending' }),
-      JSON.stringify({ circleName, minReviewers, reviews: [] }));
+      JSON.stringify({ circleName, minReviewers, reviews: [] })]);
   const stfId = 'stf-' + pastfId;
-  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-    .run(stfId, 'p-aSTF', 'Periodic Circle Health Review', circleName, 'active', 'Pending Review',
-      circleName + ' Health', new Date(Date.now() + 30*86400000).toISOString().slice(0, 10));
+  await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, [stfId, 'p-aSTF', 'Periodic Circle Health Review', circleName, 'active', 'Pending Review',
+      circleName + ' Health', new Date(Date.now() + 30*86400000).toISOString().slice(0, 10)]);
   return send(res, 201, { ok: true, pastfId });
 }
 
@@ -1058,10 +1014,10 @@ async function pastfReviewRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/pastf-review$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'p-aSTF Cell') return send(res, 400, { error: 'Not a p-aSTF cell' });
   const meta = cell.meta ? JSON.parse(cell.meta) : {};
@@ -1117,12 +1073,11 @@ async function pastfReviewRoutes(req, res, reqUrl, method) {
     var finalTier = 'healthy';
     if (tierCounts.concern > tierCounts.healthy && tierCounts.concern > tierCounts.watch) finalTier = 'concern';
     else if (tierCounts.watch >= tierCounts.healthy) finalTier = 'watch';
-    db.prepare("UPDATE cells SET status = 'Review Complete', meta = ?, resolution = ? WHERE id = ?")
-      .run(JSON.stringify(meta), JSON.stringify({ status: 'Complete', avgCircle, healthTier: finalTier }), cellId);
-    const stfRow = db.prepare("SELECT id FROM stfs WHERE type = 'p-aSTF' AND status = 'Pending Review'").get();
-    if (stfRow) db.prepare("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?").run(stfRow.id);
+    await dbRun("UPDATE cells SET status = 'Review Complete', meta = ?, resolution = ? WHERE id = ?", [JSON.stringify(meta), JSON.stringify({ status: 'Complete', avgCircle, healthTier: finalTier }), cellId]);
+    const stfRow = await dbGet("SELECT id FROM stfs WHERE type = 'p-aSTF' AND status = 'Pending Review'");
+    if (stfRow) await dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", [stfRow.id]);
   } else {
-    db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+    await dbRun('UPDATE cells SET meta = ? WHERE id = ?', [JSON.stringify(meta), cellId]);
   }
   return send(res, 200, { ok: true, filed: reviews.length, required: minReviewers, complete: reviews.length >= minReviewers, circleTotal });
 }
@@ -1138,36 +1093,35 @@ async function pastfReviewRoutes(req, res, reqUrl, method) {
 // Appeal: anyone → anonymous post on the case thread → steward escalation,
 // same process as reporting.
 
-function jstfReportThread(link) {
-  return db.prepare("SELECT * FROM threads WHERE proposal_cell_id = ? AND badge = 'b-judicial'").get(link);
+async function jstfReportThread(link) {
+  return await dbGet("SELECT * FROM threads WHERE proposal_cell_id = ? AND badge = 'b-judicial'", [link]);
 }
 
-function jstfAppendAnonymousPost(threadId, bodyText) {
-  db.prepare(`INSERT INTO thread_replies (id, thread_id, author, initials, time, body, likes)
-    VALUES (?,?,?,?,?,?,0)`)
-    .run('jstf-reply-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
-      threadId, 'Anonymous', '?', new Date().toISOString().slice(0, 10), bodyText);
-  db.prepare('UPDATE threads SET replies = replies + 1 WHERE id = ?').run(threadId);
-  return db.prepare('SELECT replies FROM threads WHERE id = ?').get(threadId).replies;
+async function jstfAppendAnonymousPost(threadId, bodyText) {
+  await dbRun(`INSERT INTO thread_replies (id, thread_id, author, initials, time, body, likes)
+    VALUES (?,?,?,?,?,?,0)`, ['jstf-reply-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6),
+      threadId, 'Anonymous', '?', new Date().toISOString().slice(0, 10), bodyText]);
+  await dbRun('UPDATE threads SET replies = replies + 1 WHERE id = ?', [threadId]);
+  return await dbGet('SELECT replies FROM threads WHERE id = ?', [threadId]).replies;
 }
 
-function jstfTeamSelection() {
-  return db.prepare(`SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r
+async function jstfTeamSelection() {
+  return await dbAll(`SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r
     JOIN users u ON u.id = r.member_id
-    WHERE r.status = 'active' ORDER BY r.name LIMIT 3`).all();
+    WHERE r.status = 'active' ORDER BY r.name LIMIT 3`);
 }
 
-function jstfIsNotSteward(userId) {
-  return !db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(userId);
+async function jstfIsNotSteward(userId) {
+  return !await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [userId]);
 }
 
 // aSTF disapproval → shuffle the jSTF composition inside the same cell.
 // Investigation continues where it stopped: prior verdict superseded,
 // team members rotated, restriction tallies recomputed for the new team.
-function jstfShuffleComposition(cellId, cell, meta, revisionNotes, by) {
+async function jstfShuffleComposition(cellId, cell, meta, revisionNotes, by) {
   const prevTeam = (cell.source ? JSON.parse(cell.source).team : null) || [];
   const prevIds = prevTeam.map(function(t) { return t.id; });
-  let stewards = jstfTeamSelection();
+  let stewards = await jstfTeamSelection();
   let fresh = stewards.filter(function(s) { return !prevIds.includes(s.id); });
   if (fresh.length < 2) fresh = stewards.slice(1).concat(stewards.slice(0, 1));
   const team = fresh;
@@ -1179,18 +1133,16 @@ function jstfShuffleComposition(cellId, cell, meta, revisionNotes, by) {
     supersededVerdict: meta.verdict || null,
   });
   meta.verdict = null;
-  db.prepare('DELETE FROM cell_team WHERE cell_id = ?').run(cellId);
-  team.forEach(function(t, i) {
-    db.prepare('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)')
-      .run(cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review');
-  });
+  await dbRun('DELETE FROM cell_team WHERE cell_id = ?', [cellId]);
+  for (const [i, t] of team.entries()) {
+    await dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
+  }
   const teamSize = team.length;
   const majority = Math.floor(teamSize / 2) + 1;
   const teamInitials = team.map(function(t) { return t.initials; });
-  db.prepare(`DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction'
-    AND initials NOT IN (${teamInitials.map(function() { return '?'; }).join(',') || 'NULL'})`)
-    .run(cellId, ...teamInitials);
-  const restrictCount = db.prepare(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`).get(cellId).n;
+  await dbRun(`DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction'
+    AND initials NOT IN (${teamInitials.map(function() { return '?'; }).join(',') || 'NULL'})`, [cellId, ...teamInitials]);
+  const restrictCount = await dbGet(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`, [cellId]).n;
   const cur = meta.restriction || { state: 'relaxed', restrictCount: 0, teamSize, majority, severity: null, history: [] };
   cur.restrictCount = restrictCount;
   cur.teamSize = teamSize;
@@ -1204,14 +1156,12 @@ function jstfShuffleComposition(cellId, cell, meta, revisionNotes, by) {
   cur.history = cur.history || [];
   cur.history.push({ prev: 'composition-shuffle', next: cur.state, at: new Date().toISOString(), by });
   meta.restriction = cur;
-  db.prepare('UPDATE cells SET participants = ?, source = ?, meta = ? WHERE id = ?')
-    .run(teamSize, JSON.stringify(source), JSON.stringify(meta), cellId);
-  db.prepare("UPDATE stfs SET status = 'Under Investigation', bucket = 'active' WHERE id = ?").run('stf-' + cellId);
+  await dbRun('UPDATE cells SET participants = ?, source = ?, meta = ? WHERE id = ?', [teamSize, JSON.stringify(source), JSON.stringify(meta), cellId]);
+  await dbRun("UPDATE stfs SET status = 'Under Investigation', bucket = 'active' WHERE id = ?", ['stf-' + cellId]);
   const evtId = 'evt-jstf-' + Date.now().toString(36);
-  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-    .run(evtId, 'jstf-recomposition', '', new Date().toISOString().slice(0, 10),
+  await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'jstf-recomposition', '', new Date().toISOString().slice(0, 10),
       (meta.targetName || '') + ' case — jSTF recomposed (' + teamSize + ' investigators) after aSTF revision',
-      String(by));
+      String(by)]);
 }
 
 // POST /api/jstf/report — any member reports any member.  Creates (or
@@ -1221,28 +1171,27 @@ async function jstfReportRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/jstf\/report$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const body = await readBody(req);
   const targetId = String(body.targetId || '').trim();
   const description = String(body.description || '').trim();
   if (!targetId) return send(res, 400, { error: 'targetId required' });
   if (!description) return send(res, 400, { error: 'description required' });
-  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+  const target = await dbGet('SELECT * FROM users WHERE id = ?', [targetId]);
   if (!target) return send(res, 404, { error: 'Target member not found' });
   if (targetId === user.id) return send(res, 400, { error: 'Cannot report yourself' });
   const link = 'user:' + targetId;
-  const existing = jstfReportThread(link);
+  const existing = await jstfReportThread(link);
   if (existing) {
-    const replies = jstfAppendAnonymousPost(existing.id, description);
+    const replies = await jstfAppendAnonymousPost(existing.id, description);
     return send(res, 200, { ok: true, threadId: existing.id, replies, accumulated: true });
   }
   const threadId = 'thread-jstf-' + Date.now().toString(36);
-  db.prepare(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(threadId, 'Anonymous Report — ' + (target.name || target.initials), description,
+  await dbRun(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [threadId, 'Anonymous Report — ' + (target.name || target.initials), description,
       'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0,
-      new Date().toISOString().slice(0, 10), 'stewards-only', link);
+      new Date().toISOString().slice(0, 10), 'stewards-only', link]);
   return send(res, 201, { ok: true, threadId, replies: 1, accumulated: false });
 }
 
@@ -1252,27 +1201,26 @@ async function jstfAppealRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/jstf\/appeal$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const body = await readBody(req);
   const caseId = String(body.caseId || '').trim();
   const description = String(body.description || '').trim();
   if (!caseId) return send(res, 400, { error: 'caseId required' });
   if (!description) return send(res, 400, { error: 'description required' });
-  const caseCell = db.prepare('SELECT * FROM cells WHERE id = ?').get(caseId);
+  const caseCell = await dbGet('SELECT * FROM cells WHERE id = ?', [caseId]);
   if (!caseCell || caseCell.type !== 'jSTF Cell') return send(res, 404, { error: 'Case not found' });
   const link = 'case:' + caseId;
-  const existing = jstfReportThread(link);
+  const existing = await jstfReportThread(link);
   if (existing) {
-    const replies = jstfAppendAnonymousPost(existing.id, description);
+    const replies = await jstfAppendAnonymousPost(existing.id, description);
     return send(res, 200, { ok: true, threadId: existing.id, replies, accumulated: true });
   }
   const threadId = 'thread-appeal-' + Date.now().toString(36);
-  db.prepare(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(threadId, 'Appeal — ' + (caseCell.title || caseId), description,
+  await dbRun(`INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`, [threadId, 'Appeal — ' + (caseCell.title || caseId), description,
       'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0,
-      new Date().toISOString().slice(0, 10), 'stewards-only', link);
+      new Date().toISOString().slice(0, 10), 'stewards-only', link]);
   return send(res, 201, { ok: true, threadId, replies: 1, accumulated: false });
 }
 
@@ -1282,13 +1230,13 @@ async function jstfEscalateRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/jstf\/escalate$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
+  if (await jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
   const body = await readBody(req);
   const threadId = String(body.threadId || '').trim();
   if (!threadId) return send(res, 400, { error: 'threadId required' });
-  const thread = db.prepare('SELECT * FROM threads WHERE id = ?').get(threadId);
+  const thread = await dbGet('SELECT * FROM threads WHERE id = ?', [threadId]);
   if (!thread) return send(res, 404, { error: 'Thread not found' });
   if (thread.jstf_cell_id) return send(res, 409, { error: 'Thread already escalated' });
   if (!thread.proposal_cell_id || !thread.proposal_cell_id.startsWith('user:') && !thread.proposal_cell_id.startsWith('case:')) {
@@ -1299,19 +1247,19 @@ async function jstfEscalateRoutes(req, res, reqUrl, method) {
   let targetId = null, targetName = thread.title.replace(/^Anonymous Report — /, '').replace(/^Appeal — /, '');
   if (isAppeal) {
     const origCaseId = link.slice(5);
-    const orig = db.prepare('SELECT * FROM cells WHERE id = ?').get(origCaseId);
+    const orig = await dbGet('SELECT * FROM cells WHERE id = ?', [origCaseId]);
     if (!orig) return send(res, 404, { error: 'Original case not found' });
     const origMeta = orig.meta ? JSON.parse(orig.meta) : {};
     targetId = origMeta.targetId || null;
     targetName = origMeta.targetName || orig.title || targetName;
   } else {
     targetId = link.slice(5);
-    const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+    const target = await dbGet('SELECT * FROM users WHERE id = ?', [targetId]);
     if (target) targetName = target.name || target.initials;
   }
   const cellId = 'jstf-' + Date.now().toString(36);
   // Team composition: active stewards, escalator guaranteed first.
-  let team = jstfTeamSelection();
+  let team = await jstfTeamSelection();
   if (!team.some(function(t) { return t.id === user.id; })) {
     team = [{ id: user.id, name: user.name, initials: user.initials }].concat(team).slice(0, 3);
   }
@@ -1322,29 +1270,25 @@ async function jstfEscalateRoutes(req, res, reqUrl, method) {
   };
   const meta = {
     targetId, targetName, threadId, isAppeal,
-    targetIsSteward: targetId ? !!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(targetId) : false,
+    targetIsSteward: targetId ? !!await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [targetId]) : false,
     revisionOf: source.revisionOf,
     restriction: { state: 'relaxed', restrictCount: 0, teamSize: team.length, majority: Math.floor(team.length / 2) + 1, severity: null, history: [] },
     verdict: null,
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(cellId, 'jSTF Cell', 'jSTF — ' + targetName, 'Under Investigation', 'judicial-investigation',
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [cellId, 'jSTF Cell', 'jSTF — ' + targetName, 'Under Investigation', 'judicial-investigation',
       team.length, '', user.id,
-      JSON.stringify(source), JSON.stringify({ status: 'Under Investigation' }), JSON.stringify(meta));
-  team.forEach(function(t, i) {
-    db.prepare('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)')
-      .run(cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review');
-  });
-  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-    .run('stf-' + cellId, 'jSTF', 'Judicial Investigation', targetName || '', 'active', 'Under Investigation',
-      'jSTF — ' + targetName, new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));
-  db.prepare('UPDATE threads SET jstf_cell_id = ? WHERE id = ?').run(cellId, threadId);
+      JSON.stringify(source), JSON.stringify({ status: 'Under Investigation' }), JSON.stringify(meta)]);
+  for (const [i, t] of team.entries()) {
+    await dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [cellId, t.name, t.initials, i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
+  }
+  await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, ['stf-' + cellId, 'jSTF', 'Judicial Investigation', targetName || '', 'active', 'Under Investigation',
+      'jSTF — ' + targetName, new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)]);
+  await dbRun('UPDATE threads SET jstf_cell_id = ? WHERE id = ?', [cellId, threadId]);
   const evtId = 'evt-jstf-' + Date.now().toString(36);
-  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-    .run(evtId, 'jstf-escalation', '', new Date().toISOString().slice(0, 10),
+  await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'jstf-escalation', '', new Date().toISOString().slice(0, 10),
       'jSTF opened against ' + targetName + ' (' + (isAppeal ? 'appeal' : 'report') + ') — ' + team.length + ' investigators',
-      String(user.name || user.initials));
+      String(user.name || user.initials)]);
   return send(res, 201, { ok: true, jstfId: cellId });
 }
 
@@ -1356,25 +1300,23 @@ async function jstfVoteRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/jstf-vote$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'jSTF Cell') return send(res, 400, { error: 'Not a jSTF cell' });
   if (cell.status !== 'Under Investigation') return send(res, 400, { error: 'Not under investigation' });
-  const onTeam = db.prepare('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?').get(cellId, user.initials);
+  const onTeam = await dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [cellId, user.initials]);
   if (!onTeam) return send(res, 403, { error: 'Only the jSTF team may vote' });
   const body = await readBody(req);
   const stance = String(body.stance || '').trim();
   if (!['restrict', 'lift'].includes(stance)) return send(res, 400, { error: 'stance must be restrict or lift' });
-  const teamSize = cell.participants || db.prepare('SELECT COUNT(*) n FROM cell_team WHERE cell_id = ?').get(cellId).n;
+  const teamSize = cell.participants || await dbGet('SELECT COUNT(*) n FROM cell_team WHERE cell_id = ?', [cellId]).n;
   const majority = Math.floor(teamSize / 2) + 1;
-  db.prepare("DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND initials = ?")
-    .run(cellId, user.initials);
-  db.prepare("INSERT INTO vote_records (cell_id, domain, name, initials, vote) VALUES (?,?,?,?,?)")
-    .run(cellId, 'restriction', user.name || user.initials, user.initials, stance);
-  const restrictCount = db.prepare(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`).get(cellId).n;
+  await dbRun("DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND initials = ?", [cellId, user.initials]);
+  await dbRun("INSERT INTO vote_records (cell_id, domain, name, initials, vote) VALUES (?,?,?,?,?)", [cellId, 'restriction', user.name || user.initials, user.initials, stance]);
+  const restrictCount = await dbGet(`SELECT COUNT(*) n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'`, [cellId]).n;
   const restricted = restrictCount >= majority;
   const meta = cell.meta ? JSON.parse(cell.meta) : {};
   const cur = meta.restriction || { state: 'relaxed', restrictCount: 0, teamSize, majority, severity: null, history: [] };
@@ -1382,7 +1324,7 @@ async function jstfVoteRoutes(req, res, reqUrl, method) {
     ? (meta.targetIsSteward && restrictCount < teamSize ? 'frozen' : 'readonly')
     : null;
   const changed = cur.state !== (restricted ? 'restricted' : 'relaxed');
-  const votes = db.prepare(`SELECT name, initials, vote FROM vote_records WHERE cell_id = ? AND domain = 'restriction'`).all(cellId);
+  const votes = await dbAll(`SELECT name, initials, vote FROM vote_records WHERE cell_id = ? AND domain = 'restriction'`, [cellId]);
   if (changed) {
     cur.history = cur.history || [];
     cur.history.push({
@@ -1399,12 +1341,11 @@ async function jstfVoteRoutes(req, res, reqUrl, method) {
   meta.restriction = cur;
   if (changed) {
     const evtId = 'evt-jstf-' + Date.now().toString(36);
-    db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-      .run(evtId, 'jstf-restriction', '', new Date().toISOString().slice(0, 10),
+    await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'jstf-restriction', '', new Date().toISOString().slice(0, 10),
         (meta.targetName || 'target') + ' activity ' + cur.state + ' (' + restrictCount + '/' + teamSize + ' → ' + severity + ')',
-        String(user.name || user.initials));
+        String(user.name || user.initials)]);
   }
-  db.prepare('UPDATE cells SET meta = ? WHERE id = ?').run(JSON.stringify(meta), cellId);
+  await dbRun('UPDATE cells SET meta = ? WHERE id = ?', [JSON.stringify(meta), cellId]);
   return send(res, 200, {
     ok: true, state: cur.state, restrictCount, teamSize, majority,
     severity: cur.severity, changed,
@@ -1419,11 +1360,11 @@ async function jstfVerdictRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/cells\/([^/]+)\/jstf-verdict$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
+  if (await jstfIsNotSteward(user.id)) return send(res, 403, { error: 'Steward access required' });
   const cellId = decodeURIComponent(m[1]);
-  const cell = db.prepare('SELECT * FROM cells WHERE id = ?').get(cellId);
+  const cell = await dbGet('SELECT * FROM cells WHERE id = ?', [cellId]);
   if (!cell) return send(res, 404, { error: 'Not found' });
   if (cell.type !== 'jSTF Cell') return send(res, 400, { error: 'Not a jSTF cell' });
   const meta = cell.meta ? JSON.parse(cell.meta) : {};
@@ -1444,8 +1385,7 @@ async function jstfVerdictRoutes(req, res, reqUrl, method) {
   };
   const source = cell.source ? JSON.parse(cell.source) : {};
   source.verdict = meta.verdict;
-  db.prepare("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?")
-    .run(JSON.stringify(meta), JSON.stringify(source), cellId);
+  await dbRun("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?", [JSON.stringify(meta), JSON.stringify(source), cellId]);
   // aSTF audit — sees the decision, never the jSTF members.
   const astfId = 'astf-audit-' + Date.now().toString(36);
   const astfSource = {
@@ -1453,22 +1393,19 @@ async function jstfVerdictRoutes(req, res, reqUrl, method) {
     targetId: meta.targetId, targetName: meta.targetName,
     verdict: { type, description, policyRefs: meta.verdict.policyRefs, findings },
   };
-  db.prepare(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?)`)
-    .run(astfId, 'aSTF Cell', 'aSTF Audit — ' + (meta.targetName || ''), 'Blind Review', 'judicial-audit',
+  await dbRun(`INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [astfId, 'aSTF Cell', 'aSTF Audit — ' + (meta.targetName || ''), 'Blind Review', 'judicial-audit',
       1, '', cellId,
       JSON.stringify(astfSource), JSON.stringify({ status: 'Pending' }),
-      JSON.stringify({ blind: 1, targetName: meta.targetName, verdict: meta.verdict }));
-  db.prepare(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`)
-    .run('stf-' + astfId, 'aSTF', 'Judicial Audit', meta.targetName || '', 'active', 'Blind Review',
-      'aSTF Audit — ' + (meta.targetName || ''), new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10));
-  db.prepare('UPDATE cells SET resolution_ref = ? WHERE id = ?').run(astfId, cellId);
-  db.prepare("UPDATE stfs SET status = 'Finalised', bucket = 'completed' WHERE id = ?").run('stf-' + cellId);
+      JSON.stringify({ blind: 1, targetName: meta.targetName, verdict: meta.verdict })]);
+  await dbRun(`INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)`, ['stf-' + astfId, 'aSTF', 'Judicial Audit', meta.targetName || '', 'active', 'Blind Review',
+      'aSTF Audit — ' + (meta.targetName || ''), new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10)]);
+  await dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [astfId, cellId]);
+  await dbRun("UPDATE stfs SET status = 'Finalised', bucket = 'completed' WHERE id = ?", ['stf-' + cellId]);
   const evtId = 'evt-jstf-' + Date.now().toString(36);
-  db.prepare('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)')
-    .run(evtId, 'jstf-verdict', '', new Date().toISOString().slice(0, 10),
+  await dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', [evtId, 'jstf-verdict', '', new Date().toISOString().slice(0, 10),
       'jSTF verdict filed vs ' + (meta.targetName || '') + ' — ' + type + ' (' + policyRefs.length + ' policies cited)',
-      String(user.name || user.initials));
+      String(user.name || user.initials)]);
   return send(res, 200, { ok: true, jstfId: cellId, astfId, type });
 }
 
@@ -1487,10 +1424,9 @@ async function membershipRoutes(req, res, reqUrl, method) {
   return null;
 }
 
-function membershipMarkFormer(rosterId, reason) {
+async function membershipMarkFormer(rosterId, reason) {
   const now = new Date().toISOString().slice(0, 10);
-  db.prepare("UPDATE circle_roster SET status = 'former', left = ?, left_reason = ? WHERE id = ?")
-    .run(now, reason, rosterId);
+  await dbRun("UPDATE circle_roster SET status = 'former', left = ?, left_reason = ? WHERE id = ?", [now, reason, rosterId]);
 }
 
 // POST /api/circles/:id/resign — any active member may resign.
@@ -1498,13 +1434,12 @@ async function membershipResignRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/resign$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  const row = db.prepare('SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = ?')
-    .get(circleId, user.id, 'active');
+  const row = await dbGet('SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = ?', [circleId, user.id, 'active']);
   if (!row) return send(res, 400, { error: 'Not an active member of this circle' });
-  membershipMarkFormer(row.id, 'resignation');
+  await membershipMarkFormer(row.id, 'resignation');
   return send(res, 200, { ok: true, reason: 'resignation' });
 }
 
@@ -1514,20 +1449,19 @@ async function membershipRemoveRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/remove-member$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const body = await readBody(req);
   const targetId = String(body.memberId || '').trim();
   if (!targetId) return send(res, 400, { error: 'memberId required' });
   if (targetId === user.id) return send(res, 400, { error: 'Cannot remove yourself' });
-  const target = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'")
-    .get(circleId, targetId);
+  const target = await dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, targetId]);
   if (!target) return send(res, 404, { error: 'Target not an active member' });
-  membershipMarkFormer(target.id, 'jstf-removal');
+  await membershipMarkFormer(target.id, 'jstf-removal');
   return send(res, 200, { ok: true, reason: 'jstf-removal', memberId: targetId });
 }
 
@@ -1537,19 +1471,19 @@ async function membershipFlushRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/flush$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const body = await readBody(req);
   const keepId = String(body.keepMemberId || user.id).trim();
-  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  const rows = await dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [circleId]);
   let removed = 0;
   for (const r of rows) {
     if (r.member_id !== keepId) {
-      membershipMarkFormer(r.id, 'jstf-circle-flush');
+      await membershipMarkFormer(r.id, 'jstf-circle-flush');
       removed++;
     }
   }
@@ -1562,19 +1496,19 @@ async function membershipDisbandRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/disband$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
-  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  const rows = await dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [circleId]);
   let removed = 0;
   for (const r of rows) {
-    membershipMarkFormer(r.id, 'circle-disbandment');
+    await membershipMarkFormer(r.id, 'circle-disbandment');
     removed++;
   }
-  db.prepare("UPDATE circles SET status = 'Archived' WHERE id = ?").run(circleId);
+  await dbRun("UPDATE circles SET status = 'Archived' WHERE id = ?", [circleId]);
   return send(res, 200, { ok: true, reason: 'circle-disbandment', removed });
 }
 
@@ -1586,23 +1520,23 @@ async function membershipDriftRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/drift-check$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const body = await readBody(req);
   const threshold = Number(body.threshold) || 50;
-  const mandateDomains = db.prepare("SELECT domain FROM circle_domains WHERE circle_id = ? AND mandate = 'primary'").all(circleId).map(d => d.domain);
+  const mandateDomains = (await dbAll("SELECT domain FROM circle_domains WHERE circle_id = ? AND mandate = 'primary'", [circleId])).map(d => d.domain);
   if (!mandateDomains.length) return send(res, 400, { error: 'Circle has no primary mandate domains' });
-  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  const rows = await dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [circleId]);
   let drifted = 0;
   for (const r of rows) {
     const topDomain = r.top_domain || '';
     const ws = r.ws || 0;
     if (ws < threshold && !mandateDomains.includes(topDomain)) {
-      membershipMarkFormer(r.id, 'competence-drift');
+      await membershipMarkFormer(r.id, 'competence-drift');
       drifted++;
     }
   }
@@ -1615,23 +1549,23 @@ async function membershipExpiryRoutes(req, res, reqUrl, method) {
   const m = reqUrl.match(/^\/api\/circles\/([^/]+)\/check-expiry$/);
   if (!m) return null;
   if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const circleId = decodeURIComponent(m[1]);
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'").get(circleId, user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [circleId, user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
-  const ss = db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {};
+  const ss = await dbGet('SELECT * FROM system_settings WHERE id = 1') || {};
   const termMonths = ss.steward_term_months || 12;
   const now = Date.now();
-  const rows = db.prepare("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'").all(circleId);
+  const rows = await dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [circleId]);
   let expired = 0;
   for (const r of rows) {
     if (!r.joined) continue;
     const joinedMs = new Date(r.joined).getTime();
     const termMs = termMonths * 30.44 * 86400000;
     if (now - joinedMs > termMs) {
-      membershipMarkFormer(r.id, 'term-expiry');
+      await membershipMarkFormer(r.id, 'term-expiry');
       expired++;
     }
   }
@@ -1647,18 +1581,18 @@ async function membershipExpiryRoutes(req, res, reqUrl, method) {
 // Ws capped 0–3000.  Applied to roster competence rows.
 async function competenceDriftRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/ws-drift' || method !== 'POST') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const now = Date.now();
   const DAY = 86400000;
-  const rows = db.prepare("SELECT * FROM user_competence WHERE kind = 'roster'").all();
+  const rows = await dbAll("SELECT * FROM user_competence WHERE kind = 'roster'");
   const changes = [];
   let updated = 0;
   for (const r of rows) {
-    const last = db.prepare('SELECT MAX(time) t FROM user_activity WHERE user_id = ?').get(r.user_id);
+    const last = await dbGet('SELECT MAX(time) t FROM user_activity WHERE user_id = ?', [r.user_id]);
     let delta = 0;
     if (last && last.t) {
       const days = (now - new Date(last.t).getTime()) / DAY;
@@ -1671,7 +1605,7 @@ async function competenceDriftRoutes(req, res, reqUrl, method) {
     const prev = r.ws || 0;
     const next = Math.max(0, Math.min(3000, prev + delta));
     if (next === prev) continue;
-    db.prepare('UPDATE user_competence SET ws = ? WHERE id = ?').run(next, r.id);
+    await dbRun('UPDATE user_competence SET ws = ? WHERE id = ?', [next, r.id]);
     updated++;
     changes.push({ userId: r.user_id, domain: r.domain, prev, next, delta });
   }
@@ -1682,22 +1616,22 @@ async function competenceDriftRoutes(req, res, reqUrl, method) {
 // domain, increasing their Ws by 50.
 async function competenceEndorseRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/endorse' || method !== 'POST') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const body = await readBody(req);
   const targetId = String(body.targetId || '').trim();
   const domain = String(body.domain || '').trim();
   if (!targetId || !domain) return send(res, 400, { error: 'targetId and domain required' });
-  const target = db.prepare('SELECT * FROM users WHERE id = ?').get(targetId);
+  const target = await dbGet('SELECT * FROM users WHERE id = ?', [targetId]);
   if (!target) return send(res, 404, { error: 'Target member not found' });
-  const row = db.prepare('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?').get(targetId, domain);
+  const row = await dbGet('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?', [targetId, domain]);
   if (!row) return send(res, 404, { error: 'Member has no competence in that domain' });
   const prev = row.ws || 0;
   const next = Math.min(3000, prev + 50);
-  db.prepare('UPDATE user_competence SET ws = ? WHERE id = ?').run(next, row.id);
+  await dbRun('UPDATE user_competence SET ws = ? WHERE id = ?', [next, row.id]);
   return send(res, 200, { ok: true, targetId, domain, prev, next, delta: next - prev });
 }
 
@@ -1705,7 +1639,7 @@ async function competenceEndorseRoutes(req, res, reqUrl, method) {
 // a domain (0–3000) with evidence.  Sets verified = 0 until vSTF locks.
 async function competenceDeclareRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/declare-wh' || method !== 'POST') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const body = await readBody(req);
   const domain = String(body.domain || '').trim();
@@ -1714,19 +1648,18 @@ async function competenceDeclareRoutes(req, res, reqUrl, method) {
   if (!domain) return send(res, 400, { error: 'domain required' });
   if (!Number.isFinite(wh) || wh < 0 || wh > 3000) return send(res, 400, { error: 'wh must be between 0 and 3000' });
   if (!evidence) return send(res, 400, { error: 'evidence required' });
-  db.prepare(`INSERT INTO user_competence (user_id, domain, wh, evidence, verified, kind)
+  await dbRun(`INSERT INTO user_competence (user_id, domain, wh, evidence, verified, kind)
     VALUES (?,?,?,?,0,'self')
-    ON CONFLICT(user_id, domain) DO UPDATE SET wh = excluded.wh, evidence = excluded.evidence, verified = 0, kind = 'self', ws = excluded.wh`)
-    .run(user.id, domain, wh, evidence);
+    ON CONFLICT(user_id, domain) DO UPDATE SET wh = excluded.wh, evidence = excluded.evidence, verified = 0, kind = 'self', ws = excluded.wh`, [user.id, domain, wh, evidence]);
   return send(res, 200, { ok: true, domain, wh, verified: 0 });
 }
 
 // POST /api/competence/verify-wh — vSTF/steward locks or unlocks Wh.
 async function competenceVerifyRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/verify-wh' || method !== 'POST') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  if (!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id)) {
+  if (!await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [user.id])) {
     return send(res, 403, { error: 'Steward access required' });
   }
   const body = await readBody(req);
@@ -1734,9 +1667,9 @@ async function competenceVerifyRoutes(req, res, reqUrl, method) {
   const domain = String(body.domain || '').trim();
   const verified = body.verified ? 1 : 0;
   if (!targetId || !domain) return send(res, 400, { error: 'targetId and domain required' });
-  const row = db.prepare('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?').get(targetId, domain);
+  const row = await dbGet('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?', [targetId, domain]);
   if (!row) return send(res, 404, { error: 'No competence row for target domain' });
-  db.prepare('UPDATE user_competence SET verified = ? WHERE id = ?').run(verified, row.id);
+  await dbRun('UPDATE user_competence SET verified = ? WHERE id = ?', [verified, row.id]);
   return send(res, 200, { ok: true, targetId, domain, verified: verified === 1 });
 }
 
@@ -1744,7 +1677,7 @@ async function competenceVerifyRoutes(req, res, reqUrl, method) {
 // interest.  Rank #1 = 10 pts … #10 = 1 pt.  interest_score is the sum.
 async function competenceInterestRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/interest' || method !== 'POST') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
   const body = await readBody(req);
   const ranks = Array.isArray(body.ranks) ? body.ranks : [];
@@ -1761,27 +1694,26 @@ async function competenceInterestRoutes(req, res, reqUrl, method) {
     seen.add(domain);
     const pts = 11 - rank;
     score += pts;
-    db.prepare(`INSERT INTO user_competence (user_id, domain, interest, rank, kind)
+    await dbRun(`INSERT INTO user_competence (user_id, domain, interest, rank, kind)
       VALUES (?,?,?,?,'self')
-      ON CONFLICT(user_id, domain) DO UPDATE SET interest = excluded.interest, rank = excluded.rank, kind = 'self'`)
-      .run(user.id, domain, pts, rank);
+      ON CONFLICT(user_id, domain) DO UPDATE SET interest = excluded.interest, rank = excluded.rank, kind = 'self'`, [user.id, domain, pts, rank]);
   }
-  db.prepare("UPDATE users SET interest_score = ?, interest_drift = ? WHERE id = ?").run(score, 'ranked', user.id);
+  await dbRun("UPDATE users SET interest_score = ?, interest_drift = ? WHERE id = ?", [score, 'ranked', user.id]);
   return send(res, 200, { ok: true, scored: ranks.length, interestScore: score });
 }
 
 // GET /api/competence/standing — standing = sum of all Ws per user.
 async function competenceStandingRoutes(req, res, reqUrl, method) {
   if (reqUrl !== '/api/competence/standing' || method !== 'GET') return null;
-  const user = authUser(req);
+  const user = await authUser(req);
   if (!user) return send(res, 401, { error: 'Unauthorized' });
-  const rows = db.prepare('SELECT * FROM user_competence ORDER BY user_id, domain').all();
+  const rows = await dbAll('SELECT * FROM user_competence ORDER BY user_id, domain');
   const byUser = new Map();
   for (const r of rows) {
     if (!byUser.has(r.user_id)) byUser.set(r.user_id, []);
     byUser.get(r.user_id).push({ domain: r.domain, ws: r.ws || 0, wh: r.wh ?? null, interest: r.interest ?? null, evidence: r.evidence ?? null, verified: !!r.verified });
   }
-  const users = db.prepare('SELECT id, name, initials, standing, interest_score FROM users').all();
+  const users = await dbAll('SELECT id, name, initials, standing, interest_score FROM users');
   const standings = users.map(u => {
     const comps = byUser.get(u.id) || [];
     const total = comps.reduce((s, c) => s + (c.ws || 0), 0);
@@ -1808,28 +1740,27 @@ async function competenceRoutes(req, res, reqUrl, method) {
 // ── Phase 4: Observatory & Public Space ────────────────
 // Public read endpoints (no auth) + steward curation writes.
 
-function observatorySteward(user) {
-  return !!user && !!db.prepare("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'").get(user.id);
+async function observatorySteward(user) {
+  return !!user && !!await dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [user.id]);
 }
 
 // NEWS — GET public, POST steward-curated.
 async function obsNewsRoutes(req, res, reqUrl, method) {
   if (reqUrl === '/api/observatory/news' && method === 'GET') {
-    const rows = db.prepare('SELECT * FROM news ORDER BY time DESC').all();
+    const rows = await dbAll('SELECT * FROM news ORDER BY time DESC');
     return send(res, 200, { ok: true, news: rows });
   }
   if (reqUrl === '/api/observatory/news' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const body = await readBody(req);
     const title = String(body.title || '').trim();
     const domain = String(body.domain || '').trim();
     const bodyText = String(body.body || '').trim();
     const source = String(body.source || '').trim();
     if (!title || !bodyText) return send(res, 400, { error: 'title and body required' });
-    const id = db.prepare('INSERT INTO news (title, time, source, domain, body, curated_by) VALUES (?,?,?,?,?,?)')
-      .run(title, new Date().toISOString().slice(0, 10), source || null, domain || null, bodyText, user.name || user.initials).lastInsertRowid;
+    const id = await dbRun('INSERT INTO news (title, time, source, domain, body, curated_by) VALUES (?,?,?,?,?,?)', [title, new Date().toISOString().slice(0, 10), source || null, domain || null, bodyText, user.name || user.initials]).insertId;
     return send(res, 201, { ok: true, id });
   }
   return null;
@@ -1838,35 +1769,33 @@ async function obsNewsRoutes(req, res, reqUrl, method) {
 // EVENTS — GET public, POST + bulk import steward-curated.
 async function obsEventsRoutes(req, res, reqUrl, method) {
   if (reqUrl === '/api/observatory/events' && method === 'GET') {
-    const rows = db.prepare('SELECT * FROM events ORDER BY date DESC').all();
+    const rows = await dbAll('SELECT * FROM events ORDER BY date DESC');
     return send(res, 200, { ok: true, events: rows });
   }
   if (reqUrl === '/api/observatory/events/import' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const body = await readBody(req);
     const items = Array.isArray(body.events) ? body.events : [];
     if (!items.length) return send(res, 400, { error: 'events array required' });
     let imported = 0;
     for (const e of items) {
       if (!e.title || !e.date) continue;
-      db.prepare('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)')
-        .run(String(e.title), String(e.date), String(e.location || ''), String(e.domain || ''), String(e.type || ''));
+      await dbRun('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)', [String(e.title), String(e.date), String(e.location || ''), String(e.domain || ''), String(e.type || '')]);
       imported++;
     }
     return send(res, 201, { ok: true, imported });
   }
   if (reqUrl === '/api/observatory/events' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const body = await readBody(req);
     const title = String(body.title || '').trim();
     const date = String(body.date || '').trim();
     if (!title || !date) return send(res, 400, { error: 'title and date required' });
-    const id = db.prepare('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)')
-      .run(title, date, String(body.location || '').trim(), String(body.domain || '').trim(), String(body.type || '').trim()).lastInsertRowid;
+    const id = await dbRun('INSERT INTO events (title, date, location, domain, type) VALUES (?,?,?,?,?)', [title, date, String(body.location || '').trim(), String(body.domain || '').trim(), String(body.type || '').trim()]).insertId;
     return send(res, 201, { ok: true, id });
   }
   return null;
@@ -1875,20 +1804,19 @@ async function obsEventsRoutes(req, res, reqUrl, method) {
 // LIBRARY — GET public, POST steward-curated.
 async function obsLibraryRoutes(req, res, reqUrl, method) {
   if (reqUrl === '/api/observatory/library' && method === 'GET') {
-    const rows = db.prepare('SELECT * FROM library_items ORDER BY id DESC').all();
+    const rows = await dbAll('SELECT * FROM library_items ORDER BY id DESC');
     return send(res, 200, { ok: true, library: rows });
   }
   if (reqUrl === '/api/observatory/library' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const body = await readBody(req);
     const title = String(body.title || '').trim();
     const link = String(body.link || '').trim();
     if (!title || !link) return send(res, 400, { error: 'title and link required' });
-    const id = db.prepare('INSERT INTO library_items (title, category, item_type, domain, link, curated_by) VALUES (?,?,?,?,?,?)')
-      .run(title, String(body.category || '').trim(), String(body.itemType || 'book').trim(),
-        String(body.domain || '').trim(), link, user.name || user.initials).lastInsertRowid;
+    const id = await dbRun('INSERT INTO library_items (title, category, item_type, domain, link, curated_by) VALUES (?,?,?,?,?,?)', [title, String(body.category || '').trim(), String(body.itemType || 'book').trim(),
+        String(body.domain || '').trim(), link, user.name || user.initials]).insertId;
     return send(res, 201, { ok: true, id });
   }
   return null;
@@ -1900,39 +1828,38 @@ async function obsPublicationRoutes(req, res, reqUrl, method) {
   const pend = reqUrl.match(/^\/api\/observatory\/publications\/([^/]+)\/(approve|reject)$/);
   if (pend) {
     if (method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const id = Number(pend[1]);
-    const pub = db.prepare('SELECT * FROM publications WHERE id = ?').get(id);
+    const pub = await dbGet('SELECT * FROM publications WHERE id = ?', [id]);
     if (!pub) return send(res, 404, { error: 'Publication not found' });
-    db.prepare('UPDATE publications SET status = ? WHERE id = ?').run(pend[2] === 'approve' ? 'approved' : 'rejected', id);
+    await dbRun('UPDATE publications SET status = ? WHERE id = ?', [pend[2] === 'approve' ? 'approved' : 'rejected', id]);
     return send(res, 200, { ok: true, id, status: pend[2] === 'approve' ? 'approved' : 'rejected' });
   }
   if (reqUrl === '/api/observatory/publications/pending' && method === 'GET') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
-    const rows = db.prepare("SELECT * FROM publications WHERE status = 'pending' ORDER BY created_at DESC").all();
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
+    const rows = await dbAll("SELECT * FROM publications WHERE status = 'pending' ORDER BY created_at DESC");
     return send(res, 200, { ok: true, pending: rows });
   }
   if (reqUrl === '/api/observatory/publications' && method === 'GET') {
-    const rows = db.prepare("SELECT * FROM publications WHERE status = 'approved' ORDER BY date DESC").all();
+    const rows = await dbAll("SELECT * FROM publications WHERE status = 'approved' ORDER BY date DESC");
     return send(res, 200, { ok: true, publications: rows });
   }
   if (reqUrl === '/api/observatory/publications' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
     const body = await readBody(req);
     const title = String(body.title || '').trim();
     const abstract = String(body.abstract || '').trim();
     if (!title || !abstract) return send(res, 400, { error: 'title and abstract required' });
-    const id = db.prepare('INSERT INTO publications (title, journal, date, type, abstract, tags, domain, status, author, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)')
-      .run(title, String(body.journal || '').trim(), new Date().toISOString().slice(0, 10),
+    const id = await dbRun('INSERT INTO publications (title, journal, date, type, abstract, tags, domain, status, author, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)', [title, String(body.journal || '').trim(), new Date().toISOString().slice(0, 10),
         String(body.type || 'essay').trim(), abstract,
         JSON.stringify(Array.isArray(body.tags) ? body.tags : []),
         String(body.domain || '').trim(), 'pending', user.name || user.initials,
-        new Date().toISOString()).lastInsertRowid;
+        new Date().toISOString()]).insertId;
     return send(res, 201, { ok: true, id, status: 'pending' });
   }
   return null;
@@ -1941,20 +1868,19 @@ async function obsPublicationRoutes(req, res, reqUrl, method) {
 // ORGANISATIONS — GET public, POST steward.
 async function obsOrganisationRoutes(req, res, reqUrl, method) {
   if (reqUrl === '/api/observatory/organisations' && method === 'GET') {
-    const rows = db.prepare('SELECT * FROM organisations ORDER BY name').all();
+    const rows = await dbAll('SELECT * FROM organisations ORDER BY name');
     return send(res, 200, { ok: true, organisations: rows });
   }
   if (reqUrl === '/api/observatory/organisations' && method === 'POST') {
-    const user = authUser(req);
+    const user = await authUser(req);
     if (!user) return send(res, 401, { error: 'Unauthorized' });
-    if (!observatorySteward(user)) return send(res, 403, { error: 'Steward access required' });
+    if (!(await observatorySteward(user))) return send(res, 403, { error: 'Steward access required' });
     const body = await readBody(req);
     const name = String(body.name || '').trim();
     if (!name) return send(res, 400, { error: 'name required' });
     const id = 'org-' + Date.now().toString(36);
-    db.prepare('INSERT INTO organisations (id, name, acronym, location, summary, status, website) VALUES (?,?,?,?,?,?,?)')
-      .run(id, name, String(body.acronym || '').trim(), String(body.location || '').trim(),
-        String(body.summary || '').trim(), 'Active', String(body.website || '').trim());
+    await dbRun('INSERT INTO organisations (id, name, acronym, location, summary, status, website) VALUES (?,?,?,?,?,?,?)', [id, name, String(body.acronym || '').trim(), String(body.location || '').trim(),
+        String(body.summary || '').trim(), 'Active', String(body.website || '').trim()]);
     return send(res, 201, { ok: true, id });
   }
   return null;
@@ -1997,20 +1923,19 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   const empty = new URL(req.url, 'http://x').searchParams.get('empty') === '1';
 
   const j = parseJson;
-  const all = (sql) => db.prepare(sql).all();
+  const all = async (sql) => (await pool.query(sql))[0];
 
   // ── identity: current user comes from the session token ──
-  const users = all('SELECT * FROM users');
+  const users = await all('SELECT * FROM users');
   const tok = ((req.headers.authorization || '').match(/^Bearer\s+(.+)$/i) || [])[1];
   const currentRow = tok
-    ? db.prepare(`SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?`)
-        .get(tok, new Date().toISOString()) || null
+    ? await dbGet(`SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?`, [tok, new Date().toISOString()]) || null
     : null;
-  const compByUser = groupBy(all('SELECT * FROM user_competence'), 'user_id');
-  const cirByUser = groupBy(all('SELECT * FROM user_circles'), 'user_id');
-  const orgByUser = groupBy(all('SELECT * FROM user_orgs'), 'user_id');
-  const dirByUser = groupBy(all('SELECT * FROM participants'), 'user_id');
-  const actByUser = groupBy(all('SELECT * FROM user_activity'), 'user_id');
+  const compByUser = groupBy(await all('SELECT * FROM user_competence'), 'user_id');
+  const cirByUser = groupBy(await all('SELECT * FROM user_circles'), 'user_id');
+  const orgByUser = groupBy(await all('SELECT * FROM user_orgs'), 'user_id');
+  const dirByUser = groupBy(await all('SELECT * FROM participants'), 'user_id');
+  const actByUser = groupBy(await all('SELECT * FROM user_activity'), 'user_id');
 
   const participants = users.map(u => {
     const dir = dirByUser[u.id] ? dirByUser[u.id][0] : {};
@@ -2050,8 +1975,8 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   }
 
   // ── organisations ──
-  const kdByOrg = groupBy(all('SELECT * FROM org_knowledge_domains'), 'org_id');
-  const organisations = all('SELECT * FROM organisations').map(o => ({
+  const kdByOrg = groupBy(await all('SELECT * FROM org_knowledge_domains'), 'org_id');
+  const organisations = (await all('SELECT * FROM organisations')).map(o => ({
     id: o.id, name: o.name, acronym: o.acronym, shortname: o.shortname,
     location: o.location, summary: o.summary, status: o.status, founded: o.founded,
     foundingCell: o.founding_cell, memberCount: o.member_count,
@@ -2061,12 +1986,12 @@ async function bootstrapRoute(req, res, reqUrl, method) {
 
   // ── domains catalog + layout ──
   const domains = {};
-  for (const d of all('SELECT * FROM domains')) {
+  for (const d of await all('SELECT * FROM domains')) {
     domains[d.id] = { label: d.label, short: d.short, color: d.color, hasCircle: !!d.has_circle, type: d.type, taxonomy: d.taxonomy };
   }
-  const layoutMeta = db.prepare('SELECT * FROM domain_layout_meta WHERE id = 1').get();
+  const layoutMeta = await dbGet('SELECT * FROM domain_layout_meta WHERE id = 1');
   const seeds = {};
-  for (const l of all('SELECT * FROM domain_layout')) seeds[l.domain_id] = [l.x, l.y];
+  for (const l of await all('SELECT * FROM domain_layout')) seeds[l.domain_id] = [l.x, l.y];
   const domainLayout = {
     worldSize: layoutMeta ? layoutMeta.world_size : 1800,
     seeds,
@@ -2074,14 +1999,14 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   };
 
   // ── circles ──
-  const cdByCircle = groupBy(all('SELECT * FROM circle_domains'), 'circle_id');
-  const rosterByCircle = groupBy(all('SELECT * FROM circle_roster'), 'circle_id');
-  const rdByRoster = groupBy(all('SELECT * FROM circle_roster_domains'), 'roster_id');
-  const propByCircle = groupBy(all('SELECT * FROM circle_proposals'), 'circle_id');
-  const resByCircle = groupBy(all('SELECT * FROM circle_resolutions'), 'circle_id');
-  const actByCircle = groupBy(all('SELECT * FROM circle_activity'), 'circle_id');
+  const cdByCircle = groupBy(await all('SELECT * FROM circle_domains'), 'circle_id');
+  const rosterByCircle = groupBy(await all('SELECT * FROM circle_roster'), 'circle_id');
+  const rdByRoster = groupBy(await all('SELECT * FROM circle_roster_domains'), 'roster_id');
+  const propByCircle = groupBy(await all('SELECT * FROM circle_proposals'), 'circle_id');
+  const resByCircle = groupBy(await all('SELECT * FROM circle_resolutions'), 'circle_id');
+  const actByCircle = groupBy(await all('SELECT * FROM circle_activity'), 'circle_id');
 
-  const circles = all('SELECT * FROM circles').map(c => {
+  const circles = (await all('SELECT * FROM circles')).map(c => {
     const cds = cdByCircle[c.id] || [];
     const domainsList = cds.filter(d => !d.mandate).map(d => d.domain);
     const primary = cds.filter(d => d.mandate === 'primary').map(d => d.domain);
@@ -2124,20 +2049,20 @@ async function bootstrapRoute(req, res, reqUrl, method) {
   });
 
   // ── cells ──
-  const cellDomains = groupBy(all('SELECT * FROM cell_domains'), 'cell_id');
-  const cellCircles = groupBy(all('SELECT * FROM cell_circles'), 'cell_id');
-  const msgByCell = groupBy(all('SELECT * FROM cell_messages'), 'cell_id');
-  const taskByCell = groupBy(all('SELECT * FROM cell_tasks'), 'cell_id');
-  const objByCell = groupBy(all('SELECT * FROM cell_objectives'), 'cell_id');
-  const teamByCell = groupBy(all('SELECT * FROM cell_team'), 'cell_id');
-  const draftByCell = groupBy(all('SELECT * FROM draft_resolutions'), 'cell_id');
-  const verByDraft = groupBy(all('SELECT * FROM resolution_versions'), 'draft_id');
-  const impByDraft = groupBy(all('SELECT * FROM resolution_implementing_circles'), 'draft_id');
-  const voteByCell = groupBy(all('SELECT * FROM cell_votes'), 'cell_id');
-  const voterByCell = groupBy(all('SELECT * FROM vote_records'), 'cell_id');
-  const vsumByCell = groupBy(all('SELECT * FROM cell_vote_summary'), 'cell_id');
+  const cellDomains = groupBy(await all('SELECT * FROM cell_domains'), 'cell_id');
+  const cellCircles = groupBy(await all('SELECT * FROM cell_circles'), 'cell_id');
+  const msgByCell = groupBy(await all('SELECT * FROM cell_messages'), 'cell_id');
+  const taskByCell = groupBy(await all('SELECT * FROM cell_tasks'), 'cell_id');
+  const objByCell = groupBy(await all('SELECT * FROM cell_objectives'), 'cell_id');
+  const teamByCell = groupBy(await all('SELECT * FROM cell_team'), 'cell_id');
+  const draftByCell = groupBy(await all('SELECT * FROM draft_resolutions'), 'cell_id');
+  const verByDraft = groupBy(await all('SELECT * FROM resolution_versions'), 'draft_id');
+  const impByDraft = groupBy(await all('SELECT * FROM resolution_implementing_circles'), 'draft_id');
+  const voteByCell = groupBy(await all('SELECT * FROM cell_votes'), 'cell_id');
+  const voterByCell = groupBy(await all('SELECT * FROM vote_records'), 'cell_id');
+  const vsumByCell = groupBy(await all('SELECT * FROM cell_vote_summary'), 'cell_id');
 
-  const cells = all('SELECT * FROM cells').map(c => {
+  const cells = (await all('SELECT * FROM cells')).map(c => {
     const meta = j(c.meta) || {};
     const cell = {
       id: c.id, type: c.type, title: c.title, status: c.status, delibType: c.delib_type,
@@ -2181,23 +2106,23 @@ async function bootstrapRoute(req, res, reqUrl, method) {
 
   // ── stfs + candidates ──
   const stfShape = { pending: [], active: [], completed: [] };
-  for (const s of all('SELECT * FROM stfs')) {
+  for (const s of await all('SELECT * FROM stfs')) {
     const obj = { id: s.id, type: s.type, purpose: s.purpose, circle: s.circle, deadline: s.deadline, status: s.status };
     if (s.bucket === 'pending') obj.candidate = s.title;
     else obj.title = s.title;
     stfShape[s.bucket] = stfShape[s.bucket] || [];
     stfShape[s.bucket].push(obj);
   }
-  const cdByCand = groupBy(all('SELECT * FROM stf_candidate_domains'), 'candidate_id');
-  const stfCandidates = all('SELECT * FROM stf_candidates').map(c => ({
+  const cdByCand = groupBy(await all('SELECT * FROM stf_candidate_domains'), 'candidate_id');
+  const stfCandidates = (await all('SELECT * FROM stf_candidates')).map(c => ({
     id: c.id, stfId: c.stf_id, name: c.name, initials: c.initials, matchScore: c.match_score,
     matchedDomains: (cdByCand[c.id] || []).map(d => d.domain), interestScore: c.interest_score, competenceScore: c.competence_score,
     status: c.status, invitedDate: c.invited_date,
   }));
 
   // ── threads / inbox / publications / projects ──
-  const replyByThread = groupBy(all('SELECT * FROM thread_replies'), 'thread_id');
-  const threads = all('SELECT * FROM threads').map(t => ({
+  const replyByThread = groupBy(await all('SELECT * FROM thread_replies'), 'thread_id');
+  const threads = (await all('SELECT * FROM threads')).map(t => ({
     id: t.id, title: t.title, body: t.body, author: t.author, initials: t.initials, avatar: j(t.avatar) || {},
     domain: t.domain, domainColor: t.domain_color, badge: t.badge, badgeClass: t.badge_class,
     replies: t.replies, likes: t.likes, shares: t.shares, time: t.time, pinned: !!t.pinned,
@@ -2209,40 +2134,40 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     })),
   }));
 
-  const actByInbox = groupBy(all('SELECT * FROM inbox_actions'), 'inbox_id');
-  const metaByInbox = groupBy(all('SELECT * FROM inbox_meta'), 'inbox_id');
-  const inbox = all('SELECT * FROM inbox').map(i => ({
+  const actByInbox = groupBy(await all('SELECT * FROM inbox_actions'), 'inbox_id');
+  const metaByInbox = groupBy(await all('SELECT * FROM inbox_meta'), 'inbox_id');
+  const inbox = (await all('SELECT * FROM inbox')).map(i => ({
     id: i.id, type: i.type, title: i.title, desc: i.desc, time: i.time, badge: i.badge,
     unread: !!i.unread, detail: i.detail, nav: i.nav,
     actions: (actByInbox[i.id] || []).map(a => ({ label: a.label, style: a.style, action: a.action })),
     meta: (metaByInbox[i.id] || []).map(m => ({ label: m.label, value: m.value })),
   }));
 
-  const authorByPub = groupBy(all('SELECT * FROM publication_authors'), 'publication_id');
-  const publications = all('SELECT * FROM publications').map(p => ({
+  const authorByPub = groupBy(await all('SELECT * FROM publication_authors'), 'publication_id');
+  const publications = (await all('SELECT * FROM publications')).map(p => ({
     id: p.id, title: p.title, journal: p.journal, date: p.date, views: p.views, downloads: p.downloads,
     type: p.type, abstract: p.abstract, tags: j(p.tags) || [],
     authors: (authorByPub[p.id] || []).map(a => a.author),
   }));
 
-  const news = all('SELECT * FROM news').map(n => ({ title: n.title, time: n.time, source: n.source }));
-  const library = all('SELECT * FROM library_items ORDER BY id DESC').map(l => ({
+  const news = (await all('SELECT * FROM news')).map(n => ({ title: n.title, time: n.time, source: n.source }));
+  const library = (await all('SELECT * FROM library_items ORDER BY id DESC')).map(l => ({
     id: l.id, title: l.title, category: l.category, itemType: l.item_type,
     domain: l.domain, link: l.link, curatedBy: l.curated_by,
   }));
-  const events = all('SELECT * FROM events').map(e => ({ title: e.title, date: e.date, location: e.location }));
-  const opportunities = all('SELECT * FROM opportunities').map(o => ({ title: o.title, deadline: o.deadline, type: o.type }));
-  const domByProject = groupBy(all('SELECT * FROM project_domains'), 'project_id');
-  const projects = all('SELECT * FROM projects').map(p => ({
+  const events = (await all('SELECT * FROM events')).map(e => ({ title: e.title, date: e.date, location: e.location }));
+  const opportunities = (await all('SELECT * FROM opportunities')).map(o => ({ title: o.title, deadline: o.deadline, type: o.type }));
+  const domByProject = groupBy(await all('SELECT * FROM project_domains'), 'project_id');
+  const projects = (await all('SELECT * FROM projects')).map(p => ({
     id: p.id, title: p.title, lead: p.lead, progress: p.progress, role: p.role,
     domains: (domByProject[p.id] || []).map(d => d.domain),
   }));
 
   // ── config & misc ──
   const exitReasonLabels = {};
-  for (const r of all('SELECT * FROM exit_reason_labels')) exitReasonLabels[r.key] = r.label;
+  for (const r of await all('SELECT * FROM exit_reason_labels')) exitReasonLabels[r.key] = r.label;
 
-  const ss = db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {};
+  const ss = await dbGet('SELECT * FROM system_settings WHERE id = 1') || {};
   const systemSettings = {
     stewardTermMonths: ss.steward_term_months ?? null,
     maxConsecutiveTerms: ss.max_consecutive_terms ?? null,
@@ -2251,10 +2176,10 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     autoExpireCircles: !!ss.auto_expire_circles,
     defaultCircleExpiryMonths: ss.default_circle_expiry_months ?? null,
   };
-  const stats = j(db.prepare('SELECT stats FROM stats WHERE id = 1').get()?.stats) || {};
+  const stats = j(await dbGet('SELECT stats FROM stats WHERE id = 1')?.stats) || {};
 
-  const regRows = all('SELECT * FROM registration_domains');
-  const regMeta = db.prepare('SELECT * FROM registration_meta WHERE id = 1').get();
+  const regRows = await all('SELECT * FROM registration_domains');
+  const regMeta = await dbGet('SELECT * FROM registration_meta WHERE id = 1');
   const registration = {
     domains: regRows.map(r => ({ name: r.name, type: r.type })),
     eloMap: regMeta ? j(regMeta.elo_map) : {},
@@ -2263,35 +2188,34 @@ async function bootstrapRoute(req, res, reqUrl, method) {
     defaultInterests: regMeta ? j(regMeta.default_interests) : [],
   };
 
-  const integrityRecords = all('SELECT * FROM integrity_records');
-  const governanceEvents = all('SELECT * FROM governance_events').map(g => {
+  const integrityRecords = await all('SELECT * FROM integrity_records');
+  const governanceEvents = (await all('SELECT * FROM governance_events')).map(g => {
     const o = { id: g.id, type: g.type, circle: g.circle, date: g.date, text: g.text };
     if (g.participant != null) o.participant = g.participant;
     return o;
   });
 
-  const domByApp = groupBy(all('SELECT * FROM circle_application_domains'), 'app_id');
-  const circleApplications = all('SELECT * FROM circle_applications').map(a => ({
+  const domByApp = groupBy(await all('SELECT * FROM circle_application_domains'), 'app_id');
+  const circleApplications = (await all('SELECT * FROM circle_applications')).map(a => ({
     id: a.id, circleId: a.circle_id, circleName: a.circle_name, applicant: a.applicant, initials: a.initials,
     motivation: a.motivation, relevantDomains: (domByApp[a.id] || []).map(d => d.domain), status: a.status,
     appliedDate: a.applied_date, queuePosition: a.queue_position,
   }));
 
-  const projectApplications = all('SELECT * FROM project_applications').map(p => ({
+  const projectApplications = (await all('SELECT * FROM project_applications')).map(p => ({
     id: p.id, cellId: p.cell_id, projectName: p.project_name, applicant: p.applicant, initials: p.initials,
     motivation: p.motivation, status: p.status, appliedDate: p.applied_date, proposedRole: p.proposed_role,
   }));
 
-  const governanceLedger = all('SELECT * FROM governance_ledger').map(l => ({
+  const governanceLedger = (await all('SELECT * FROM governance_ledger')).map(l => ({
     id: l.id, type: l.type, target: l.target, settings: j(l.settings), appliedBy: l.applied_by,
     appliedAt: l.applied_at, status: l.status,
   }));
 
   const myEngagements = currentRow
-    ? db.prepare(
-        `SELECT t.id, (SELECT COUNT(*) FROM thread_endorsements e WHERE e.thread_id = t.id AND e.user_id = ?) AS endorsed,
+    ? (await dbAll(`SELECT t.id, (SELECT COUNT(*) FROM thread_endorsements e WHERE e.thread_id = t.id AND e.user_id = ?) AS endorsed,
                  (SELECT COUNT(*) FROM thread_bookmarks b WHERE b.thread_id = t.id AND b.user_id = ?) AS bookmarked
-         FROM threads t`).all(String(currentRow.id), String(currentRow.id))
+         FROM threads t`, [String(currentRow.id), String(currentRow.id)]))
         .map(r => ({ threadId: r.id, endorsed: r.endorsed > 0, bookmarked: r.bookmarked > 0 }))
     : [];
 
@@ -2325,24 +2249,24 @@ async function bootstrapRoute(req, res, reqUrl, method) {
 
 async function configRoutes(req, res, reqUrl, method) {
   if (reqUrl === '/api/system-settings' && method === 'GET') {
-    return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get() || {});
+    return send(res, 200, await dbGet('SELECT * FROM system_settings WHERE id = 1') || {});
   }
   if (reqUrl === '/api/system-settings' && (method === 'PATCH' || method === 'PUT')) {
     const body = await readBody(req);
-    const cols = db.prepare('PRAGMA table_info(system_settings)').all().map(c => c.name).filter(c => c !== 'id');
+    const cols = (await dbAll('SHOW COLUMNS FROM system_settings')).map(c => c.Field).filter(c => c !== 'id');
     const entries = Object.entries(body).filter(([k]) => cols.includes(k));
-    if (!entries.length) return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get());
+    if (!entries.length) return send(res, 200, await dbGet('SELECT * FROM system_settings WHERE id = 1'));
     const sets = entries.map(([k]) => `${k} = ?`).join(', ');
-    db.prepare(`UPDATE system_settings SET ${sets} WHERE id = 1`).run(...entries.map(([, v]) => v));
-    return send(res, 200, db.prepare('SELECT * FROM system_settings WHERE id = 1').get());
+    await dbRun(`UPDATE system_settings SET ${sets} WHERE id = 1`, [...entries.map(([, v]) => v)]);
+    return send(res, 200, await dbGet('SELECT * FROM system_settings WHERE id = 1'));
   }
   if (reqUrl === '/api/stats' && method === 'GET') {
-    const row = db.prepare('SELECT stats FROM stats WHERE id = 1').get();
+    const row = await dbGet('SELECT stats FROM stats WHERE id = 1');
     return send(res, 200, row ? JSON.parse(row.stats) : {});
   }
   if (reqUrl === '/api/registration' && method === 'GET') {
-    const reg = db.prepare('SELECT * FROM registration_domains').all();
-    const meta = db.prepare('SELECT * FROM registration_meta WHERE id = 1').get();
+    const reg = await dbAll('SELECT * FROM registration_domains');
+    const meta = await dbGet('SELECT * FROM registration_meta WHERE id = 1');
     return send(res, 200, {
       domains: reg,
       eloMap: meta ? JSON.parse(meta.elo_map || '{}') : {},
@@ -2352,7 +2276,7 @@ async function configRoutes(req, res, reqUrl, method) {
     });
   }
   if (reqUrl === '/api/current-user' && method === 'GET') {
-    const u = db.prepare('SELECT * FROM users WHERE is_current = 1').get();
+    const u = await dbGet('SELECT * FROM users WHERE is_current = 1');
     if (!u) return send(res, 404, { error: 'No current user' });
     delete u.password_hash;
     return send(res, 200, u);
@@ -2399,6 +2323,7 @@ function staticFile(reqUrl) {
 const CORS_ORIGIN = process.env.SOLIS_ORIGIN || '*';
 
 const server = createServer(async (req, res) => {
+  try {
   const reqUrl = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   const method = req.method;
 
@@ -2464,10 +2389,14 @@ const server = createServer(async (req, res) => {
   }
 
   send(res, 404, { error: 'Not found' });
+  } catch (e) {
+    console.error('Request error:', e.message);
+    if (!res.writableEnded) send(res, 500, { error: 'Internal server error' });
+  }
 });
 
 server.listen(PORT, () => {
   console.log(`Solis database prototype → http://localhost:${PORT}`);
   console.log(`  static root: ${PLATFORM_DIR}`);
-  console.log(`  database:    ${DB_PATH}`);
+  console.log(`  database:    MySQL (${process.env.SOLIS_MYSQL_HOST || 'localhost'}:${process.env.SOLIS_MYSQL_PORT || '3306'}/${process.env.SOLIS_MYSQL_DB || 'solis'})`);
 });
