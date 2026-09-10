@@ -2,3 +2,7 @@
 solis.db
 solis.db-shm
 solis.db-wal
+
+# Node is retired — PHP API (platform/api.php) is canonical
+platform/node_modules/
+
