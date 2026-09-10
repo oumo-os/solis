@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Observatory · Solis</title>
+  <link rel="icon" type="image/svg+xml" href="shared/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="shared/favicon.png">
+  <link rel="icon" type="image/x-icon" href="shared/favicon.ico">
+  <link rel="stylesheet" href="shared/fonts.css">
+  <link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="observatory.html" class="nav-link active">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
+
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="obs-orbit" style="width:400px;height:400px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Observatory</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Knowledge for the curious</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:520px">The Commons' public knowledge space. Entirely open — no participation required.</p>
+      <p class="text-xs mt-2" style="color:var(--text-tertiary);font-style:italic">An observatory is where you go to see further.</p>
+    </div>
+  </section>
+  <div class="container">
+    <div style="padding:var(--space-6) 0 var(--space-8);position:relative">
+      <div id="observatory-cards" class="opps-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);margin-bottom:var(--space-7)"></div>
+      <div style="border-top:1px solid var(--border);padding-top:var(--space-6)">
+        <span class="text-label mb-4" style="display:block">Recent publications</span>
+        <div id="publications" class="flex-col gap-3" style="display:flex"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span id="footer-mark"></span>
+        <span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span>
+      </div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="shared/colors.js"></script>
+  <script src="shared/solmark.js"></script>
+  <script>
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var oo=document.getElementById('obs-orbit'); if(oo) oo.innerHTML=SolMark(400);
+
+    var observatory = [
+      {cat:'News',desc:'Curated space sector coverage, filtered for signal',count:'Updated daily'},
+      {cat:'Calendar',desc:'Global launches, milestones, and Commons events',count:'38 upcoming'},
+      {cat:'Opportunities',desc:'Scholarships, fellowships, competitions, open calls',count:'12 open'},
+      {cat:'Library',desc:'Books, courses, podcasts, career guides, and tools',count:'200+ resources'},
+      {cat:'Publications',desc:'Essays, reports, and analysis from Commons participants',count:'14 pieces'}
+    ];
+    document.getElementById('observatory-cards').innerHTML = observatory.map(function(c) {
+      return '<div class="card card-interactive">' +
+        '<div style="width:24px;height:2px;background:var(--gold);border-radius:1px;margin-bottom:var(--space-4)"></div>' +
+        '<div class="text-xs mb-2" style="font-weight:600;color:var(--gold)">'+c.cat+'</div>' +
+        '<p class="text-sm mb-3" style="font-weight:500">'+c.desc+'</p>' +
+        '<p class="text-xs" style="color:var(--text-tertiary)">'+c.count+'</p>' +
+      '</div>';
+    }).join('');
+
+    var pubs = [
+      {title:'Why East Africa Needs a Space Economy Strategy',author:'Okello M.',date:'Jul 9, 2026',type:'Essay'},
+      {title:'Understanding the Outer Space Treaty — A Plain Language Guide',author:'Ssempa D.',date:'Jun 22, 2026',type:'Guide'},
+      {title:'AfricaSpace 2026 — What the Summit Means for East Africa',author:'Nakabugo B.',date:'Jun 15, 2026',type:'Report'}
+    ];
+    document.getElementById('publications').innerHTML = pubs.map(function(p) {
+      return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)">' +
+        '<div>' +
+          '<span class="tag tag-pub" style="margin-right:var(--space-2)">'+p.type+'</span>' +
+          '<span class="text-sm" style="font-weight:500">'+p.title+'</span>' +
+          '<div class="text-xs mt-1" style="color:var(--text-tertiary)">'+p.author+' · '+p.date+'</div>' +
+        '</div>' +
+        '<button class="btn btn-secondary btn-sm">Read →</button>' +
+      '</div>';
+    }).join('');
+  </script>
+</body>
+</html>

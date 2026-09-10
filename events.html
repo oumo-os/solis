@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Events · Solis</title>
+  <link rel="icon" type="image/svg+xml" href="shared/favicon.svg">
+  <link rel="stylesheet" href="shared/fonts.css">
+  <link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link active">Events</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
+
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="ev-orbit" style="width:400px;height:400px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Events</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Gatherings & milestones</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:560px">Global launches, conferences, and Commons gatherings — the calendar the community keeps together. Curated by stewards, open to all.</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <div class="layout-2col" style="padding:var(--space-6) 0 var(--space-8)">
+      <div style="min-width:0">
+        <div class="section-head"><span class="label">Upcoming</span><span class="text-label" style="font-size:8px">38 events</span></div>
+        <div id="events-list" style="display:flex;flex-direction:column;gap:var(--space-3)"></div>
+        <div style="margin-top:var(--space-5);padding:var(--space-4);background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:var(--space-3);align-items:center">
+          <span class="tag tag-blue">Archive</span>
+          <div style="flex:1"><div class="text-sm" style="font-weight:600">Past events are archived</div><div class="text-xs" style="color:var(--text-tertiary)">Every gathering leaves a record — what happened, who was there, what was learned.</div></div>
+          <span class="text-xs" style="color:var(--text-tertiary)">2024–2026 →</span>
+        </div>
+      </div>
+      <aside style="display:flex;flex-direction:column;gap:var(--space-4)">
+        <div class="card">
+          <div class="text-label mb-3" style="font-size:8px">This month</div>
+          <div id="month-mini" style="display:flex;flex-direction:column;gap:8px"></div>
+          <a href="observatory.html" class="btn btn-secondary btn-sm" style="width:100%;margin-top:12px;justify-content:center">Full calendar →</a>
+        </div>
+        <div class="card" style="background:var(--gold-soft);border-color:var(--gold-border)">
+          <div class="text-label mb-2" style="color:var(--gold)">Host an event</div>
+          <p class="text-sm" style="color:var(--text-secondary)">Stewards can publish events. Anyone may propose one — a steward will curate it.</p>
+          <a href="participate.html" class="btn btn-primary btn-sm" style="margin-top:10px">Propose an event →</a>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div id="ev-mini" style="background:var(--navy);padding:10px;display:flex;justify-content:center"></div>
+          <div style="padding:10px var(--space-3)"><div class="text-label" style="font-size:8px">Observatory</div><div class="text-xs" style="color:var(--text-tertiary)">Events feed into the public calendar. <a href="observatory.html" style="color:var(--gold);text-decoration:none">Explore →</a></div></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand"><span id="footer-mark"></span><span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span></div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="shared/colors.js"></script>
+  <script src="shared/solmark.js"></script>
+  <script>
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+    document.getElementById('ev-orbit').innerHTML = SolMark(400);
+    document.getElementById('ev-mini').innerHTML = SolMark(140,true);
+    var events=[
+      {date:"18 Jul 2026",title:"Space Policy 101 — Open Discussion Session",loc:"Kampala · Commons",type:"Discussion"},
+      {date:"22–24 Aug 2026",title:"AfricaSpace Summit 2026",loc:"Cape Town",type:"Summit"},
+      {date:"04 Sep 2026",title:"Launch: ISRO PSLV-C62 / EOS-09",loc:"Satish Dhawan",type:"Launch"},
+      {date:"15 Oct 2026",title:"IAC 2026 — Brisbane",loc:"Brisbane",type:"Congress"},
+      {date:"02 Nov 2026",title:"Anniversary: 26 years continuous presence",loc:"Orbit",type:"Milestone"}
+    ];
+    document.getElementById('events-list').innerHTML = events.map(function(e){
+      return '<div class="card" style="display:grid;grid-template-columns:110px 1fr auto;gap:var(--space-3);align-items:center"><div><div class="text-xs" style="font-weight:600;color:var(--gold)">'+e.date+'</div><div class="text-xs" style="color:var(--text-tertiary)">'+e.type+'</div></div><div><div class="text-sm" style="font-weight:600">'+e.title+'</div><div class="text-xs" style="color:var(--text-tertiary)">'+e.loc+'</div></div><span class="tag tag-event">Open</span></div>';
+    }).join('');
+    document.getElementById('month-mini').innerHTML = events.slice(0,3).map(function(e){
+      return '<div style="display:flex;justify-content:space-between;align-items:center"><span class="text-xs" style="color:var(--text-secondary)">'+e.title.slice(0,28)+'…</span><span class="text-xs" style="color:var(--gold)">'+e.date.split(" ")[0]+'</span></div>';
+    }).join('');
+  </script>
+</body>
+</html>

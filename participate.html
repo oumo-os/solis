@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Participate · Solis</title>
+  <link rel="icon" type="image/svg+xml" href="shared/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="shared/favicon.png">
+  <link rel="icon" type="image/x-icon" href="shared/favicon.ico">
+  <link rel="stylesheet" href="shared/fonts.css">
+  <link rel="stylesheet" href="css/public.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
+
+  <section class="hero-monument" style="padding:var(--space-6) 0 var(--space-6);margin-bottom:0">
+    <div class="hero-orbit" id="part-orbit" style="width:380px;height:380px;right:-20px;opacity:.07"></div>
+    <div class="container" style="position:relative">
+      <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Participate</span></div>
+      <h1 class="text-display serif mb-2" style="font-size:clamp(28px,4.5vw,42px)">Join the Commons</h1>
+      <p class="text-sm" style="color:var(--text-secondary);max-width:520px">The Commons is open. No application, no approval, no credentials required. You participate, and the Commons is there.</p>
+    </div>
+  </section>
+  <div class="container">
+    <div style="padding:var(--space-6) 0 var(--space-8);max-width:600px;position:relative">
+      <div id="benefits" class="flex-col gap-4" style="display:flex"></div>
+      <div class="card mt-4" style="background:var(--surface-raised)">
+        <p class="text-xs mb-4" style="color:var(--text-secondary)">Create your Solarian profile and begin participating. No introduction required.</p>
+        <div class="flex gap-3">
+          <a href="platform/index.html#profile" class="btn btn-primary">Create your profile</a>
+          <a href="about.html" class="btn btn-secondary">Read about the Commons first</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span id="footer-mark"></span>
+        <span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span>
+      </div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="shared/colors.js"></script>
+  <script src="shared/solmark.js"></script>
+  <script>
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+    var po=document.getElementById('part-orbit'); if(po) po.innerHTML=SolMark(380);
+
+    var benefits = [
+      ['Access the participant directory','Find and connect with other Solarians across disciplines, backgrounds, and interests.'],
+      ['Participate in discussions','The Commons\' forum — threaded, searchable, permanent. Not a WhatsApp group.'],
+      ['Start or join expeditions','Propose something. The Commons provides visibility and support, not gatekeeping.'],
+      ['Affiliate your organisation','Bring your organisation into the Commons. It keeps its independence entirely.']
+    ];
+    document.getElementById('benefits').innerHTML = benefits.map(function(b) {
+      return '<div class="flex gap-3" style="padding-bottom:var(--space-4);border-bottom:1px solid var(--border-subtle)">' +
+        '<div style="width:5px;height:5px;border-radius:50%;background:var(--gold);margin-top:7px;flex-shrink:0"></div>' +
+        '<div>' +
+          '<div class="text-sm mb-1" style="font-weight:600">'+b[0]+'</div>' +
+          '<div class="text-xs" style="color:var(--text-secondary)">'+b[1]+'</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  </script>
+</body>
+</html>

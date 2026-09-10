@@ -3,55 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Solis · Test Website</title>
+  <title>Solis · Solarian Commons</title>
+  <link rel="icon" type="image/svg+xml" href="shared/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="shared/favicon.png">
+  <link rel="icon" type="image/x-icon" href="shared/favicon.ico">
   <link rel="stylesheet" href="shared/fonts.css">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0E1E34; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
-    .serif { font-family: 'Playfair Display', Georgia, serif; }
-    .container { max-width: 640px; width: 100%; }
-    .mark { display: flex; justify-content: center; margin-bottom: 40px; }
-    h1 { font-size: 36px; font-weight: 700; text-align: center; margin-bottom: 8px; }
-    .subtitle { font-size: 14px; color: rgba(255,255,255,.45); text-align: center; margin-bottom: 48px; line-height: 1.6; }
-    .links { display: flex; flex-direction: column; gap: 12px; }
-    .link-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 20px 24px; text-decoration: none; color: #fff; transition: background .15s, border-color .15s; display: block; }
-    .link-card:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.2); }
-    .link-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .link-desc { font-size: 13px; color: rgba(255,255,255,.45); line-height: 1.5; }
-    .link-arrow { float: right; color: rgba(255,255,255,.3); font-size: 18px; margin-top: -2px; }
-    .footer { margin-top: 48px; text-align: center; font-size: 12px; color: rgba(255,255,255,.25); font-style: italic; }
-  </style>
+  <link rel="stylesheet" href="css/public.css">
 </head>
 <body>
-  <div class="container">
-    <div class="mark" id="mark"></div>
-    <h1 class="serif">Solis</h1>
-    <p class="subtitle">Test website — three views of the Solarian Commons</p>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand" id="brand"></a>
+      <button class="nav-hamburger" id="nav-hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="nav-links">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="observatory.html" class="nav-link">Observatory</a>
+        <a href="expeditions.html" class="nav-link">Expeditions</a>
+        <a href="events.html" class="nav-link">Events</a>
+        <a href="stewards.html" class="nav-link">Stewards</a>
+        <a href="organisations.html" class="nav-link">Organisations</a>
+      </div>
+      <div class="nav-actions">
+        <a href="platform/" class="btn btn-secondary btn-sm">Login</a>
+        <a href="participate.html" class="btn btn-primary btn-sm">Participate</a>
+      </div>
+    </div>
+    <div class="nav-line"></div>
+  </nav>
 
-    <div class="links">
-      <a href="public/index.html" class="link-card">
-        <span class="link-arrow">→</span>
-        <div class="link-title">Public Site</div>
-        <div class="link-desc">Home, About, Observatory, Stewards, Organisations, Participate — the public face of the Commons.</div>
-      </a>
-      <a href="platform/index.html" class="link-card">
-        <span class="link-arrow">→</span>
-        <div class="link-title">Commons Platform</div>
-        <div class="link-desc">Dashboard, Discussions, Undertakings, Cells, Task Forces, Participants, Profile — the participant experience.</div>
-      </a>
-      <a href="emblem/index.html" class="link-card">
-        <span class="link-arrow">→</span>
-        <div class="link-title">Solarian Emblem</div>
-        <div class="link-desc">Interactive planetary map with wordmark, labels, light-time, and dark mode.</div>
-      </a>
+  <!-- Hero — Monumental -->
+  <section class="hero-monument">
+    <div class="hero-orbit" id="hero-orbit"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <div class="hero-kicker"><span class="dot"></span><span class="text-label" style="color:var(--gold)">Kampala, Uganda · Open to all</span></div>
+          <h1 class="hero-title text-display serif" style="color:var(--navy)">The Commons for a<br><span class="accent">Solarian civilisation.</span></h1>
+          <p class="hero-copy text-md" style="color:var(--text-secondary)">An open community for anyone interested in humanity's future beyond Earth — regardless of discipline, institution, or other affiliations.</p>
+          <p class="hero-copy text-sm" style="color:var(--text-tertiary);margin-top:6px">You're already Solarian. This is where you find the others.</p>
+          <div class="hero-actions flex gap-3">
+            <a href="participate.html" class="btn btn-primary">Participate in the Commons →</a>
+            <a href="about.html" class="btn btn-ghost">What is Solis?</a>
+          </div>
+          <div class="flex gap-4" style="margin-top:18px">
+            <span class="text-label" style="display:flex;align-items:center;gap:6px"><span style="width:28px;height:1px;background:var(--gold)"></span>Est. 02 Nov 2000 — continuous human presence</span>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="card hero-stats-card">
+            <div class="head">
+              <span class="head-label">The Commons today</span>
+              <span class="head-dot" title="Live"></span>
+            </div>
+            <div id="stats"></div>
+            <div style="padding:10px var(--space-4);background:var(--surface-raised);border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center">
+              <span class="text-label" style="font-size:8px;opacity:.7">14 bodies · Voyager beyond heliopause</span>
+              <a href="observatory.html" style="font-family:var(--mono);font-size:10px;color:var(--gold);text-decoration:none">Observatory →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-bottom:var(--space-7)" id="two-col">
+      <div>
+        <div class="section-head"><span class="label">From the sector</span><a class="link" href="observatory.html">Full Observatory →</a></div>
+        <div id="sector-news" class="flex-col gap-3" style="display:flex"></div>
+      </div>
+      <div>
+        <div class="section-head"><span class="label">From the Commons</span><a class="link" href="platform/">Participant area →</a></div>
+        <div id="commons-activity" class="flex-col gap-3" style="display:flex"></div>
+      </div>
     </div>
 
-    <div class="footer">Ultra hic et nunc</div>
+    <div style="margin-bottom:var(--space-7)">
+      <div class="section-head"><span class="label">Open opportunities</span><span class="text-label" style="font-size:8px">Grants · Calls · Fellowships</span></div>
+      <div id="opportunities" class="opps-grid"></div>
+    </div>
+
+    <section class="cta-monument">
+      <div class="cta-orbit" id="cta-orbit"></div>
+      <div>
+        <h2 class="text-lg serif mb-3" style="color:#fff;line-height:1.25">Not united by a destination.<br><span class="gold">United by a direction.</span></h2>
+        <p class="text-sm">The Commons is open to anyone with genuine curiosity about humanity's future beyond Earth. No credentials. No approval. You participate, and the Commons grows around you.</p>
+      </div>
+      <div class="cta-actions">
+        <a href="participate.html" class="btn btn-gold" style="justify-content:center">Participate in the Commons →</a>
+        <a href="about.html" class="btn" style="justify-content:center;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:rgba(255,255,255,.72)">Read about Solis</a>
+        <span class="text-label" style="font-size:8px;color:rgba(255,255,255,.32);text-align:center;letter-spacing:.1em">Ultra hic et nunc — here and now, beyond</span>
+      </div>
+    </section>
   </div>
 
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span id="footer-mark"></span>
+        <span class="serif text-xs" style="color:var(--text-secondary)">Solis · Solarian Commons · Kampala, Uganda</span>
+      </div>
+      <span class="footer-motto">Ultra hic et nunc</span>
+    </div>
+  </footer>
+
+  <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
   <script>
-    document.getElementById('mark').innerHTML = SolMark(64);
+    document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
+    document.getElementById('footer-mark').innerHTML = SolMark(16);
+    document.getElementById('hero-orbit').innerHTML = SolMark(460); // light bg = dark lines (false)
+    document.getElementById('cta-orbit').innerHTML = SolMark(380,true);
+
+    var stats = [["12","Open opportunities"],["38","Upcoming events"],["5","Active stewards"],["4","Active expeditions"],["6","Affiliated organisations"]];
+    document.getElementById('stats').innerHTML = stats.map(function(s,i) {
+      return '<div class="stat-row-mini' + (i===stats.length-1?'':'') + '"><span class="lbl">'+s[1]+'</span><span class="val">'+s[0]+'</span></div>';
+    }).join('');
+
+    var sectorNews = [
+      {tag:'tag-launch',label:'Launch',title:"ISRO's PSLV-C60 successfully deploys SpaDeX docking demonstration in LEO",source:'Space News',time:'2 hr ago'},
+      {tag:'tag-policy',label:'Policy',title:'African Union Space Agency framework advances at Addis Ababa summit',source:'SpaceAfrica',time:'Yesterday'},
+      {tag:'tag-industry',label:'Industry',title:'Rocket Lab expands Neutron manufacturing capacity for constellation operators',source:'NASASpaceFlight',time:'2 days ago'}
+    ];
+    document.getElementById('sector-news').innerHTML = sectorNews.map(function(n) {
+      return '<div class="card card-interactive">' +
+        '<div class="flex items-center gap-2 mb-3">' +
+          '<span class="tag '+n.tag+'">'+n.label+'</span>' +
+          '<span class="text-xs" style="color:var(--text-tertiary)">'+n.source+' · '+n.time+'</span>' +
+        '</div>' +
+        '<p class="text-sm" style="font-weight:500">'+n.title+'</p>' +
+      '</div>';
+    }).join('');
+
+    var commonsActivity = [
+      {tag:'tag-event',label:'Event',title:'Space Policy 101 — Open Discussion Session',note:'Fri Jul 18 · Steward: Policy & Advocacy'},
+      {tag:'tag-project',label:'Expedition',title:'Uganda Space Sector Map — Collaborative Initiative',note:'Open for contributors · 4 participants active'},
+      {tag:'tag-pub',label:'Publication',title:'Why East Africa Needs a Space Economy Strategy',note:'Essay by Okello M. · Jul 9, 2026'}
+    ];
+    document.getElementById('commons-activity').innerHTML = commonsActivity.map(function(a) {
+      return '<div class="card">' +
+        '<div class="mb-2"><span class="tag '+a.tag+'">'+a.label+'</span></div>' +
+        '<p class="text-sm mb-1" style="font-weight:500">'+a.title+'</p>' +
+        '<p class="text-xs" style="color:var(--text-tertiary)">'+a.note+'</p>' +
+      '</div>';
+    }).join('');
+
+    var opportunities = [
+      {type:'Fellowship',org:'SGAC',title:'Space Generation Congress 2026',deadline:'Aug 1',location:'Milan'},
+      {type:'Scholarship',org:'AfricaSpace',title:'Young Professional Award',deadline:'Aug 15',location:'Remote'},
+      {type:'Competition',org:'ESA',title:'Moon Camp Challenge — Open Category',deadline:'Sep 30',location:'Remote'},
+      {type:'Call',org:'IAC 2026',title:'Abstract Submissions Now Open',deadline:'Oct 1',location:'Brisbane'}
+    ];
+    document.getElementById('opportunities').innerHTML = opportunities.map(function(o) {
+      return '<div class="card card-interactive opp-card">' +
+        '<div class="text-label mb-2" style="color:var(--gold)">'+o.type+'</div>' +
+        '<p class="text-xs mb-3" style="font-weight:500;min-height:34px">'+o.title+'</p>' +
+        '<div class="text-xs" style="color:var(--text-tertiary)">'+o.org+' · '+o.location+'</div>' +
+        '<div class="text-xs" style="color:var(--text-tertiary)">Due '+o.deadline+'</div>' +
+      '</div>';
+    }).join('');
   </script>
 </body>
 </html>

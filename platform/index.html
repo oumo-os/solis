@@ -9837,7 +9837,7 @@ function loadApiData() {
       // later reload (with the API up) retries transparently.
       console.warn('loadApiData: unexpected bootstrap response (status ' + (data && data.__status) + '). Is the API server running?');
       MOCK = emptyMock();
-      setTimeout(function() { toast('API unreachable — showing offline view. Start it with: node server.mjs', 'warn'); }, 0);
+      setTimeout(function() { toast('API unreachable — showing offline view. Start Apache + MySQL in XAMPP.', 'warn'); }, 0);
       return;
     }
     MOCK = data;
