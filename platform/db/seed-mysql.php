@@ -26,7 +26,7 @@ function j($v) {
 }
 
 function hashPassword($pw) {
-    return hash('sha256', (string)$pw);
+    return password_hash((string)$pw, PASSWORD_BCRYPT);
 }
 
 /**

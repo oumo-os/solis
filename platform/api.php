@@ -28,12 +28,22 @@ function rateLimit($key, $max, $windowMs) { global $rateBuckets; $now = (int)(mi
 function clientIp() { return preg_replace('/^::ffff:/', '', $_SERVER['REMOTE_ADDR'] ?? 'unknown'); }
 $AUTH_LIMIT = 10; $AUTH_WINDOW_MS = 15 * 60 * 1000;
 function genToken() { return bin2hex(random_bytes(48)); }
-function authUser() { $h = $_SERVER['HTTP_AUTHORIZATION'] ?? ''; if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; return dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); }
+function getAuthHeader() {
+    if (!empty($_SERVER['HTTP_AUTHORIZATION'])) return $_SERVER['HTTP_AUTHORIZATION'];
+    if (!empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    if (function_exists('getallheaders')) {
+        foreach (getallheaders() as $k => $v) { if (strtolower($k) === 'authorization') return $v; }
+    }
+    return '';
+}
+function authUser() { $h = getAuthHeader(); if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; return dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); }
 
-// Strip /api prefix
+// Strip everything up to /api or /api.php (works under any subdirectory base)
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($uri, PHP_URL_PATH);
-$path = preg_replace('#^/api(?:\.php)?#', '', $path) ?: '/';
+$path = preg_replace('#^.*/api(?:\.php)?#', '', $path);
+$path = ($path === '' || $path === null) ? '/' : $path;
+if ($path[0] !== '/') $path = '/' . $path;
 $method = $_SERVER['REQUEST_METHOD'];
 $cleanPath = rtrim($path, '/');
 
@@ -79,7 +89,7 @@ if ($method === 'POST' && $cleanPath === '/auth/register') {
     send(201, ['token' => $token, 'user' => $u]);
 }
 if ($method === 'POST' && $cleanPath === '/auth/logout') {
-    $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $h = getAuthHeader();
     if (preg_match('/^Bearer\s+(.+)$/i', $h, $m)) dbRun('DELETE FROM auth_tokens WHERE token = ?', [$m[1]]);
     send(200, ['ok' => true]);
 }
@@ -93,7 +103,7 @@ if ($method === 'GET' && $cleanPath === '/auth/me') {
 if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $empty = isset($_GET['empty']) && $_GET['empty'] === '1';
     $users = dbAll('SELECT * FROM users');
-    $tok = null; $h = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    $tok = null; $h = getAuthHeader();
     if (preg_match('/^Bearer\s+(.+)$/i', $h, $m)) $tok = $m[1];
     $currentRow = $tok ? dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?', [$tok, date('Y-m-d\TH:i:s.000\Z')]) : null;
     $compByUser = groupBy(dbAll('SELECT * FROM user_competence'), 'user_id');
