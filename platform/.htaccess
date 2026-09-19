@@ -1,4 +1,7 @@
 RewriteEngine On
+# Block sensitive files
+RewriteCond %{REQUEST_URI} (db/|mock\.json|server\.mjs|package\.json) [NC]
+RewriteRule .* - [F,L]
 # Pass Authorization header through to PHP (Apache strips it by default)
 RewriteCond %{HTTP:Authorization} .
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
