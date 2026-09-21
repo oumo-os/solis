@@ -7,7 +7,13 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Max-Age: 86400');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
-$db = new mysqli('localhost', 'root', '', 'solis', 3306);
+$db = new mysqli(
+    getenv('SOLIS_DB_HOST') ?: 'localhost',
+    getenv('SOLIS_DB_USER') ?: 'root',
+    getenv('SOLIS_DB_PASS') ?: '',
+    getenv('SOLIS_DB_NAME') ?: 'solis',
+    (int)(getenv('SOLIS_DB_PORT') ?: 3306)
+);
 if ($db->connect_error) { send(500, ['error' => 'DB: ' . $db->connect_error]); }
 $db->set_charset('utf8mb4');
 

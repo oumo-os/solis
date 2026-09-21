@@ -15,21 +15,27 @@ if (isset($opts['help'])) {
     exit(0);
 }
 
-$dbHost = 'localhost';
-$dbPort = 3306;
-$dbUser = 'root';
-$dbPass = '';
-$dbName = $opts['db'] ?? 'solis';
+$dbHost = getenv('SOLIS_DB_HOST') ?: 'localhost';
+$dbPort = (int)(getenv('SOLIS_DB_PORT') ?: 3306);
+$dbUser = getenv('SOLIS_DB_USER') ?: 'root';
+$dbPass = getenv('SOLIS_DB_PASS') ?: '';
+$dbName = $opts['db'] ?? getenv('SOLIS_DB_NAME') ?: 'solis';
 $backupDir = __DIR__ . '/backups';
 $ts = date('Y-m-d_H-i-s');
 $filename = "solis_{$ts}.sql";
 
 if (!is_dir($backupDir)) mkdir($backupDir, 0755, true);
 
-$mysqldump = 'M:/Dev/xampp/mysql/bin/mysqldump.exe';
-if (!file_exists($mysqldump)) {
-    // Try PATH
+// Locate mysqldump: PATH first (portable), then XAMPP default
+$mysqldump = '';
+if (PHP_OS_FAMILY === 'Windows') {
     $mysqldump = trim(shell_exec('where mysqldump 2>nul') ?: '');
+} else {
+    $mysqldump = trim(shell_exec('which mysqldump 2>/dev/null') ?: '');
+}
+$mysqldump = strtok($mysqldump, "\r\n");
+if (!$mysqldump || !file_exists($mysqldump)) {
+    $mysqldump = 'M:/Dev/xampp/mysql/bin/mysqldump.exe';
 }
 if (!$mysqldump || !file_exists($mysqldump)) {
     echo "ERROR: mysqldump not found. Provide full path in script or add to PATH.\n";

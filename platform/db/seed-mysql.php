@@ -8,11 +8,11 @@
  * Requires XAMPP MySQL running on localhost:3306, user root, no password.
  */
 
-$DB_HOST = 'localhost';
-$DB_PORT = 3306;
-$DB_USER = 'root';
-$DB_PASS = '';
-$DB_NAME = 'solis';
+$DB_HOST = getenv('SOLIS_DB_HOST') ?: 'localhost';
+$DB_PORT = (int)(getenv('SOLIS_DB_PORT') ?: 3306);
+$DB_USER = getenv('SOLIS_DB_USER') ?: 'root';
+$DB_PASS = getenv('SOLIS_DB_PASS') ?: '';
+$DB_NAME = getenv('SOLIS_DB_NAME') ?: 'solis';
 $MOCK_PATH = __DIR__ . '/../mock.json';
 
 $drop = in_array('--drop', $argv);
@@ -31,7 +31,14 @@ function hashPassword($pw) {
 
 /**
  * Upsert: INSERT ... ON DUPLICATE KEY UPDATE for each row.
+ * Reports failures loudly — silent skips caused the great empty-table mystery.
  */
+$SEED_ERRORS = [];
+function seedErr(string $msg): void {
+    global $SEED_ERRORS;
+    $SEED_ERRORS[] = $msg;
+    echo "  ✗ $msg\n";
+}
 function upsert(mysqli $db, string $table, array $rows, array $cols): void {
     if (empty($rows)) return;
     $colList = implode(', ', array_map(fn($c) => "`$c`", $cols));
@@ -45,7 +52,7 @@ function upsert(mysqli $db, string $table, array $rows, array $cols): void {
     $updateClause = $updates ? implode(', ', $updates) : '`id` = `id`';
     $sql = "INSERT INTO `$table` ($colList) VALUES ($placeholders) ON DUPLICATE KEY UPDATE $updateClause";
     $stmt = $db->prepare($sql);
-    if (!$stmt) return;
+    if (!$stmt) { seedErr("$table prepare failed: " . $db->error); return; }
     foreach ($rows as $row) {
         $vals = [];
         foreach ($cols as $c) {
@@ -55,7 +62,7 @@ function upsert(mysqli $db, string $table, array $rows, array $cols): void {
             $vals[] = $v;
         }
         $stmt->bind_param(str_repeat('s', count($vals)), ...$vals);
-        $stmt->execute();
+        if (!$stmt->execute()) seedErr("$table execute failed: " . $stmt->error);
     }
     $stmt->close();
 }
@@ -69,7 +76,7 @@ function insert(mysqli $db, string $table, array $rows, array $cols): void {
     $placeholders = implode(',', array_fill(0, count($cols), '?'));
     $sql = "INSERT INTO `$table` ($colList) VALUES ($placeholders)";
     $stmt = $db->prepare($sql);
-    if (!$stmt) return;
+    if (!$stmt) { seedErr("$table prepare failed: " . $db->error); return; }
     foreach ($rows as $row) {
         $vals = [];
         foreach ($cols as $c) {
@@ -79,7 +86,7 @@ function insert(mysqli $db, string $table, array $rows, array $cols): void {
             $vals[] = $v;
         }
         $stmt->bind_param(str_repeat('s', count($vals)), ...$vals);
-        $stmt->execute();
+        if (!$stmt->execute()) seedErr("$table execute failed: " . $stmt->error);
     }
     $stmt->close();
 }
@@ -472,6 +479,35 @@ $partRows = array_map(fn($u) => [
 ], $users);
 insert($db, 'participants', $partRows, ['user_id','location','joined','bio']);
 
+// User competence / circles / orgs (powers bootstrap domains, circles, orgs)
+$compRows = []; $ucRows = []; $uoRows = [];
+foreach ($users as $u) {
+    foreach ($u['domains'] ?? [] as $d) {
+        if (!is_array($d)) $d = ['name' => $d];
+        $compRows[] = [
+            'user_id' => $u['id'], 'domain' => $d['name'] ?? null,
+            'ws' => $d['ws'] ?? null, 'wh' => $d['wh'] ?? null,
+            'interest' => $d['interest'] ?? null, 'bar_ws' => $d['barWs'] ?? null,
+            'bar_wh' => $d['barWh'] ?? null, 'members' => $d['members'] ?? null,
+            'color' => $d['color'] ?? null, 'kind' => 'roster',
+            'evidence' => $d['evidence'] ?? null, 'verified' => ($d['verified'] ?? false) ? 1 : 0,
+        ];
+    }
+    foreach ($u['circles'] ?? [] as $c) {
+        $ucRows[] = [
+            'user_id' => $u['id'], 'circle' => is_string($c) ? $c : ($c['name'] ?? null),
+            'status' => is_array($c) ? ($c['status'] ?? 'Active') : 'Active',
+            'since' => is_array($c) ? ($c['since'] ?? null) : null, 'kind' => 'roster',
+        ];
+    }
+    foreach ($u['orgs'] ?? [] as $o) {
+        $uoRows[] = ['user_id' => $u['id'], 'org_acronym' => is_string($o) ? $o : ($o['acronym'] ?? null)];
+    }
+}
+upsert($db, 'user_competence', $compRows, ['user_id','domain','ws','wh','interest','bar_ws','bar_wh','members','color','kind','evidence','verified']);
+upsert($db, 'user_circles', $ucRows, ['user_id','circle','status','since','kind']);
+upsert($db, 'user_orgs', $uoRows, ['user_id','org_acronym']);
+
 // Domains
 $domains = $mock['domains'] ?? [];
 $domainRows = [];
@@ -494,6 +530,15 @@ $orgs = array_map(fn($o) => [
     'logo' => j($o['logo'] ?? null),
 ], $mock['organisations'] ?? []);
 upsert($db, 'organisations', $orgs, ['id','name','acronym','shortname','location','summary','status','founded','founding_cell','member_count','website','logo']);
+
+// Org knowledge domains
+$okdRows = [];
+foreach ($mock['organisations'] ?? [] as $o) {
+    foreach ($o['knowledgeDomains'] ?? [] as $d) {
+        $okdRows[] = ['org_id' => $o['id'], 'domain' => $d];
+    }
+}
+upsert($db, 'org_knowledge_domains', $okdRows, ['org_id','domain']);
 
 // Circles
 $circles = $mock['circles'] ?? [];
@@ -532,7 +577,47 @@ foreach ($circles as $c) {
             'top_domain' => $r['topDomain'] ?? $r['top_domain'] ?? null,
         ], $roster);
         insert($db, 'circle_roster', $rosterRows, ['circle_id','member_id','name','initials','color','ws','status','joined','last_active','top_domain']);
+        // Link roster domains back to the auto-generated roster rows
+        $ridByMember = [];
+        $rq = $db->query("SELECT id, member_id FROM circle_roster WHERE circle_id = '" . $db->real_escape_string($c['id']) . "'");
+        if ($rq) { while ($rr = $rq->fetch_assoc()) { if (!isset($ridByMember[$rr['member_id']])) $ridByMember[$rr['member_id']] = $rr['id']; } $rq->free(); }
+        $rdRows = [];
+        foreach ($roster as $r) {
+            $mid = $r['member_id'] ?? $r['id'] ?? null;
+            if ($mid === null || !isset($ridByMember[$mid])) continue;
+            $doms = $r['domains'] ?? [];
+            $wsList = $r['domainWs'] ?? $r['domain_ws'] ?? [];
+            foreach ($doms as $di => $dn) {
+                $rdRows[] = ['roster_id' => $ridByMember[$mid], 'domain' => $dn, 'ws' => $wsList[$di] ?? null];
+            }
+        }
+        upsert($db, 'circle_roster_domains', $rdRows, ['roster_id','domain','ws']);
     }
+    // Circle proposals / resolutions / activity
+    foreach ($circles as $c) {
+        $propRows = array_map(fn($p) => [
+            'id' => $p['id'], 'circle_id' => $c['id'], 'title' => $p['title'] ?? null,
+            'status' => $p['status'] ?? null, 'date' => $p['date'] ?? null,
+        ], $c['proposals'] ?? []);
+        upsert($db, 'circle_proposals', $propRows, ['id','circle_id','title','status','date']);
+        $resRows = array_map(fn($r) => [
+            'id' => $r['id'], 'circle_id' => $c['id'], 'title' => $r['title'] ?? null,
+            'date' => $r['date'] ?? null, 'type' => $r['type'] ?? null,
+        ], $c['resolutions'] ?? []);
+        upsert($db, 'circle_resolutions', $resRows, ['id','circle_id','title','date','type']);
+        $actRows = array_map(fn($a) => [
+            'circle_id' => $c['id'], 'text' => $a['text'] ?? null,
+            'time' => $a['time'] ?? null, 'type' => $a['type'] ?? null,
+        ], $c['activity'] ?? []);
+        insert($db, 'circle_activity', $actRows, ['circle_id','text','time','type']);
+    }
+}
+
+// Exit reason labels
+if (!empty($mock['exitReasonLabels'])) {
+    $erRows = [];
+    foreach ($mock['exitReasonLabels'] as $k => $label) $erRows[] = ['key' => $k, 'label' => $label];
+    upsert($db, 'exit_reason_labels', $erRows, ['key','label']);
 }
 
 // Cells
@@ -574,6 +659,27 @@ foreach ($cells as $c) {
     }
 }
 
+// Cell messages / tasks / objectives
+foreach ($cells as $c) {
+    $msgRows = array_map(fn($m) => [
+        'cell_id' => $c['id'], 'author' => $m['author'] ?? null,
+        'initials' => $m['initials'] ?? null, 'text' => $m['text'] ?? null,
+        'time' => $m['time'] ?? null, 'color' => $m['color'] ?? null,
+    ], $c['messages'] ?? []);
+    insert($db, 'cell_messages', $msgRows, ['cell_id','author','initials','text','time','color']);
+    $taskRows = array_map(fn($t) => [
+        'cell_id' => $c['id'], 'task_id' => $t['id'] ?? null, 'label' => $t['label'] ?? null,
+        'status' => $t['status'] ?? null, 'locked' => ($t['locked'] ?? false) ? 1 : 0,
+        'assignee' => $t['assignee'] ?? null,
+    ], $c['tasks'] ?? []);
+    insert($db, 'cell_tasks', $taskRows, ['cell_id','task_id','label','status','locked','assignee']);
+    $objRows = array_map(fn($o) => [
+        'cell_id' => $c['id'], 'obj_id' => $o['id'] ?? null, 'label' => $o['label'] ?? null,
+        'status' => $o['status'] ?? null,
+    ], $c['objectives'] ?? []);
+    insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status']);
+}
+
 // STFs
 $stfs = $mock['stfs'] ?? ['pending' => [], 'active' => [], 'completed' => []];
 $allStfs = array_merge($stfs['pending'] ?? [], $stfs['active'] ?? [], $stfs['completed'] ?? []);
@@ -590,18 +696,25 @@ $stfRows = array_map(function($s) use ($stfs) {
 }, $allStfs);
 upsert($db, 'stfs', $stfRows, ['id','type','purpose','title','circle','deadline','status','bucket']);
 
-// STF candidates
-foreach ($allStfs as $s) {
-    if (!empty($s['candidates']) && is_array($s['candidates'])) {
-        $scRows = array_map(fn($c) => [
-            'id' => $c['id'], 'stf_id' => $s['id'], 'name' => $c['name'] ?? null,
-            'initials' => $c['initials'] ?? null, 'match_score' => $c['match_score'] ?? null,
-            'interest_score' => $c['interest_score'] ?? null, 'competence_score' => $c['competence_score'] ?? null,
-            'status' => $c['status'] ?? null, 'invited_date' => $c['invited_date'] ?? null,
-        ], $s['candidates']);
-        upsert($db, 'stf_candidates', $scRows, ['id','stf_id','name','initials','match_score','interest_score','competence_score','status','invited_date']);
+// STF candidates (top-level stfCandidates, camelCase keys)
+$scRows = array_map(fn($c) => [
+    'id' => $c['id'], 'stf_id' => $c['stfId'] ?? $c['stf_id'] ?? null,
+    'name' => $c['name'] ?? null, 'initials' => $c['initials'] ?? null,
+    'match_score' => $c['matchScore'] ?? $c['match_score'] ?? null,
+    'interest_score' => $c['interestScore'] ?? $c['interest_score'] ?? null,
+    'competence_score' => $c['competenceScore'] ?? $c['competence_score'] ?? null,
+    'status' => $c['status'] ?? null,
+    'invited_date' => $c['invitedDate'] ?? $c['invited_date'] ?? null,
+], $mock['stfCandidates'] ?? []);
+upsert($db, 'stf_candidates', $scRows, ['id','stf_id','name','initials','match_score','interest_score','competence_score','status','invited_date']);
+// STF candidate matched domains
+$scdRows = [];
+foreach ($mock['stfCandidates'] ?? [] as $c) {
+    foreach ($c['matchedDomains'] ?? $c['matched_domains'] ?? [] as $d) {
+        $scdRows[] = ['candidate_id' => $c['id'], 'domain' => $d];
     }
 }
+upsert($db, 'stf_candidate_domains', $scdRows, ['candidate_id','domain']);
 
 // Threads
 $threads = $mock['threads'] ?? [];
@@ -618,6 +731,21 @@ $threadRows = array_map(fn($t) => [
 ], $threads);
 upsert($db, 'threads', $threadRows, ['id','title','body','author','initials','avatar','domain','domain_color','badge','badge_class','replies','likes','shares','time','pinned','endorsements','proposal_cell_id','visibility','jstf_cell_id']);
 
+// Thread replies
+$repRows = [];
+foreach ($threads as $t) {
+    foreach ($t['repliesList'] ?? [] as $r) {
+        $repRows[] = [
+            'id' => $r['id'] ?? null, 'thread_id' => $t['id'],
+            'author' => $r['author'] ?? null, 'initials' => $r['initials'] ?? null,
+            'avatar' => j($r['avatar'] ?? null), 'time' => $r['time'] ?? null,
+            'body' => $r['body'] ?? null, 'likes' => $r['likes'] ?? 0,
+        ];
+    }
+}
+$repRows = array_filter($repRows, fn($r) => $r['id'] !== null);
+upsert($db, 'thread_replies', array_values($repRows), ['id','thread_id','author','initials','avatar','time','body','likes']);
+
 // Inbox
 $inbox = $mock['inbox'] ?? [];
 $inboxRows = array_map(fn($i) => [
@@ -628,17 +756,46 @@ $inboxRows = array_map(fn($i) => [
 ], $inbox);
 upsert($db, 'inbox', $inboxRows, ['id','type','title','desc','time','badge','unread','detail','nav']);
 
-// Publications
+// Inbox actions / meta
+$iaRows = []; $imRows = [];
+foreach ($inbox as $i) {
+    foreach ($i['actions'] ?? [] as $a) {
+        $iaRows[] = [
+            'inbox_id' => $i['id'], 'label' => $a['label'] ?? null,
+            'style' => $a['style'] ?? null, 'action' => $a['action'] ?? null,
+        ];
+    }
+    foreach ($i['meta'] ?? [] as $m) {
+        $imRows[] = [
+            'inbox_id' => $i['id'], 'label' => $m['label'] ?? null,
+            'value' => is_array($m['value'] ?? null) ? j($m['value']) : ($m['value'] ?? null),
+        ];
+    }
+}
+insert($db, 'inbox_actions', $iaRows, ['inbox_id','label','style','action']);
+insert($db, 'inbox_meta', $imRows, ['inbox_id','label','value']);
+
+// Publications (explicit ids so publication_authors can link)
 $pubs = $mock['publications'] ?? [];
 $pubRows = array_map(fn($p) => [
-    'title' => $p['title'] ?? null, 'journal' => $p['journal'] ?? null,
+    'id' => $p['id'] ?? null, 'title' => $p['title'] ?? null, 'journal' => $p['journal'] ?? null,
     'date' => $p['date'] ?? null, 'views' => $p['views'] ?? null,
     'downloads' => $p['downloads'] ?? null, 'type' => $p['type'] ?? null,
     'abstract' => $p['abstract'] ?? null, 'tags' => j($p['tags'] ?? null),
     'domain' => $p['domain'] ?? null, 'status' => $p['status'] ?? 'approved',
     'author' => $p['author'] ?? null, 'created_at' => $p['created_at'] ?? null,
 ], $pubs);
-insert($db, 'publications', $pubRows, ['title','journal','date','views','downloads','type','abstract','tags','domain','status','author','created_at']);
+$pubRows = array_filter($pubRows, fn($p) => $p['id'] !== null);
+upsert($db, 'publications', array_values($pubRows), ['id','title','journal','date','views','downloads','type','abstract','tags','domain','status','author','created_at']);
+// Publication authors
+$paRows = [];
+foreach ($pubs as $p) {
+    if (!isset($p['id'])) continue;
+    foreach ($p['authors'] ?? [] as $a) {
+        $paRows[] = ['publication_id' => $p['id'], 'author' => is_string($a) ? $a : ($a['name'] ?? null)];
+    }
+}
+upsert($db, 'publication_authors', $paRows, ['publication_id','author']);
 
 // News
 $news = $mock['news'] ?? [];
@@ -673,6 +830,24 @@ $projRows = array_map(fn($p) => [
 ], $projects);
 upsert($db, 'projects', $projRows, ['id','title','lead','progress','role']);
 
+// Project domains
+$pdRows = [];
+foreach ($projects as $p) {
+    foreach ($p['domains'] ?? [] as $d) {
+        $pdRows[] = ['project_id' => $p['id'], 'domain' => is_string($d) ? $d : ($d['domain'] ?? null)];
+    }
+}
+upsert($db, 'project_domains', $pdRows, ['project_id','domain']);
+
+// Project applications (top-level, camelCase keys)
+$papRows = array_map(fn($a) => [
+    'id' => $a['id'], 'cell_id' => $a['cellId'] ?? null, 'project_name' => $a['projectName'] ?? null,
+    'applicant' => $a['applicant'] ?? null, 'initials' => $a['initials'] ?? null,
+    'motivation' => $a['motivation'] ?? null, 'status' => $a['status'] ?? null,
+    'applied_date' => $a['appliedDate'] ?? null, 'proposed_role' => $a['proposedRole'] ?? null,
+], $mock['projectApplications'] ?? []);
+upsert($db, 'project_applications', $papRows, ['id','cell_id','project_name','applicant','initials','motivation','status','applied_date','proposed_role']);
+
 // Stats
 if (!empty($mock['stats'])) {
     upsert($db, 'stats', [['id' => 1, 'stats' => j($mock['stats'])]], ['id','stats']);
@@ -682,10 +857,18 @@ if (!empty($mock['stats'])) {
 if (!empty($mock['systemSettings'])) {
     $s = $mock['systemSettings'];
     $stmt = $db->prepare("INSERT INTO system_settings (id, steward_term_months, max_consecutive_terms, cooloff_months, p_astf_cycle_months, auto_expire_circles, default_circle_expiry_months) VALUES (1, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE steward_term_months=VALUES(steward_term_months)");
-    $auto = ($s['auto_expire_circles'] ?? false) ? 1 : 0;
-    $stmt->bind_param('iiiiii', $s['steward_term_months'], $s['max_consecutive_terms'], $s['cooloff_months'], $s['p_astf_cycle_months'], $auto, $s['default_circle_expiry_months']);
-    $stmt->execute();
-    $stmt->close();
+    if (!$stmt) { seedErr("system_settings prepare failed: " . $db->error); }
+    else {
+        $auto = ($s['autoExpireCircles'] ?? $s['auto_expire_circles'] ?? false) ? 1 : 0;
+        $stm = $s['stewardTermMonths'] ?? $s['steward_term_months'] ?? null;
+        $mct = $s['maxConsecutiveTerms'] ?? $s['max_consecutive_terms'] ?? null;
+        $co = $s['cooloffMonths'] ?? $s['cooloff_months'] ?? null;
+        $pc = $s['pAstfCycleMonths'] ?? $s['p_astf_cycle_months'] ?? null;
+        $dce = $s['defaultCircleExpiryMonths'] ?? $s['default_circle_expiry_months'] ?? null;
+        $stmt->bind_param('iiiiii', $stm, $mct, $co, $pc, $auto, $dce);
+        if (!$stmt->execute()) seedErr("system_settings execute failed: " . $stmt->error);
+        $stmt->close();
+    }
 }
 
 // Registration
@@ -696,13 +879,16 @@ if (!empty($mock['registration'])) {
         insert($db, 'registration_domains', $regRows, ['name','type']);
     }
     $stmt = $db->prepare("INSERT INTO registration_meta (id, elo_map, knowledge_levels, experiential_levels, default_interests) VALUES (1, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE elo_map=VALUES(elo_map)");
-    $elo = j($r['eloMap'] ?? null);
-    $kl = j($r['knowledgeLevels'] ?? null);
-    $el = j($r['experientialLevels'] ?? null);
-    $di = j($r['defaultInterests'] ?? null);
-    $stmt->bind_param('ssss', $elo, $kl, $el, $di);
-    $stmt->execute();
-    $stmt->close();
+    if (!$stmt) { seedErr("registration_meta prepare failed: " . $db->error); }
+    else {
+        $elo = j($r['eloMap'] ?? null);
+        $kl = j($r['knowledgeLevels'] ?? null);
+        $el = j($r['experientialLevels'] ?? null);
+        $di = j($r['defaultInterests'] ?? null);
+        $stmt->bind_param('ssss', $elo, $kl, $el, $di);
+        if (!$stmt->execute()) seedErr("registration_meta execute failed: " . $stmt->error);
+        $stmt->close();
+    }
 }
 
 // Governance events
@@ -724,6 +910,15 @@ $appRows = array_map(fn($a) => [
 ], $circleApps);
 upsert($db, 'circle_applications', $appRows, ['id','circle_id','circle_name','applicant','initials','motivation','status','applied_date','queue_position']);
 
+// Circle application relevant domains
+$cadRows = [];
+foreach ($circleApps as $a) {
+    foreach ($a['relevantDomains'] ?? [] as $d) {
+        $cadRows[] = ['app_id' => $a['id'], 'domain' => $d];
+    }
+}
+upsert($db, 'circle_application_domains', $cadRows, ['app_id','domain']);
+
 // Integrity records
 $ir = $mock['integrityRecords'] ?? [];
 $irRows = array_map(fn($r) => [
@@ -742,7 +937,43 @@ $glRows = array_map(fn($l) => [
 ], $gl);
 upsert($db, 'governance_ledger', $glRows, ['id','type','target','settings','applied_by','applied_at','status']);
 
+// Domain layout (observatory map seeds + camera)
+if (!empty($mock['domainLayout'])) {
+    $dl = $mock['domainLayout'];
+    $seedRows = [];
+    foreach ($dl['seeds'] ?? [] as $did => $xy) {
+        $seedRows[] = ['domain_id' => $did, 'x' => $xy[0] ?? null, 'y' => $xy[1] ?? null];
+    }
+    upsert($db, 'domain_layout', $seedRows, ['domain_id','x','y']);
+    $stmt = $db->prepare("INSERT INTO domain_layout_meta (id, world_size, seeds, camera) VALUES (1, ?, ?, ?) ON DUPLICATE KEY UPDATE world_size=VALUES(world_size), seeds=VALUES(seeds), camera=VALUES(camera)");
+    if (!$stmt) { seedErr("domain_layout_meta prepare failed: " . $db->error); }
+    else {
+        $ws = $dl['worldSize'] ?? 1800;
+        $seeds = j($dl['seeds'] ?? null);
+        $cam = j($dl['camera'] ?? null);
+        $stmt->bind_param('iss', $ws, $seeds, $cam);
+        if (!$stmt->execute()) seedErr("domain_layout_meta execute failed: " . $stmt->error);
+        $stmt->close();
+    }
+}
+
 echo "  ✓ Seed complete\n";
+
+// Per-table row counts (spot empty tables instantly)
+echo "  Table counts:\n";
+$tres = $db->query("SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema = '" . $db->real_escape_string($DB_NAME) . "' ORDER BY table_name");
+if ($tres) {
+    while ($tr = $tres->fetch_assoc()) {
+        $flag = ((int)$tr['table_rows'] === 0) ? ' (empty)' : '';
+        echo "    {$tr['table_rows']} {$tr['table_name']}$flag\n";
+    }
+    $tres->free();
+}
+if (!empty($SEED_ERRORS)) {
+    echo "  ✗ " . count($SEED_ERRORS) . " seed error(s) — see lines above\n";
+} else {
+    echo "  ✓ No seed errors\n";
+}
 
 $db->close();
 echo "Done!\n";
