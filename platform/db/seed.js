@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = process.env.SOLIS_DB || join(__dirname, '..', 'solis.db');
 const SCHEMA = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
-const MOCK = JSON.parse(readFileSync(join(__dirname, '..', 'mock.json'), 'utf8'));
+const MOCK = JSON.parse(readFileSync(join(__dirname, 'mock.json'), 'utf8'));
 
 const db = new DatabaseSync(DB_PATH);
 db.exec(SCHEMA);

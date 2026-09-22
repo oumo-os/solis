@@ -13,7 +13,7 @@ $DB_PORT = (int)(getenv('SOLIS_DB_PORT') ?: 3306);
 $DB_USER = getenv('SOLIS_DB_USER') ?: 'root';
 $DB_PASS = getenv('SOLIS_DB_PASS') ?: '';
 $DB_NAME = getenv('SOLIS_DB_NAME') ?: 'solis';
-$MOCK_PATH = __DIR__ . '/../mock.json';
+$MOCK_PATH = __DIR__ . '/mock.json';
 
 $drop = in_array('--drop', $argv);
 
@@ -514,7 +514,7 @@ $domainRows = [];
 foreach ($domains as $id => $d) {
     $domainRows[] = [
         'id' => $id, 'label' => $d['label'] ?? $id, 'short' => $d['short'] ?? null,
-        'color' => $d['color'] ?? null, 'has_circle' => ($d['has_circle'] ?? false) ? 1 : 0,
+        'color' => $d['color'] ?? null, 'has_circle' => ($d['hasCircle'] ?? $d['has_circle'] ?? false) ? 1 : 0,
         'type' => $d['type'] ?? null, 'taxonomy' => $d['taxonomy'] ?? null,
     ];
 }
@@ -525,8 +525,8 @@ $orgs = array_map(fn($o) => [
     'id' => $o['id'], 'name' => $o['name'] ?? null, 'acronym' => $o['acronym'] ?? null,
     'shortname' => $o['shortname'] ?? null, 'location' => $o['location'] ?? null,
     'summary' => $o['summary'] ?? null, 'status' => $o['status'] ?? null,
-    'founded' => $o['founded'] ?? null, 'founding_cell' => $o['founding_cell'] ?? null,
-    'member_count' => $o['member_count'] ?? null, 'website' => $o['website'] ?? null,
+    'founded' => $o['founded'] ?? null, 'founding_cell' => $o['foundingCell'] ?? $o['founding_cell'] ?? null,
+    'member_count' => $o['memberCount'] ?? $o['member_count'] ?? null, 'website' => $o['website'] ?? null,
     'logo' => j($o['logo'] ?? null),
 ], $mock['organisations'] ?? []);
 upsert($db, 'organisations', $orgs, ['id','name','acronym','shortname','location','summary','status','founded','founding_cell','member_count','website','logo']);
@@ -546,20 +546,35 @@ $circRows = array_map(fn($c) => [
     'id' => $c['id'], 'name' => $c['name'] ?? null, 'status' => $c['status'] ?? null,
     'members' => $c['members'] ?? null, 'motions' => $c['motions'] ?? null,
     'description' => $c['description'] ?? null, 'founded' => $c['founded'] ?? null,
+    'term_override' => j($c['termOverride'] ?? $c['term_override'] ?? null),
+    'expiry_override' => j($c['expiryOverride'] ?? $c['expiry_override'] ?? null),
     'meta' => j($c['meta'] ?? null),
 ], $circles);
-upsert($db, 'circles', $circRows, ['id','name','status','members','motions','description','founded','meta']);
+upsert($db, 'circles', $circRows, ['id','name','status','members','motions','description','founded','term_override','expiry_override','meta']);
 
-// Circle domains
+// Circle domains (flat list + mandate map + desiredWs map)
 foreach ($circles as $c) {
+    $cdRows = [];
+    $desired = $c['desiredWs'] ?? $c['desired_ws'] ?? [];
     if (!empty($c['domains']) && is_array($c['domains'])) {
-        $cdRows = array_map(fn($d) => [
-            'circle_id' => $c['id'],
-            'domain' => is_string($d) ? $d : ($d['domain'] ?? null),
-            'mandate' => is_array($d) ? ($d['mandate'] ?? null) : null,
-        ], $c['domains']);
-        insert($db, 'circle_domains', $cdRows, ['circle_id','domain','mandate']);
+        foreach ($c['domains'] as $d) {
+            $name = is_string($d) ? $d : ($d['domain'] ?? null);
+            $cdRows[] = [
+                'circle_id' => $c['id'], 'domain' => $name,
+                'mandate' => is_array($d) ? ($d['mandate'] ?? null) : null,
+                'desired_ws' => $desired[$name] ?? (is_array($d) ? ($d['desired_ws'] ?? null) : null),
+            ];
+        }
     }
+    foreach (['primary', 'secondary'] as $m) {
+        foreach (($c['mandate'][$m] ?? []) as $name) {
+            $cdRows[] = [
+                'circle_id' => $c['id'], 'domain' => $name,
+                'mandate' => $m, 'desired_ws' => $desired[$name] ?? null,
+            ];
+        }
+    }
+    upsert($db, 'circle_domains', $cdRows, ['circle_id','domain','mandate','desired_ws']);
 }
 
 // Circle roster
@@ -574,9 +589,10 @@ foreach ($circles as $c) {
             'color' => $r['color'] ?? null, 'ws' => $r['ws'] ?? null,
             'status' => $r['status'] ?? null, 'joined' => $r['joined'] ?? null,
             'last_active' => $r['lastActive'] ?? $r['last_active'] ?? null,
+            'left' => $r['left'] ?? null, 'left_reason' => $r['leftReason'] ?? $r['left_reason'] ?? null,
             'top_domain' => $r['topDomain'] ?? $r['top_domain'] ?? null,
         ], $roster);
-        insert($db, 'circle_roster', $rosterRows, ['circle_id','member_id','name','initials','color','ws','status','joined','last_active','top_domain']);
+        insert($db, 'circle_roster', $rosterRows, ['circle_id','member_id','name','initials','color','ws','status','joined','last_active','left','left_reason','top_domain']);
         // Link roster domains back to the auto-generated roster rows
         $ridByMember = [];
         $rq = $db->query("SELECT id, member_id FROM circle_roster WHERE circle_id = '" . $db->real_escape_string($c['id']) . "'");
@@ -722,12 +738,12 @@ $threadRows = array_map(fn($t) => [
     'id' => $t['id'], 'title' => $t['title'] ?? null, 'body' => $t['body'] ?? null,
     'author' => $t['author'] ?? null, 'initials' => $t['initials'] ?? null,
     'avatar' => j($t['avatar'] ?? null), 'domain' => $t['domain'] ?? null,
-    'domain_color' => $t['domain_color'] ?? null, 'badge' => $t['badge'] ?? null,
-    'badge_class' => $t['badge_class'] ?? null, 'replies' => $t['replies'] ?? null,
+    'domain_color' => $t['domainColor'] ?? $t['domain_color'] ?? null, 'badge' => $t['badge'] ?? null,
+    'badge_class' => $t['badgeClass'] ?? $t['badge_class'] ?? null, 'replies' => $t['replies'] ?? null,
     'likes' => $t['likes'] ?? null, 'shares' => $t['shares'] ?? null, 'time' => $t['time'] ?? null,
     'pinned' => ($t['pinned'] ?? false) ? 1 : 0, 'endorsements' => $t['endorsements'] ?? 0,
-    'proposal_cell_id' => $t['proposal_cell_id'] ?? null,
-    'visibility' => $t['visibility'] ?? 'public', 'jstf_cell_id' => $t['jstf_cell_id'] ?? null,
+    'proposal_cell_id' => $t['proposalCellId'] ?? $t['proposal_cell_id'] ?? null,
+    'visibility' => $t['visibility'] ?? 'public', 'jstf_cell_id' => $t['jstfCellId'] ?? $t['jstf_cell_id'] ?? null,
 ], $threads);
 upsert($db, 'threads', $threadRows, ['id','title','body','author','initials','avatar','domain','domain_color','badge','badge_class','replies','likes','shares','time','pinned','endorsements','proposal_cell_id','visibility','jstf_cell_id']);
 

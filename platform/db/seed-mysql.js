@@ -15,7 +15,7 @@ import { dirname, join } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_NAME = process.env.SOLIS_MYSQL_DB || 'solis';
-const MOCK_PATH = join(__dirname, '..', 'mock.json');
+const MOCK_PATH = join(__dirname, 'mock.json');
 const hashPassword = (pw) => createHash('sha256').update(String(pw)).digest('hex');
 
 // ═══════════════════════════════════════════════════════════════

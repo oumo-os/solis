@@ -1085,6 +1085,20 @@ if ($cleanPath === '/observatory/publications' && $method === 'POST') {
     send(201, ['ok' => true, 'id' => $res->insertId, 'status' => 'pending']);
 }
 if ($cleanPath === '/observatory/organisations' && $method === 'GET') { send(200, ['ok' => true, 'organisations' => dbAll('SELECT * FROM organisations ORDER BY name')]); }
+// Public org cards for the marketing site (no auth): orgs + knowledge-domain labels joined
+if ($cleanPath === '/public/organisations' && $method === 'GET') {
+    $kd = groupBy(dbAll('SELECT * FROM org_knowledge_domains'), 'org_id');
+    $labels = [];
+    foreach (dbAll('SELECT id, label FROM domains') as $d) $labels[$d['id']] = $d['label'];
+    $orgs = array_map(function($o) use ($kd, $labels) {
+        return [
+            'id' => $o['id'], 'name' => $o['name'], 'memberCount' => $o['member_count'],
+            'location' => $o['location'], 'summary' => $o['summary'], 'status' => $o['status'],
+            'knowledgeDomains' => array_values(array_map(function($d) use ($labels) { return $labels[$d['domain']] ?? $d['domain']; }, $kd[$o['id']] ?? [])),
+        ];
+    }, dbAll('SELECT * FROM organisations ORDER BY name'));
+    send(200, ['ok' => true, 'organisations' => $orgs]);
+}
 if ($cleanPath === '/observatory/organisations' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     if (!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']])) send(403, ['error' => 'Steward access required']);

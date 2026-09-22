@@ -70,14 +70,10 @@
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     var oo2=document.getElementById('org-orbit'); if(oo2) oo2.innerHTML=SolMark(400);
 
-    fetch('platform/mock.json').then(function(r) { return r.json(); }).then(function(data) {
+    fetch('api/public/organisations').then(function(r) { return r.json(); }).then(function(data) {
       var orgs = data.organisations || [];
-      var domainMeta = data.domains || {};
       document.getElementById('orgs-grid').innerHTML = orgs.map(function(o) {
-        var domains = (o.knowledgeDomains || []).map(function(key) {
-          var m = domainMeta[key] || {};
-          return m.label || key;
-        }).join(' · ');
+        var domains = (o.knowledgeDomains || []).join(' · ');
         return '<div class="card card-interactive">' +
           '<div class="flex items-center justify-between mb-2">' +
             '<h3 class="text-sm" style="font-weight:600">'+o.name+'</h3>' +
