@@ -1686,6 +1686,7 @@
       <!-- STEP 1: About You -->
       <div id="reg-s1">
         <div class="card" style="margin-bottom:16px">
+          <div id="reg-account-block">
           <div class="sec">Account</div>
           <div class="form-grid">
             <div class="form-group">
@@ -1696,6 +1697,7 @@
               <label class="form-label">Password</label>
               <input class="form-input" type="password" placeholder="At least 6 characters" id="reg-password" autocomplete="new-password">
             </div>
+          </div>
           </div>
           <div class="sec" style="margin-top:12px">About You</div>
           <div class="form-grid">
@@ -6422,11 +6424,9 @@ function openRegModal(editMode){
   }else{
     titleEl.textContent='Join the Commons';
   }
-  // Show account fields only for new registration
-  var acctSection = document.querySelector('#reg-s1 .sec:first-child');
-  if (acctSection && acctSection.textContent.trim() === 'Account') {
-    acctSection.parentElement.style.display = regIsEdit ? 'none' : '';
-  }
+  // Show account (email/password) fields only for new registration
+  var acctBlock = document.getElementById('reg-account-block');
+  if (acctBlock) acctBlock.style.display = regIsEdit ? 'none' : '';
   regResetSteps();
 }
 function closeRegModal(){
