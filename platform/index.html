@@ -7458,8 +7458,13 @@ function dmSphereLayout(){
     L=Math.sqrt(x*x+y*y+z*z)||1;
     pos[id]={x:x/L,y:y/L,z:z/L};
   });
-  var minAng=0.3;
-  for(var it=0;it<60;it++){
+  var minAng=0.4;
+  // Under-relaxation: full-size corrections oscillate when the packing is
+  // over-constrained (too many nodes for the target angle), actively worsening
+  // the closest pair. A damped step converges exactly when feasible and
+  // degrades gracefully when not — dmGlobeR then grows to keep MIN_SEP px.
+  var relax=0.3;
+  for(var it=0;it<300;it++){
     for(var i=0;i<DM_IDS.length;i++){
       for(var j=i+1;j<DM_IDS.length;j++){
         var A=pos[DM_IDS[i]],B=pos[DM_IDS[j]];
@@ -7470,17 +7475,32 @@ function dmSphereLayout(){
         var kl=Math.sqrt(kx*kx+ky*ky+kz*kz);
         if(kl<1e-6)continue;
         kx/=kl;ky/=kl;kz/=kl;
-        var push=(minAng-ang)*0.5;
-        var na=dmRotAxis(A,{x:kx,y:ky,z:kz},push);
-        var nb=dmRotAxis(B,{x:-kx,y:-ky,z:-kz},push);
+        var push=(minAng-ang)*0.5*relax;
+        // k = A×B: +rot moves A toward B — so push each node the opposite way
+        var na=dmRotAxis(A,{x:kx,y:ky,z:kz},-push);
+        var nb=dmRotAxis(B,{x:kx,y:ky,z:kz},push);
         pos[DM_IDS[i]]=na;pos[DM_IDS[j]]=nb;
         A=na;B=nb;
       }
     }
   }
+  var achieved=minAng;
+  for(var i=0;i<DM_IDS.length;i++){
+    for(var j=i+1;j<DM_IDS.length;j++){
+      var A=pos[DM_IDS[i]],B=pos[DM_IDS[j]];
+      var d=Math.max(-1,Math.min(1,A.x*B.x+A.y*B.y+A.z*B.z));
+      var ang=Math.acos(d);
+      if(ang<achieved)achieved=ang;
+    }
+  }
+  DM_sphereMinAng=Math.max(achieved,0.05);
   return pos;
 }
+var DM_sphereMinAng=0.4;
 var DM_sphere=dmSphereLayout();
+// Minimum on-screen chord (px at scale 1) between the closest pair — dmGlobeR
+// grows the globe to honour it when angular packing gets tight.
+var DM_MIN_SEP=64;
 
 // State — must be before dmReinit because startApp→initApp→dmReinit runs before later var inits reach this point
 var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:1},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2,
@@ -7605,7 +7625,14 @@ function dmRender(){
 }
 
 // Globe projection helpers
-function dmGlobeR(){return Math.min(DM_dims.w,DM_dims.h)*0.38*DM.cam.scale;}
+function dmGlobeR(){
+  var fit=Math.min(DM_dims.w,DM_dims.h)*0.38;
+  // Chord for the closest pair must keep DM_MIN_SEP px at scale 1; if angular
+  // packing is tighter than the viewport allows, grow the globe (volume) rather
+  // than let nodes crowd (density). Cap at 6× viewport as a sanity bound.
+  var need=DM_MIN_SEP/(2*Math.sin(Math.max(DM_sphereMinAng,0.05)/2));
+  return Math.min(Math.max(fit,need),fit*6)*DM.cam.scale;
+}
 function dmDepthFade(z){return z>=0?0.6+0.4*z:0.06+0.54*(1+z);}
 function dmRotYawPitch(v){
   var cy=Math.cos(DM.rot.yaw),sy=Math.sin(DM.rot.yaw);
