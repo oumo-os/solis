@@ -616,11 +616,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* ── Domain Map ── */
 .dm-toggles{display:flex;gap:4px}
+.dm-controls{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.dm-view-toggles .dm-toggle{padding:2px 9px;opacity:.85}
 .dm-toggle{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:4px 10px;border-radius:3px;border:1px solid var(--border);background:var(--surface);color:var(--text-tertiary);cursor:pointer;transition:all .12s}
 .dm-toggle:hover{border-color:var(--gold);color:var(--text-secondary)}
 .dm-toggle.active{background:var(--gold-soft);color:var(--gold);border-color:var(--gold-border)}
 .dm-canvas{position:relative;height:calc(100vh - 180px);min-height:400px;background:#0E1E34;border-radius:var(--radius-lg);overflow:hidden;cursor:crosshair}
 .dm-canvas svg{display:block;pointer-events:none}
+#dm-gl{position:absolute;top:0;left:0;display:block;pointer-events:none}
+.dm-canvas.view-flat #dm-gl{display:none}
+.dm-canvas.view-flat #dm-svg{display:block}
+.dm-canvas.view-globe #dm-svg{display:none}
 .dm-hud{position:absolute;bottom:12px;left:14px;font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(200,150,14,0.3);text-transform:uppercase;pointer-events:none}
 .dm-hint{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(200,150,14,0.35);text-transform:uppercase;pointer-events:none;transition:opacity 1.5s ease;animation:dmHintPulse 3s ease-in-out infinite}
 .dm-hint.hidden{opacity:0}
