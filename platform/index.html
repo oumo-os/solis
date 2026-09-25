@@ -7579,7 +7579,7 @@ var DM_volume=dmVolumeLayout();
 // State — must be before dmReinit because startApp→initApp→dmReinit runs before later var inits reach this point
 var DM={cam:{x:DM_WORLD/2,y:DM_WORLD/2,scale:1},active:null,locked:null,mode:'membership',time:0,pan:false,panLast:{x:0,y:0},vel:{vx:0,vy:0},inertiaId:null,flyRef:null,tour:null,tourNext:2,
   view:'globe',rot:{yaw:0.6,pitch:0.22},rotVel:{yaw:0,pitch:0},flatScale:0.5,
-  vol:{yaw:0.6,pitch:1.05,vyaw:0,vpitch:0}};
+  vol:{yaw:0.6,pitch:1.05,vyaw:0,vpitch:0,tx:0,ty:0,tz:0}};
 
 function dmReinit(){
   DM_LAYOUT=dmLayout();
@@ -7739,6 +7739,8 @@ function dmHitGlobe(mx,my){
 }
 
 // Volume projection — perspective (focal ≈ camera distance), dolly via cam.scale.
+// Camera orbits/dollies around DM.vol.(tx,ty,tz) (the look-at target, world units);
+// points at/behind the near plane are flagged !front and skipped when drawn.
 // px-per-unit grows to honour DM_MIN_SEP on the achieved 3D min chord.
 function dmVolPPU(){
   var fit=Math.min(DM_dims.w,DM_dims.h)*0.40;
@@ -7746,22 +7748,34 @@ function dmVolPPU(){
   var need=DM_MIN_SEP/DM_volMinChord;
   return Math.min(Math.max(base,need),base*6);
 }
+function dmRotInvVol(v){
+  var cy=Math.cos(DM.vol.yaw),sy=Math.sin(DM.vol.yaw);
+  var cp=Math.cos(DM.vol.pitch),sp=Math.sin(DM.vol.pitch);
+  var y1=v.y*cp+v.z*sp, z1=-v.y*sp+v.z*cp;
+  return {x:v.x*cy-z1*sy, y:y1, z:v.x*sy+z1*cy};
+}
 function dmProjectVol(v){
-  var r=dmRotYawPitch(v,DM.vol);
+  var t=DM.vol;
+  var r=dmRotYawPitch({x:v.x-t.tx,y:v.y-t.ty,z:v.z-t.tz},DM.vol);
   var ppu=dmVolPPU();
   var dist=3*DM_volR*ppu/Math.max(DM.cam.scale,0.05);
   var X=r.x*ppu,Y=r.y*ppu,Z=r.z*ppu;
-  var den=dist-Z;if(den<dist*0.25)den=dist*0.25;
-  var s=dist/den;
-  return {sx:DM_dims.w/2+X*s,sy:DM_dims.h/2-Y*s,z:Z,s:s};
+  var den=dist-Z;
+  var front=den>dist*0.05;
+  var s=dist/(front?den:dist*0.05);
+  return {sx:DM_dims.w/2+X*s,sy:DM_dims.h/2-Y*s,z:Z,s:s,front:front};
 }
 function dmHitVolume(mx,my){
-  var dx0=mx-DM_dims.w/2,dy0=my-DM_dims.h/2;
-  if(dx0*dx0+dy0*dy0<16*16)return '__solis__';
+  var so=dmProjectVol({x:0,y:0,z:0});
+  if(so.front){
+    var dx0=mx-so.sx,dy0=my-so.sy;
+    if(dx0*dx0+dy0*dy0<16*16)return '__solis__';
+  }
   var hit=null,bestZ=-Infinity;
   DM_IDS.forEach(function(id){
     if(!DM_volume[id])return;
     var p=dmProjectVol(DM_volume[id]);
+    if(!p.front)return;
     if(p.sx<-60||p.sx>DM_dims.w+60||p.sy<-60||p.sy>DM_dims.h+60)return;
     var d=Math.sqrt((p.sx-mx)*(p.sx-mx)+(p.sy-my)*(p.sy-my));
     if(d<24&&p.z>bestZ){bestZ=p.z;hit=id;}
@@ -7771,7 +7785,8 @@ function dmHitVolume(mx,my){
 function dmVolHome(){
   if(DM.view!=='volume')return;
   var dy=((0.6-DM.vol.yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
-  DM.flyRef={kind:'volume',syaw:DM.vol.yaw,eyaw:DM.vol.yaw+dy,spitch:DM.vol.pitch,epitch:1.05,ss:DM.cam.scale,es:1,t:0,dur:0.9};
+  DM.flyRef={kind:'volume',syaw:DM.vol.yaw,eyaw:DM.vol.yaw+dy,spitch:DM.vol.pitch,epitch:1.05,ss:DM.cam.scale,es:1,
+    stx:DM.vol.tx,sty:DM.vol.ty,stz:DM.vol.tz,etx:0,ety:0,etz:0,t:0,dur:0.9};
 }
 window.dmVolHome=dmVolHome;
 
@@ -7978,11 +7993,13 @@ function dmRenderVolume(){
   var Rp=DM_volR*ppu;
   var dist=3*Rp/Math.max(DM.cam.scale,0.05);
   function proj(v){
-    var r=dmRotYawPitch(v,DM.vol);
+    var t=DM.vol;
+    var r=dmRotYawPitch({x:v.x-t.tx,y:v.y-t.ty,z:v.z-t.tz},DM.vol);
     var X=r.x*ppu,Y=r.y*ppu,Z=r.z*ppu;
-    var den=dist-Z;if(den<dist*0.25)den=dist*0.25;
-    var s=dist/den;
-    return {sx:cx+X*s,sy:cy-Y*s,z:Z,s:s};
+    var den=dist-Z;
+    var front=den>dist*0.05;
+    var s=dist/(front?den:dist*0.05);
+    return {sx:cx+X*s,sy:cy-Y*s,z:Z,s:s,front:front};
   }
   function zN(Z){return Math.max(-1,Math.min(1,Z/Rp));}
 
@@ -7991,17 +8008,20 @@ function dmRenderVolume(){
   var conn=null;
   if(hasF){conn=new Set();DM_EDGES.forEach(function(e){if(e.a===fid)conn.add(e.b);if(e.b===fid)conn.add(e.a);});}
 
-  // Bulge haze — warm spherical core glow + cool outer haze
-  var hazeR=Rp*(0.55+0.04*Math.sin(DM.time*0.6));
-  var hz=ctx.createRadialGradient(cx,cy,0,cx,cy,hazeR);
-  hz.addColorStop(0,'rgba(232,180,80,0.14)');
-  hz.addColorStop(0.4,'rgba(232,180,80,0.05)');
-  hz.addColorStop(1,'rgba(232,180,80,0)');
-  ctx.fillStyle=hz;ctx.beginPath();ctx.arc(cx,cy,hazeR,0,Math.PI*2);ctx.fill();
-  var hz2=ctx.createRadialGradient(cx,cy,0,cx,cy,Rp*1.15);
-  hz2.addColorStop(0,'rgba(30,58,92,0.34)');
-  hz2.addColorStop(1,'rgba(30,58,92,0)');
-  ctx.fillStyle=hz2;ctx.beginPath();ctx.arc(cx,cy,Rp*1.15,0,Math.PI*2);ctx.fill();
+  // Bulge haze — warm spherical core glow + cool outer haze (follows projected Solis)
+  var oc=proj({x:0,y:0,z:0});
+  if(oc.front){
+    var hazeR=Rp*oc.s*(0.55+0.04*Math.sin(DM.time*0.6));
+    var hz=ctx.createRadialGradient(oc.sx,oc.sy,0,oc.sx,oc.sy,hazeR);
+    hz.addColorStop(0,'rgba(232,180,80,0.14)');
+    hz.addColorStop(0.4,'rgba(232,180,80,0.05)');
+    hz.addColorStop(1,'rgba(232,180,80,0)');
+    ctx.fillStyle=hz;ctx.beginPath();ctx.arc(oc.sx,oc.sy,hazeR,0,Math.PI*2);ctx.fill();
+    var hz2=ctx.createRadialGradient(oc.sx,oc.sy,0,oc.sx,oc.sy,Rp*1.15*oc.s);
+    hz2.addColorStop(0,'rgba(30,58,92,0.34)');
+    hz2.addColorStop(1,'rgba(30,58,92,0)');
+    ctx.fillStyle=hz2;ctx.beginPath();ctx.arc(oc.sx,oc.sy,Rp*1.15*oc.s,0,Math.PI*2);ctx.fill();
+  }
 
   // Orbital rings in the disc plane (depth-faded, back half dimmer)
   [0.5,0.78,1.05].forEach(function(fr){
@@ -8012,7 +8032,7 @@ function dmRenderVolume(){
     for(var i=0;i<=72;i++){
       var a=i/72*Math.PI*2;
       var p=proj({x:Math.cos(a)*DM_volR*fr,y:0,z:Math.sin(a)*DM_volR*fr});
-      if(prev){
+      if(prev&&prev.front&&p.front){
         ctx.globalAlpha=0.08*dmDepthFade(zN((p.z+prev.z)/2));
         ctx.beginPath();ctx.moveTo(prev.sx,prev.sy);ctx.lineTo(p.sx,p.sy);ctx.stroke();
       }
@@ -8028,6 +8048,7 @@ function dmRenderVolume(){
     var isF=fid===id,isN=hasF&&conn&&conn.has(id);
     if(hasF&&!isN&&!isF)return;
     var a=proj({x:0,y:0,z:0}),b=proj(DM_volume[id]);
+    if(!a.front||!b.front)return;
     ctx.globalAlpha=(isF?0.5:isN?0.35:0.05)*dmDepthFade(zN((a.z+b.z)/2));
     ctx.strokeStyle=isF||isN?'#E8B450':'#1A3050';
     ctx.lineWidth=isF?1:0.6;
@@ -8042,7 +8063,7 @@ function dmRenderVolume(){
     if(!DM_volume[e.a]||!DM_volume[e.b])return;
     var va=DM_volume[e.a],vb=DM_volume[e.b];
     var pa=proj(va),pb=proj(vb);
-    if(pa.z<-Rp*0.5&&pb.z<-Rp*0.5)return;
+    if(!pa.front&&!pb.front)return;
     var ca={x:(va.x+vb.x)*0.625,y:(va.y+vb.y)*0.625,z:(va.z+vb.z)*0.625};
     var op=isConn?0.6:(0.04+Math.min(e.count/10,1)*0.12);
     ctx.globalAlpha=op*(0.35+0.65*dmDepthFade(zN((pa.z+pb.z)/2)));
@@ -8056,6 +8077,7 @@ function dmRenderVolume(){
       var p=proj({x:it*it*va.x+2*it*t*ca.x+t*t*vb.x,
                   y:it*it*va.y+2*it*t*ca.y+t*t*vb.y,
                   z:it*it*va.z+2*it*t*ca.z+t*t*vb.z});
+      if(!p.front){prev=null;continue;}
       if(!prev)ctx.moveTo(p.sx,p.sy);
       else ctx.lineTo(p.sx,p.sy);
       prev=p;
@@ -8065,10 +8087,15 @@ function dmRenderVolume(){
   });
   ctx.globalAlpha=1;
 
-  // Painter's order (back to front), Solis at the origin
+  // Painter's order (back to front), Solis at the origin; behind-camera skipped
   var list=[];
-  DM_IDS.forEach(function(id){if(!DM_volume[id])return;list.push({id:id,p:proj(DM_volume[id])});});
-  list.push({id:'__solis__',solis:true,p:{sx:cx,sy:cy,z:0,s:1}});
+  DM_IDS.forEach(function(id){
+    if(!DM_volume[id])return;
+    var p=proj(DM_volume[id]);
+    if(!p.front)return;
+    list.push({id:id,p:p});
+  });
+  if(oc.front)list.push({id:'__solis__',solis:true,p:{sx:oc.sx,sy:oc.sy,z:oc.z,s:oc.s}});
   list.sort(function(a,b){return a.p.z-b.p.z;});
 
   // Labels: focused/connected always; otherwise front-most 10
@@ -8086,25 +8113,27 @@ function dmRenderVolume(){
     if(n.solis){
       // Solis — galactic core
       var pulse=Math.sin(DM.time*1.4)*0.5+0.5;
-      var cor=ctx.createRadialGradient(cx,cy,0,cx,cy,34+pulse*7);
+      var ox=n.p.sx,oy=n.p.sy,os=Math.min(n.p.s,3);
+      var corR=(34+pulse*7)*os;
+      var cor=ctx.createRadialGradient(ox,oy,0,ox,oy,corR);
       cor.addColorStop(0,'rgba(255,236,190,0.5)');
       cor.addColorStop(0.35,'rgba(232,180,80,0.26)');
       cor.addColorStop(1,'rgba(232,180,80,0)');
-      ctx.fillStyle=cor;ctx.beginPath();ctx.arc(cx,cy,34+pulse*7,0,Math.PI*2);ctx.fill();
-      var g2=ctx.createRadialGradient(cx,cy,0,cx,cy,9);
+      ctx.fillStyle=cor;ctx.beginPath();ctx.arc(ox,oy,corR,0,Math.PI*2);ctx.fill();
+      var g2=ctx.createRadialGradient(ox,oy,0,ox,oy,9*os);
       g2.addColorStop(0,'#FFFFFF');g2.addColorStop(0.45,'#FFE9B0');g2.addColorStop(1,'#E8B450');
       ctx.shadowBlur=16;ctx.shadowColor='rgba(232,180,80,0.9)';
-      ctx.fillStyle=g2;ctx.beginPath();ctx.arc(cx,cy,9,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=g2;ctx.beginPath();ctx.arc(ox,oy,9*os,0,Math.PI*2);ctx.fill();
       ctx.shadowBlur=0;
       ctx.globalAlpha=0.22+pulse*0.22;
       ctx.strokeStyle='#E8B450';ctx.lineWidth=1;
-      ctx.beginPath();ctx.arc(cx,cy,14+pulse*6,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.arc(ox,oy,(14+pulse*6)*os,0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha=0.9;
-      ctx.font='700 9px Inter, "IBM Plex Sans", sans-serif';
+      ctx.font='700 '+(9*os)+'px Inter, "IBM Plex Sans", sans-serif';
       ctx.textAlign='center';ctx.textBaseline='alphabetic';
       ctx.shadowBlur=4;ctx.shadowColor='rgba(232,180,80,0.7)';
       ctx.fillStyle='#E8B450';
-      ctx.fillText('SOLIS',cx,cy+32);
+      ctx.fillText('SOLIS',ox,oy+32*os);
       ctx.shadowBlur=0;
       ctx.globalAlpha=1;
       return;
@@ -8114,11 +8143,12 @@ function dmRenderVolume(){
     var isF=fid===id,isN=conn&&conn.has(id);
     if(p.sx<-80||p.sx>w+80||p.sy<-80||p.sy>h+80)return;
     var s=p.s;
+    var ss=Math.min(s,6);
     var zn=zN(p.z);
     var df=dmDepthFade(zn);
     var sz=0.85+0.15*(zn+1)/2;
-    var sr=dmStarR(stats.peakW)*s*sz;
-    var sl=dmSpikeLen(stats.peakW)*s*sz;
+    var sr=dmStarR(stats.peakW)*ss*sz;
+    var sl=dmSpikeLen(stats.peakW)*ss*sz;
     var pulse=Math.sin(DM.time*1.1+id.charCodeAt(0)*0.8)*0.5+0.5;
     var twinkle=Math.sin(DM.time*1.8+id.charCodeAt(0)*2.3)*0.5+0.5;
     var twinkle2=Math.sin(DM.time*0.4+id.charCodeAt(1)*3.7)*0.5+0.5;
@@ -8131,19 +8161,19 @@ function dmRenderVolume(){
     if(meta.steward&&(isF||(!hasF&&p.z>0))){
       ctx.globalAlpha=op*(isF?0.6:0.2);
       ctx.strokeStyle=meta.color;
-      ctx.lineWidth=(isF?1.5:0.6)*s;
-      ctx.setLineDash([2*s,3*s]);
-      ctx.beginPath();ctx.arc(p.sx,p.sy,sr+(isF?16:10)*s,0,Math.PI*2);ctx.stroke();
+      ctx.lineWidth=(isF?1.5:0.6)*ss;
+      ctx.setLineDash([2*ss,3*ss]);
+      ctx.beginPath();ctx.arc(p.sx,p.sy,sr+(isF?16:10)*ss,0,Math.PI*2);ctx.stroke();
       ctx.setLineDash([]);
     }
 
     // Halos
     if(isF||(isN&&p.z>0)||(!hasF&&p.z>0&&s>0.3)){
       [8,14].forEach(function(base,ri){
-        var r=(base+stats.interest*0.3)*s*(isF?1.3:1)*(1+pulse*0.06);
+        var r=(base+stats.interest*0.3)*ss*(isF?1.3:1)*(1+pulse*0.06);
         ctx.globalAlpha=op*((0.15-ri*0.04)*(isF?2:1)*(0.7+pulse*0.3));
         ctx.strokeStyle=meta.color;
-        ctx.lineWidth=(isF?1:0.5-ri*0.12)*s;
+        ctx.lineWidth=(isF?1:0.5-ri*0.12)*ss;
         if(isF){ctx.shadowBlur=8;ctx.shadowColor=meta.color;}
         ctx.beginPath();ctx.arc(p.sx,p.sy,r,0,Math.PI*2);ctx.stroke();
         ctx.shadowBlur=0;
@@ -8159,7 +8189,7 @@ function dmRenderVolume(){
         var sop=op*(isF?(ai>1?0.3:0.5):(ai>1?0.06:0.12));
         ctx.globalAlpha=sop;
         ctx.strokeStyle=meta.color;
-        ctx.lineWidth=(isF?0.5:0.25)*s;
+        ctx.lineWidth=(isF?0.5:0.25)*ss;
         ctx.beginPath();
         ctx.moveTo(p.sx-Math.cos(rad)*len*0.15,p.sy-Math.sin(rad)*len*0.15);
         ctx.lineTo(p.sx+Math.cos(rad)*len,p.sy+Math.sin(rad)*len);
@@ -8180,7 +8210,7 @@ function dmRenderVolume(){
     // Label
     if(labelSet[id]){
       var ly=p.sy-sr-(isF?sl*0.5+8:10);
-      var ls=(isF?10:8)*s;
+      var ls=(isF?10:8)*Math.min(s,3.5);
       ctx.globalAlpha=isF?1:((hasF&&isN)?0.8:(0.45+twinkle*0.1)*Math.min(1,df+0.3));
       ctx.font=(isF?'700 ':'500 ')+ls+'px Inter, "IBM Plex Sans", sans-serif';
       ctx.textAlign='center';
@@ -8245,7 +8275,8 @@ function dmNav(id){
     var v=DM_volume[id];
     var ey=Math.atan2(-v.x,v.z);
     var dy=((ey-DM.vol.yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
-    DM.flyRef={kind:'volume',syaw:DM.vol.yaw,eyaw:DM.vol.yaw+dy,spitch:DM.vol.pitch,epitch:DM.vol.pitch,ss:DM.cam.scale,es:1.7,t:0,dur:0.8};
+    DM.flyRef={kind:'volume',syaw:DM.vol.yaw,eyaw:DM.vol.yaw+dy,spitch:DM.vol.pitch,epitch:DM.vol.pitch,ss:DM.cam.scale,es:1.7,
+      stx:DM.vol.tx,sty:DM.vol.ty,stz:DM.vol.tz,etx:v.x,ety:v.y,etz:v.z,t:0,dur:0.8};
   }else if(DM.view==='globe'&&DM_sphere[id]){
     var v=DM_sphere[id];
     var r=Math.sqrt(v.x*v.x+v.z*v.z);
@@ -8278,7 +8309,7 @@ function dmSetView(v){
   if(v==='flat')DM.cam.scale=DM.flatScale||0.5;
   else DM.cam.scale=1;
   DM.view=v;
-  if(v==='volume')DM.vol={yaw:0.6,pitch:1.05,vyaw:0,vpitch:0};
+  if(v==='volume')DM.vol={yaw:0.6,pitch:1.05,vyaw:0,vpitch:0,tx:0,ty:0,tz:0};
   var cvs=document.getElementById('dm-canvas');
   if(cvs){
     cvs.classList.toggle('view-flat',v==='flat');
@@ -8295,7 +8326,7 @@ function dmSetView(v){
     sub.textContent=sub.dataset.base+(v==='volume'?' · distance from Solis = domain gravity':'');
   }
   var hint=document.getElementById('dm-hint');
-  if(hint)hint.textContent=v==='volume'?' · double-click recenters':' · Click a star to explore';
+  if(hint)hint.textContent=v==='volume'?' · shift-drag pans · double-click recenters':' · Click a star to explore';
   dmRender();
 }
 window.dmSetView=dmSetView;
@@ -8324,11 +8355,13 @@ function dmInit(){
   function hideHint(){if(hintEl&&!hintEl.classList.contains('hidden'))hintEl.classList.add('hidden');cvs.removeEventListener('pointerdown',hideHint);}
   cvs.addEventListener('pointerdown',hideHint);
 
-  // Pan
+  // Pan / orbit
+  cvs.addEventListener('contextmenu',function(e){e.preventDefault();});
   cvs.addEventListener('pointerdown',function(e){
-    if(e.button!==0)return;
+    if(e.button!==0&&e.button!==1&&e.button!==2)return;
     DM.flyRef=null;if(DM.inertiaId){cancelAnimationFrame(DM.inertiaId);DM.inertiaId=null;}
     DM.pan=true;DM.panLast={x:e.clientX,y:e.clientY};DM.vel={vx:0,vy:0};
+    DM.panMode=(DM.view==='volume'&&(e.button!==0||e.shiftKey))?'pan':'orbit';
     cvs.setPointerCapture(e.pointerId);
   });
   cvs.addEventListener('pointermove',function(e){
@@ -8341,10 +8374,19 @@ function dmInit(){
         DM.rot.pitch=Math.max(-1.4,Math.min(1.4,DM.rot.pitch+rp));
         DM.rotVel={yaw:ry,pitch:rp};
       }else if(DM.view==='volume'){
-        var ry=dx*0.005,rp=dy*0.005;
-        DM.vol.yaw+=ry;
-        DM.vol.pitch=Math.max(-1.4,Math.min(1.4,DM.vol.pitch+rp));
-        DM.vol.vyaw=ry;DM.vol.vpitch=rp;
+        if(DM.panMode==='pan'){
+          // move the look-at target in the view plane (content follows the cursor)
+          var dv=dmRotInvVol({x:-dx,y:dy,z:0});
+          DM.vol.tx+=dv.x;DM.vol.ty+=dv.y;DM.vol.tz+=dv.z;
+          var L=Math.sqrt(DM.vol.tx*DM.vol.tx+DM.vol.ty*DM.vol.ty+DM.vol.tz*DM.vol.tz);
+          var maxT=DM_volR*1.6;
+          if(L>maxT){DM.vol.tx*=maxT/L;DM.vol.ty*=maxT/L;DM.vol.tz*=maxT/L;}
+        }else{
+          var ry=dx*0.005,rp=dy*0.005;
+          DM.vol.yaw+=ry;
+          DM.vol.pitch=Math.max(-1.4,Math.min(1.4,DM.vol.pitch+rp));
+          DM.vol.vyaw=ry;DM.vol.vpitch=rp;
+        }
       }else{
         DM.vel={vx:dx,vy:dy};
         DM.cam.x-=dx/DM.cam.scale;DM.cam.y-=dy/DM.cam.scale;
@@ -8410,7 +8452,7 @@ function dmInit(){
       return;
     }
     if(DM.view==='volume'){
-      DM.cam.scale=Math.max(0.4,Math.min(2.2,DM.cam.scale*f));
+      DM.cam.scale=Math.max(0.4,Math.min(10,DM.cam.scale*f));
       return;
     }
     var rect=cvs.getBoundingClientRect();
@@ -8457,6 +8499,9 @@ function dmInit(){
       }else if(f.kind==='volume'){
         DM.vol.yaw=f.syaw+(f.eyaw-f.syaw)*ease;
         DM.vol.pitch=f.spitch+(f.epitch-f.spitch)*ease;
+        DM.vol.tx=f.stx+(f.etx-f.stx)*ease;
+        DM.vol.ty=f.sty+(f.ety-f.sty)*ease;
+        DM.vol.tz=f.stz+(f.etz-f.stz)*ease;
         DM.cam.scale=f.ss+(f.es-f.ss)*ease;
       }else{
         DM.cam.x=f.sx+(f.ex-f.sx)*ease;DM.cam.y=f.sy+(f.ey-f.sy)*ease;DM.cam.scale=f.ss+(f.es-f.ss)*ease;
