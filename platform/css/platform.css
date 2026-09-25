@@ -627,6 +627,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .dm-canvas.view-flat #dm-gl{display:none}
 .dm-canvas.view-flat #dm-svg{display:block}
 .dm-canvas.view-globe #dm-svg{display:none}
+.dm-canvas.view-volume #dm-svg{display:none}
 .dm-hud{position:absolute;bottom:12px;left:14px;font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(200,150,14,0.3);text-transform:uppercase;pointer-events:none}
 .dm-hint{font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(200,150,14,0.35);text-transform:uppercase;pointer-events:none;transition:opacity 1.5s ease;animation:dmHintPulse 3s ease-in-out infinite}
 .dm-hint.hidden{opacity:0}
