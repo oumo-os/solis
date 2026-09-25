@@ -8375,8 +8375,9 @@ function dmInit(){
         DM.rotVel={yaw:ry,pitch:rp};
       }else if(DM.view==='volume'){
         if(DM.panMode==='pan'){
-          // move the look-at target in the view plane (content follows the cursor)
-          var dv=dmRotInvVol({x:-dx,y:dy,z:0});
+          // move the look-at target in the view plane — screen-space 1:1 at target depth
+          var inv=1/dmVolPPU();
+          var dv=dmRotInvVol({x:-dx*inv,y:dy*inv,z:0});
           DM.vol.tx+=dv.x;DM.vol.ty+=dv.y;DM.vol.tz+=dv.z;
           var L=Math.sqrt(DM.vol.tx*DM.vol.tx+DM.vol.ty*DM.vol.ty+DM.vol.tz*DM.vol.tz);
           var maxT=DM_volR*1.6;
