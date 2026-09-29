@@ -3325,6 +3325,47 @@
           "color": "var(--teal)"
         }
       ]
+    },
+    {
+      "id": "vstf-steward",
+      "type": "vSTF Cell",
+      "title": "vSTF — Steward Candidacy: Ssempa David",
+      "status": "Active",
+      "delibType": "steward-candidacy",
+      "circle": "Space Law Circle",
+      "participants": 3,
+      "deadline": "Aug 5",
+      "source": {
+        "type": "steward-candidacy",
+        "candidateName": "Ssempa David"
+      }
+    },
+    {
+      "id": "vstf-competence",
+      "type": "vSTF Cell",
+      "title": "vSTF — Competence Claims: Akello Jane",
+      "status": "Active",
+      "delibType": "competence-claim",
+      "circle": "Space Law Circle",
+      "participants": 3,
+      "deadline": "Aug 12",
+      "source": {
+        "type": "competence-claim",
+        "candidateName": "Akello Jane"
+      }
+    },
+    {
+      "id": "pastf-space-law",
+      "type": "p-aSTF Cell",
+      "title": "p-aSTF — Periodic review: Space Law Circle",
+      "status": "Active",
+      "circle": "Space Law Circle",
+      "participants": 8,
+      "deadline": "Sep 30",
+      "source": {
+        "type": "periodic-review",
+        "circleName": "Space Law Circle"
+      }
     }
   ],
   "inbox": [

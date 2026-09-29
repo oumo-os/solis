@@ -623,12 +623,12 @@
           <div class="text-label mb-2">Disapprove ← → Approve</div>
           <div style="position:relative;margin-bottom:16px">
             <div style="height:6px;background:var(--border-subtle);border-radius:3px;position:relative">
-              <div style="position:absolute;left:0;top:0;height:100%;width:72%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px"></div>
-              <div style="position:absolute;left:72%;top:-5px;width:16px;height:16px;background:var(--green);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(-50%)"></div>
+              <div id="vstf-stew-gauge-fill" style="position:absolute;left:0;top:0;height:100%;width:0%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));border-radius:3px"></div>
+              <div id="vstf-stew-gauge-thumb" style="position:absolute;left:0%;top:-5px;width:16px;height:16px;background:var(--red);border:2px solid #fff;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(-50%)"></div>
             </div>
             <div class="flex justify-between" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--text-tertiary)"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
           </div>
-          <div class="flex gap-2 mb-3"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Score:</span><input type="number" value="72" min="0" max="100" class="form-input" style="width:60px;padding:3px 6px;font-family:var(--mono);font-size:12px"></div>
+          <div class="flex gap-2 mb-3"><span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Score:</span><input type="number" id="vstf-stew-score" value="0" min="0" max="100" class="form-input" style="width:60px;padding:3px 6px;font-family:var(--mono);font-size:12px"></div>
           <div class="text-label mb-2">Rationale</div>
           <textarea placeholder="Justify your approval score..." class="form-input" style="height:80px;resize:none"></textarea>
         </div>
@@ -814,13 +814,16 @@
         <div class="sec">Investigation Team</div>
         <div id="jstf-team"></div>
 
-        <div class="sec" style="margin-top:16px">Report Status</div>
-        <div class="card" style="margin-bottom:16px" id="jstf-report-status-card">
-          <div id="jstf-report-status">
-            <div class="flex justify-between mb-3" style="font-size:12px;color:var(--text-secondary)"><span>Findings</span><span style="color:var(--green)">✓ Drafted</span></div>
-            <div class="flex justify-between mb-3" style="font-size:12px;color:var(--text-secondary)"><span>Evidence appendix</span><span style="color:var(--green)">✓ Complete</span></div>
-            <div class="flex justify-between mb-3" style="font-size:12px;color:var(--text-secondary)"><span>Points of concern</span><span style="color:var(--amber)">△ In review</span></div>
-            <div class="flex justify-between" style="font-size:12px;color:var(--text-secondary)"><span>Recommended sanctions</span><span style="color:var(--text-tertiary)">— Pending</span></div>
+        <div class="sec" style="margin-top:16px">Investigation Deliberations</div>
+        <div class="card">
+          <div id="jstf-msgs">
+            <div style="font-size:12px;color:var(--text-tertiary);padding:8px 0">No entries yet.</div>
+          </div>
+          <div class="divider" style="margin:var(--space-3) 0"></div>
+          <textarea class="msg-input" rows="2" id="jstf-composer" placeholder="Add to investigation..."></textarea>
+          <div class="flex justify-between items-center" style="margin-top:8px;gap:8px">
+            <span class="text-xs" style="color:var(--text-tertiary)">All messages are recorded. This cell is sealed - only investigation team and Judicial Circle have access.</span>
+            <button class="btn btn-danger btn-sm" onclick="sendJstfMessage()">Post</button>
           </div>
         </div>
 
@@ -833,19 +836,6 @@
             <div style="margin-bottom:4px;color:var(--text-tertiary)">"Members found to have misrepresented competence credentials shall face sanctions proportionate to the severity and impact of the misrepresentation."</div>
             <div><strong style="color:var(--purple)">Policy Resolution #PR-021</strong> — Steward accountability</div>
             <div style="color:var(--text-tertiary)">"Stewards found to have violated integrity standards shall have steward privileges suspended pending review, and may face removal from Circle membership."</div>
-          </div>
-        </div>
-
-        <div class="sec">Investigation Deliberations</div>
-        <div class="card">
-          <div id="jstf-msgs">
-            <div class="flex gap-3" style="padding:var(--space-2) 0"><div class="avatar avatar-md">FO</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">Fatima O.</span><span class="text-xs" style="color:var(--text-tertiary)">2h ago</span></div><p class="text-sm">Evidence appendix is complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.</p></div></div>
-          </div>
-          <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" id="jstf-composer" placeholder="Add to investigation..."></textarea>
-          <div class="flex justify-between items-center" style="margin-top:8px;gap:8px">
-            <span class="text-xs" style="color:var(--text-tertiary)">All messages are recorded. This cell is sealed — only investigation team and Judicial Circle have access.</span>
-            <button class="btn btn-danger btn-sm" onclick="sendJstfMessage()">Post</button>
           </div>
         </div>
 
@@ -877,6 +867,12 @@
         <div class="aside-card">
           <div class="aside-title">Assignment</div>
           <div id="stf-assignment-jstf"></div>
+        </div>
+        <div class="aside-card">
+          <div class="aside-title">Report Status</div>
+          <div id="jstf-report-status" style="font-size:11px;color:var(--text-secondary)">
+            <div style="font-size:11px;color:var(--text-tertiary)">— Loading case status</div>
+          </div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Accused</div>
@@ -935,14 +931,14 @@
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
         <table class="tbl" style="margin-bottom:12px">
           <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="8" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
-          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="4" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
-          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" id="astf-s-align" value="8" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
-          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" id="astf-s-comp" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
+          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
+          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
+          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" id="astf-s-align" value="0" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
+          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" id="astf-s-comp" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
         </table>
         <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
           <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
-          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">25 / 30</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="astf-total">0 / 30</span>
         </div>
         <div class="divider" style="margin:12px 0"></div>
         <div class="sec">Verdict</div>
@@ -954,10 +950,9 @@
         <div class="text-label mb-2">Rationale</div>
         <textarea id="astf-s-rationale" placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div class="divider" style="margin:12px 0"></div>
-        <div class="sec">Malpractice Flagging (optional)</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Ssempa D.</span><span style="font-size:10px;color:var(--text-tertiary)">— Possible conflict of interest (undeclared affiliation)</span></label>
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox"> <span>Kimani A.</span><span style="font-size:10px;color:var(--text-tertiary)">— Insufficient contribution to deliberation record</span></label>
+        <div class="sec" id="astf-flags-sec">Malpractice Flagging (optional)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px" id="astf-flags-desc">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
+        <div id="astf-flags"></div>
         <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft('view-stf-astf')">Save Draft</button></div></div>
       </div>
       <div class="layout-aside">
@@ -967,12 +962,12 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Commissioning Circle</div>
-          <div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)">Mandated: Space Law &amp; Policy</div></div></div>
+          <div class="hrow" id="astf-circle-row"><div class="hav" id="astf-circle-ini" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="astf-circle-name">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)" id="astf-circle-sub">Mandated: Space Law &amp; Policy</div></div></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Motion Type</div>
-          <div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)">non_system (Directive)</span></div>
-          <div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)">Space Law Circle</span></div>
+          <div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)" id="astf-type-cat">non_system (Directive)</span></div>
+          <div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)" id="astf-type-impl">Space Law Circle</span></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Rubric Weights</div>
@@ -1050,15 +1045,15 @@
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Based on publicly observable information. No access to internal deliberations required.</div>
         <table class="tbl" style="margin-bottom:16px">
           <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-          <tr><td style="font-weight:500">Activity</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Is the Circle visibly active in governance?</td></tr>
-          <tr><td style="font-weight:500">Competence Fit</td><td class="m">7</td><td><input type="number" value="6" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does actual member Ws match mandate domains? <span style="color:var(--gold)">Pre-computed: 78%</span></td></tr>
-          <tr><td style="font-weight:500">Discipline</td><td class="m">6</td><td><input type="number" value="5" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it stay within its mandate?</td></tr>
-          <tr><td style="font-weight:500">Cohesion</td><td class="m">5</td><td><input type="number" value="3" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it act as a collective or as isolated individuals?</td></tr>
-          <tr><td style="font-weight:500">Delivery</td><td class="m">6</td><td><input type="number" value="4" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it follow through — enacted resolutions, Gate 2 pass rate?</td></tr>
+          <tr><td style="font-weight:500">Activity</td><td class="m">6</td><td><input type="number" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Is the Circle visibly active in governance?</td></tr>
+          <tr><td style="font-weight:500">Competence Fit</td><td class="m">7</td><td><input type="number" value="0" min="0" max="7" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does actual member Ws match mandate domains? <span style="color:var(--gold)" id="pastf-l1-competence-pre"></span></td></tr>
+          <tr><td style="font-weight:500">Discipline</td><td class="m">6</td><td><input type="number" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it stay within its mandate?</td></tr>
+          <tr><td style="font-weight:500">Cohesion</td><td class="m">5</td><td><input type="number" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it act as a collective or as isolated individuals?</td></tr>
+          <tr><td style="font-weight:500">Delivery</td><td class="m">6</td><td><input type="number" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does it follow through — enacted resolutions, Gate 2 pass rate?</td></tr>
         </table>
         <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
           <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Circle Total</span>
-          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)">23 / 30</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="pastf-l1-total">0 / 30</span>
         </div>
 
         <div class="divider" style="margin:20px 0"></div>
@@ -1096,13 +1091,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 1 — Circle Rubric</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
-            <div class="flex justify-between"><span>Activity</span><span style="color:var(--text)">5/6</span></div>
-            <div class="flex justify-between"><span>Competence Fit</span><span style="color:var(--gold)">6/7 <span style="font-size:9px">(78% pre-computed)</span></span></div>
-            <div class="flex justify-between"><span>Discipline</span><span style="color:var(--text)">5/6</span></div>
-            <div class="flex justify-between"><span>Cohesion</span><span style="color:var(--amber)">3/5</span></div>
-            <div class="flex justify-between"><span>Delivery</span><span style="color:var(--text)">4/6</span></div>
-          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8" id="pastf-l1-rows"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 2 — Member Scores</div>
@@ -3588,6 +3577,33 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
 // a jSTF disciplinary verdict) and cross-links back to the originating case;
 // otherwise binds the static card to the newest open deliberation aSTF cell
 // (title, status, submitted draft text).
+// aSTF rubric: zero-scored inputs (reviewer judgment) with a live running
+// total — no pre-filled demo scores.
+function wireAstfRubric() {
+  var view = document.getElementById('view-stf-astf');
+  if (!view) return;
+  var ids = ['astf-s-jur', 'astf-s-depth', 'astf-s-align', 'astf-s-comp'];
+  var maxes = [9, 5, 10, 6];
+  var sync = function() {
+    var total = 0;
+    ids.forEach(function(id, i) {
+      var el = document.getElementById(id);
+      var v = el ? Math.min(maxes[i], Math.max(0, Number(el.value) || 0)) : 0;
+      total += v;
+    });
+    var t = document.getElementById('astf-total');
+    if (t) t.textContent = total + ' / 30';
+  };
+  if (!view._rubricWired) {
+    view._rubricWired = true;
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', sync);
+    });
+  }
+  sync();
+}
+
 function renderAstfMotion() {
   var cells = (MOCK && MOCK.cells) || [];
   var delibAstf = null, auditAstf = null;
@@ -3610,11 +3626,39 @@ function renderAstfMotion() {
   }
   if (!pick) return;
   window._astfActiveCellId = pick.id;
+  wireAstfRubric();
   var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
   var src = pick.source || {};
   var bl = document.getElementById('astf-backlink');
   var xrA = document.getElementById('astf-motion-xref');
   if (xrA) xrA.innerHTML = '';
+  var setCircle = function(name, ini, sub) {
+    setText('astf-circle-name', name || '—');
+    var iniEl = document.getElementById('astf-circle-ini');
+    if (iniEl) iniEl.textContent = ini || '—';
+    setText('astf-circle-sub', sub || '');
+  };
+  var showFlags = function(list, note) {
+    var sec = document.getElementById('astf-flags-sec');
+    var desc = document.getElementById('astf-flags-desc');
+    var box = document.getElementById('astf-flags');
+    if (sec) sec.style.display = '';
+    if (desc) desc.style.display = '';
+    if (!box) return;
+    if (!list.length) {
+      box.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml(note || 'No deliberation participants recorded.') + '</div>';
+      return;
+    }
+    box.innerHTML = list.map(function(n) {
+      return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox" data-flag-name="' + escapeHtml(n) + '"> <span>' + escapeHtml(n) + '</span><span style="font-size:10px;color:var(--text-tertiary)">— In deliberation record</span></label>';
+    }).join('');
+  };
+  var hideFlags = function() {
+    ['astf-flags-sec', 'astf-flags-desc', 'astf-flags'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+  };
   if (src.type === 'judicial-audit' && src.sourceCellId) {
     if (bl) {
       bl.style.display = '';
@@ -3638,6 +3682,10 @@ function renderAstfMotion() {
       xrA.innerHTML = (src.targetId ? xrefChip('user', src.targetId, src.targetName || src.targetId, { color: 'var(--red)' }) : '')
         + (src.sourceCellId ? xrefChip('cell', src.sourceCellId, 'jSTF case', { color: 'var(--red)' }) : '');
     }
+    hideFlags();
+    setCircle('Judicial Circle', 'JC', 'Mandated: Integrity audit');
+    setText('astf-type-cat', 'system (judicial audit)');
+    setText('astf-type-impl', 'Judicial Circle');
     return;
   }
   if (bl) { bl.style.display = 'none'; bl.innerHTML = ''; }
@@ -3653,13 +3701,34 @@ function renderAstfMotion() {
   setText('astf-motion-title', origin.title || pick.title || '');
   var body2 = '';
   var drafts = origin.draftResolutions || [];
+  var foundDraft = null;
   for (var k = drafts.length - 1; k >= 0; k--) {
-    if (drafts[k].status === 'submitted' || drafts[k].status === 'passed' || drafts[k].status === 'crystallised') { body2 = drafts[k].text || drafts[k].title || ''; break; }
+    if (drafts[k].status === 'submitted' || drafts[k].status === 'passed' || drafts[k].status === 'crystallised') { foundDraft = drafts[k]; body2 = drafts[k].text || drafts[k].title || ''; break; }
   }
-  if (!body2 && drafts.length) body2 = drafts[drafts.length - 1].text || drafts[drafts.length - 1].title || '';
+  if (!foundDraft && drafts.length) foundDraft = drafts[drafts.length - 1];
+  if (!body2 && foundDraft) body2 = foundDraft.text || foundDraft.title || '';
   if (body2) setText('astf-motion-body', body2);
   else setText('astf-motion-body', 'No draft text linked to this motion yet.');
   if (xrA) xrA.innerHTML = origin && origin.id !== pick.id ? xrefChip('motion', origin.id, origin.title || origin.id, { color: 'var(--gold)' }) : '';
+  // Commissioning circle + motion type from the origin deliberation record.
+  var lead = ((origin.participatingCircles || [])[0]) || ((origin.circles || [])[0]) || null;
+  var cName = lead && lead.name ? lead.name : (origin.commissionedBy || 'Commons');
+  var wordsC = String(cName).split(/\s+/).filter(Boolean);
+  var cIni = wordsC.length >= 2 ? (wordsC[0].charAt(0) + wordsC[1].charAt(0)).toUpperCase() : String(cName).slice(0, 2).toUpperCase();
+  var cDomains = (origin.domains || []).join(', ');
+  setCircle(cName, cIni, cDomains ? 'Mandated: ' + cDomains : 'Mandated: —');
+  setText('astf-type-cat', 'deliberation (' + (origin.delibType || 'general') + ')');
+  var impl = ((foundDraft && foundDraft.implementingCircles) || []).filter(Boolean);
+  setText('astf-type-impl', impl.length ? impl.join(', ') : '—');
+  // Flag candidates: everyone who spoke in the origin deliberation.
+  var names = [];
+  (origin.messages || []).forEach(function(mm) {
+    var n = mm && mm.author;
+    if (n && names.indexOf(n) === -1) names.push(n);
+  });
+  var proposer = (origin.source || {}).proposer;
+  if (proposer && names.indexOf(proposer) === -1) names.push(proposer);
+  showFlags(names, 'No deliberation participants recorded for this motion.');
 }
 
 function submitStaticAstfAdjudication() {
@@ -3681,9 +3750,14 @@ function submitStaticAstfAdjudication() {
   if (total > 30) { toast('Rubric total cannot exceed 30.', 'error'); return; }
   var rationale = ((document.getElementById('astf-s-rationale') || {}).value || '').trim();
   if (!rationale) { toast('Rationale is required.', 'error'); return; }
+  var flags = [];
+  document.querySelectorAll('#astf-flags input[type="checkbox"]').forEach(function(cb) {
+    var n = cb.getAttribute('data-flag-name');
+    if (cb.checked && n) flags.push(n);
+  });
   var verdict = window._astfStaticVerdict || 'approved';
-  confirmModal('Submit your adjudication (' + verdict + ', rubric ' + total + '/30)? It will be sealed until all 3 adjudicators have filed.', function() {
-    fileAstfVerdict(cell.id, verdict, rubric, rationale);
+  confirmModal('Submit your adjudication (' + verdict + ', rubric ' + total + '/30' + (flags.length ? ', ' + flags.length + ' participant' + (flags.length > 1 ? 's' : '') + ' flagged' : '') + ')? It will be sealed until all 3 adjudicators have filed.', function() {
+    fileAstfVerdict(cell.id, verdict, rubric, rationale, flags);
   });
 }
 
@@ -3713,6 +3787,7 @@ function restoreViewDrafts() {
       if (idx >= data.length) return;
       if (el.type === 'checkbox') el.checked = !!data[idx];
       else el.value = data[idx];
+      try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) {}
     });
   });
 }
@@ -4018,6 +4093,28 @@ function confirmEvidenceCreate(cellId) {
   }).catch(function() { toast('Could not attach. Is the server running?', 'error'); });
 }
 
+// Verdict gauge: score input drives fill width, thumb position and colour.
+function wireVstfStewardGauge() {
+  var view = document.getElementById('view-stf-vstf-steward');
+  var input = document.getElementById('vstf-stew-score');
+  if (!view || !input) return;
+  var sync = function() {
+    var v = Math.min(100, Math.max(0, Number(input.value) || 0));
+    var fill = document.getElementById('vstf-stew-gauge-fill');
+    var thumb = document.getElementById('vstf-stew-gauge-thumb');
+    if (fill) fill.style.width = v + '%';
+    if (thumb) {
+      thumb.style.left = v + '%';
+      thumb.style.background = v < 34 ? 'var(--red)' : v < 67 ? 'var(--gold)' : 'var(--green)';
+    }
+  };
+  if (!view._gaugeWired) {
+    view._gaugeWired = true;
+    input.addEventListener('input', sync);
+  }
+  sync();
+}
+
 // Steward-candidacy view: profile meta, auto-match table, affiliations,
 // mandate card and summary from the live candidate + circle.
 function renderVstfSteward() {
@@ -4082,6 +4179,7 @@ function renderVstfSteward() {
       '<div class="mb-2"><strong style="color:var(--text)">Affiliations:</strong></div>' +
       '<div class="flex gap-1">' + (tag(affils, 'tag-amber') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>');
   }
+  wireVstfStewardGauge();
 }
 
 // Competence-claims view: eval table from the candidate's roster domains,
@@ -4113,6 +4211,56 @@ function renderVstfCompetence() {
     '<div><div style="font-size:13px;font-weight:500;color:var(--text)">' + escapeHtml(ctx.name || 'Candidate') + '</div>' +
     '<div style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml([loc, joined ? 'Joined ' + joined : ''].filter(Boolean).join(' · ') || '—') + '</div></div>');
   setText('vstf-comp-sum', 'Current total Ws: ' + (totalWs != null ? fmt(totalWs) : '—') + '. Claims across ' + domains.length + ' domain' + (domains.length !== 1 ? 's' : '') + '.');
+}
+
+// Layer-1 circle rubric: zero-scored inputs (reviewer judgment, no coded
+// defaults), live total, live aside mirror, and a real roster-vs-mandate
+// competence pre-compute.
+function renderPastfLayer1(circle) {
+  var view = document.getElementById('view-stf-pastf');
+  if (!view) return;
+  var tbl = view.querySelector('table.tbl');
+  if (!tbl) return;
+  var inputs = tbl.querySelectorAll('input[type="number"]');
+  if (!inputs.length) return;
+  var maxes = [6, 7, 6, 5, 6];
+  var labels = ['Activity', 'Competence Fit', 'Discipline', 'Cohesion', 'Delivery'];
+  var sync = function() {
+    var host = document.getElementById('pastf-l1-rows');
+    if (host) {
+      host.innerHTML = labels.map(function(lb, i) {
+        var v = Number(inputs[i] && inputs[i].value) || 0;
+        var max = maxes[i] != null ? maxes[i] : 0;
+        var color = v === 0 ? 'var(--text-tertiary)' : (v >= max - 1 ? 'var(--green)' : 'var(--amber)');
+        return '<div class="flex justify-between"><span>' + lb + '</span><span style="color:' + color + '">' + v + '/' + max + '</span></div>';
+      }).join('');
+    }
+    var total = 0;
+    inputs.forEach(function(inp, i) {
+      var max = maxes[i] != null ? maxes[i] : 0;
+      total += Math.min(max, Math.max(0, Number(inp.value) || 0));
+    });
+    var tEl = document.getElementById('pastf-l1-total');
+    if (tEl) tEl.textContent = total + ' / 30';
+  };
+  if (!view._l1wired) {
+    view._l1wired = true;
+    inputs.forEach(function(inp) { inp.addEventListener('input', sync); });
+  }
+  var pre = document.getElementById('pastf-l1-competence-pre');
+  if (pre) {
+    var mand = ((circle && circle.mandate && circle.mandate.primary) || []).concat((circle && circle.mandate && circle.mandate.secondary) || []);
+    var roster = (circle && circle.roster && circle.roster.active) || [];
+    if (roster.length && mand.length) {
+      var hit = roster.filter(function(m) {
+        return (m.domains || []).some(function(d) { return mand.indexOf(d) !== -1; });
+      }).length;
+      pre.textContent = 'Pre-computed: ' + Math.round(hit / roster.length * 100) + '%';
+    } else {
+      pre.textContent = '';
+    }
+  }
+  sync();
 }
 
 function getActivePastfCell() {
@@ -4156,6 +4304,7 @@ function renderPastfMembers() {
   setHtml('pastf-member-scores', roster.length ? roster.map(function(m) {
     return '<div class="flex justify-between" style="margin-bottom:2px"><span><strong>' + escapeHtml(m.initials || m.name || '') + '</strong></span><span style="color:var(--text-tertiary)">—</span></div>';
   }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No members to score yet.</div>');
+  renderPastfLayer1(circle);
   if (!container) return;
   if (!cell) { container.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No active p-aSTF review. A steward can spawn one from the STF Dash.</div></div>'; return; }
   if (!roster.length) { container.innerHTML = '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No circle members found for this review.</div></div>'; return; }

@@ -79,6 +79,19 @@ function dbRun(string $sql, array $params = []): void {
     $stmt->close();
 }
 
+function dbAll(string $sql, array $params = []): array {
+    global $db;
+    $stmt = $db->prepare($sql);
+    if (!$stmt) { seedErr('prepare failed: ' . $db->error); return []; }
+    if ($params) { $types = ''; $vals = []; foreach ($params as $p) { $types .= is_int($p) ? 'i' : 's'; $vals[] = $p; } $stmt->bind_param($types, ...$vals); }
+    if (!$stmt->execute()) { seedErr('execute failed: ' . $stmt->error); return []; }
+    $res = $stmt->get_result();
+    $out = [];
+    while ($row = $res->fetch_assoc()) $out[] = $row;
+    $stmt->close();
+    return $out;
+}
+
 function deleteGroup(string $table, string $col, array $vals): void {
     foreach (array_values(array_unique(array_filter($vals))) as $v) dbRun("DELETE FROM `$table` WHERE `$col` = ?", [$v]);
 }
@@ -659,15 +672,19 @@ if (!empty($mock['exitReasonLabels'])) {
 $cells = $mock['cells'] ?? [];
 $cellRows = array_map(fn($c) => [
     'id' => $c['id'], 'type' => $c['type'] ?? null, 'title' => $c['title'] ?? null,
-    'status' => $c['status'] ?? null, 'delib_type' => $c['delib_type'] ?? null,
+    'status' => $c['status'] ?? null,
+    'delib_type' => $c['delib_type'] ?? $c['delibType'] ?? null,
     'participants' => $c['participants'] ?? null, 'members' => $c['members'] ?? null,
-    'progress' => $c['progress'] ?? null, 'days_active' => $c['days_active'] ?? null,
+    'progress' => $c['progress'] ?? null,
+    'days_active' => $c['days_active'] ?? $c['daysActive'] ?? null,
     'lead' => $c['lead'] ?? null, 'circle' => $c['circle'] ?? null,
     'created' => $c['created'] ?? null, 'deadline' => $c['deadline'] ?? null,
     'blind' => ($c['blind'] ?? false) ? 1 : 0, 'assessors' => $c['assessors'] ?? null,
-    'commissioned_by' => $c['commissioned_by'] ?? null, 'resolution_ref' => $c['resolution_ref'] ?? null,
+    'commissioned_by' => $c['commissioned_by'] ?? $c['commissionedBy'] ?? null,
+    'resolution_ref' => $c['resolution_ref'] ?? $c['resolutionRef'] ?? null,
     'source' => j($c['source'] ?? null), 'resolution' => j($c['resolution'] ?? null),
-    'deliverable_specs' => j($c['deliverable_specs'] ?? null), 'meta' => j($c['meta'] ?? null),
+    'deliverable_specs' => j($c['deliverable_specs'] ?? $c['deliverableSpecs'] ?? null),
+    'meta' => j($c['meta'] ?? null),
 ], $cells);
 upsert($db, 'cells', $cellRows, ['id','type','title','status','delib_type','participants','members','progress','days_active','lead','circle','created','deadline','blind','assessors','commissioned_by','resolution_ref','source','resolution','deliverable_specs','meta']);
 
@@ -715,6 +732,55 @@ foreach ($cells as $c) {
         'status' => $o['status'] ?? null,
     ], $c['objectives'] ?? []);
     if ($objRows) { dbRun('DELETE FROM cell_objectives WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status']); }
+}
+
+// Cell circles (participation rows + circle badge rows consumed by GET /cells)
+foreach ($cells as $c) {
+    $ccRows = [];
+    foreach (($c['participatingCircles'] ?? []) as $pc) {
+        $ccRows[] = [
+            'cell_id' => $c['id'], 'circle_id' => $pc['id'] ?? null, 'name' => $pc['name'] ?? null,
+            'initials' => null, 'gradient' => null, 'status' => null,
+            'role' => $pc['role'] ?? null, 'votes' => $pc['votes'] ?? null,
+        ];
+    }
+    foreach (($c['circles'] ?? []) as $cc) {
+        $ccRows[] = [
+            'cell_id' => $c['id'], 'circle_id' => null, 'name' => $cc['name'] ?? null,
+            'initials' => $cc['initials'] ?? null, 'gradient' => $cc['gradient'] ?? null,
+            'status' => $cc['status'] ?? null, 'role' => $cc['role'] ?? null, 'votes' => null,
+        ];
+    }
+    if ($ccRows) {
+        dbRun('DELETE FROM cell_circles WHERE cell_id = ?', [$c['id']]);
+        insert($db, 'cell_circles', $ccRows, ['cell_id','circle_id','name','initials','gradient','status','role','votes']);
+    }
+}
+
+// Draft resolutions + implementing circles (source of aSTF motions)
+foreach ($cells as $c) {
+    $drafts = $c['draftResolutions'] ?? [];
+    if (!$drafts) continue;
+    $drRows = array_map(fn($d) => [
+        'cell_id' => $c['id'], 'res_id' => $d['id'] ?? null, 'title' => $d['title'] ?? null,
+        'text' => $d['text'] ?? null, 'action' => $d['action'] ?? null,
+        'votes_nullified' => !empty($d['votesNullified']) ? 1 : 0,
+        'status' => $d['status'] ?? 'draft',
+    ], $drafts);
+    dbRun('DELETE FROM resolution_implementing_circles WHERE draft_id IN (SELECT id FROM draft_resolutions WHERE cell_id = ?)', [$c['id']]);
+    dbRun('DELETE FROM draft_resolutions WHERE cell_id = ?', [$c['id']]);
+    insert($db, 'draft_resolutions', $drRows, ['cell_id','res_id','title','text','action','votes_nullified','status']);
+    $idByRes = [];
+    foreach (dbAll('SELECT id, res_id FROM draft_resolutions WHERE cell_id = ?', [$c['id']]) as $r) {
+        $idByRes[(string)$r['res_id']] = $r['id'];
+    }
+    foreach ($drafts as $d) {
+        $draftId = $idByRes[(string)($d['id'] ?? '')] ?? null;
+        if (!$draftId) continue;
+        foreach (array_values(array_filter($d['implementingCircles'] ?? [])) as $cn) {
+            dbRun('INSERT IGNORE INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?)', [$draftId, $cn]);
+        }
+    }
 }
 
 // Cell vote records (e.g. jSTF restriction votes) — keyed by cell+domain
