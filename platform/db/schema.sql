@@ -182,6 +182,17 @@ CREATE TABLE IF NOT EXISTS circle_resolutions (
   PRIMARY KEY (id, circle_id)
 );
 
+CREATE TABLE IF NOT EXISTS policies (
+  id       TEXT PRIMARY KEY,
+  ref      TEXT NOT NULL UNIQUE,   -- PR-014
+  title    TEXT,
+  text     TEXT,                   -- resolution text, quoted verbatim by jSTF verdicts
+  status   TEXT,                   -- Enacted | Proposed | Repealed
+  circle   TEXT,
+  passed   TEXT,
+  category TEXT
+);
+
 CREATE TABLE IF NOT EXISTS circle_activity (
   id        INTEGER PRIMARY KEY AUTOINCREMENT,
   circle_id TEXT NOT NULL REFERENCES circles(id) ON DELETE CASCADE,

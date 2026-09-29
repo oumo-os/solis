@@ -224,6 +224,12 @@ var SolisApi = (function() {
     });
   }
 
+  function addCellMessage(cellId, msg) {
+    return req('POST', 'cells/' + cellId + '/messages', {
+      author: msg.author, initials: msg.initials, text: msg.text, time: msg.time, color: msg.color || null
+    });
+  }
+
   function castVote(cellId, domain, vote) {
     return req('POST', 'cells/' + cellId + '/vote-records', {
       domain: domain, name: vote.name || null, initials: vote.initials,
@@ -464,6 +470,7 @@ var SolisApi = (function() {
     saveDraftVersion: saveDraftVersion,
     saveCircle: saveCircle,
     addThread: addThread,
+    addCellMessage: addCellMessage,
     saveInboxItem: saveInboxItem,
     saveCircleApplication: saveCircleApplication,
     saveProjectApplication: saveProjectApplication,

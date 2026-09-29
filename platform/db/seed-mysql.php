@@ -70,6 +70,19 @@ function upsert(mysqli $db, string $table, array $rows, array $cols): void {
 /**
  * Raw insert: INSERT INTO (for auto-increment tables).
  */
+function dbRun(string $sql, array $params = []): void {
+    global $db;
+    $stmt = $db->prepare($sql);
+    if (!$stmt) { seedErr('prepare failed: ' . $db->error); return; }
+    if ($params) { $types = ''; $vals = []; foreach ($params as $p) { $types .= is_int($p) ? 'i' : 's'; $vals[] = $p; } $stmt->bind_param($types, ...$vals); }
+    if (!$stmt->execute()) seedErr('execute failed: ' . $stmt->error);
+    $stmt->close();
+}
+
+function deleteGroup(string $table, string $col, array $vals): void {
+    foreach (array_values(array_unique(array_filter($vals))) as $v) dbRun("DELETE FROM `$table` WHERE `$col` = ?", [$v]);
+}
+
 function insert(mysqli $db, string $table, array $rows, array $cols): void {
     if (empty($rows)) return;
     $colList = implode(', ', array_map(fn($c) => "`$c`", $cols));
@@ -414,6 +427,11 @@ $TABLES = [
         `token` VARCHAR(255) NOT NULL UNIQUE, `expires_at` TEXT NOT NULL,
         `created_at` TEXT DEFAULT (NOW())
     )",
+
+    "CREATE TABLE IF NOT EXISTS `policies` (
+        `id` VARCHAR(255) PRIMARY KEY, `ref` VARCHAR(32) NOT NULL, `title` TEXT,
+        `text` TEXT, `status` TEXT, `circle` TEXT, `passed` TEXT, `category` TEXT
+    )",
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -477,7 +495,7 @@ $partRows = array_map(fn($u) => [
     'user_id' => $u['id'], 'location' => $u['location'] ?? null,
     'joined' => $u['joined'] ?? null, 'bio' => $u['bio'] ?? null,
 ], $users);
-insert($db, 'participants', $partRows, ['user_id','location','joined','bio']);
+upsert($db, 'participants', $partRows, ['user_id','location','joined','bio']);
 
 // User competence / circles / orgs (powers bootstrap domains, circles, orgs)
 $compRows = []; $ucRows = []; $uoRows = [];
@@ -592,6 +610,7 @@ foreach ($circles as $c) {
             'left' => $r['left'] ?? null, 'left_reason' => $r['leftReason'] ?? $r['left_reason'] ?? null,
             'top_domain' => $r['topDomain'] ?? $r['top_domain'] ?? null,
         ], $roster);
+        deleteGroup('circle_roster', 'circle_id', array_map(fn($r) => $r['circle_id'], $rosterRows));
         insert($db, 'circle_roster', $rosterRows, ['circle_id','member_id','name','initials','color','ws','status','joined','last_active','left','left_reason','top_domain']);
         // Link roster domains back to the auto-generated roster rows
         $ridByMember = [];
@@ -625,7 +644,7 @@ foreach ($circles as $c) {
             'circle_id' => $c['id'], 'text' => $a['text'] ?? null,
             'time' => $a['time'] ?? null, 'type' => $a['type'] ?? null,
         ], $c['activity'] ?? []);
-        insert($db, 'circle_activity', $actRows, ['circle_id','text','time','type']);
+        if ($actRows) { dbRun('DELETE FROM circle_activity WHERE circle_id = ?', [$c['id']]); insert($db, 'circle_activity', $actRows, ['circle_id','text','time','type']); }
     }
 }
 
@@ -659,6 +678,7 @@ foreach ($cells as $c) {
             'cell_id' => $c['id'],
             'domain' => is_string($d) ? $d : ($d['domain'] ?? $d),
         ], $c['domains']);
+        dbRun('DELETE FROM cell_domains WHERE cell_id = ?', [$c['id']]);
         insert($db, 'cell_domains', $cdRows, ['cell_id','domain']);
     }
 }
@@ -671,6 +691,7 @@ foreach ($cells as $c) {
             'initials' => $t['initials'] ?? null, 'role' => $t['role'] ?? null,
             'focus' => $t['focus'] ?? null,
         ], $c['team']);
+        dbRun('DELETE FROM cell_team WHERE cell_id = ?', [$c['id']]);
         insert($db, 'cell_team', $ctRows, ['cell_id','name','initials','role','focus']);
     }
 }
@@ -682,18 +703,30 @@ foreach ($cells as $c) {
         'initials' => $m['initials'] ?? null, 'text' => $m['text'] ?? null,
         'time' => $m['time'] ?? null, 'color' => $m['color'] ?? null,
     ], $c['messages'] ?? []);
-    insert($db, 'cell_messages', $msgRows, ['cell_id','author','initials','text','time','color']);
+    if ($msgRows) { dbRun('DELETE FROM cell_messages WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_messages', $msgRows, ['cell_id','author','initials','text','time','color']); }
     $taskRows = array_map(fn($t) => [
         'cell_id' => $c['id'], 'task_id' => $t['id'] ?? null, 'label' => $t['label'] ?? null,
         'status' => $t['status'] ?? null, 'locked' => ($t['locked'] ?? false) ? 1 : 0,
         'assignee' => $t['assignee'] ?? null,
     ], $c['tasks'] ?? []);
-    insert($db, 'cell_tasks', $taskRows, ['cell_id','task_id','label','status','locked','assignee']);
+    if ($taskRows) { dbRun('DELETE FROM cell_tasks WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_tasks', $taskRows, ['cell_id','task_id','label','status','locked','assignee']); }
     $objRows = array_map(fn($o) => [
         'cell_id' => $c['id'], 'obj_id' => $o['id'] ?? null, 'label' => $o['label'] ?? null,
         'status' => $o['status'] ?? null,
     ], $c['objectives'] ?? []);
-    insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status']);
+    if ($objRows) { dbRun('DELETE FROM cell_objectives WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status']); }
+}
+
+// Cell vote records (e.g. jSTF restriction votes) — keyed by cell+domain
+foreach (($mock['voteRecords'] ?? []) as $vrCell) {
+    $cid = $vrCell['cell_id'] ?? null; $dom = $vrCell['domain'] ?? null;
+    if (!$cid || !$dom || empty($vrCell['rows']) || !is_array($vrCell['rows'])) continue;
+    $vrRows = array_map(fn($v) => [
+        'cell_id' => $cid, 'domain' => $dom, 'name' => $v['name'] ?? null,
+        'initials' => $v['initials'] ?? null, 'ws' => $v['ws'] ?? null, 'vote' => $v['vote'] ?? null,
+    ], $vrCell['rows']);
+    dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ?', [$cid, $dom]);
+    insert($db, 'vote_records', $vrRows, ['cell_id','domain','name','initials','ws','vote']);
 }
 
 // STFs
@@ -788,7 +821,9 @@ foreach ($inbox as $i) {
         ];
     }
 }
+deleteGroup('inbox_actions', 'inbox_id', array_map(fn($r) => $r['inbox_id'], $iaRows));
 insert($db, 'inbox_actions', $iaRows, ['inbox_id','label','style','action']);
+deleteGroup('inbox_meta', 'inbox_id', array_map(fn($r) => $r['inbox_id'], $imRows));
 insert($db, 'inbox_meta', $imRows, ['inbox_id','label','value']);
 
 // Publications (explicit ids so publication_authors can link)
@@ -820,7 +855,7 @@ $newsRows = array_map(fn($n) => [
     'source' => $n['source'] ?? null, 'domain' => $n['domain'] ?? null,
     'body' => $n['body'] ?? null, 'curated_by' => $n['curated_by'] ?? null,
 ], $news);
-insert($db, 'news', $newsRows, ['title','time','source','domain','body','curated_by']);
+if ($newsRows) { dbRun('DELETE FROM news'); insert($db, 'news', $newsRows, ['title','time','source','domain','body','curated_by']); }
 
 // Events
 $events = $mock['events'] ?? [];
@@ -829,14 +864,14 @@ $eventRows = array_map(fn($e) => [
     'location' => $e['location'] ?? null, 'domain' => $e['domain'] ?? null,
     'type' => $e['type'] ?? null,
 ], $events);
-insert($db, 'events', $eventRows, ['title','date','location','domain','type']);
+if ($eventRows) { dbRun('DELETE FROM events'); insert($db, 'events', $eventRows, ['title','date','location','domain','type']); }
 
 // Opportunities
 $opps = $mock['opportunities'] ?? [];
 $oppRows = array_map(fn($o) => [
     'title' => $o['title'] ?? null, 'deadline' => $o['deadline'] ?? null, 'type' => $o['type'] ?? null,
 ], $opps);
-insert($db, 'opportunities', $oppRows, ['title','deadline','type']);
+if ($oppRows) { dbRun('DELETE FROM opportunities'); insert($db, 'opportunities', $oppRows, ['title','deadline','type']); }
 
 // Projects
 $projects = $mock['projects'] ?? [];
@@ -892,7 +927,7 @@ if (!empty($mock['registration'])) {
     $r = $mock['registration'];
     if (!empty($r['domains'])) {
         $regRows = array_map(fn($d) => ['name' => $d['name'] ?? null, 'type' => $d['type'] ?? null], $r['domains']);
-        insert($db, 'registration_domains', $regRows, ['name','type']);
+        if ($regRows) { dbRun('DELETE FROM registration_domains'); insert($db, 'registration_domains', $regRows, ['name','type']); }
     }
     $stmt = $db->prepare("INSERT INTO registration_meta (id, elo_map, knowledge_levels, experiential_levels, default_interests) VALUES (1, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE elo_map=VALUES(elo_map)");
     if (!$stmt) { seedErr("registration_meta prepare failed: " . $db->error); }
@@ -943,6 +978,15 @@ $irRows = array_map(fn($r) => [
     'date' => $r['date'] ?? null, 'verdict' => $r['verdict'] ?? null, 'text' => $r['text'] ?? null,
 ], $ir);
 upsert($db, 'integrity_records', $irRows, ['id','type','subject','purpose','circle','date','verdict','text']);
+
+// Policy resolutions (cited by jSTF verdicts)
+$pol = $mock['policies'] ?? [];
+$polRows = array_map(fn($r) => [
+    'id' => $r['id'], 'ref' => $r['ref'] ?? $r['id'], 'title' => $r['title'] ?? null,
+    'text' => $r['text'] ?? null, 'status' => $r['status'] ?? 'Enacted', 'circle' => $r['circle'] ?? null,
+    'passed' => $r['passed'] ?? null, 'category' => $r['category'] ?? null,
+], $pol);
+upsert($db, 'policies', $polRows, ['id','ref','title','text','status','circle','passed','category']);
 
 // Governance ledger
 $gl = $mock['governanceLedger'] ?? [];

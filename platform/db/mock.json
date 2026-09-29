@@ -281,6 +281,7 @@
       "id": "dm",
       "name": "Diallo Mamadou",
       "initials": "DM",
+      "status": "Restricted",
       "location": "Dakar",
       "joined": "Jul 2025",
       "avatar": {},
@@ -1349,6 +1350,15 @@
     ],
     "active": [
       {
+        "id": "stf-jstf-cred",
+        "type": "jSTF",
+        "purpose": "Judicial Investigation",
+        "title": "jSTF — Diallo Mamadou",
+        "circle": "Diallo Mamadou",
+        "deadline": "18 Oct 2026",
+        "status": "Under Investigation"
+      },
+      {
         "id": "astf-debris",
         "type": "aSTF",
         "purpose": "Motion adjudication",
@@ -1389,6 +1399,30 @@
     ]
   },
   "threads": [
+    {
+      "id": "thread-jstf-cred",
+      "title": "Anonymous Report — Diallo Mamadou",
+      "body": "Reported 18 Sep: Diallo Mamadou presented Space Law competence credentials that do not match their publication or verification record. Verification logs from Jul–Sep show three anomalies in auditor assignment outcomes correlated with the accused's assignments. Requesting steward sponsorship for judicial investigation.",
+      "author": "Anonymous",
+      "initials": "?",
+      "domain": "Commons",
+      "domainColor": "#7c8ba1",
+      "badge": "b-judicial",
+      "badgeClass": "b-judicial",
+      "replies": 2,
+      "likes": 0,
+      "shares": 0,
+      "time": "18 Sep 2026",
+      "pinned": false,
+      "endorsements": 0,
+      "proposalCellId": "user:dm",
+      "visibility": "stewards-only",
+      "jstfCellId": "jstf-cred",
+      "repliesList": [
+        { "id": "jstf-reply-seed-1", "author": "Anonymous", "initials": "?", "time": "19 Sep 2026", "body": "Follow-up: external credential registry shows no matching entry for the claimed Space Law Ws.", "likes": 0 },
+        { "id": "jstf-reply-seed-2", "author": "Anonymous", "initials": "?", "time": "21 Sep 2026", "body": "Additional evidence attached: verification outcome timeline for Jul–Sep.", "likes": 0 }
+      ]
+    },
     {
       "id": "thread-042",
       "title": "Liability frameworks for debris-generating manoeuvres",
@@ -1702,6 +1736,68 @@
     }
   ],
   "cells": [
+    {
+      "id": "jstf-cred",
+      "type": "jSTF Cell",
+      "title": "jSTF — Diallo Mamadou",
+      "status": "Under Investigation",
+      "delib_type": "judicial-investigation",
+      "participants": 3,
+      "circle": "",
+      "created": "18 Sep 2026",
+      "deadline": "18 Oct 2026",
+      "blind": true,
+      "commissioned_by": "sd",
+      "source": {
+        "type": "judicial-investigation",
+        "threadId": "thread-jstf-cred",
+        "isAppeal": false,
+        "targetId": "dm",
+        "targetName": "Diallo Mamadou",
+        "escalatedBy": "Ssempa David",
+        "escalatedAt": "2026-09-18T10:00:00.000Z",
+        "revisionOf": null,
+        "team": [
+          { "id": "aj", "name": "Akello Jane", "initials": "AJ" },
+          { "id": "ok", "name": "Osei Kwame", "initials": "OK" },
+          { "id": "nc", "name": "Namugga Claire", "initials": "NC" }
+        ]
+      },
+      "resolution": { "status": "Under Investigation" },
+      "meta": {
+        "targetId": "dm",
+        "targetName": "Diallo Mamadou",
+        "threadId": "thread-jstf-cred",
+        "isAppeal": false,
+        "targetIsSteward": false,
+        "revisionOf": null,
+        "restriction": {
+          "state": "restricted",
+          "restrictCount": 2,
+          "teamSize": 3,
+          "majority": 2,
+          "severity": "readonly",
+          "history": [
+            { "prev": "relaxed", "next": "restricted", "at": "2026-09-24T09:15:00.000Z", "votedBy": "Akello Jane" }
+          ],
+          "votes": [
+            { "name": "Akello Jane", "initials": "AJ", "vote": "restrict" },
+            { "name": "Osei Kwame", "initials": "OK", "vote": "restrict" }
+          ]
+        },
+        "verdict": null
+      },
+      "team": [
+        { "name": "Akello Jane", "initials": "AJ", "role": "Lead investigator", "focus": "Judicial review" },
+        { "name": "Osei Kwame", "initials": "OK", "role": "Investigator", "focus": "Judicial review" },
+        { "name": "Namugga Claire", "initials": "NC", "role": "Investigator", "focus": "Judicial review" }
+      ],
+      "messages": [
+        { "author": "Akello Jane", "initials": "AJ", "text": "Evidence appendix complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.", "time": "2h ago" },
+        { "author": "Osei Kwame", "initials": "OK", "text": "Confirmed. The statistical anomaly is significant — p-value below 0.01. Also found that 2 of the 3 verified candidates had prior personal contact with the accused outside Solis.", "time": "1h ago" },
+        { "author": "Namugga Claire", "initials": "NC", "text": "Domain expertise gaps are also concerning. The accused's claimed Ws in Space Law do not match their publication record. Drafting the findings section now.", "time": "45m ago" }
+      ]
+    },
     {
       "id": "cell-14",
       "type": "Project Cell",
@@ -2283,7 +2379,11 @@
       "title": "Motion: Debris liability",
       "assessors": 3,
       "deadline": "Jul 28",
-      "status": "Active"
+      "status": "Active",
+      "source": {
+        "originCellId": "cell-21",
+        "draftId": 1
+      }
     },
     {
       "id": "cell-19",
@@ -4231,6 +4331,58 @@
     "autoExpireCircles": false,
     "defaultCircleExpiryMonths": 24
   },
+  "policies": [
+    {
+      "id": "PR-014",
+      "ref": "PR-014",
+      "title": "Credential integrity standards",
+      "text": "Members found to have misrepresented competence credentials shall face sanctions proportionate to the severity and impact of the misrepresentation.",
+      "status": "Enacted",
+      "circle": "Commons",
+      "passed": "2026-05-18",
+      "category": "Integrity"
+    },
+    {
+      "id": "PR-021",
+      "ref": "PR-021",
+      "title": "Steward accountability",
+      "text": "Stewards found to have violated integrity standards shall have steward privileges suspended pending review, and may face removal from Circle membership.",
+      "status": "Enacted",
+      "circle": "Commons",
+      "passed": "2026-06-02",
+      "category": "Stewardship"
+    },
+    {
+      "id": "PR-007",
+      "ref": "PR-007",
+      "title": "Restriction due process",
+      "text": "Activity restriction during investigation requires a majority vote of the assigned investigative team, is reviewable on demand, and lifts automatically when the case concludes.",
+      "status": "Enacted",
+      "circle": "Commons",
+      "passed": "2026-04-11",
+      "category": "Integrity"
+    },
+    {
+      "id": "PR-033",
+      "ref": "PR-033",
+      "title": "Blind judicial review",
+      "text": "Judicial investigations deliberate blind: investigator identities are withheld from the reported member and the public until a verdict is filed or the case is closed.",
+      "status": "Enacted",
+      "circle": "Commons",
+      "passed": "2026-07-04",
+      "category": "Integrity"
+    }
+  ],
+  "voteRecords": [
+    {
+      "cell_id": "jstf-cred",
+      "domain": "restriction",
+      "rows": [
+        { "name": "Akello Jane", "initials": "AJ", "vote": "restrict" },
+        { "name": "Osei Kwame", "initials": "OK", "vote": "restrict" }
+      ]
+    }
+  ],
   "integrityRecords": [
     {
       "id": "IR-001",

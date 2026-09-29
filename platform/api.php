@@ -43,6 +43,14 @@ function getAuthHeader() {
     return '';
 }
 function authUser() { $h = getAuthHeader(); if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; return dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); }
+function isSteward($userId) { if (!$userId) return false; return (bool)dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$userId]); }
+function assertActiveMember($user) { if (!$user) return; $st = $user['status'] ?? ''; if ($st === 'Restricted' || $st === 'Suspended') send(403, ['error' => $st === 'Suspended' ? 'Activity frozen pending jSTF resolution' : 'Activity restricted pending jSTF investigation']); }
+function syncTargetRestriction($userId, $restricted, $severity) {
+    if (!$userId) return;
+    $want = $restricted ? ($severity === 'frozen' ? 'Suspended' : 'Restricted') : 'Active';
+    $cur = dbGet('SELECT status FROM users WHERE id = ?', [$userId]);
+    if ($cur && $cur['status'] !== 'Former' && $cur['status'] !== $want) dbRun('UPDATE users SET status = ? WHERE id = ?', [$want, $userId]);
+}
 
 // Strip everything up to /api or /api.php (works under any subdirectory base)
 $uri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -112,6 +120,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $tok = null; $h = getAuthHeader();
     if (preg_match('/^Bearer\s+(.+)$/i', $h, $m)) $tok = $m[1];
     $currentRow = $tok ? dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?', [$tok, date('Y-m-d\TH:i:s.000\Z')]) : null;
+    $isSteward = isSteward($currentRow['id'] ?? null);
     $compByUser = groupBy(dbAll('SELECT * FROM user_competence'), 'user_id');
     $cirByUser = groupBy(dbAll('SELECT * FROM user_circles'), 'user_id');
     $orgByUser = groupBy(dbAll('SELECT * FROM user_orgs'), 'user_id');
@@ -122,7 +131,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     foreach ($users as $u) {
         $dir = $dirByUser[$u['id']][0] ?? [];
         $participants[] = [
-            'id' => $u['id'], 'name' => $u['name'], 'initials' => $u['initials'],
+            'id' => $u['id'], 'name' => $u['name'], 'initials' => $u['initials'], 'status' => $u['status'],
             'location' => ($dir['location'] ?? $u['location']), 'joined' => ($dir['joined'] ?? $u['joined']),
             'avatar' => pJson($u['avatar'] ?? null) ?: [],
             'domains' => array_values(array_filter(array_map(function($c) { return $c['kind'] === 'roster' ? ['name' => $c['domain'], 'ws' => $c['ws'] ?? 0, 'color' => $c['color'] ?? null, 'evidence' => $c['evidence'] ?? null, 'verified' => (bool)($c['verified'] ?? false)] : null; }, $compByUser[$u['id']] ?? []))),
@@ -202,6 +211,18 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['tasks'] = array_map(function($t) { return ['id' => $t['task_id'] ?: 't' . $t['id'], 'label' => $t['label'], 'status' => $t['status'], 'locked' => (bool)$t['locked'], 'assignee' => $t['assignee']]; }, $taskByCell[$c['id']] ?? []);
         $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status']]; }, $objByCell[$c['id']] ?? []);
         $cell['team'] = array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus']]; }, $teamByCell[$c['id']] ?? []);
+        if ($c['blind'] && !$isSteward) {
+            $letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+            $iniMap = [];
+            foreach (($cell['team'] ?? []) as $ti => $tv) { $lab = 'Investigator ' . ($letters[$ti] ?? strval($ti + 1)); $iniMap[(string)$tv['initials']] = ['lab' => $lab, 'ini' => 'I' . ($letters[$ti] ?? strval($ti + 1))]; }
+            $anonTeam = [];
+            foreach (($cell['team'] ?? []) as $tv) { $mp = $iniMap[(string)$tv['initials']] ?? ['lab' => 'Investigator', 'ini' => 'IN']; $anonTeam[] = ['name' => $mp['lab'], 'initials' => $mp['ini'], 'role' => $tv['role'], 'focus' => $tv['focus']]; }
+            $cell['team'] = $anonTeam;
+            $cell['messages'] = array_map(function($m2) use ($iniMap) { $mm = $m2; $mp = $iniMap[(string)($m2['initials'] ?? '')] ?? null; if ($mp) { $mm['author'] = $mp['lab']; $mm['initials'] = $mp['ini']; } return $mm; }, $cell['messages']);
+            if (!empty($cell['restriction']['votes']) && is_array($cell['restriction']['votes'])) $cell['restriction']['votes'] = array_map(function($v) use ($iniMap) { $mp = $iniMap[(string)($v['initials'] ?? '')] ?? null; if ($mp) { $v['name'] = $mp['lab']; $v['initials'] = $mp['ini']; } return $v; }, $cell['restriction']['votes']);
+            if (!empty($cell['restriction']['history']) && is_array($cell['restriction']['history'])) $cell['restriction']['history'] = array_map(function($h) use ($iniMap) { $mp = $iniMap[(string)($h['initials'] ?? $h['votedBy'] ?? '')] ?? null; if ($mp) $h['votedBy'] = $mp['lab']; return $h; }, $cell['restriction']['history']);
+            if (is_array($cell['source']) && !empty($cell['source']['team']) && is_array($cell['source']['team'])) $cell['source']['team'] = array_map(function($t2) { $t2['name'] = 'Investigator'; $t2['initials'] = 'IN'; return $t2; }, $cell['source']['team']);
+        }
         $cell['draftResolutions'] = [];
         foreach (($draftByCell[$c['id']] ?? []) as $d) {
             $cell['draftResolutions'][] = ['id' => $d['res_id'] ?? $d['id'], 'rowId' => $d['id'], 'status' => $d['status'] ?: 'draft', 'title' => $d['title'], 'text' => $d['text'], 'action' => $d['action'], 'votesNullified' => (bool)$d['votes_nullified'], 'versions' => array_map(function($v) { return ['title' => $v['title'], 'text' => $v['text'], 'action' => $v['action'], 'author' => $v['author'], 'ts' => $v['ts']]; }, $verByDraft[$d['id']] ?? []), 'implementingCircles' => array_map(function($i) { return $i['circle_name']; }, $impByDraft[$d['id']] ?? [])];
@@ -222,6 +243,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $stfCandidates = array_map(function($c) use ($cdByCand) { return ['id' => $c['id'], 'stfId' => $c['stf_id'], 'name' => $c['name'], 'initials' => $c['initials'], 'matchScore' => $c['match_score'], 'matchedDomains' => array_values(array_map(function($d) { return $d['domain']; }, $cdByCand[$c['id']] ?? [])), 'interestScore' => $c['interest_score'], 'competenceScore' => $c['competence_score'], 'status' => $c['status'], 'invitedDate' => $c['invited_date']]; }, dbAll('SELECT * FROM stf_candidates'));
     $replyByThread = groupBy(dbAll('SELECT * FROM thread_replies'), 'thread_id');
     $threads = array_map(function($t) use ($replyByThread) { return ['id' => $t['id'], 'title' => $t['title'], 'body' => $t['body'], 'author' => $t['author'], 'initials' => $t['initials'], 'avatar' => pJson($t['avatar'] ?? null) ?: [], 'domain' => $t['domain'], 'domainColor' => $t['domain_color'], 'badge' => $t['badge'], 'badgeClass' => $t['badge_class'], 'replies' => $t['replies'], 'likes' => $t['likes'], 'shares' => $t['shares'], 'time' => $t['time'], 'pinned' => (bool)$t['pinned'], 'endorsements' => $t['endorsements'] ?? 0, 'proposalCellId' => $t['proposal_cell_id'] ?? null, 'visibility' => $t['visibility'] ?: 'public', 'jstfCellId' => $t['jstf_cell_id'] ?? null, 'repliesList' => array_map(function($r) { return ['id' => $r['id'], 'author' => $r['author'], 'initials' => $r['initials'], 'avatar' => pJson($r['avatar'] ?? null) ?: [], 'time' => $r['time'], 'body' => $r['body'], 'likes' => $r['likes']]; }, $replyByThread[$t['id']] ?? [])]; }, dbAll('SELECT * FROM threads'));
+    if (!$isSteward) $threads = array_values(array_filter($threads, function($t) { return ($t['visibility'] ?? 'public') !== 'stewards-only'; }));
     $actByInbox = groupBy(dbAll('SELECT * FROM inbox_actions'), 'inbox_id');
     $metaByInbox = groupBy(dbAll('SELECT * FROM inbox_meta'), 'inbox_id');
     $inbox = array_map(function($i) use ($actByInbox, $metaByInbox) { return ['id' => $i['id'], 'type' => $i['type'], 'title' => $i['title'], 'desc' => $i['desc'], 'time' => $i['time'], 'badge' => $i['badge'], 'unread' => (bool)$i['unread'], 'detail' => $i['detail'], 'nav' => $i['nav'], 'actions' => array_map(function($a) { return ['label' => $a['label'], 'style' => $a['style'], 'action' => $a['action']]; }, $actByInbox[$i['id']] ?? []), 'meta' => array_map(function($m) { return ['label' => $m['label'], 'value' => $m['value']]; }, $metaByInbox[$i['id']] ?? [])]; }, dbAll('SELECT * FROM inbox'));
@@ -241,6 +263,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
     $registration = ['domains' => array_map(function($r) { return ['name' => $r['name'], 'type' => $r['type']]; }, $regRows), 'eloMap' => $regMeta ? pJson($regMeta['elo_map']) ?: [] : [], 'knowledgeLevels' => $regMeta ? pJson($regMeta['knowledge_levels']) ?: [] : [], 'experientialLevels' => $regMeta ? pJson($regMeta['experiential_levels']) ?: [] : [], 'defaultInterests' => $regMeta ? pJson($regMeta['default_interests']) ?: [] : []];
     $integrityRecords = dbAll('SELECT * FROM integrity_records');
+    $policies = dbAll('SELECT * FROM policies');
     $governanceEvents = array_map(function($g) { $o = ['id' => $g['id'], 'type' => $g['type'], 'circle' => $g['circle'], 'date' => $g['date'], 'text' => $g['text']]; if ($g['participant'] !== null) $o['participant'] = $g['participant']; return $o; }, dbAll('SELECT * FROM governance_events'));
     $domByApp = groupBy(dbAll('SELECT * FROM circle_application_domains'), 'app_id');
     $circleApplications = array_map(function($a) use ($domByApp) { return ['id' => $a['id'], 'circleId' => $a['circle_id'], 'circleName' => $a['circle_name'], 'applicant' => $a['applicant'], 'initials' => $a['initials'], 'motivation' => $a['motivation'], 'relevantDomains' => array_values(array_map(function($d) { return $d['domain']; }, $domByApp[$a['id']] ?? [])), 'status' => $a['status'], 'appliedDate' => $a['applied_date'], 'queuePosition' => $a['queue_position']]; }, dbAll('SELECT * FROM circle_applications'));
@@ -249,7 +272,8 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $myEngagements = [];
     if ($currentRow) { foreach (dbAll('SELECT t.id, (SELECT COUNT(*) FROM thread_endorsements e WHERE e.thread_id = t.id AND e.user_id = ?) AS endorsed, (SELECT COUNT(*) FROM thread_bookmarks b WHERE b.thread_id = t.id AND b.user_id = ?) AS bookmarked FROM threads t', [strval($cuid), strval($cuid)]) as $r) $myEngagements[] = ['threadId' => $r['id'], 'endorsed' => $r['endorsed'] > 0, 'bookmarked' => $r['bookmarked'] > 0]; }
     $payload = ['currentUser' => $currentUser, 'participants' => $participants, 'organisations' => $organisations, 'domains' => $domains, 'domainLayout' => $domainLayout, 'circles' => $circles, 'cells' => $cells, 'stfs' => $stfShape, 'stfCandidates' => $stfCandidates, 'threads' => $threads, 'inbox' => $inbox, 'publications' => $publications, 'news' => $news, 'events' => $events, 'opportunities' => $opportunities, 'projects' => $projects, 'library' => $library, 'exitReasonLabels' => $exitReasonLabels, 'systemSettings' => $systemSettings, 'stats' => $stats, 'registration' => $registration, 'integrityRecords' => $integrityRecords, 'governanceEvents' => $governanceEvents, 'circleApplications' => $circleApplications, 'projectApplications' => $projectApplications, 'governanceLedger' => $governanceLedger, 'myEngagements' => $myEngagements];
-    if ($empty) { foreach (['participants','organisations','circles','cells','threads','inbox','publications','news','events','opportunities','projects','library','integrityRecords','governanceEvents','circleApplications','projectApplications','governanceLedger','stfCandidates','myEngagements'] as $k) $payload[$k] = []; $payload['stfs'] = ['pending' => [], 'active' => [], 'completed' => []]; $payload['domains'] = []; $payload['stats'] = []; }
+    $payload['policies'] = $policies;
+    if ($empty) { foreach (['participants','organisations','circles','cells','threads','inbox','publications','news','events','opportunities','projects','library','integrityRecords','governanceEvents','circleApplications','projectApplications','governanceLedger','stfCandidates','policies','myEngagements'] as $k) $payload[$k] = []; $payload['stfs'] = ['pending' => [], 'active' => [], 'completed' => []]; $payload['domains'] = []; $payload['stats'] = []; }
     send(200, $payload);
 }
 
@@ -271,6 +295,7 @@ $routes = [
     ['table' => 'opportunities', 'path' => '/opportunities'],
     ['table' => 'projects', 'path' => '/projects'],
     ['table' => 'integrity_records', 'path' => '/integrity-records'],
+    ['table' => 'policies', 'path' => '/policies'],
     ['table' => 'governance_events', 'path' => '/governance-events'],
     ['table' => 'circle_applications', 'path' => '/circle-applications'],
     ['table' => 'project_applications', 'path' => '/project-applications'],
@@ -292,8 +317,17 @@ function parseId($reqUrl, $base) { if (strpos($reqUrl, $base . '/') !== 0) retur
 foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
     if ($cleanPath === $r['path'] || $id !== null) {
-        if ($method === 'GET') { if ($id !== null) { $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); send(200, $row); } send(200, dbAll("SELECT * FROM {$r['table']}")); }
-        if ($method === 'POST' && $cleanPath === $r['path']) { $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
+        if ($method === 'GET') {
+            if ($r['table'] === 'threads') {
+                $gViewer = authUser(); $gStew = isSteward($gViewer['id'] ?? null);
+                if ($id !== null) { $row = dbGet('SELECT * FROM threads WHERE id = ?', [$id]); if (!$row) send(404, ['error' => 'Not found']); if (($row['visibility'] ?: 'public') === 'stewards-only' && !$gStew) send(404, ['error' => 'Not found']); send(200, $row); }
+                $allT = dbAll('SELECT * FROM threads');
+                if (!$gStew) $allT = array_values(array_filter($allT, function($t) { return ($t['visibility'] ?: 'public') !== 'stewards-only'; }));
+                send(200, $allT);
+            }
+            if ($id !== null) { $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); send(200, $row); } send(200, dbAll("SELECT * FROM {$r['table']}"));
+        }
+        if ($method === 'POST' && $cleanPath === $r['path']) { if (in_array($r['table'], ['threads','vote_records','cell_votes','circle_proposals'])) { $wu = authUser(); if (!$wu) send(401, ['error' => 'Unauthorized']); assertActiveMember($wu); } $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
         if ($method === 'PATCH' || $method === 'PUT') { $body = readBody(); $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); updateRow($r['table'], $body, $id); send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id])); }
         if ($method === 'DELETE') { $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
         send(405, ['error' => 'Method not allowed']);
@@ -329,8 +363,9 @@ foreach ($childDefs as $d) {
     $childIdRe = '#^' . $pattern . '/([^/]+)$#';
     if (preg_match($re, $cleanPath, $m) || preg_match($childIdRe, $cleanPath, $cm)) {
         $parentId = urldecode($cm ? $cm[1] : $m[1]);
+        if ($method === 'GET' && $d['child'] === 'thread_replies') { $tvRow = dbGet('SELECT visibility FROM threads WHERE id = ?', [$parentId]); if ($tvRow && ($tvRow['visibility'] ?: 'public') === 'stewards-only') { $rvUser = authUser(); if (!isSteward($rvUser['id'] ?? null)) send(404, ['error' => 'Not found']); } }
         if ($method === 'GET' && !preg_match($childIdRe, $cleanPath)) { send(200, dbAll("SELECT * FROM {$d['child']} WHERE {$d['parentKey']} = ?", [$parentId])); }
-        if ($method !== 'GET') { $wuser = authUser(); if (!$wuser) send(401, ['error' => 'Unauthorized']); }
+        if ($method !== 'GET') { $wuser = authUser(); if (!$wuser) send(401, ['error' => 'Unauthorized']); if (in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions'])) assertActiveMember($wuser); }
         if ($method === 'POST' && !preg_match($childIdRe, $cleanPath)) {
             $body = readBody();
             $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) use ($d) { return $c !== $d['parentKey'] && $c !== 'id'; });
@@ -375,7 +410,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/(versions|impl
 if (preg_match('/^\/threads\/([^\/]+)\/(endorsement|bookmark)$/', $cleanPath, $m)) {
     if ($method !== 'POST' && $method !== 'DELETE') send(405, ['error' => 'Method not allowed']);
     $threadId = urldecode($m[1]); $kind = $m[2];
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     if (!dbGet('SELECT id FROM threads WHERE id = ?', [$threadId])) send(404, ['error' => 'Not found']);
     $table = $kind === 'endorsement' ? 'thread_endorsements' : 'thread_bookmarks';
     if ($method === 'POST') dbRun("INSERT INTO $table (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1", [$user['id'], $threadId]);
@@ -549,6 +584,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 $jr['status'] = 'Applied'; $vi = $src['verdict'] ?? $jm['verdict'] ?? [];
                 $jr['implementation'] = ['type' => $vi['type'] ?? 'policy-cited', 'actions' => (($vi['type'] ?? '') === 'system-bound') ? ['target role/privileges updated per system settings', 'Ws recalculated', 'fresh vSTF composition triggered'] : ['applied per cited policy resolutions: ' . implode(', ', $vi['policyRefs'] ?? [])]];
                 dbRun("UPDATE cells SET status = 'Resolution Applied', resolution = ? WHERE id = ?", [json_encode($jr), $src['sourceCellId']]);
+                syncTargetRestriction($jm['targetId'] ?? null, false, null);
             } else {
                 $jr['status'] = 'Revision Ordered'; $jr['revisionNotes'] = $rationale;
                 dbRun("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?", [json_encode($jr), $src['sourceCellId']]);
@@ -574,7 +610,9 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 $jm['restriction'] = $cur;
                 dbRun('UPDATE cells SET participants = ?, source = ?, meta = ? WHERE id = ?', [$ts2, json_encode($js), json_encode($jm), $src['sourceCellId']]);
                 dbRun("UPDATE stfs SET status = 'Under Investigation', bucket = 'active' WHERE id = ?", ['stf-' . $src['sourceCellId']]);
+                syncTargetRestriction($jm['targetId'] ?? null, $cur['state'] === 'restricted', $cur['severity']);
             }
+            dbRun('INSERT INTO integrity_records (id, type, subject, purpose, circle, date, verdict, text) VALUES (?,?,?,?,?,?,?,?)', ['ir-jstf-' . base_convert(time(), 10, 36) . '-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $src['sourceCellId']), 'jSTF', (string)($jm['targetName'] ?? ''), 'Judicial investigation concluded', (string)($jstf['circle'] ?? ''), date('Y-m-d'), $verdict === 'approved' ? 'Resolution Applied' : 'Revision Ordered', 'aSTF audit ' . $verdict . ' — ' . substr((string)$rationale, 0, 500)]);
             dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-audit', '', date('Y-m-d'), '"' . ($jstf['title'] ?? $src['sourceCellId']) . '" — aSTF audit: ' . $verdict . ' (rubric ' . $total . '/30)', (string)($user['name'] ?? $user['initials'])]);
         }
         $asStf = dbGet("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?", ['aSTF Audit — ' . ($src['targetName'] ?? '')]);
@@ -828,7 +866,7 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     $tIs = $targetId ? !!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$targetId]) : false;
     $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $isAppeal ? substr($link2, 5) : null, 'team' => array_map(function($t) { return ['id' => $t['id'], 'name' => $t['name'], 'initials' => $t['initials']]; }, $team)];
     $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => count($team), 'majority' => (int)floor(count($team) / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', count($team), '', $user['id'], json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta)]);
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', count($team), '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta)]);
     foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, date('Y-m-d', time() + 30 * 86400)]);
     dbRun('UPDATE threads SET jstf_cell_id = ? WHERE id = ?', [$jId, $thrId]);
@@ -859,6 +897,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     $cur['state'] = $newState; $cur['restrictCount'] = $rc; $cur['teamSize'] = $ts; $cur['majority'] = $maj;
     if ($sev) $cur['severity'] = $sev; $cur['votes'] = $votes; $meta['restriction'] = $cur;
     if ($changed) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-restriction', '', date('Y-m-d'), ($meta['targetName'] ?? 'target') . ' activity ' . $cur['state'] . ' (' . $rc . '/' . $ts . ' → ' . $sev . ')', (string)($user['name'] ?? $user['initials'])]);
+    syncTargetRestriction($meta['targetId'] ?? null, $restricted, $sev);
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(200, ['ok' => true, 'state' => $cur['state'], 'restrictCount' => $rc, 'teamSize' => $ts, 'majority' => $maj, 'severity' => $cur['severity'], 'changed' => $changed]);
 }
@@ -874,6 +913,13 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
     $pRefs = is_array($body->policyRefs ?? null) ? $body->policyRefs : []; $findings = trim((string)($body->findings ?? ''));
     if (!in_array($type, ['system-bound', 'policy-cited'])) send(400, ['error' => 'type must be system-bound or policy-cited']);
     if (!$desc) send(400, ['error' => 'description required']);
+    if ($type === 'policy-cited' && !$pRefs) send(400, ['error' => 'At least one policy reference required for policy-cited verdicts']);
+    if ($pRefs) {
+        $polMap = []; foreach (dbAll('SELECT ref, status FROM policies') as $pr) $polMap[strtolower($pr['ref'])] = $pr['status'];
+        $badRefs = [];
+        foreach ($pRefs as $prf) { $pk = strtolower(strval($prf)); if (!isset($polMap[$pk])) $badRefs[] = strval($prf) . ' (unknown)'; elseif (!in_array($polMap[$pk], ['Enacted', 'Passed'])) $badRefs[] = strval($prf) . ' (' . $polMap[$pk] . ')'; }
+        if ($badRefs) send(400, ['error' => 'Policy references must cite enacted resolutions: ' . implode(', ', $badRefs)]);
+    }
     $meta['verdict'] = ['type' => $type, 'description' => $desc, 'policyRefs' => array_map('strval', $pRefs), 'findings' => $findings, 'filedBy' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $src = pJson($cell['source'] ?? '{}') ?: []; $src['verdict'] = $meta['verdict'];
     dbRun("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?", [json_encode($meta), json_encode($src), $cId]);

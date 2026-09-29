@@ -69,7 +69,10 @@ function renderSTFRows() {
     var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : 'tag-blue';
     var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : 'b-pending';
     var purpose = s.purpose + (s.candidate ? ': ' + s.candidate : s.title ? ': ' + s.title : '');
-    return '<tr class="click" onclick="nav(\'' + (typeof stfNavKey === 'function' ? stfNavKey(s.id) : 'stf-' + s.id) + '\')">'
+    var navJs = typeof navStf === 'function'
+      ? "navStf('" + String(s.id || '').replace(/'/g, '\\\'') + "')"
+      : "nav('" + (typeof stfNavKey === 'function' ? stfNavKey(s.id) : 'stf-' + s.id) + "')";
+    return '<tr class="click" onclick="' + navJs + '">'
       + '<td><span class="tag ' + tagClass + '" style="font-size:8px">' + s.type + '</span></td>'
       + '<td class="s">' + purpose + '</td>'
       + '<td>' + s.circle + '</td>'
@@ -156,24 +159,109 @@ function renderProjectRows() {
   }).join('');
 }
 
+// Cell type registry: glyph + room theme (badge + left-border accent) used by
+// the cells grid and kept in sync with the Cell Types legend.
+var CELL_TYPE_STYLES = {
+  'Deliberation Cell': { glyph: '◎', color: 'var(--gold)', soft: 'var(--gold-soft)', label: 'Deliberation' },
+  'Circle Cell': { glyph: '⬡', color: 'var(--purple)', soft: 'var(--purple-soft)', label: 'Circle' },
+  'Project Cell': { glyph: '▣', color: 'var(--green)', soft: 'var(--green-soft)', label: 'Project' },
+  'Founding Cell': { glyph: '✦', color: 'var(--teal)', soft: 'var(--teal-soft)', label: 'Founding' },
+  'vSTF Cell': { glyph: '✔', color: 'var(--purple)', soft: 'var(--purple-soft)', label: 'vSTF' },
+  'aSTF Cell': { glyph: '◈', color: 'var(--red)', soft: 'var(--red-soft)', label: 'aSTF' },
+  'xSTF Cell': { glyph: '⬢', color: 'var(--blue)', soft: 'var(--blue-soft)', label: 'xSTF' },
+  'jSTF Cell': { glyph: '⚖', color: 'var(--red)', soft: 'var(--red-soft)', label: 'jSTF' },
+  'p-aSTF Cell': { glyph: '↻', color: 'var(--teal)', soft: 'var(--teal-soft)', label: 'p-aSTF' }
+};
+function cellTypeStyle(type) {
+  return CELL_TYPE_STYLES[type] || { glyph: '⬡', color: 'var(--text-tertiary)', soft: 'var(--surface-raised)', label: type || 'Cell' };
+}
+// Runtime-state tags derived from process data (restriction, verdict, blind).
+function cellStateTags(c) {
+  var tags = [];
+  var restriction = c.restriction || {};
+  var resolution = c.resolution || {};
+  if (c.status === 'Under Investigation') tags.push({ label: 'investigating', color: 'var(--amber)' });
+  if (restriction.state === 'restricted') tags.push({ label: 'restricted' + (restriction.severity ? ' · ' + restriction.severity : ''), color: 'var(--red)' });
+  if (c.verdict && !resolution.audit) tags.push({ label: 'awaiting audit', color: 'var(--amber)' });
+  if (c.status === 'Resolution Applied' || resolution.status === 'Applied') tags.push({ label: 'applied', color: 'var(--green)' });
+  if (c.status === 'Blind Review') tags.push({ label: 'blind review', color: 'var(--purple)' });
+  if (c.blind && c.status !== 'Blind Review') tags.push({ label: 'blind', color: 'var(--purple)' });
+  if (c.status === 'Archived') tags.push({ label: 'archived', color: 'var(--text-tertiary)' });
+  return tags;
+}
+// Per-type dispatcher: routes to the view that actually owns the cell.
+function cellOnclick(c) {
+  var id = String(c.id).replace(/'/g, '\\\'');
+  switch (c.type) {
+    case 'Project Cell': return "openProjectCell('" + id + "')";
+    case 'Deliberation Cell': return "openDelibCell('" + id + "')";
+    case 'Circle Cell': return "openCircleCell('" + id + "')";
+    case 'Founding Cell': return "nav('organisations')";
+    case 'jSTF Cell': return "openJstfCase('" + id + "')";
+    case 'aSTF Cell': return "nav('stf-astf')";
+    case 'xSTF Cell': return "nav('stf-xstf')";
+    case 'vSTF Cell': return "nav('" + ((c.title && /competence|credential/i.test(c.title)) ? 'stf-vstf-competence' : 'stf-vstf-steward') + "')";
+    case 'p-aSTF Cell': return "nav('stf-pastf')";
+    default: return "nav('cells')";
+  }
+}
+var CELL_FILTER_PREDICATES = {
+  all: function() { return true; },
+  Active: function(c) { return c.status === 'Active'; },
+  Archived: function(c) { return c.status === 'Archived'; },
+  Investigation: function(c) { return c.status === 'Under Investigation'; },
+  Restricted: function(c) { return (c.restriction || {}).state === 'restricted'; },
+  Blind: function(c) { return !!c.blind; },
+  Verdict: function(c) { return c.status === 'Finalised' || c.status === 'Blind Review' || !!(c.verdict && !(c.resolution || {}).audit); }
+};
+
 function renderCellCards(filter) {
   if (!MOCK) return '';
   filter = filter || 'all';
-  var cells = (MOCK.cells || []).filter(function(c) { return filter === 'all' || c.status === filter; });
+  var predicate = CELL_FILTER_PREDICATES[filter];
+  var cells = (MOCK.cells || []).filter(function(c) {
+    if (predicate) return predicate(c);
+    return c.status === filter;
+  });
   if (cells.length === 0) {
     return '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">No cells match this filter.</div></div>';
   }
   return cells.map(function(c) {
+    var st = cellTypeStyle(c.type);
     var isArchived = c.status === 'Archived';
-    var icon = c.type === 'Deliberation Cell' ? 'delib' : c.type === 'Circle Cell' ? 'circle' : c.type === 'Founding Cell' ? 'organisations' : '';
-    var badgeClass = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : 'b-pending';
-    var cardStyle = isArchived ? 'opacity:0.65' : '';
-    var onclick = c.type === 'Project Cell' ? "openProjectCell('" + c.id + "')" : c.type === 'Deliberation Cell' ? "openDelibCell('" + c.id + "')" : c.type === 'Circle Cell' ? "openCircleCell('" + c.id + "')" : "nav('" + (c.type === 'Founding Cell' ? 'organisations' : c.type === 'aSTF Cell' ? 'stf-astf' : c.type === 'xSTF Cell' ? 'stf-xstf' : 'cells') + "')";
-    return '<div class="card click" style="' + cardStyle + '" onclick="' + onclick + '">'
-      + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + c.type + '</span>'
+    var statusBadge = c.status === 'Active' ? 'b-active' : c.status === 'Archived' ? 'b-judicial' : c.status === 'Under Investigation' || c.status === 'Finalised' || c.status === 'Resolution Applied' ? 'b-review' : 'b-pending';
+    var cardStyle = 'border-left:3px solid ' + st.color + ';' + (isArchived ? 'opacity:0.65' : '');
+    var tags = cellStateTags(c);
+    var tagHtml = tags.length ? '<div class="flex gap-2" style="flex-wrap:wrap;margin-top:6px">' + tags.map(function(t) {
+      return '<span style="font-family:var(--mono);font-size:8px;letter-spacing:.05em;padding:2px 6px;border:1px solid ' + t.color + ';color:' + t.color + ';border-radius:99px">' + t.label + '</span>';
+    }).join('') + '</div>' : '';
+    var xr = [];
+    if (typeof xrefChip === 'function') {
+      var pName = function(pid) {
+        var ps = MOCK.participants || [];
+        for (var pi = 0; pi < ps.length; pi++) if (ps[pi].id === pid) return ps[pi].name;
+        return pid;
+      };
+      var src = c.source || {};
+      if (src.type === 'judicial-audit') {
+        if (src.targetId) xr.push(xrefChip('user', src.targetId, src.targetName || pName(src.targetId), { color: 'var(--red)' }));
+        if (src.sourceCellId) xr.push(xrefChip('cell', src.sourceCellId, 'jSTF case', { color: 'var(--red)' }));
+      } else {
+        if (c.targetId) xr.push(xrefChip('user', c.targetId, pName(c.targetId), { color: 'var(--red)' }));
+        if (c.commissionedBy) xr.push(xrefChip('user', c.commissionedBy, pName(c.commissionedBy), { color: 'var(--purple)' }));
+        if (src.originCellId) xr.push(xrefChip('motion', src.originCellId, 'motion', { color: 'var(--gold)' }));
+        if (c.resolutionRef) xr.push(xrefChip('cell', c.resolutionRef, 'aSTF audit', { color: 'var(--blue)' }));
+        if (c.type && c.type.indexOf('jSTF') !== -1) xr.push(xrefChip('stf', 'stf-' + c.id, 'STF', { color: 'var(--teal)' }));
+      }
+    }
+    var xrHtml = xr.length ? '<div style="margin-top:6px">' + xr.join('') + '</div>' : '';
+    return '<div class="card click" style="' + cardStyle + '" onclick="' + cellOnclick(c) + '">'
+      + '<div class="flex justify-between mb-2"><span class="badge ' + statusBadge + '" style="background:' + st.soft + ';color:' + st.color + '"><span style="margin-right:4px">' + st.glyph + '</span>' + st.label + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + c.id.toUpperCase() + (isArchived && c.archivedDate ? ' &middot; Archived ' + c.archivedDate : '') + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + c.title + '</div>'
       + '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + (c.participants ? c.participants + ' participants' : c.members ? c.members + ' members' : '') + (c.progress ? ' · ' + c.progress + '% complete' : '') + '</div>'
+      + tagHtml
+      + xrHtml
       + '</div>';
   }).join('');
 }
