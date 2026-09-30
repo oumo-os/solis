@@ -620,8 +620,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 dbRun("UPDATE stfs SET status = 'Under Investigation', bucket = 'active' WHERE id = ?", ['stf-' . $src['sourceCellId']]);
                 syncTargetRestriction($jm['targetId'] ?? null, $cur['state'] === 'restricted', $cur['severity']);
             }
-            dbRun('INSERT INTO integrity_records (id, type, subject, purpose, circle, date, verdict, text) VALUES (?,?,?,?,?,?,?,?)', ['ir-jstf-' . base_convert(time(), 10, 36) . '-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $src['sourceCellId']), 'jSTF', (string)($jm['targetName'] ?? ''), 'Judicial investigation concluded', (string)($jstf['circle'] ?? ''), date('Y-m-d'), $verdict === 'approved' ? 'Resolution Applied' : 'Revision Ordered', 'aSTF audit ' . $verdict . ' — ' . substr((string)$rationale, 0, 500)]);
-            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-audit', '', date('Y-m-d'), '"' . ($jstf['title'] ?? $src['sourceCellId']) . '" — aSTF audit: ' . $verdict . ' (rubric ' . $total . '/30)', (string)($user['name'] ?? $user['initials'])]);
+            dbRun('INSERT INTO integrity_records (id, type, subject, purpose, circle, date, verdict, text) VALUES (?,?,?,?,?,?,?,?)', ['ir-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $src['sourceCellId']), 'jSTF', (string)($jm['targetName'] ?? ''), 'Judicial investigation concluded', (string)($jstf['circle'] ?? ''), date('Y-m-d'), $verdict === 'approved' ? 'Resolution Applied' : 'Revision Ordered', 'aSTF audit ' . $verdict . ' — ' . substr((string)$rationale, 0, 500)]);
+            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-audit', '', date('Y-m-d'), '"' . ($jstf['title'] ?? $src['sourceCellId']) . '" — aSTF audit: ' . $verdict . ' (rubric ' . $total . '/30)', (string)($user['name'] ?? $user['initials'])]);
         }
         $asStf = dbGet("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?", ['aSTF Audit — ' . ($src['targetName'] ?? '')]);
         if ($asStf) dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", [$asStf['id']]);
@@ -654,7 +654,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-xstf$/', $cleanPath, $m)) {
     $body = readBody(); $as2 = pJson($af['source'] ?? '{}') ?: [];
     $title = preg_replace('/^aSTF · /', '', (string)($body->title ?? $as2['draftTitle'] ?? $af['title'] ?? ''));
     $team = is_array($body->team ?? null) ? $body->team : []; $specs = $body->deliverableSpecs ?? new \stdClass();
-    $xId = 'xstf-' . base_convert(time(), 10, 36); $blind = isset($body->blind) ? ($body->blind ? 1 : 0) : 1;
+    $xId = 'xstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4); $blind = isset($body->blind) ? ($body->blind ? 1 : 0) : 1;
     $deadline = trim((string)($body->deadline ?? '')) ?: date('Y-m-d', time() + 30 * 86400);
     $dSpecs = ['name' => (string)($specs->name ?? $title), 'description' => (string)($specs->description ?? ''), 'sections' => (int)($specs->sections ?? 4), 'wordCount' => (string)($specs->wordCount ?? 'TBD'), 'language' => (string)($specs->language ?? 'Plain English'), 'reviewProcess' => (string)($specs->reviewProcess ?? 'draft-circle-final')];
     $defTasks = [['id'=>'t0','label'=>'STF formulation','status'=>'pending','locked'=>true],['id'=>'t1','label'=>'Mandate comprehension','status'=>'pending','locked'=>false],['id'=>'t2','label'=>'Research & drafting','status'=>'pending','locked'=>false],['id'=>'t3','label'=>'Internal review','status'=>'pending','locked'=>false],['id'=>'t4','label'=>'Circle review cycle','status'=>'pending','locked'=>false],['id'=>'t5','label'=>'Finalisation','status'=>'pending','locked'=>false],['id'=>'t6','label'=>'Dissolve STF','status'=>'pending','locked'=>true]];
@@ -672,7 +672,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $content = trim((string)($body->content ?? '')); $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $dels = $meta['deliverables'] ?? [];
-    $dels[] = ['id' => 'del-' . time(), 'title' => $title, 'content' => $content, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
+    $dels[] = ['id' => 'del-' . time() . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'title' => $title, 'content' => $content, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
     $meta['deliverables'] = $dels; dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(201, ['ok' => true, 'deliverableId' => end($dels)['id']]);
 }
@@ -827,7 +827,7 @@ function jstfAppendReply($threadId, $desc) {
 }
 function jstfCreateIntakeThread($link, $title, $desc) {
     $prefix = (str_starts_with($link, 'case:') || str_starts_with($link, 'resolution:')) ? 'thread-appeal-' : 'thread-jstf-';
-    $thrId = $prefix . base_convert(time(), 10, 36);
+    $thrId = $prefix . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     dbRun('INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$thrId, $title, $desc, 'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0, date('Y-m-d'), 'stewards-only', $link]);
     return $thrId;
 }
@@ -927,7 +927,7 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
         $om = pJson($orig['meta'] ?? '{}') ?: []; $targetId = $om['targetId'] ?? null; $targetName = $om['targetName'] ?? $orig['title'] ?? $targetName;
         $revisionOf = substr($link2, 5);
     } else { $targetId = substr($link2, 5); $tgt = dbGet('SELECT * FROM users WHERE id = ?', [$targetId]); if ($tgt) $targetName = $tgt['name'] ?? $tgt['initials']; }
-    $jId = 'jstf-' . base_convert(time(), 10, 36);
+    $jId = 'jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $stewards = dbAll("SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r JOIN users u ON u.id = r.member_id WHERE r.status = 'active' ORDER BY r.name LIMIT 3");
     $team = $stewards;
     if (!array_reduce($team, function($c, $t) use ($user) { return $c || $t['id'] === $user['id']; }, false))
@@ -939,7 +939,7 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, date('Y-m-d', time() + 30 * 86400)]);
     dbRun('UPDATE threads SET jstf_cell_id = ? WHERE id = ?', [$jId, $thrId]);
-    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — ' . count($team) . ' investigators', (string)($user['name'] ?? $user['initials'])]);
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — ' . count($team) . ' investigators', (string)($user['name'] ?? $user['initials'])]);
     send(201, ['ok' => true, 'jstfId' => $jId]);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
@@ -965,7 +965,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     if ($changed) { $cur['history'] = $cur['history'] ?? []; $cur['history'][] = ['prev' => $cur['state'], 'next' => $newState, 'at' => date('Y-m-d\TH:i:s.000\Z'), 'votedBy' => $user['name'] ?? $user['initials']]; }
     $cur['state'] = $newState; $cur['restrictCount'] = $rc; $cur['teamSize'] = $ts; $cur['majority'] = $maj;
     if ($sev) $cur['severity'] = $sev; $cur['votes'] = $votes; $meta['restriction'] = $cur;
-    if ($changed) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-restriction', '', date('Y-m-d'), ($meta['targetName'] ?? 'target') . ' activity ' . $cur['state'] . ' (' . $rc . '/' . $ts . ' → ' . $sev . ')', (string)($user['name'] ?? $user['initials'])]);
+    if ($changed) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-restriction', '', date('Y-m-d'), ($meta['targetName'] ?? 'target') . ' activity ' . $cur['state'] . ' (' . $rc . '/' . $ts . ' → ' . $sev . ')', (string)($user['name'] ?? $user['initials'])]);
     syncTargetRestriction($meta['targetId'] ?? null, $restricted, $sev);
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(200, ['ok' => true, 'state' => $cur['state'], 'restrictCount' => $rc, 'teamSize' => $ts, 'majority' => $maj, 'severity' => $cur['severity'], 'changed' => $changed]);
@@ -993,13 +993,13 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
     $meta['verdict'] = ['type' => $type, 'description' => $desc, 'policyRefs' => array_map('strval', $pRefs), 'findings' => $findings, 'executingCircles' => $execs, 'filedBy' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $src = pJson($cell['source'] ?? '{}') ?: []; $src['verdict'] = $meta['verdict'];
     dbRun("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?", [json_encode($meta), json_encode($src), $cId]);
-    $aId = 'astf-audit-' . base_convert(time(), 10, 36);
+    $aId = 'astf-audit-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $aSrc = ['type' => 'judicial-audit', 'sourceCellId' => $cId, 'sourceTitle' => 'jSTF Disciplinary Verdict', 'targetId' => $meta['targetId'], 'targetName' => $meta['targetName'], 'verdict' => ['type' => $type, 'description' => $desc, 'policyRefs' => $meta['verdict']['policyRefs'], 'findings' => $findings, 'executingCircles' => $execs]];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$aId, 'aSTF Cell', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), 'Blind Review', 'judicial-audit', 1, '', $cId, json_encode($aSrc), json_encode(['status' => 'Pending']), json_encode(['blind' => 1, 'targetName' => $meta['targetName'], 'verdict' => $meta['verdict']])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $aId, 'aSTF', 'Judicial Audit', $meta['targetName'] ?? '', 'active', 'Blind Review', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), date('Y-m-d', time() + 30 * 86400)]);
     dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [$aId, $cId]);
     dbRun("UPDATE stfs SET status = 'Finalised', bucket = 'completed' WHERE id = ?", ['stf-' . $cId]);
-    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36), 'jstf-verdict', '', date('Y-m-d'), 'jSTF verdict filed vs ' . ($meta['targetName'] ?? '') . ' — ' . $type . ' (' . count($pRefs) . ' policies cited)', (string)($user['name'] ?? $user['initials'])]);
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-verdict', '', date('Y-m-d'), 'jSTF verdict filed vs ' . ($meta['targetName'] ?? '') . ' — ' . $type . ' (' . count($pRefs) . ' policies cited)', (string)($user['name'] ?? $user['initials'])]);
     send(200, ['ok' => true, 'jstfId' => $cId, 'astfId' => $aId, 'type' => $type]);
 }
 
@@ -1012,7 +1012,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/questions$/', $cleanPath, $m)) {
     if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may manage questions']);
     $body = readBody(); $label = trim((string)($body->label ?? ''));
     if (!$label) send(400, ['error' => 'label required']);
-    $objId = 'q-' . base_convert(time(), 10, 36);
+    $objId = 'q-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     dbRun('INSERT INTO cell_objectives (cell_id, obj_id, label, status) VALUES (?,?,?,?)', [$cId, $objId, $label, 'open']);
     send(201, ['ok' => true, 'objId' => $objId]);
 }
@@ -1044,7 +1044,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $body = readBody(); $brief = trim((string)($body->brief ?? ''));
     $qs = dbAll('SELECT obj_id, label, status FROM cell_objectives WHERE cell_id = ? ORDER BY id', [$cId]);
-    $xId = 'xstf-jstf-' . base_convert(time(), 10, 36);
+    $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $qText = implode("\n", array_map(function($q) { return '- [' . ($q['status'] ?? 'open') . '] ' . ($q['label'] ?? ''); }, $qs));
     $dSpecs = ['name' => 'jSTF investigation findings', 'description' => ($brief !== '' ? $brief . "\n\n" : '') . "Investigation questions:\n" . $qText, 'sections' => max(1, count($qs)), 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
