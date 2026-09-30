@@ -1796,6 +1796,10 @@
         { "author": "Akello Jane", "initials": "AJ", "text": "Evidence appendix complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.", "time": "2h ago" },
         { "author": "Osei Kwame", "initials": "OK", "text": "Confirmed. The statistical anomaly is significant — p-value below 0.01. Also found that 2 of the 3 verified candidates had prior personal contact with the accused outside Solis.", "time": "1h ago" },
         { "author": "Namugga Claire", "initials": "NC", "text": "Domain expertise gaps are also concerning. The accused's claimed Ws in Space Law do not match their publication record. Drafting the findings section now.", "time": "45m ago" }
+      ],
+      "objectives": [
+        { "id": "q-cred-1", "label": "Did Diallo Mamadou misrepresent Space Law competence credentials during steward candidacy?", "status": "open" },
+        { "id": "q-cred-2", "label": "Do the auditor-assignment anomalies correlate with the accused's own assignments?", "status": "open" }
       ]
     },
     {

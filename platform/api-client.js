@@ -309,6 +309,22 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/jstf-verdict', payload);
   }
 
+  function addJstfQuestion(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/questions', payload);
+  }
+
+  function setJstfQuestion(cellId, objId, payload) {
+    return req('PATCH', 'cells/' + cellId + '/questions/' + objId, payload);
+  }
+
+  function commissionJstfXstf(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/commission-xstf', payload || {});
+  }
+
+  function acceptJstfFindings(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/accept-findings', payload);
+  }
+
   function resignCircle(circleId) {
     return req('POST', 'circles/' + circleId + '/resign');
   }
@@ -508,6 +524,10 @@ var SolisApi = (function() {
     escalateJstf: escalateJstf,
     voteJstf: voteJstf,
     fileJstfVerdict: fileJstfVerdict,
+    addJstfQuestion: addJstfQuestion,
+    setJstfQuestion: setJstfQuestion,
+    commissionJstfXstf: commissionJstfXstf,
+    acceptJstfFindings: acceptJstfFindings,
     resignCircle: resignCircle,
     removeMember: removeMember,
     flushCircle: flushCircle,
