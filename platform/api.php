@@ -827,7 +827,24 @@ if (preg_match('/^\/jstf\/appeal$/', $cleanPath)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $body = readBody(); $cid = trim((string)($body->caseId ?? '')); $desc = trim((string)($body->description ?? ''));
-    if (!$cid) send(400, ['error' => 'caseId required']); if (!$desc) send(400, ['error' => 'description required']);
+    $rRef = trim((string)($body->resolutionRef ?? '')); $rTitle = trim((string)($body->resolutionTitle ?? ''));
+    if (!$desc) send(400, ['error' => 'description required']);
+    if ($rRef) {
+        if (!$rTitle) { $rTitle = $rRef; }
+        $link = 'resolution:' . $rRef;
+        $ex = dbGet("SELECT * FROM threads WHERE proposal_cell_id = ? AND badge = 'b-judicial'", [$link]);
+        if ($ex) {
+            $rid = 'jstf-reply-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(3)), 0, 6);
+            dbRun('INSERT INTO thread_replies (id, thread_id, author, initials, time, body, likes) VALUES (?,?,?,?,?,?,0)', [$rid, $ex['id'], 'Anonymous', '?', date('Y-m-d'), $desc]);
+            dbRun('UPDATE threads SET replies = replies + 1 WHERE id = ?', [$ex['id']]);
+            $rr = dbGet('SELECT replies FROM threads WHERE id = ?', [$ex['id']]);
+            send(200, ['ok' => true, 'threadId' => $ex['id'], 'replies' => $rr['replies'] ?? 0, 'accumulated' => true]);
+        }
+        $thrId = 'thread-appeal-' . base_convert(time(), 10, 36);
+        dbRun('INSERT INTO threads (id, title, body, author, initials, badge, badge_class, replies, likes, shares, time, visibility, proposal_cell_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$thrId, 'Appeal — ' . $rTitle, $desc, 'Anonymous', '?', 'b-judicial', 'b-judicial', 1, 0, 0, date('Y-m-d'), 'stewards-only', $link]);
+        send(201, ['ok' => true, 'threadId' => $thrId, 'replies' => 1, 'accumulated' => false]);
+    }
+    if (!$cid) send(400, ['error' => 'caseId or resolutionRef required']);
     $cc = dbGet('SELECT * FROM cells WHERE id = ?', [$cid]); if (!$cc || $cc['type'] !== 'jSTF Cell') send(404, ['error' => 'Case not found']);
     $link = 'case:' . $cid;
     $ex = dbGet("SELECT * FROM threads WHERE proposal_cell_id = ? AND badge = 'b-judicial'", [$link]);
@@ -850,13 +867,17 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     $thread = dbGet('SELECT * FROM threads WHERE id = ?', [$thrId]); if (!$thread) send(404, ['error' => 'Thread not found']);
     if ($thread['jstf_cell_id']) send(409, ['error' => 'Thread already escalated']);
     $ppc = $thread['proposal_cell_id'] ?? '';
-    if (!$ppc || (!str_starts_with($ppc, 'user:') && !str_starts_with($ppc, 'case:'))) send(400, ['error' => 'Thread is not a judicial thread']);
-    $isAppeal = str_starts_with($ppc, 'case:'); $link2 = $ppc; $targetId = null;
+    if (!$ppc || (!str_starts_with($ppc, 'user:') && !str_starts_with($ppc, 'case:') && !str_starts_with($ppc, 'resolution:'))) send(400, ['error' => 'Thread is not a judicial thread']);
+    $isAppeal = str_starts_with($ppc, 'case:') || str_starts_with($ppc, 'resolution:'); $link2 = $ppc; $targetId = null;
     $targetName = preg_replace('/^(?:Anonymous Report|Appeal) — /', '', $thread['title']);
-    if ($isAppeal) {
+    $revisionOf = null; $appealOf = null;
+    if (str_starts_with($ppc, 'resolution:')) {
+        $appealOf = substr($link2, 11);
+    } elseif ($isAppeal) {
         $oid = substr($link2, 5); $orig = dbGet('SELECT * FROM cells WHERE id = ?', [$oid]);
         if (!$orig) send(404, ['error' => 'Original case not found']);
         $om = pJson($orig['meta'] ?? '{}') ?: []; $targetId = $om['targetId'] ?? null; $targetName = $om['targetName'] ?? $orig['title'] ?? $targetName;
+        $revisionOf = substr($link2, 5);
     } else { $targetId = substr($link2, 5); $tgt = dbGet('SELECT * FROM users WHERE id = ?', [$targetId]); if ($tgt) $targetName = $tgt['name'] ?? $tgt['initials']; }
     $jId = 'jstf-' . base_convert(time(), 10, 36);
     $stewards = dbAll("SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r JOIN users u ON u.id = r.member_id WHERE r.status = 'active' ORDER BY r.name LIMIT 3");
@@ -864,8 +885,8 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     if (!array_reduce($team, function($c, $t) use ($user) { return $c || $t['id'] === $user['id']; }, false))
         $team = array_values(array_slice(array_merge([['id' => $user['id'], 'name' => $user['name'], 'initials' => $user['initials']]], $stewards), 0, 3));
     $tIs = $targetId ? !!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$targetId]) : false;
-    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $isAppeal ? substr($link2, 5) : null, 'team' => array_map(function($t) { return ['id' => $t['id'], 'name' => $t['name'], 'initials' => $t['initials']]; }, $team)];
-    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => count($team), 'majority' => (int)floor(count($team) / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null];
+    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => array_map(function($t) { return ['id' => $t['id'], 'name' => $t['name'], 'initials' => $t['initials']]; }, $team)];
+    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => count($team), 'majority' => (int)floor(count($team) / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', count($team), '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta)]);
     foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, date('Y-m-d', time() + 30 * 86400)]);

@@ -1543,9 +1543,11 @@
           </div>
           <div class="aside-card">
             <div class="aside-title">By Circle</div>
-            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
-            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
-            <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
+            <div id="gov-by-circle">
+              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
+              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
+              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -4789,6 +4791,49 @@ function jstfToggleCite(ref, on) {
   if (on && i < 0) _jstfCitedRefs.push(ref);
   if (!on && i >= 0) _jstfCitedRefs.splice(i, 1);
 }
+function openPolicyPickerModal() {
+  openModal('<div class="sec">Attach Policy Resolution</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Select from passed policy resolutions. Search filters by reference, title, category or text.</div>' +
+    '<div class="form-group"><input class="form-input" id="policy-picker-search" placeholder="Search passed resolutions (e.g. PR-014, steward, integrity...)" oninput="renderPolicyPickerRows()"></div>' +
+    '<div id="policy-picker-rows" style="max-height:260px;overflow-y:auto;margin-bottom:8px"></div>' +
+    '<div class="flex gap-2" style="justify-content:space-between;align-items:center"><span id="policy-picker-count" style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)"></span><button class="btn btn-primary btn-sm" onclick="closeModal()">Done</button></div>',
+    { size: 'md', onClose: function() { renderJstfPolicies(getActiveJstfCell()); refreshVerdictCites(); } });
+  renderPolicyPickerRows();
+  setTimeout(function() { var s = document.getElementById('policy-picker-search'); if (s) s.focus(); }, 60);
+}
+function renderPolicyPickerRows() {
+  var host = document.getElementById('policy-picker-rows');
+  if (!host) return;
+  var q = ((document.getElementById('policy-picker-search') || {}).value || '').toLowerCase().trim();
+  var list = jstfPassedPolicies().filter(function(p) {
+    if (!q) return true;
+    return (String(p.ref || '') + ' ' + (p.title || '') + ' ' + (p.text || '') + ' ' + (p.category || '')).toLowerCase().indexOf(q) !== -1;
+  });
+  var shown = list.slice(0, 100);
+  host.innerHTML = shown.map(function(p) {
+    var ref = String(p.ref).toUpperCase();
+    var on = _jstfCitedRefs.indexOf(ref) >= 0;
+    return '<div class="flex gap-2" style="align-items:flex-start;padding:7px 8px;border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px;background:' + (on ? 'var(--purple-soft)' : 'var(--surface-raised)') + '">'
+      + '<div style="flex:1"><div style="font-size:12px"><strong style="color:var(--purple)">Policy Resolution #' + esc(p.ref) + '</strong> — ' + esc(p.title) + '</div>'
+      + '<div style="font-size:11px;color:var(--text-tertiary);line-height:1.4">"' + esc(p.text) + '"</div></div>'
+      + '<button class="btn btn-sm" onclick="jstfPickPolicy(\'' + ref + '\')">' + (on ? '✓ Cited' : 'Cite') + '</button></div>';
+  }).join('') || '<div style="font-size:12px;color:var(--text-tertiary)">No passed resolutions match.</div>';
+  var c = document.getElementById('policy-picker-count');
+  if (c) c.textContent = (list.length > 100 ? 'showing 100 of ' + list.length : list.length + ' match' + (list.length === 1 ? '' : 'es')) + ' · ' + _jstfCitedRefs.length + ' cited';
+}
+function jstfPickPolicy(ref) {
+  ref = String(ref || '').toUpperCase();
+  jstfToggleCite(ref, _jstfCitedRefs.indexOf(ref) < 0);
+  renderPolicyPickerRows();
+}
+function refreshVerdictCites() {
+  var host = document.getElementById('jstf-verdict-cites');
+  if (!host) return;
+  host.innerHTML = _jstfCitedRefs.map(function(r) {
+    var p = jstfPassedPolicies().filter(function(x) { return String(x.ref).toUpperCase() === r; })[0];
+    return '<span class="tag tag-purple" style="font-size:9px">#' + esc(r) + (p ? ' — ' + esc(p.title) : '') + '<span onclick="jstfToggleCite(\'' + r + '\',false);refreshVerdictCites()" style="cursor:pointer;margin-left:4px">×</span></span>';
+  }).join('') || '<span style="font-size:11px;color:var(--text-tertiary)">None selected — add at least one passed resolution.</span>';
+}
 function renderJstfPolicies(cell) {
   var host = document.getElementById('jstf-policies');
   if (!host) return;
@@ -4806,15 +4851,13 @@ function renderJstfPolicies(cell) {
     }
   }
   if (!list.length) { host.innerHTML = '<div style="color:var(--text-tertiary)">No enacted policy resolutions on file. jSTF cannot cite policy that does not exist.</div>'; return; }
-  host.innerHTML = list.map(function(p) {
-    var checked = _jstfCitedRefs.indexOf(String(p.ref).toUpperCase()) >= 0;
-    return '<label style="display:block;cursor:pointer;margin-bottom:10px">'
-      + '<span style="display:flex;gap:6px;align-items:flex-start"><input type="checkbox" class="jstf-cite" data-ref="' + esc(p.ref) + '"' + (checked ? ' checked' : '') + ' onchange="jstfToggleCite(this.getAttribute(\'data-ref\'), this.checked)" style="margin-top:2px;flex-shrink:0">'
-      + '<span><strong style="color:var(--purple)">Policy Resolution #' + esc(p.ref) + '</strong> — ' + esc(p.title)
-      + (p.passed ? ' <span style="color:var(--text-tertiary)">(passed ' + esc(p.passed) + ')</span>' : '')
-      + '</span></span>'
-      + '<div style="color:var(--text-tertiary);margin:2px 0 0 20px">"' + esc(p.text) + '"</div></label>';
-  }).join('');
+  var sel = _jstfCitedRefs.map(function(r) {
+    var p = list.filter(function(x) { return String(x.ref).toUpperCase() === r; })[0];
+    return '<span class="tag tag-purple" style="font-size:9px">' + esc(r) + (p ? ' — ' + esc(p.title) : '') + '<span onclick="jstfToggleCite(\'' + r + '\',false);renderJstfPolicies(getActiveJstfCell())" style="cursor:pointer;margin-left:4px">×</span></span>';
+  }).join(' ');
+  host.innerHTML = (sel ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">' + sel + '</div>' : '<div style="color:var(--text-tertiary);margin-bottom:8px">No resolutions cited yet.</div>')
+    + '<button class="btn btn-sm" onclick="openPolicyPickerModal()">+ Add policy resolution</button>'
+    + '<div style="color:var(--text-tertiary);margin-top:6px">' + list.length + ' passed resolution' + (list.length === 1 ? '' : 's') + ' on file — search to attach.</div>';
 }
 function sendJstfMessage() {
   var cell = getActiveJstfCell();
@@ -4999,22 +5042,23 @@ function submitJstfReport() {
   }).catch(function() { toast('Could not file report. Is the server running?', 'error'); });
 }
 
-function openAppealModal(caseId, caseTitle) {
-  openModal('<div class="sec">Appeal</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Anyone can appeal the resolution of case <strong>' + caseTitle + '</strong>. The appeal is posted anonymously on the case thread — visible only to stewards — and follows the same escalation process as a report.</div>' +
-    '<div class="form-group"><label class="form-label">Grounds of appeal</label><textarea class="msg-input" rows="3" id="jstf-appeal-desc" placeholder="Why should this resolution be revisited?..."></textarea></div>' +
-    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitJstfAppeal(\'' + caseId + '\')">Submit Appeal</button></div>',
+function openResolutionAppealModal(resId, resTitle) {
+  openModal('<div class="sec">Appeal Resolution</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">An appeal challenges an enacted resolution. It is posted <strong>anonymously</strong>, visible only to stewards — like a report. If a steward escalates it, a jSTF investigation is spawned on the appeal.</div>' +
+    '<div class="form-group"><label class="form-label">Resolution under appeal</label><div style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">#' + esc(resId) + ' — ' + esc(resTitle) + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Grounds of appeal</label><textarea class="msg-input" rows="3" id="res-appeal-desc" placeholder="Why should this resolution be revisited?..."></textarea></div>' +
+    '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="submitResolutionAppeal(\'' + String(resId).replace(/'/g, "\\'") + '\',\'' + String(resTitle).replace(/'/g, "\\'") + '\')">Submit Appeal</button></div>',
     { size: 'md' });
 }
 
-function submitJstfAppeal(caseId) {
-  var desc = document.getElementById('jstf-appeal-desc');
-  var description = desc ? desc.value.trim() : '';
+function submitResolutionAppeal(resId, resTitle) {
+  var descEl = document.getElementById('res-appeal-desc');
+  var description = descEl ? descEl.value.trim() : '';
   if (!description) { toast('State the grounds of appeal.', 'error'); return; }
-  SolisApi.appealJstf({ caseId: caseId, description: description }).then(function(r) {
+  SolisApi.appealResolution({ resolutionRef: resId, resolutionTitle: resTitle, description: description }).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Appeal failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     closeModal();
-    toast('Appeal posted anonymously — thread now has ' + r.replies + ' post(s).', 'success');
+    toast('Appeal posted anonymously. A steward can escalate it into a jSTF investigation.', 'success');
     setTimeout(function(){ window.location.reload(); }, 900);
   }).catch(function() { toast('Could not file appeal. Is the server running?', 'error'); });
 }
@@ -5038,28 +5082,21 @@ function toggleJstfRestriction(cellId, stance) {
 }
 
 function openJstfVerdictModal(cell) {
-  var citeRows = jstfPassedPolicies().map(function(p) {
-    var checked = _jstfCitedRefs.indexOf(String(p.ref).toUpperCase()) >= 0;
-    return '<label style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;cursor:pointer;font-size:12px;color:var(--text-secondary)">'
-      + '<input type="checkbox" class="jstf-verdict-cite" data-ref="' + esc(p.ref) + '"' + (checked ? ' checked' : '') + ' style="margin-top:3px;flex-shrink:0">'
-      + '<span><strong style="color:var(--purple)">#' + esc(p.ref) + '</strong> — ' + esc(p.title)
-      + (p.passed ? ' <span style="color:var(--text-tertiary)">(passed ' + esc(p.passed) + ')</span>' : '')
-      + '<span style="display:block;color:var(--text-tertiary);font-size:11px;line-height:1.5">"' + esc(p.text) + '"</span></span></label>';
-  }).join('') || '<div style="color:var(--text-tertiary);font-size:12px">No passed policy resolutions on file.</div>';
   openModal('<div class="sec">File Disciplinary Verdict — ' + (cell.targetName || cell.title) + '</div>' +
     '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF files a verdict as a single action (like a motion). It must cite existing policy resolutions — narrated judgements are <strong>policy-cited (non-system)</strong>; changes to system settings are <strong>system-bound</strong>. The verdict goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
     '<div class="form-group"><label class="form-label">Verdict type</label><select class="form-input" id="jstf-verdict-type"><option value="policy-cited">Policy-cited (non-system, narrated judgement)</option><option value="system-bound">System-bound (system settings)</option></select></div>' +
     '<div class="form-group"><label class="form-label">Verdict</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review..."></textarea></div>' +
-    '<div class="form-group"><label class="form-label">Cited policy resolutions (select from passed resolutions)</label><div id="jstf-verdict-policy" style="max-height:200px;overflow-y:auto;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-raised)">' + citeRows + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Cited policy resolutions (select from passed resolutions)</label><div id="jstf-verdict-cites" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div><button type="button" class="btn btn-sm" onclick="openPolicyPickerModal()">+ Add policy resolution</button></div>' +
     '<div class="form-group"><label class="form-label">Findings</label><textarea class="msg-input" rows="3" id="jstf-verdict-findings" placeholder="Evidence summary and conclusions..."></textarea></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="submitJstfVerdict(\'' + cell.id + '\')">Finalise &amp; Forward to aSTF</button></div>',
     { size: 'md' });
+  refreshVerdictCites();
 }
 
 function submitJstfVerdict(cellId) {
   var type = document.getElementById('jstf-verdict-type').value;
   var desc = (document.getElementById('jstf-verdict-desc').value || '').trim();
-  var policyRefs = Array.prototype.map.call(document.querySelectorAll('#jstf-verdict-policy .jstf-verdict-cite:checked'), function(i) { return i.getAttribute('data-ref'); });
+  var policyRefs = _jstfCitedRefs.slice();
   var findings = (document.getElementById('jstf-verdict-findings').value || '').trim();
   if (!desc) { toast('State the verdict.', 'error'); return; }
   if (!policyRefs.length) { toast('Cite at least one policy resolution.', 'error'); return; }
@@ -5124,18 +5161,15 @@ function renderJstfPanel() {
     html += '<div style="font-size:11px;color:var(--amber);margin-top:8px">Awaiting aSTF audit.</div>';
   }
   html += '</div>';
-  html += '<div style="margin-top:8px"><button class="btn btn-sm" onclick="openAppealModal(\'' + cell.id + '\',\'' + (cell.title || '').replace(/'/g, '\\\'') + '\')">Appeal Resolution</button></div>';
   host.innerHTML = html;
 }
 
 function renderJstfIntake() {
   var host = document.getElementById('jstf-intake');
   if (!host) return;
-  var cases = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'jSTF Cell'; });
-  var active = getActiveJstfCell() || (cases.length ? cases[0] : null);
   var html = '<div class="flex gap-2" style="flex-direction:column;gap:6px">'
     + '<button class="btn btn-sm" onclick="openReportModal()">Report a Member</button>'
-    + (active ? '<button class="btn btn-sm" onclick="openAppealModal(\'' + active.id + '\',\'' + (active.title || '').replace(/'/g, '\\\'') + '\')">Appeal a Resolution</button>' : '')
+    + '<div style="font-size:10px;color:var(--text-tertiary);line-height:1.5">To appeal an enacted resolution, open it in <a href="#" onclick="nav(\'resolutions\');return false;" style="color:var(--gold)">Governance</a>.</div>'
     + '</div>';
   host.innerHTML = html;
 }
@@ -5766,6 +5800,19 @@ function buildResolutionsData() {
       });
     });
   });
+  ((MOCK && MOCK.policies) || []).forEach(function(p) {
+    if (p.status !== 'Enacted' && p.status !== 'Passed') return;
+    out.push({
+      id: String(p.ref || p.id || '').toUpperCase(),
+      title: p.title || '',
+      status: 'enacted',
+      date: p.passed || '',
+      circles: [p.circle || 'Commons'],
+      visibility: 'public',
+      text: p.text || '',
+      forPublication: false
+    });
+  });
   return out;
 }
 
@@ -5790,6 +5837,7 @@ function renderResolutionsList(filter) {
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.title + '</div>'
       + '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">' + r.text + '</div>'
       + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' + circlesHtml
+      + (r.status === 'enacted' ? '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionAppealModal(\'' + String(r.id).replace(/'/g, "\\'") + '\',\'' + String(r.title).replace(/'/g, "\\'") + '\')">Appeal</button>' : '')
       + '<span style="font-size:9px;color:var(--text-tertiary);margin-left:auto">' + visIcon + '</span>' + pubBadge
       + '</div></div>';
   }).join('');
@@ -5802,6 +5850,11 @@ function renderResolutionsList(filter) {
   if (totalEl) totalEl.textContent = total;
   if (enactedEl) enactedEl.textContent = enacted;
   if (pendingEl) pendingEl.textContent = pending;
+  var byCircle = {};
+  resolutionsData.forEach(function(r) { (r.circles || []).forEach(function(c) { byCircle[c] = (byCircle[c] || 0) + 1; }); });
+  var ranked = Object.keys(byCircle).map(function(c) { return { name: c, n: byCircle[c] }; }).sort(function(a, b) { return b.n - a.n; }).slice(0, 4);
+  var bc = document.getElementById('gov-by-circle');
+  if (bc) bc.innerHTML = ranked.map(function(x) { return '<div class="aside-row"><span style="font-size:12px;color:var(--text)">' + esc(x.name) + '</span><span class="aside-value">' + x.n + '</span></div>'; }).join('');
 }
 
 function filterResolutions(filter, btn) {

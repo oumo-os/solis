@@ -293,6 +293,10 @@ var SolisApi = (function() {
     return req('POST', 'jstf/appeal', payload);
   }
 
+  function appealResolution(payload) {
+    return req('POST', 'jstf/appeal', payload);
+  }
+
   function escalateJstf(payload) {
     return req('POST', 'jstf/escalate', payload);
   }
@@ -500,6 +504,7 @@ var SolisApi = (function() {
     filePastfReview: filePastfReview,
     reportJstf: reportJstf,
     appealJstf: appealJstf,
+    appealResolution: appealResolution,
     escalateJstf: escalateJstf,
     voteJstf: voteJstf,
     fileJstfVerdict: fileJstfVerdict,
