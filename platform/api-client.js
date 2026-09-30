@@ -325,6 +325,14 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/accept-findings', payload);
   }
 
+  function saveJstfDraft(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/resolution-draft', payload);
+  }
+
+  function voteJstfDraft(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/draft-vote', payload);
+  }
+
   function resignCircle(circleId) {
     return req('POST', 'circles/' + circleId + '/resign');
   }
@@ -528,6 +536,8 @@ var SolisApi = (function() {
     setJstfQuestion: setJstfQuestion,
     commissionJstfXstf: commissionJstfXstf,
     acceptJstfFindings: acceptJstfFindings,
+    saveJstfDraft: saveJstfDraft,
+    voteJstfDraft: voteJstfDraft,
     resignCircle: resignCircle,
     removeMember: removeMember,
     flushCircle: flushCircle,

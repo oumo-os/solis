@@ -311,8 +311,8 @@ $TABLES = [
         `id` VARCHAR(255) PRIMARY KEY, `title` TEXT, `body` TEXT, `author` TEXT, `initials` TEXT,
         `avatar` TEXT, `domain` TEXT, `domain_color` TEXT, `badge` TEXT, `badge_class` TEXT,
         `replies` INT, `likes` INT, `shares` INT, `time` TEXT, `pinned` INT DEFAULT 0,
-        `endorsements` INT DEFAULT 0, `proposal_cell_id` TEXT, `visibility` TEXT DEFAULT 'public',
-        `jstf_cell_id` TEXT
+        `endorsements` INT DEFAULT 0,         `proposal_cell_id` TEXT, `visibility` TEXT DEFAULT 'public',
+        `jstf_cell_id` TEXT, `submitter_id` TEXT
     )",
 
     "CREATE TABLE IF NOT EXISTS `thread_endorsements` (
@@ -843,8 +843,9 @@ $threadRows = array_map(fn($t) => [
     'pinned' => ($t['pinned'] ?? false) ? 1 : 0, 'endorsements' => $t['endorsements'] ?? 0,
     'proposal_cell_id' => $t['proposalCellId'] ?? $t['proposal_cell_id'] ?? null,
     'visibility' => $t['visibility'] ?? 'public', 'jstf_cell_id' => $t['jstfCellId'] ?? $t['jstf_cell_id'] ?? null,
+    'submitter_id' => $t['submitterId'] ?? $t['submitter_id'] ?? null,
 ], $threads);
-upsert($db, 'threads', $threadRows, ['id','title','body','author','initials','avatar','domain','domain_color','badge','badge_class','replies','likes','shares','time','pinned','endorsements','proposal_cell_id','visibility','jstf_cell_id']);
+upsert($db, 'threads', $threadRows, ['id','title','body','author','initials','avatar','domain','domain_color','badge','badge_class','replies','likes','shares','time','pinned','endorsements','proposal_cell_id','visibility','jstf_cell_id','submitter_id']);
 
 // Thread replies
 $repRows = [];

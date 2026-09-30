@@ -110,12 +110,14 @@ function renderDiscussionThreads(list, emptyMsg) {
     var pinnedClass = t.pinned ? ' pinned' : '';
     var pinnedIcon = t.pinned ? '<span class="post-pin-icon" title="Pinned">&#9733;</span>' : '';
     var pinBtn = canPin ? '<button class="post-action' + (t.pinned ? ' pin-on' : '') + '" onclick="event.stopPropagation();toggleThreadPinned(\'' + t.id + '\')" title="' + (t.pinned ? 'Unpin' : 'Pin') + '"><span>&#9873;</span></button>' : '';
+    var isJud = (t.badge || '') === 'b-judicial';
     var domainTagBg = 'background:var(--surface-raised);color:var(--text-secondary);border:1px solid var(--border)';
     if (t.domainColor === 'tag-purple') domainTagBg = 'background:var(--purple-soft);color:var(--purple);border:1px solid var(--purple-border)';
     else if (t.domainColor === 'tag-green') domainTagBg = 'background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)';
     else if (t.domainColor === 'tag-amber') domainTagBg = 'background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)';
     else if (t.domainColor === 'tag-blue') domainTagBg = 'background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border)';
     else if (t.domainColor === 'tag-red') domainTagBg = 'background:var(--red-soft);color:var(--red);border:1px solid var(--red-border)';
+    var domainTag = t.domain ? '<span class="post-domain-tag" style="' + domainTagBg + '">' + t.domain + '</span>' : '';
 
     return '<div class="post-card' + pinnedClass + '" onclick="openThreadDetail(\'' + t.id + '\')">'
       + '<div class="post-header">'
@@ -123,7 +125,7 @@ function renderDiscussionThreads(list, emptyMsg) {
       + '<div class="post-meta">'
       + '<div class="post-author">' + t.author + '</div>'
       + '<div class="post-author-line">'
-      + '<span class="post-domain-tag" style="' + domainTagBg + '">' + t.domain + '</span>'
+      + domainTag
       + '<span>' + t.time + '</span>'
       + pinnedIcon
       + '</div></div>'
@@ -132,12 +134,14 @@ function renderDiscussionThreads(list, emptyMsg) {
       + '<div class="post-title">' + t.title + '</div>'
       + '<div class="post-body">' + t.body + '</div>'
       + '<div class="post-actions">'
-      + '<button class="post-action' + ((window._likedThreads && window._likedThreads[t.id]) ? ' liked' : '') + '" onclick="event.stopPropagation();toggleThreadLike(\'' + t.id + '\')"><span>' + ((window._likedThreads && window._likedThreads[t.id]) ? '&#9829;' : '&#9825;') + '</span><span class="count">' + t.likes + '</span></button>'
-      + pinBtn
-      + '<button class="post-action' + ((window._endorsedThreads && window._endorsedThreads[t.id]) ? ' endorsed' : '') + '" onclick="event.stopPropagation();toggleThreadEndorse(\'' + t.id + '\')"><span>&#10003;</span><span class="count">' + (t.endorsements || 0) + '</span></button>'
-      + '<button class="post-action' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? ' bookmarked' : '') + '" onclick="event.stopPropagation();toggleThreadBookmark(\'' + t.id + '\')"><span>&#' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? '11035' : '11036') + ';</span></button>'
-      + '<button class="post-action" onclick="event.stopPropagation();openThreadDetail(\'' + t.id + '\')"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
-      + '<button class="post-action" onclick="event.stopPropagation();shareThread(\'' + t.id + '\')"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>'
+      + (isJud
+        ? '<button class="post-action" onclick="event.stopPropagation();openThreadDetail(\'' + t.id + '\')"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
+        : '<button class="post-action' + ((window._likedThreads && window._likedThreads[t.id]) ? ' liked' : '') + '" onclick="event.stopPropagation();toggleThreadLike(\'' + t.id + '\')"><span>' + ((window._likedThreads && window._likedThreads[t.id]) ? '&#9829;' : '&#9825;') + '</span><span class="count">' + t.likes + '</span></button>'
+        + pinBtn
+        + '<button class="post-action' + ((window._endorsedThreads && window._endorsedThreads[t.id]) ? ' endorsed' : '') + '" onclick="event.stopPropagation();toggleThreadEndorse(\'' + t.id + '\')"><span>&#10003;</span><span class="count">' + (t.endorsements || 0) + '</span></button>'
+        + '<button class="post-action' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? ' bookmarked' : '') + '" onclick="event.stopPropagation();toggleThreadBookmark(\'' + t.id + '\')"><span>&#' + ((window._bookmarkedThreads && window._bookmarkedThreads[t.id]) ? '11035' : '11036') + ';</span></button>'
+        + '<button class="post-action" onclick="event.stopPropagation();openThreadDetail(\'' + t.id + '\')"><span>&#9114;</span><span class="count">' + t.replies + '</span></button>'
+        + '<button class="post-action" onclick="event.stopPropagation();shareThread(\'' + t.id + '\')"><span>&#8681;</span><span class="count">' + t.shares + '</span></button>')
       + '</div></div>';
   }).join('');
 }

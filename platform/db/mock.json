@@ -1793,9 +1793,9 @@
         { "name": "Namugga Claire", "initials": "NC", "role": "Investigator", "focus": "Judicial review" }
       ],
       "messages": [
-        { "author": "Akello Jane", "initials": "AJ", "text": "Evidence appendix complete. The credential verification pattern shows 3 anomalies that correlate with the accused's assignments. Compiling timeline.", "time": "2h ago" },
-        { "author": "Osei Kwame", "initials": "OK", "text": "Confirmed. The statistical anomaly is significant — p-value below 0.01. Also found that 2 of the 3 verified candidates had prior personal contact with the accused outside Solis.", "time": "1h ago" },
-        { "author": "Namugga Claire", "initials": "NC", "text": "Domain expertise gaps are also concerning. The accused's claimed Ws in Space Law do not match their publication record. Drafting the findings section now.", "time": "45m ago" }
+        { "author": "Akello Jane", "initials": "AJ", "text": "Hmm, Diallo's file has been on my mind — three separate flags in two months feels like a pattern, not bad luck. Before we go further, I think we should freeze his steward activity so nothing else moves while we look.", "time": "2h ago" },
+        { "author": "Osei Kwame", "initials": "OK", "text": "Agreed on the freeze. The assignment anomalies bother me most — twice now the auditor lottery landed on his own candidates. I'd like a second question on whether anyone else had access to the assignment pool.", "time": "1h ago" },
+        { "author": "Namugga Claire", "initials": "NC", "text": "I'll take the credential question. His claimed Ws doesn't match anything in his publication record, but let's be careful — mismatch isn't proof. Can we get the verification logs before we talk sanctions?", "time": "45m ago" }
       ],
       "objectives": [
         { "id": "q-cred-1", "label": "Did Diallo Mamadou misrepresent Space Law competence credentials during steward candidacy?", "status": "open" },
