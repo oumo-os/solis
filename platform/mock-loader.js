@@ -213,8 +213,8 @@ function cellOnclick(c) {
     case 'Circle Cell': return "openCircleCell('" + id + "')";
     case 'Founding Cell': return "nav('organisations')";
     case 'jSTF Cell': return "openJstfCase('" + id + "')";
-    case 'aSTF Cell': return "nav('stf-astf')";
-    case 'xSTF Cell': return "nav('stf-xstf')";
+    case 'aSTF Cell': return "openAstfCell('" + id + "')";
+    case 'xSTF Cell': return "openXstfCase('" + id + "')";
     case 'vSTF Cell': return "nav('" + ((c.title && /competence|credential/i.test(c.title)) ? 'stf-vstf-competence' : 'stf-vstf-steward') + "')";
     case 'p-aSTF Cell': return "nav('stf-pastf')";
     default: return "nav('cells')";

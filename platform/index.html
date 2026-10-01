@@ -3657,6 +3657,10 @@ function renderAstfMotion() {
     if (auditAstf && delibAstf) break;
   }
   var pick = auditAstf || delibAstf;
+  if (typeof getActiveAstfCell === 'function') {
+    var bound = getActiveAstfCell();
+    if (bound) pick = bound;
+  }
   if (!pick) {
     var xrNone = document.getElementById('astf-motion-xref');
     if (xrNone) xrNone.innerHTML = '';
@@ -4823,7 +4827,86 @@ function navStf(stfId) {
   if (!stfId) { nav('stf-xstf'); return; }
   if (stfId.indexOf('stf-jstf-') === 0) setActiveJstfCase(stfId.substring(4));
   else if (stfId.indexOf('jstf-') === 0) { setActiveJstfCase(stfId); nav('stf-jstf'); return; }
+  // Resolve the view from the stfs row type — never from id substrings
+  // ('stf-xstf-jstf-*' contains both; guessing misroutes it to stf-jstf).
+  var row = null;
+  if (typeof stfRowById === 'function') row = stfRowById(stfId);
+  if (row) {
+    if (row.type === 'xSTF') {
+      var xCell = stfId.indexOf('stf-') === 0 ? stfId.substring(4) : null;
+      if (xCell && typeof setActiveXstfCase === 'function') setActiveXstfCase(xCell);
+      nav('stf-xstf'); return;
+    }
+    if (row.type === 'aSTF') {
+      var aCell = stfId.indexOf('stf-') === 0 ? stfId.substring(4) : null;
+      if (aCell && typeof setActiveAstfCell === 'function') setActiveAstfCell(aCell);
+      nav('stf-astf'); return;
+    }
+    if (row.type === 'jSTF') { setActiveJstfCase(stfId.indexOf('stf-') === 0 ? stfId.substring(4) : stfId); nav('stf-jstf'); return; }
+  }
   nav(stfNavKey(stfId));
+}
+function stfRowById(stfId) {
+  if (!stfId || !MOCK || !MOCK.stfs) return null;
+  var buckets = [MOCK.stfs.pending, MOCK.stfs.active, MOCK.stfs.completed];
+  for (var b = 0; b < buckets.length; b++) {
+    var list = buckets[b];
+    if (!Array.isArray(list)) continue;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].id === stfId) return list[i];
+    }
+  }
+  return null;
+}
+// Active-item binding for the xSTF / aSTF views (mirrors the jSTF pattern):
+// the view renders the selected item, not newest-open or a hardcoded cell.
+var _xstfActiveCellId = null;
+var _astfActiveCellId = null;
+function setActiveXstfCase(id) { _xstfActiveCellId = id || null; try { if (id) sessionStorage.setItem('xstfActiveCell', id); else sessionStorage.removeItem('xstfActiveCell'); } catch (e) {} }
+function setActiveAstfCell(id) { _astfActiveCellId = id || null; try { if (id) sessionStorage.setItem('astfActiveCell', id); else sessionStorage.removeItem('astfActiveCell'); } catch (e) {} }
+function getActiveXstfCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  var i;
+  if (_xstfActiveCellId) {
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i].id === _xstfActiveCellId && cells[i].type === 'xSTF Cell') return cells[i];
+    }
+  }
+  try {
+    var remembered = sessionStorage.getItem('xstfActiveCell');
+    if (remembered) {
+      for (i = 0; i < cells.length; i++) {
+        if (cells[i].id === remembered && cells[i].type === 'xSTF Cell') { _xstfActiveCellId = remembered; return cells[i]; }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+function getActiveAstfCell() {
+  var cells = (MOCK && MOCK.cells) || [];
+  var i;
+  if (_astfActiveCellId) {
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i].id === _astfActiveCellId && cells[i].type === 'aSTF Cell') return cells[i];
+    }
+  }
+  try {
+    var remembered = sessionStorage.getItem('astfActiveCell');
+    if (remembered) {
+      for (i = 0; i < cells.length; i++) {
+        if (cells[i].id === remembered && cells[i].type === 'aSTF Cell') { _astfActiveCellId = remembered; return cells[i]; }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+function openXstfCase(cellId) {
+  setActiveXstfCase(cellId);
+  nav('stf-xstf');
+}
+function openAstfCell(cellId) {
+  setActiveAstfCell(cellId);
+  nav('stf-astf');
 }
 
 // jSTF case view: hydrates every block of view-stf-jstf (report, sponsor,
@@ -6661,12 +6744,22 @@ function stfNavKey(stfId) {
   var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf', 'xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
   var id = String(stfId == null ? '' : stfId);
   if (map[id]) return map[id];
+  if (typeof stfRowById === 'function') {
+    var row = stfRowById(id);
+    if (row) {
+      if (row.type === 'jSTF') return 'stf-jstf';
+      if (row.type === 'aSTF') return 'stf-astf';
+      if (row.type === 'xSTF') return 'stf-xstf';
+      if (row.type === 'p-aSTF') return 'stf-pastf';
+      if (row.type === 'vSTF') return id.toLowerCase().indexOf('competence') !== -1 ? 'stf-vstf-competence' : 'stf-vstf-steward';
+    }
+  }
   var low = id.toLowerCase();
-  if (low.indexOf('jstf') !== -1) return 'stf-jstf';
   if (low.indexOf('pastf') !== -1) return 'stf-pastf';
+  if (low.indexOf('xstf') !== -1) return 'stf-xstf';
   if (low.indexOf('vstf') !== -1) return low.indexOf('competence') !== -1 ? 'stf-vstf-competence' : 'stf-vstf-steward';
   if (low.indexOf('astf') !== -1) return 'stf-astf';
-  if (low.indexOf('xstf') !== -1) return 'stf-xstf';
+  if (low.indexOf('jstf') !== -1) return 'stf-jstf';
   return id ? 'stf-' + id : 'stf-xstf';
 }
 // Cells-grid entry point for a jSTF cell: select the case, then open its view.
@@ -11539,7 +11632,7 @@ var _origNav=nav;
  nav=function(key){
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
-  if(key==='stf-xstf'){renderXstf('cell-19');}
+  if(key==='stf-xstf'){ var _xc = (typeof getActiveXstfCell === 'function') ? getActiveXstfCell() : null; renderXstf(_xc ? _xc.id : 'cell-19'); }
   if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-astf'||key==='stf-pastf'){renderStfDetail(key);}
   if(key==='stf-vstf-steward'){renderVstfSteward();}
   if(key==='stf-vstf-competence'){renderVstfCompetence();}
