@@ -1788,9 +1788,9 @@
         "verdict": null
       },
       "team": [
-        { "name": "Akello Jane", "initials": "AJ", "role": "Lead investigator", "focus": "Judicial review" },
-        { "name": "Osei Kwame", "initials": "OK", "role": "Investigator", "focus": "Judicial review" },
-        { "name": "Namugga Claire", "initials": "NC", "role": "Investigator", "focus": "Judicial review" }
+        { "name": "Akello Jane", "initials": "AJ", "role": "jSTF adjudicator", "focus": "Judicial review" },
+        { "name": "Osei Kwame", "initials": "OK", "role": "jSTF adjudicator", "focus": "Judicial review" },
+        { "name": "Namugga Claire", "initials": "NC", "role": "jSTF adjudicator", "focus": "Judicial review" }
       ],
       "messages": [
         { "author": "Akello Jane", "initials": "AJ", "text": "Hmm, Diallo's file has been on my mind — three separate flags in two months feels like a pattern, not bad luck. Before we go further, I think we should freeze his steward activity so nothing else moves while we look.", "time": "2h ago" },

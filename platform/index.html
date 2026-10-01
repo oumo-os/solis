@@ -855,7 +855,7 @@
             <span class="badge b-active">Sponsor</span>
           </div>
           <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:8px" id="jstf-sponsor-desc">As sponsor, the sponsoring steward takes responsibility for the claim. The investigation team now has authority to examine the evidence. The anonymous reporter's identity is permanently sealed.</div>
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">Investigators</div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">jSTF adjudicators</div>
           <div id="jstf-team"></div>
         </details>
         <details class="aside-card" open>
@@ -4741,7 +4741,7 @@ function filePastfReview() {
 
 // ── jSTF judicial investigation (to_prod 2.11) ───────
 var _jstfActiveCaseId = null;
-function setActiveJstfCase(id) { _jstfActiveCaseId = id || null; }
+function setActiveJstfCase(id) { _jstfActiveCaseId = id || null; try { if (id) sessionStorage.setItem('jstfActiveCase', id); else sessionStorage.removeItem('jstfActiveCase'); } catch (e) {} }
 function getActiveJstfCell() {
   var cells = (MOCK && MOCK.cells) || [];
   var i;
@@ -4750,6 +4750,14 @@ function getActiveJstfCell() {
       if (cells[i].id === _jstfActiveCaseId && cells[i].type === 'jSTF Cell') return cells[i];
     }
   }
+  try {
+    var remembered = sessionStorage.getItem('jstfActiveCase');
+    if (remembered) {
+      for (i = 0; i < cells.length; i++) {
+        if (cells[i].id === remembered && cells[i].type === 'jSTF Cell') { _jstfActiveCaseId = remembered; return cells[i]; }
+      }
+    }
+  } catch (e) {}
   var terminal = ['Resolution Applied', 'Exonerated', 'Closed', 'Archived'];
   for (i = cells.length - 1; i >= 0; i--) {
     if (cells[i].type === 'jSTF Cell' && terminal.indexOf(cells[i].status) < 0) return cells[i];
@@ -5031,7 +5039,7 @@ function openCommissionModal(qid) {
   openModal('<div class="sec">Commission xSTF Probe</div>' +
     '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One question, one siloed probe team. The deliverable report becomes the answer.</span></div>' +
     '<div class="form-group"><label class="form-label">Brief for the probe team (optional)</label><textarea class="msg-input" rows="2" id="jstf-commission-brief" placeholder="Scope, constraints, deadlines..."></textarea></div>' +
-    '<div class="form-group"><label class="form-label">Investigators (siloed team for this question)</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
+    '<div class="form-group"><label class="form-label">jSTF-xSTF investigators (siloed team for this question)</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitCommission(\'' + String(qid).replace(/'/g, "\\'") + '\')">Commission Probe</button></div>',
     { size: 'md' });
 }
@@ -5040,7 +5048,7 @@ function submitCommission(qid) {
   if (!cell) return;
   var brief = ((document.getElementById('jstf-commission-brief') || {}).value || '').trim();
   var team = Array.prototype.map.call(document.querySelectorAll('.jstf-probe-member:checked'), function(i) { return { name: i.getAttribute('data-name'), initials: i.getAttribute('data-ini') }; });
-  if (!team.length) { toast('Select at least one investigator.', 'error'); return; }
+  if (!team.length) { toast('Select at least one jSTF-xSTF investigator.', 'error'); return; }
   SolisApi.commissionJstfXstf(cell.id, { questionId: qid, brief: brief, team: team }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Commission failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     closeModal();
@@ -5205,7 +5213,7 @@ function saveJstfVerdictDraft() {
   if (!cell) return;
   var desc = ((document.getElementById('jstf-verdict-desc') || {}).value || '').trim();
   var findings = ((document.getElementById('jstf-verdict-findings') || {}).value || '').trim();
-  var execs = Array.prototype.map.call(document.querySelectorAll('.jstf-verdict-exec:checked'), function(i) { return i.getAttribute('data-name'); });
+  var execs = jstfSelectedExecCircles();
   var appealDirEl = document.getElementById('jstf-appeal-direction');
   SolisApi.saveJstfDraft(cell.id, { description: desc, policyRefs: _jstfCitedRefs.slice(), executingCircles: execs, systemActions: collectJstfSysActions(), appealDirection: appealDirEl ? (appealDirEl.value || null) : null, findings: findings }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Could not save draft: ' + ((r && r.error) || 'server error'), 'error'); return; }
@@ -5356,7 +5364,7 @@ function renderJstfCase() {
       var ps2 = (MOCK && MOCK.participants) || [];
       for (var pi = 0; pi < ps2.length; pi++) if (ps2[pi].name === t.name) { pid = ps2[pi].id; break; }
       var chip = pid ? xrefChip('user', pid, 'profile') : '';
-      return '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">' + esc(t.initials || '?') + '</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">' + esc(t.name || '') + '</div><div style="font-size:11px;color:var(--text-tertiary)">' + esc(t.role || 'Investigator') + (t.focus ? ' · ' + esc(t.focus) : '') + '</div></div>' + badge + chip + '</div>';
+      return '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">' + esc(t.initials || '?') + '</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">' + esc(t.name || '') + '</div><div style="font-size:11px;color:var(--text-tertiary)">' + esc(t.role || 'jSTF adjudicator') + (t.focus ? ' · ' + esc(t.focus) : '') + '</div></div>' + badge + chip + '</div>';
     }).join('') || '<div style="font-size:12px;color:var(--text-tertiary)">No team seated.</div>';
   }
   renderJstfReportStatus(cell);
@@ -5476,11 +5484,37 @@ function toggleJstfRestriction(cellId, stance) {
   SolisApi.voteJstf(cellId, { stance: stance }).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Vote failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     toast('Stance: ' + stance + ' — ' + r.restrictCount + '/' + r.teamSize + ' restrict (majority ' + r.majority + ') → ' + r.state + (r.severity ? ' · ' + r.severity : ''), 'success');
-    setTimeout(function(){ window.location.reload(); }, 900);
+    // Live tally: refresh data and re-render the case in place (no reload,
+    // so the open case and its vote buttons stay put while live).
+    if (typeof loadApiData === 'function') loadApiData().then(function() {
+      if (typeof renderJstfCase === 'function') renderJstfCase();
+      if (typeof renderJstfPanel === 'function') renderJstfPanel();
+      if (typeof renderJstfIntake === 'function') renderJstfIntake();
+    });
   }).catch(function() { toast('Could not record vote. Is the server running?', 'error'); });
 }
 
 var _jstfSysActions = [];
+var _jstfTargetCircles = [];
+// Circles where the case target holds active stewardship (roster-active).
+// Circle-steward removal may only target these; anything else is dropped.
+function jstfTargetStewardCircles(cell) {
+  var out = [];
+  var tid = cell && cell.targetId;
+  if (!tid) return out;
+  ((MOCK && MOCK.circles) || []).forEach(function(c) {
+    var ros = (c.roster && c.roster.active) || [];
+    for (var i = 0; i < ros.length; i++) {
+      if (ros[i].id === tid && ros[i].status === 'active') { out.push(c.name); break; }
+    }
+  });
+  return out;
+}
+function jstfSelectedExecCircles() {
+  var sel = document.getElementById('jstf-verdict-exec');
+  if (!sel) return [];
+  return Array.prototype.filter.call(sel.options || [], function(o) { return o.selected; }).map(function(o) { return o.value; });
+}
 function jstfActKindLabel(kind) {
   var m = { remove_from_circle: 'Remove from circle(s)', freeze_ws_until: 'Freeze Ws until', candidacy_freeze_until: 'Freeze steward candidacy until', guest_until: 'Guest privilege level until' };
   return m[kind] || kind;
@@ -5489,13 +5523,10 @@ function jstfAddSysAction() { _jstfSysActions.push({ kind: 'remove_from_circle',
 function jstfRemoveSysAction(i) { _jstfSysActions.splice(i, 1); renderJstfSysActions(); }
 function jstfActKindChanged(i, v) { _jstfSysActions[i] = { kind: v, circles: [], until: '' }; renderJstfSysActions(); }
 function jstfActUntilChanged(i, v) { if (_jstfSysActions[i]) _jstfSysActions[i].until = v; }
-function jstfActCircleToggled(i, name, on) {
+function jstfActCirclesChanged(i, sel) {
   var a = _jstfSysActions[i];
   if (!a) return;
-  a.circles = a.circles || [];
-  var x = a.circles.indexOf(name);
-  if (on && x < 0) a.circles.push(name);
-  if (!on && x >= 0) a.circles.splice(x, 1);
+  a.circles = Array.prototype.filter.call(sel.options || [], function(o) { return o.selected; }).map(function(o) { return o.value; });
 }
 function renderJstfSysActions() {
   var host = document.getElementById('jstf-verdict-actions');
@@ -5505,10 +5536,13 @@ function renderJstfSysActions() {
     var opts = kinds.map(function(k) { return '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + jstfActKindLabel(k) + '</option>'; }).join('');
     var params = '';
     if (a.kind === 'remove_from_circle') {
-      params = ((MOCK && MOCK.circles) || []).map(function(c) {
-        var on = (a.circles || []).indexOf(c.name) >= 0;
-        return '<label style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-secondary);padding:2px 0;cursor:pointer"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="jstfActCircleToggled(' + i + ',\'' + String(c.name).replace(/'/g, "\\'") + '\',this.checked)"> ' + esc(c.name) + '</label>';
-      }).join('');
+      var avail = _jstfTargetCircles.length ? _jstfTargetCircles : [];
+      params = avail.length
+        ? '<select multiple class="form-input" size="' + Math.min(4, avail.length) + '" onchange="jstfActCirclesChanged(' + i + ',this)" style="width:100%;font-size:11px">' + avail.map(function(n) {
+            var on = (a.circles || []).indexOf(n) >= 0;
+            return '<option value="' + esc(n) + '"' + (on ? ' selected' : '') + '>' + esc(n) + '</option>';
+          }).join('') + '</select><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Only circles where the target is steward. Hold Ctrl/Cmd for several.</div>'
+        : '<div style="font-size:11px;color:var(--text-tertiary)">Target holds no circle stewardship — nothing removable.</div>';
     } else {
       params = '<input type="date" class="form-input jstf-act-until" value="' + esc(a.until || '') + '" onchange="jstfActUntilChanged(' + i + ',this.value)" style="font-size:11px;padding:4px 8px"><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Empty = indefinite.</div>';
     }
@@ -5517,7 +5551,10 @@ function renderJstfSysActions() {
 }
 function collectJstfSysActions() {
   return _jstfSysActions.map(function(a) {
-    if (a.kind === 'remove_from_circle') return { kind: a.kind, circles: (a.circles || []).slice() };
+    if (a.kind === 'remove_from_circle') {
+      var kept = ((a.circles || []).filter(function(n) { return _jstfTargetCircles.indexOf(n) >= 0; }));
+      return { kind: a.kind, circles: kept.slice() };
+    }
     return { kind: a.kind, until: a.until || null };
   }).filter(function(a) { return a.kind === 'remove_from_circle' ? a.circles.length > 0 : true; });
 }
@@ -5525,9 +5562,10 @@ function openJstfVerdictModal(cell) {
   var draft0 = (cell && cell.resolutionDraft) || null;
   if (draft0) _jstfCitedRefs = ((draft0.policyRefs || []).map(function(r) { return String(r).toUpperCase(); }));
   var draftExecs = draft0 ? (draft0.executingCircles || []) : [];
-  var execRows = ((MOCK && MOCK.circles) || []).map(function(c) {
-    var checked = draftExecs.indexOf(c.name) >= 0;
-    return '<label style="display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer;font-size:12px;color:var(--text-secondary)"><input type="checkbox" class="jstf-verdict-exec" data-name="' + esc(c.name) + '"' + (checked ? ' checked' : '') + ' style="flex-shrink:0"><span>' + esc(c.name) + '</span></label>';
+  _jstfTargetCircles = jstfTargetStewardCircles(cell);
+  var execOpts = ((MOCK && MOCK.circles) || []).map(function(c) {
+    var selected = draftExecs.indexOf(c.name) >= 0;
+    return '<option value="' + esc(c.name) + '"' + (selected ? ' selected' : '') + '>' + esc(c.name) + '</option>';
   }).join('');
   var preFindings = (draft0 && draft0.findings) || ((cell && cell.findings) || []).map(function(f) { return (f.title || 'Finding') + ': ' + (f.content || ''); }).join('\n\n');
   var preDesc = (draft0 && draft0.description) || '';
@@ -5540,7 +5578,7 @@ function openJstfVerdictModal(cell) {
     '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF passes a resolution as a single action: a policy directive to executing circles, system actions, or both combined. The resolution goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
     '<div class="form-group"><label class="form-label">Verdict — the resolution</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review...">' + esc(preDesc) + '</textarea></div>' +
     '<div class="form-group"><label class="form-label">Cited policy resolutions (select from passed resolutions)</label><div id="jstf-verdict-cites" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div><button type="button" class="btn btn-sm" onclick="openPolicyPickerModal()">+ Add policy resolution</button></div>' +
-    '<div class="form-group"><label class="form-label">Responsible circles for execution (policy directive)</label><div style="max-height:130px;overflow-y:auto;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-raised)">' + execRows + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Responsible circles for execution (policy directive)</label><select multiple class="form-input" id="jstf-verdict-exec" size="5" style="width:100%;font-size:12px">' + execOpts + '</select><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Hold Ctrl/Cmd to select several.</div></div>' +
     '<div class="form-group"><label class="form-label">System actions (executed on approval)</label><div id="jstf-verdict-actions"></div><button type="button" class="btn btn-sm" onclick="jstfAddSysAction()">+ Add system action</button></div>' +
     (isAppealModal ? '<div class="form-group"><label class="form-label">Appeal direction</label><select class="form-input" id="jstf-appeal-direction"><option value="">Select…</option><option value="uphold"' + (preAppealDir === 'uphold' ? ' selected' : '') + '>Uphold original</option><option value="overturn"' + (preAppealDir === 'overturn' ? ' selected' : '') + '>Overturn (supersede original)</option></select></div>' : '') +
     '<div class="form-group"><label class="form-label">Findings</label><textarea class="msg-input" rows="3" id="jstf-verdict-findings" placeholder="Evidence summary and conclusions...">' + esc(preFindings) + '</textarea></div>' +
@@ -5562,7 +5600,7 @@ function submitJstfVerdict(cellId) {
   }
   var desc = (document.getElementById('jstf-verdict-desc').value || '').trim();
   var policyRefs = _jstfCitedRefs.slice();
-  var execs = Array.prototype.map.call(document.querySelectorAll('.jstf-verdict-exec:checked'), function(i) { return i.getAttribute('data-name'); });
+  var execs = jstfSelectedExecCircles();
   var sysActs = collectJstfSysActions();
   var appealDirEl = document.getElementById('jstf-appeal-direction');
   var appealDir = appealDirEl ? appealDirEl.value : '';

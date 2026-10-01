@@ -216,10 +216,11 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['team'] = array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus']]; }, $teamByCell[$c['id']] ?? []);
         if ($c['blind'] && !$isSteward) {
             $letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+            $blindLab = ($c['type'] === 'jSTF Cell') ? 'Adjudicator ' : 'Investigator ';
             $iniMap = [];
-            foreach (($cell['team'] ?? []) as $ti => $tv) { $lab = 'Investigator ' . ($letters[$ti] ?? strval($ti + 1)); $iniMap[(string)$tv['initials']] = ['lab' => $lab, 'ini' => 'I' . ($letters[$ti] ?? strval($ti + 1))]; }
+            foreach (($cell['team'] ?? []) as $ti => $tv) { $lab = $blindLab . ($letters[$ti] ?? strval($ti + 1)); $iniMap[(string)$tv['initials']] = ['lab' => $lab, 'ini' => 'I' . ($letters[$ti] ?? strval($ti + 1))]; }
             $anonTeam = [];
-            foreach (($cell['team'] ?? []) as $tv) { $mp = $iniMap[(string)$tv['initials']] ?? ['lab' => 'Investigator', 'ini' => 'IN']; $anonTeam[] = ['name' => $mp['lab'], 'initials' => $mp['ini'], 'role' => $tv['role'], 'focus' => $tv['focus']]; }
+            foreach (($cell['team'] ?? []) as $tv) { $mp = $iniMap[(string)$tv['initials']] ?? ['lab' => $blindLab, 'ini' => 'IN']; $anonTeam[] = ['name' => $mp['lab'], 'initials' => $mp['ini'], 'role' => $tv['role'], 'focus' => $tv['focus']]; }
             $cell['team'] = $anonTeam;
             $cell['messages'] = array_map(function($m2) use ($iniMap) { $mm = $m2; $mp = $iniMap[(string)($m2['initials'] ?? '')] ?? null; if ($mp) { $mm['author'] = $mp['lab']; $mm['initials'] = $mp['ini']; } return $mm; }, $cell['messages']);
             if (!empty($cell['restriction']['votes']) && is_array($cell['restriction']['votes'])) $cell['restriction']['votes'] = array_map(function($v) use ($iniMap) { $mp = $iniMap[(string)($v['initials'] ?? '')] ?? null; if ($mp) { $v['name'] = $mp['lab']; $v['initials'] = $mp['ini']; } return $v; }, $cell['restriction']['votes']);
@@ -686,7 +687,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 $revisions = $jm['revisions'] ?? []; $revisions[] = ['at' => date('Y-m-d\TH:i:s.000\Z'), 'by' => $user['name'] ?? $user['initials'], 'notes' => $rationale, 'supersededVerdict' => $jm['verdict'] ?? null];
                 $jm['verdict'] = null;
                 dbRun('DELETE FROM cell_team WHERE cell_id = ?', [$src['sourceCellId']]);
-                foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$src['sourceCellId'], $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
+                foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$src['sourceCellId'], $t['name'], $t['initials'], 'jSTF adjudicator', 'Judicial review']);
                 $ts2 = count($team); $maj = (int)floor($ts2 / 2) + 1;
                 $ti = array_map(function($t) { return $t['initials']; }, $team);
                 if ($ti) { $ph = implode(',', array_fill(0, count($ti), '?')); dbRun("DELETE FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND initials NOT IN ($ph)", array_merge([$src['sourceCellId']], $ti)); }
@@ -1007,6 +1008,12 @@ function jstfSpawnSuccessorVstf($candName, $candIni, $circleName, $caseId, $prop
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', 'Steward Candidacy', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
     return $vId;
 }
+function jstfFilterRemovalCircles($circles, $targetId) {
+    if (!$targetId || !$circles) return $targetId ? $circles : [];
+    $tgtRows = dbAll("SELECT c.name FROM circle_roster r JOIN circles c ON c.id = r.circle_id WHERE r.member_id = ? AND r.status = 'active'", [$targetId]);
+    $allowed = array_map(function($r) { return strtolower($r['name']); }, $tgtRows);
+    return array_values(array_filter($circles, function($cn) use ($allowed) { return in_array(strtolower($cn), $allowed); }));
+}
 function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes) {
     $kind = $act['kind'] ?? '';
     if ($kind === 'remove_from_circle') {
@@ -1127,10 +1134,10 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => array_map(function($t) { return ['id' => $t['id'], 'name' => $t['name'], 'initials' => $t['initials']]; }, $team)];
     $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => count($team), 'majority' => (int)floor(count($team) / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', count($team), '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta)]);
-    foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator', 'Judicial review']);
+    foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], 'jSTF adjudicator', 'Judicial review']);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, date('Y-m-d', time() + 30 * 86400)]);
     dbRun('UPDATE threads SET jstf_cell_id = ? WHERE id = ?', [$jId, $thrId]);
-    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — ' . count($team) . ' investigators', (string)($user['name'] ?? $user['initials'])]);
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — ' . count($team) . ' jSTF adjudicators', (string)($user['name'] ?? $user['initials'])]);
     send(201, ['ok' => true, 'jstfId' => $jId]);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
@@ -1179,6 +1186,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
         $act = ['kind' => $kind];
         if ($kind === 'remove_from_circle') {
             $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
+            $circles = jstfFilterRemovalCircles($circles, $meta['targetId'] ?? null);
             if (!$circles) continue;
             $act['circles'] = $circles;
         } else {
@@ -1277,7 +1285,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $dSpecs = ['name' => 'Answer the mandate question', 'description' => ($brief !== '' ? $brief . "\n\n" : '') . "Mandate (question):\n" . $qlabel, 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
     dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId), 'Active', count($team) ?: 3, $cell['circle'] ?? '', 1, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, date('Y-m-d', time() + 30 * 86400)]);
-    foreach ($team as $i => $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], $i === 0 ? 'Lead investigator' : 'Investigator']);
+    foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', 'jSTF investigation probe', $cell['circle'] ?? '', 'active', 'Active', 'xSTF investigation — ' . ($meta['targetName'] ?? ''), date('Y-m-d', time() + 30 * 86400)]);
     $byQ = $meta['xstfByQuestion'] ?? []; $byQ[$qId] = $xId; $meta['xstfByQuestion'] = $byQ;
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
@@ -1324,6 +1332,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/resolution-draft$/', $cleanPath, $m)) {
         $act = ['kind' => $kind];
         if ($kind === 'remove_from_circle') {
             $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
+            $cellMeta = pJson($cell['meta'] ?? '{}') ?: [];
+            $circles = jstfFilterRemovalCircles($circles, $cellMeta['targetId'] ?? null);
             if (!$circles) continue;
             $act['circles'] = $circles;
         } else {
