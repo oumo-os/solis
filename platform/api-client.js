@@ -482,6 +482,10 @@ var SolisApi = (function() {
     return req('POST', 'proposals/system', payload);
   }
 
+  function saveSystemSettings(patch) {
+    return req('PUT', 'system-settings', patch || {});
+  }
+
   function createCircleProposal(payload) {
     return req('POST', 'proposals/system', payload);
   }
@@ -512,6 +516,7 @@ var SolisApi = (function() {
     raiseThreadProposal: raiseThreadProposal,
     createDirectProposal: createDirectProposal,
     createSettingsProposal: createSettingsProposal,
+    saveSystemSettings: saveSystemSettings,
     createCircleProposal: createCircleProposal,
     castVote: castVote,
     submitDraftResolution: submitDraftResolution,

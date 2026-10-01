@@ -2172,6 +2172,7 @@
             <div class="form-group"><label class="form-label">aSTF Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-astf-assessors"></div>
             <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14" id="settings-stf-vstf-duration"></div>
             <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10" id="settings-stf-astf-duration"></div>
+            <div class="form-group"><label class="form-label">jSTF Duration (days)</label><input class="form-input" type="number" value="30" id="settings-stf-jstf-duration"><span style="font-size:10px;color:var(--text-tertiary)">Deliberation deadline per team composition</span></div>
             <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6" id="settings-stf-pastf-cycle"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
           </div>
         </div>
@@ -3372,7 +3373,7 @@ function renderResolutionSettingsForm(cell, container) {
   if (cell.delibType === 'system-settings') {
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
@@ -3381,7 +3382,7 @@ function renderResolutionSettingsForm(cell, container) {
       aiConfirmQuorum:'AI Confirm Quorum', aiSetsDomainWeights:'AI Sets Domain Weights'
     };
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -4807,6 +4808,7 @@ function renderJstfLifecycle(cell) {
     if (res.audit) stage = 5;
     if (res.status === 'Applied') stage = 6;
     if (res.status === 'Revision Ordered') stage = 2;
+    if (cell.status === 'Resolution Applied' || cell.status === 'Exonerated') stage = 6;
   }
   host.innerHTML = stages.map(function(s, i) {
     var c, dot;
@@ -4815,6 +4817,12 @@ function renderJstfLifecycle(cell) {
     else { c = 'var(--green)'; dot = '✓'; }
     return '<span style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 9px;border:1px solid ' + c + ';color:' + c + ';border-radius:99px;white-space:nowrap">' + dot + ' ' + s + '</span>';
   }).join('');
+  if (cell && (cell.status === 'Under Investigation') && cell.deadline) {
+    var daysLeft = Math.ceil((new Date(cell.deadline + 'T23:59:59') - Date.now()) / 86400000);
+    var dlColor = daysLeft < 0 ? 'var(--red)' : (daysLeft <= 7 ? 'var(--amber)' : 'var(--text-tertiary)');
+    var dlTxt = daysLeft < 0 ? 'deadline passed — refresh due' : (daysLeft === 0 ? 'deadline today' : daysLeft + 'd left to resolve');
+    host.innerHTML += ' <span style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;padding:3px 9px;border:1px solid ' + dlColor + ';color:' + dlColor + ';border-radius:99px;white-space:nowrap">◷ ' + dlTxt + '</span>';
+  }
 }
 function jstfStatusRow(label, state, word) {
   var m = { ok: ['✓', 'var(--green)'], review: ['△', 'var(--amber)'], fail: ['✕', 'var(--red)'], pending: ['—', 'var(--text-tertiary)'] };
@@ -5076,7 +5084,7 @@ function renderJstfResolutionRecord(cell) {
   var target = cell.targetName || '';
   var ir = ((MOCK && MOCK.integrityRecords) || []).filter(function(r) { return r.type === 'jSTF' && String(r.subject || '') === String(target); })[0];
   var execs = verdict.executingCircles || impl.executingCircles || [];
-  host.innerHTML = '<div class="mb-2" style="color:var(--green)">✓ Resolution applied' + (res.audit && res.audit.verdict ? ' — aSTF ' + esc(res.audit.verdict) : '') + '</div>'
+  host.innerHTML = '<div class="mb-2" style="color:var(--green)">✓ ' + (cell.status === 'Exonerated' ? 'Exonerated' : 'Resolution applied') + (res.audit && res.audit.verdict ? ' — aSTF ' + esc(res.audit.verdict) : '') + '</div>'
     + '<div class="mb-2"><strong style="color:var(--text)">Verdict (' + esc(verdict.type || '') + '):</strong> ' + esc(verdict.description || '') + '</div>'
     + ((verdict.policyRefs && verdict.policyRefs.length) ? '<div class="mb-2">Cites ' + verdict.policyRefs.map(function(r) { return '<span class="tag tag-purple" style="font-size:8px">#' + esc(r) + '</span>'; }).join(' ') + '</div>' : '')
     + ((cell.findings || []).length ? '<div class="mb-2">Findings accepted: ' + cell.findings.length + '</div>' : '')
@@ -5338,7 +5346,7 @@ function renderJstfCase() {
   var rNote = document.getElementById('jstf-restrict-note');
   var rVotes = document.getElementById('jstf-restrict-votes');
   if (rTitle) rTitle.textContent = restricted ? (restriction.severity === 'frozen' ? 'Steward privileges frozen' : 'Activity restricted — readonly') : 'No restriction in force';
-  if (rBody) rBody.textContent = restricted ? displayName + ' cannot participate in Circle deliberations or vote on motions during this investigation.' : displayName + ' may participate normally. The team can vote to restrict at any time (majority of ' + (restriction.majority || '?') + ').';
+  if (rBody) rBody.textContent = restricted ? displayName + ' cannot participate in Circle deliberations or vote on motions during this investigation.' : (cell.status === 'Under Investigation' ? displayName + ' may participate normally. The team can vote to restrict at any time (majority of ' + (restriction.majority || '?') + ').' : displayName + ' — case closed, no restriction in force.');
   if (rBox) {
     if (restricted) { rBox.style.background = 'var(--amber-soft)'; rBox.style.borderColor = 'var(--amber-border)'; if (rTitle) rTitle.style.color = 'var(--amber)'; }
     else { rBox.style.background = 'rgba(47,158,110,.08)'; rBox.style.borderColor = 'rgba(47,158,110,.35)'; if (rTitle) rTitle.style.color = 'var(--green)'; }
@@ -5376,7 +5384,7 @@ function renderJstfCase() {
   if (motion) {
     var res = cell.resolution || {};
     var audit = res.audit || null;
-    if (audit) motion.textContent = audit.verdict === 'approved' ? '✓ Resolution passed aSTF audit — applied.' : '△ aSTF ordered revision — composition shuffled, investigation continues.';
+    if (audit) motion.textContent = audit.verdict === 'approved' ? (cell.status === 'Exonerated' ? '✓ Target exonerated — aSTF approved, no action attaches.' : '✓ Resolution passed aSTF audit — applied.') : '△ aSTF ordered revision — composition shuffled, investigation continues.';
     else if (cell.verdict) motion.textContent = 'Resolution filed: ' + cell.verdict.type + (cell.verdict.policyRefs && cell.verdict.policyRefs.length ? ' · cites ' + cell.verdict.policyRefs.join(', ') : '') + ' — awaiting aSTF audit.';
     else motion.textContent = 'Resolution not yet filed — investigation ongoing.';
   }
@@ -5575,13 +5583,14 @@ function openJstfVerdictModal(cell) {
   var preAppealDir = (draft0 && draft0.appealDirection) || '';
   var isAppealModal = !!((cell && (cell.isAppeal || cell.appealOf)));
   openModal('<div class="sec">File Resolution — ' + (cell.targetName || cell.title) + '</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF passes a resolution as a single action: a policy directive to executing circles, system actions, or both combined. The resolution goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF passes a resolution as a single action: a policy directive to executing circles, system actions, or both combined. A verdict with no directive and no actions records exoneration — claims found insignificant. The resolution goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
     '<div class="form-group"><label class="form-label">Verdict — the resolution</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review...">' + esc(preDesc) + '</textarea></div>' +
     '<div class="form-group"><label class="form-label">Cited policy resolutions (select from passed resolutions)</label><div id="jstf-verdict-cites" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div><button type="button" class="btn btn-sm" onclick="openPolicyPickerModal()">+ Add policy resolution</button></div>' +
     '<div class="form-group"><label class="form-label">Responsible circles for execution (policy directive)</label><select multiple class="form-input" id="jstf-verdict-exec" size="5" style="width:100%;font-size:12px">' + execOpts + '</select><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Hold Ctrl/Cmd to select several.</div></div>' +
     '<div class="form-group"><label class="form-label">System actions (executed on approval)</label><div id="jstf-verdict-actions"></div><button type="button" class="btn btn-sm" onclick="jstfAddSysAction()">+ Add system action</button></div>' +
     (isAppealModal ? '<div class="form-group"><label class="form-label">Appeal direction</label><select class="form-input" id="jstf-appeal-direction"><option value="">Select…</option><option value="uphold"' + (preAppealDir === 'uphold' ? ' selected' : '') + '>Uphold original</option><option value="overturn"' + (preAppealDir === 'overturn' ? ' selected' : '') + '>Overturn (supersede original)</option></select></div>' : '') +
     '<div class="form-group"><label class="form-label">Findings</label><textarea class="msg-input" rows="3" id="jstf-verdict-findings" placeholder="Evidence summary and conclusions...">' + esc(preFindings) + '</textarea></div>' +
+    '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Saving a draft resets team endorsements — re-endorse after edits.</div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-sm" onclick="saveJstfVerdictDraft()">Save Draft</button><button class="btn btn-danger btn-sm" onclick="submitJstfVerdict(\'' + cell.id + '\')">Finalise &amp; Forward to aSTF</button></div>',
     { size: 'md' });
   renderJstfSysActions();
@@ -5606,7 +5615,7 @@ function submitJstfVerdict(cellId) {
   var appealDir = appealDirEl ? appealDirEl.value : '';
   var findings = (document.getElementById('jstf-verdict-findings').value || '').trim();
   if (!desc) { toast('State the verdict.', 'error'); return; }
-  if (!policyRefs.length && !sysActs.length) { toast('Add a policy directive or at least one system action.', 'error'); return; }
+  if (!policyRefs.length && !sysActs.length && appealDirEl) { toast('Add a policy directive or at least one system action.', 'error'); return; }
   if (appealDirEl && !appealDir) { toast('Choose whether this appeal upholds or overturns the original.', 'error'); return; }
   confirmModal('Finalise and forward to blind aSTF audit? The aSTF weighs the decision, never the jSTF members.', function() {
     SolisApi.fileJstfVerdict(cellId, { description: desc, policyRefs: policyRefs, executingCircles: execs, systemActions: sysActs, appealDirection: appealDir || null, findings: findings }).then(function(r) {
@@ -5622,6 +5631,7 @@ function fileJstfVerdictFlow() {
   var cell = getActiveJstfCell();
   if (!cell) { toast('No active jSTF case.', 'error'); return; }
   if (!jstfTeamView(cell) && !jstfClientIsSteward()) { toast('Only the team or stewards may work on a verdict.', 'error'); return; }
+  if (cell.verdict || cell.status !== 'Under Investigation') { toast('Case is not open for a new verdict.', 'error'); return; }
   openJstfVerdictModal(cell);
 }
 
@@ -5643,7 +5653,7 @@ function renderJstfPanel() {
     + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Target: <strong>' + (cell.targetName || '') + '</strong>' + (cell.targetIsSteward ? ' · steward' : ' · member') + (cell.revisionOf ? ' · recomposed' : '') + '</div>';
   html += '<div style="font-size:10px;font-family:var(--mono);color:var(--text-tertiary);margin-bottom:8px">Team: ' + (cell.team || []).map(function(t){ return t.name + ' (' + t.initials + ')'; }).join(' · ') + '</div>';
   if (verdict) {
-    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--text-secondary)">Resolution:</span> <strong>' + verdict.type + '</strong> · ' + verdict.description + (verdict.policyRefs && verdict.policyRefs.length ? ' · cites ' + verdict.policyRefs.join(', ') : '') + '</div>';
+    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--text-secondary)">' + (verdict.type === 'exonerating' ? 'Exoneration' : 'Resolution') + ':</span> <strong>' + verdict.type + '</strong> · ' + verdict.description + (verdict.policyRefs && verdict.policyRefs.length ? ' · cites ' + verdict.policyRefs.join(', ') : '') + '</div>';
   }
   if (resolution.status === 'Applied') {
     html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--green);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--green)">✓ Resolution applied</span>' + ((resolution.implementation || {}).actions || []).map(function(a){ return '<div>' + a + '</div>'; }).join('') + '</div>';
@@ -5855,6 +5865,11 @@ function updateDelibDecisionButtons(cell) {
 function openSettingsModal() {
   document.getElementById('settings-modal').classList.add('active');
   document.body.classList.add('modal-open');
+  var ss = (typeof MOCK !== 'undefined' && MOCK && MOCK.systemSettings) || {};
+  var setNum = function(id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; };
+  setNum('settings-stf-vstf-duration', ss.vstfDurationDays);
+  setNum('settings-stf-astf-duration', ss.astfDurationDays);
+  setNum('settings-stf-jstf-duration', ss.jstfDurationDays);
 }
 
 function closeSettingsModal() {
@@ -6088,17 +6103,21 @@ function applySettingsSnapshot(snapshot) {
   var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   if (snapshot.type === 'system') {
     var s = snapshot.settings || {};
-    if (s.stf && MOCK.systemSettings) {
-      Object.keys(s.stf).forEach(function(k) { MOCK.systemSettings.stf[k] = s.stf[k]; });
-    }
-    if (s.quorum && MOCK.systemSettings) {
-      Object.keys(s.quorum).forEach(function(k) { MOCK.systemSettings.quorum[k] = s.quorum[k]; });
-    }
-    if (s.circles && MOCK.systemSettings) {
-      Object.keys(s.circles).forEach(function(k) { MOCK.systemSettings.circles[k] = s.circles[k]; });
-    }
-    if (s.deliberation && MOCK.systemSettings) {
-      Object.keys(s.deliberation).forEach(function(k) { MOCK.systemSettings.deliberation[k] = s.deliberation[k]; });
+    if (!MOCK.systemSettings) MOCK.systemSettings = {};
+    ['stf', 'quorum', 'circles', 'deliberation'].forEach(function(sec) {
+      if (s[sec]) {
+        MOCK.systemSettings[sec] = MOCK.systemSettings[sec] || {};
+        Object.keys(s[sec]).forEach(function(k) { MOCK.systemSettings[sec][k] = s[sec][k]; });
+      }
+    });
+    // Durations take real effect server-side: persist the STF ones so the
+    // enforcement paths read them from system_settings.
+    if (s.stf && typeof SolisApi !== 'undefined' && SolisApi.saveSystemSettings) {
+      var persist = {};
+      if (s.stf.jstfDurationDays != null) persist.jstf_duration_days = s.stf.jstfDurationDays;
+      if (s.stf.astfDurationDays != null) persist.astf_duration_days = s.stf.astfDurationDays;
+      if (s.stf.vstfDurationDays != null) persist.vstf_duration_days = s.stf.vstfDurationDays;
+      if (Object.keys(persist).length) SolisApi.saveSystemSettings(persist);
     }
   } else if (snapshot.type === 'circle') {
     var s = snapshot.settings || {};
@@ -7307,6 +7326,7 @@ function submitSystemProposal() {
       astfAssessors: parseInt(document.getElementById('settings-stf-astf-assessors').value) || 3,
       vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
       astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
+      jstfDurationDays: parseInt(document.getElementById('settings-stf-jstf-duration').value) || 30,
       pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
     };
   } else if (target === 'quorum') {
@@ -11237,7 +11257,7 @@ function renderDelibOrigin(cell, container) {
     var snapSettings = snap.settings || {};
     var targetLabel = snap.target ? snap.target.charAt(0).toUpperCase() + snap.target.slice(1) : 'System';
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -11250,7 +11270,7 @@ function renderDelibOrigin(cell, container) {
     var sectionLabels = { stf: 'STF Configuration', quorum: 'Quorum Thresholds', circles: 'Circle Governance', deliberation: 'Deliberation Defaults' };
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',

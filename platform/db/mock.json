@@ -4374,7 +4374,10 @@
     "cooloffMonths": 6,
     "pAstfCycleMonths": 6,
     "autoExpireCircles": false,
-    "defaultCircleExpiryMonths": 24
+    "defaultCircleExpiryMonths": 24,
+    "jstfDurationDays": 30,
+    "astfDurationDays": 10,
+    "vstfDurationDays": 14
   },
   "policies": [
     {
