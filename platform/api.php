@@ -211,7 +211,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['participatingCircles'] = array_values(array_filter(array_map(function($cc) { return ($cc['circle_id'] || $cc['votes']) ? ['id' => $cc['circle_id'], 'name' => $cc['name'], 'role' => $cc['role'], 'votes' => $cc['votes']] : null; }, $ccs)));
         $cell['messages'] = array_map(function($m) { $msg = ['author' => $m['author'], 'initials' => $m['initials'], 'text' => $m['text'], 'time' => $m['time']]; if ($m['color'] !== null) $msg['color'] = $m['color']; return $msg; }, $msgByCell[$c['id']] ?? []);
         $cell['tasks'] = array_map(function($t) { return ['id' => $t['task_id'] ?: 't' . $t['id'], 'label' => $t['label'], 'status' => $t['status'], 'locked' => (bool)$t['locked'], 'assignee' => $t['assignee']]; }, $taskByCell[$c['id']] ?? []);
-        $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status']]; }, $objByCell[$c['id']] ?? []);
+        $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status'], 'assessors' => $o['assessors'] !== null ? (int)$o['assessors'] : null, 'deadline' => $o['deadline']]; }, $objByCell[$c['id']] ?? []);
         $cell['draftVotes'] = $draftVotesByCell[$c['id']] ?? [];
         $cell['team'] = array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus']]; }, $teamByCell[$c['id']] ?? []);
         if ($c['blind'] && !$isSteward) {
@@ -613,12 +613,22 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
     $body = readBody(); $verdict = trim((string)($body->verdict ?? ''));
     if (!in_array($verdict, ['approved', 'rejected', 'revision'])) send(400, ['error' => 'verdict must be approved, rejected, or revision']);
     $rubric = $body->rubric ?? new \stdClass();
-    $jur = min(9, max(0, (int)($rubric->jurisdiction ?? 0))); $dep = min(5, max(0, (int)($rubric->depth ?? 0)));
-    $ali = min(10, max(0, (int)($rubric->alignment ?? 0))); $com = min(6, max(0, (int)($rubric->competence ?? 0)));
-    $total = $jur + $dep + $ali + $com;
-    $rationale = trim((string)($body->rationale ?? '')); $flags = is_array($body->flags ?? null) ? $body->flags : [];
     $src = pJson($cell['source'] ?? '{}') ?: [];
-    $ar = ['verdict' => $verdict, 'rationale' => $rationale, 'flags' => $flags, 'rubric' => ['jurisdiction' => $jur, 'depth' => $dep, 'alignment' => $ali, 'competence' => $com, 'total' => $total], 'adjudicator' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    // Judicial audits are scored on justice, not motioncraft.
+    $judicial = (($src['type'] ?? '') === 'judicial-audit');
+    if ($judicial) {
+        $dd = min(9, max(0, (int)($rubric->dueDiligence ?? 0))); $ju = min(9, max(0, (int)($rubric->justice ?? 0)));
+        $pr = min(6, max(0, (int)($rubric->proportionality ?? 0))); $in = min(6, max(0, (int)($rubric->integrity ?? 0)));
+        $total = $dd + $ju + $pr + $in;
+        $rubOut = ['dueDiligence' => $dd, 'justice' => $ju, 'proportionality' => $pr, 'integrity' => $in, 'total' => $total];
+    } else {
+        $jur = min(9, max(0, (int)($rubric->jurisdiction ?? 0))); $dep = min(5, max(0, (int)($rubric->depth ?? 0)));
+        $ali = min(10, max(0, (int)($rubric->alignment ?? 0))); $com = min(6, max(0, (int)($rubric->competence ?? 0)));
+        $total = $jur + $dep + $ali + $com;
+        $rubOut = ['jurisdiction' => $jur, 'depth' => $dep, 'alignment' => $ali, 'competence' => $com, 'total' => $total];
+    }
+    $rationale = trim((string)($body->rationale ?? '')); $flags = is_array($body->flags ?? null) ? $body->flags : [];
+    $ar = ['verdict' => $verdict, 'rationale' => $rationale, 'flags' => $flags, 'rubric' => $rubOut, 'rubricKind' => $judicial ? 'judicial' : 'motion', 'adjudicator' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun("UPDATE cells SET status = 'Verdict Filed', resolution = ?, blind = 0 WHERE id = ?", [json_encode($ar), $cellId]);
     dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", ['stf-' . $cellId]);
     if ($flags) {
@@ -737,6 +747,9 @@ if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'xSTF Cell') send(400, ['error' => 'Not an xSTF cell']);
+    $csrc = pJson($cell['source'] ?? '{}') ?: [];
+    // Isolated investigator paths: only the assigned investigator files here.
+    if (($csrc['type'] ?? '') === 'jstf-investigation' && !dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the assigned investigator may file on this path']);
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $content = trim((string)($body->content ?? '')); $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $dels = $meta['deliverables'] ?? [];
@@ -1287,8 +1300,12 @@ if (preg_match('/^\/cells\/([^\/]+)\/questions$/', $cleanPath, $m)) {
     if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may manage questions']);
     $body = readBody(); $label = trim((string)($body->label ?? ''));
     if (!$label) send(400, ['error' => 'label required']);
+    $assessors = isset($body->assessors) ? max(1, (int)$body->assessors) : 1;
+    $due = trim((string)($body->deadline ?? ''));
+    if ($due !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $due)) send(400, ['error' => 'deadline must be YYYY-MM-DD']);
+    if ($due === '') $due = $cell['deadline'] ?? date('Y-m-d', time() + 30 * 86400);
     $objId = 'q-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    dbRun('INSERT INTO cell_objectives (cell_id, obj_id, label, status) VALUES (?,?,?,?)', [$cId, $objId, $label, 'open']);
+    dbRun('INSERT INTO cell_objectives (cell_id, obj_id, label, status, assessors, deadline) VALUES (?,?,?,?,?,?)', [$cId, $objId, $label, 'open', $assessors, $due]);
     send(201, ['ok' => true, 'objId' => $objId]);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/questions\/([^\/]+)$/', $cleanPath, $m)) {
@@ -1300,8 +1317,14 @@ if (preg_match('/^\/cells\/([^\/]+)\/questions\/([^\/]+)$/', $cleanPath, $m)) {
     if (($cell['status'] ?? '') !== 'Under Investigation') send(400, ['error' => 'Case is closed']);
     if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may manage questions']);
     $body = readBody(); $status = trim((string)($body->status ?? ''));
-    if (!in_array($status, ['open', 'met', 'at-risk'])) send(400, ['error' => 'status must be open, met or at-risk']);
-    dbRun('UPDATE cell_objectives SET status = ? WHERE cell_id = ? AND obj_id = ?', [$status, $cId, $qId]);
+    if ($status !== '' && !in_array($status, ['open', 'met', 'at-risk'])) send(400, ['error' => 'status must be open, met or at-risk']);
+    $sets = []; $args = [];
+    if ($status !== '') { $sets[] = 'status = ?'; $args[] = $status; }
+    if (isset($body->assessors)) { $sets[] = 'assessors = ?'; $args[] = max(1, (int)$body->assessors); }
+    if (isset($body->deadline)) { $dd = trim((string)$body->deadline); if ($dd !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dd)) send(400, ['error' => 'deadline must be YYYY-MM-DD']); $sets[] = 'deadline = ?'; $args[] = $dd !== '' ? $dd : null; }
+    if (!$sets) send(400, ['error' => 'nothing to update']);
+    $args[] = $cId; $args[] = $qId;
+    dbRun('UPDATE cell_objectives SET ' . implode(', ', $sets) . ' WHERE cell_id = ? AND obj_id = ?', $args);
     send(200, ['ok' => true, 'objId' => $qId, 'status' => $status]);
 }
 
@@ -1322,26 +1345,36 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     if (!$qId) send(400, ['error' => 'questionId required']);
     $qrow = dbGet('SELECT * FROM cell_objectives WHERE cell_id = ? AND obj_id = ?', [$cId, $qId]);
     if (!$qrow) send(404, ['error' => 'Question not found on this case']);
-    foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; if (($cs2['questionId'] ?? null) === $qId) send(409, ['error' => 'This question already has an open probe']); }
+    // The question mandates how many eyes and when: one isolated probe per
+    // investigator, each due on the question deadline.
+    $mandate = max(1, (int)($qrow['assessors'] ?? 1));
+    $qDue = $qrow['deadline'] ?? $cell['deadline'] ?? date('Y-m-d', time() + 30 * 86400);
     $team = is_array($body->team ?? null) ? $body->team : [];
     $inv = dbAll('SELECT name, initials FROM cell_team WHERE cell_id = ?', [$cId]);
-    if (!$team) $team = array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $inv);
+    if (!$team) $team = array_slice(array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $inv), 0, $mandate);
     else {
         $team = array_values(array_filter(array_map(function($t) { $a = (array)$t; $n = trim((string)($a['name'] ?? '')); $i = trim((string)($a['initials'] ?? '')); return ($n !== '' && $i !== '') ? ['name' => $n, 'initials' => $i] : null; }, $team)));
         if (!$team) send(400, ['error' => 'team must list investigators']);
     }
+    if (count($team) !== $mandate) send(400, ['error' => 'This question mandates ' . $mandate . ' investigator' . ($mandate === 1 ? '' : 's') . ' (' . count($team) . ' selected)']);
     $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $brief = trim((string)($body->brief ?? ''));
     $qlabel = $qrow['label'] ?? '';
-    $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
-    $dSpecs = ['name' => 'Answer the mandate question', 'description' => ($brief !== '' ? $brief . "\n\n" : '') . "Mandate (question):\n" . $qlabel, 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
-    dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId), 'Active', count($team) ?: 3, $cell['circle'] ?? '', 1, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, date('Y-m-d', time() + 30 * 86400)]);
-    foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
-    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', 'jSTF investigation probe', $cell['circle'] ?? '', 'active', 'Active', 'xSTF investigation — ' . ($meta['targetName'] ?? ''), date('Y-m-d', time() + 30 * 86400)]);
-    $byQ = $meta['xstfByQuestion'] ?? []; $byQ[$qId] = $xId; $meta['xstfByQuestion'] = $byQ;
+    $made = [];
+    foreach ($team as $t) {
+        foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; $tm2 = dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cc2['id'], $t['initials']]); if (($cs2['questionId'] ?? null) === $qId && $tm2) send(409, ['error' => $t['name'] . ' already has an open probe on this question']); }
+        $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $t['initials'] ?: 'x'));
+        $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'investigator' => $t['name'], 'investigatorInitials' => $t['initials'], 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
+        $dSpecs = ['name' => 'Answer the mandate question', 'description' => ($brief !== '' ? $brief . "\n\n" : '') . "Mandate (question):\n" . $qlabel, 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
+        dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId) . ' — ' . $t['name'], 'Active', 1, $cell['circle'] ?? '', 1, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, $qDue]);
+        dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
+        dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', 'jSTF investigation probe', $cell['circle'] ?? '', 'active', 'Active', 'xSTF investigation — ' . ($meta['targetName'] ?? '') . ' — ' . $t['name'], $qDue]);
+        $made[] = $xId;
+    }
+    $byQ = $meta['xstfByQuestion'] ?? []; $prevQ = isset($byQ[$qId]) ? (is_array($byQ[$qId]) ? $byQ[$qId] : [$byQ[$qId]]) : []; $byQ[$qId] = array_values(array_unique(array_merge($prevQ, $made)));
+    $meta['xstfByQuestion'] = $byQ;
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
-    send(201, ['ok' => true, 'xstfId' => $xId]);
+    send(201, ['ok' => true, 'xstfId' => $made[0], 'xstfIds' => $made]);
 }
 
 // ---- jSTF investigation: accept xSTF findings into the case ----

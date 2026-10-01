@@ -246,7 +246,7 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `cell_objectives` (
         `id` INT AUTO_INCREMENT PRIMARY KEY, `cell_id` VARCHAR(255) NOT NULL,
-        `obj_id` TEXT, `label` TEXT, `status` TEXT
+        `obj_id` TEXT, `label` TEXT, `status` TEXT, `assessors` INT, `deadline` DATE
     )",
 
     "CREATE TABLE IF NOT EXISTS `cell_team` (
@@ -739,9 +739,10 @@ foreach ($cells as $c) {
     if ($taskRows) { dbRun('DELETE FROM cell_tasks WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_tasks', $taskRows, ['cell_id','task_id','label','status','locked','assignee']); }
     $objRows = array_map(fn($o) => [
         'cell_id' => $c['id'], 'obj_id' => $o['id'] ?? null, 'label' => $o['label'] ?? null,
-        'status' => $o['status'] ?? null,
+        'status' => $o['status'] ?? null, 'assessors' => $o['assessors'] ?? null,
+        'deadline' => $o['deadline'] ?? null,
     ], $c['objectives'] ?? []);
-    if ($objRows) { dbRun('DELETE FROM cell_objectives WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status']); }
+    if ($objRows) { dbRun('DELETE FROM cell_objectives WHERE cell_id = ?', [$c['id']]); insert($db, 'cell_objectives', $objRows, ['cell_id','obj_id','label','status','assessors','deadline']); }
 }
 
 // Cell circles (participation rows + circle badge rows consumed by GET /cells)

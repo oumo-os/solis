@@ -877,7 +877,8 @@
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Questions</div>
           <div id="jstf-questions"><div style="font-size:11px;color:var(--text-tertiary)">No questions framed yet.</div></div>
           <div id="jstf-question-add" style="display:none;margin-top:8px">
-            <div class="flex gap-2"><input class="form-input" id="jstf-question-input" placeholder="Frame an investigation question..." style="flex:1;font-size:11px"><button class="btn btn-sm" onclick="addJstfQuestion()">Add</button></div>
+            <div class="flex gap-2" style="align-items:center;flex-wrap:wrap"><input class="form-input" id="jstf-question-input" placeholder="Frame an investigation question..." style="flex:1;min-width:160px;font-size:11px"><input class="form-input" id="jstf-question-eyes" type="number" min="1" max="9" value="1" title="How many eyes (investigators) on this question" style="width:60px;font-size:11px"><input class="form-input" id="jstf-question-due" type="date" title="When the reports must be delivered" style="font-size:11px"><button class="btn btn-sm" onclick="addJstfQuestion()">Add</button></div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Eyes = investigators assigned · due = report deadline (defaults to case deadline).</div>
           </div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">Evidence</div>
           <div id="jstf-evidence" style="font-size:11px;color:var(--text-secondary);line-height:1.8">
@@ -941,9 +942,9 @@
         </div>
         <div id="astf-backlink" style="display:none;margin:-8px 0 16px"></div>
         <div id="astf-motion-xref" style="margin:-8px 0 16px"></div>
-        <div class="sec">4-Dimension Rubric (30 pts max)</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
-        <table class="tbl" style="margin-bottom:12px">
+        <div class="sec" id="astf-rubric-sec">4-Dimension Rubric (30 pts max)</div>
+        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px" id="astf-rubric-desc">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
+        <table class="tbl" style="margin-bottom:12px" id="astf-rubric-table">
           <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
           <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
           <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
@@ -3621,8 +3622,9 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
 function wireAstfRubric() {
   var view = document.getElementById('view-stf-astf');
   if (!view) return;
-  var ids = ['astf-s-jur', 'astf-s-depth', 'astf-s-align', 'astf-s-comp'];
-  var maxes = [9, 5, 10, 6];
+  var judicial = !!document.getElementById('astf-s-dd');
+  var ids = judicial ? ['astf-s-dd', 'astf-s-ju', 'astf-s-pr', 'astf-s-in'] : ['astf-s-jur', 'astf-s-depth', 'astf-s-align', 'astf-s-comp'];
+  var maxes = judicial ? [9, 9, 6, 6] : [9, 5, 10, 6];
   var sync = function() {
     var total = 0;
     ids.forEach(function(id, i) {
@@ -3633,13 +3635,12 @@ function wireAstfRubric() {
     var t = document.getElementById('astf-total');
     if (t) t.textContent = total + ' / 30';
   };
-  if (!view._rubricWired) {
-    view._rubricWired = true;
-    ids.forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.addEventListener('input', sync);
-    });
-  }
+  // (Re)attach every render: inputs are rebuilt on rubric switches, and
+  // repeat attaches are harmless — sync is idempotent.
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', sync);
+  });
   sync();
 }
 
@@ -3728,9 +3729,19 @@ function renderAstfMotion() {
     setCircle('Judicial Circle', 'JC', 'Mandated: Integrity audit');
     setText('astf-type-cat', 'system (judicial audit)');
     setText('astf-type-impl', 'Judicial Circle');
+    setText('astf-rubric-sec', 'Justice Rubric (30 pts max)');
+    setText('astf-rubric-desc', 'Score each dimension. The rubric guides your judgment — the verdict is filed separately.');
+    var rtJ = document.getElementById('astf-rubric-table');
+    if (rtJ) rtJ.innerHTML = astfStaticRubricRows('judicial');
+    wireAstfRubric();
     return;
   }
   if (bl) { bl.style.display = 'none'; bl.innerHTML = ''; }
+  setText('astf-rubric-sec', '4-Dimension Rubric (30 pts max)');
+  setText('astf-rubric-desc', 'Score each dimension. The rubric guides your judgment — the verdict is filed separately.');
+  var rtM = document.getElementById('astf-rubric-table');
+  if (rtM) rtM.innerHTML = astfStaticRubricRows('motion');
+  wireAstfRubric();
   var origin = (typeof cellsById !== 'undefined' && src.originCellId && cellsById[src.originCellId]) || null;
   if (!origin) {
     for (var k0 = 0; k0 < cells.length; k0++) {
@@ -3773,6 +3784,31 @@ function renderAstfMotion() {
   showFlags(names, 'No deliberation participants recorded for this motion.');
 }
 
+// Static-card rubric rows: motion craft for deliberation cells, justice
+// dimensions for judicial audits. Both sum to 30.
+function astfStaticRubricRows(kind) {
+  if (kind === 'judicial') {
+    return '<tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>' +
+      '<tr><td style="font-weight:500">Due diligence</td><td class="m">9</td><td><input type="number" id="astf-s-dd" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was the investigation complete and properly run?</td></tr>' +
+      '<tr><td style="font-weight:500">Justice of verdict</td><td class="m">9</td><td><input type="number" id="astf-s-ju" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Right outcome on the evidence?</td></tr>' +
+      '<tr><td style="font-weight:500">Proportionality</td><td class="m">6</td><td><input type="number" id="astf-s-pr" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the sanction fit — or dismissal hold?</td></tr>' +
+      '<tr><td style="font-weight:500">Integrity of process</td><td class="m">6</td><td><input type="number" id="astf-s-in" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Blind intact, no interference?</td></tr>';
+  }
+  return '<tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>' +
+    '<tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>' +
+    '<tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>' +
+    '<tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" id="astf-s-align" value="0" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>' +
+    '<tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" id="astf-s-comp" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>';
+}
+function astfCollectStaticRubric() {
+  var num = function(id) { var el = document.getElementById(id); return el ? (Number(el.value) || 0) : 0; };
+  if (document.getElementById('astf-s-dd')) {
+    var rubric = { dueDiligence: num('astf-s-dd'), justice: num('astf-s-ju'), proportionality: num('astf-s-pr'), integrity: num('astf-s-in') };
+    return { rubric: rubric, total: rubric.dueDiligence + rubric.justice + rubric.proportionality + rubric.integrity };
+  }
+  var m = { jurisdiction: num('astf-s-jur'), depth: num('astf-s-depth'), alignment: num('astf-s-align'), competence: num('astf-s-comp') };
+  return { rubric: m, total: m.jurisdiction + m.depth + m.alignment + m.competence };
+}
 function submitStaticAstfAdjudication() {
   var cells = (MOCK && MOCK.cells) || [];
   var cell = null;
@@ -3787,8 +3823,9 @@ function submitStaticAstfAdjudication() {
   }
   if (!cell) { toast('No open aSTF cell to file against.', 'error'); return; }
   var num = function(id) { var el = document.getElementById(id); return el ? (Number(el.value) || 0) : 0; };
-  var rubric = { jurisdiction: num('astf-s-jur'), depth: num('astf-s-depth'), alignment: num('astf-s-align'), competence: num('astf-s-comp') };
-  var total = rubric.jurisdiction + rubric.depth + rubric.alignment + rubric.competence;
+  var got = astfCollectStaticRubric();
+  var rubric = got.rubric;
+  var total = got.total;
   if (total > 30) { toast('Rubric total cannot exceed 30.', 'error'); return; }
   var rationale = ((document.getElementById('astf-s-rationale') || {}).value || '').trim();
   if (!rationale) { toast('Rationale is required.', 'error'); return; }
@@ -3840,13 +3877,26 @@ function doAstfVerdict(verdict) {
   var cell = cellsById[cellId];
   if (!cell || cell.type !== 'aSTF Cell') { toast('Not an aSTF cell.', 'error'); return; }
   if (cell.status === 'Verdict Filed') { toast('Verdict already filed.', 'error'); return; }
-  var rubric = {
-    jurisdiction: Number(document.getElementById('astf-r-jur').value) || 0,
-    depth: Number(document.getElementById('astf-r-depth').value) || 0,
-    alignment: Number(document.getElementById('astf-r-align').value) || 0,
-    competence: Number(document.getElementById('astf-r-comp').value) || 0
-  };
-  var total = rubric.jurisdiction + rubric.depth + rubric.alignment + rubric.competence;
+  var rubric;
+  var judicial = cell && ((cell.source || {}).type === 'judicial-audit') && document.getElementById('astf-j-dd');
+  if (judicial) {
+    rubric = {
+      dueDiligence: Number(document.getElementById('astf-j-dd').value) || 0,
+      justice: Number(document.getElementById('astf-j-ju').value) || 0,
+      proportionality: Number(document.getElementById('astf-j-pr').value) || 0,
+      integrity: Number(document.getElementById('astf-j-in').value) || 0
+    };
+  } else {
+    rubric = {
+      jurisdiction: Number(document.getElementById('astf-r-jur').value) || 0,
+      depth: Number(document.getElementById('astf-r-depth').value) || 0,
+      alignment: Number(document.getElementById('astf-r-align').value) || 0,
+      competence: Number(document.getElementById('astf-r-comp').value) || 0
+    };
+  }
+  var total = rubric.dueDiligence != null
+    ? rubric.dueDiligence + rubric.justice + rubric.proportionality + rubric.integrity
+    : rubric.jurisdiction + rubric.depth + rubric.alignment + rubric.competence;
   if (total > 30) { toast('Rubric total cannot exceed 30.', 'error'); return; }
   var rationale = (document.getElementById('astf-rationale').value || '').trim();
   if (!rationale) { toast('Rationale is required.', 'error'); return; }
@@ -4943,9 +4993,19 @@ function jstfLinkedXstfs(cell) {
     return c.type === 'xSTF Cell' && (c.commissionedBy === cell.id || ((c.source || {}).jstfId === cell.id));
   });
 }
+function jstfXstfsForQuestion(cell, qid) {
+  return jstfLinkedXstfs(cell).filter(function(c) { return (((c.source || {}).questionId) || null) === qid; });
+}
 function jstfXstfForQuestion(cell, qid) {
-  var list = jstfLinkedXstfs(cell).filter(function(c) { return (((c.source || {}).questionId) || null) === qid; });
+  var list = jstfXstfsForQuestion(cell, qid);
   return list.length ? list[list.length - 1] : null;
+}
+function jstfDueText(deadline) {
+  if (!deadline) return null;
+  var days = Math.ceil((new Date(deadline + 'T23:59:59') - Date.now()) / 86400000);
+  if (days < 0) return { txt: 'overdue', col: 'var(--red)' };
+  if (days === 0) return { txt: 'due today', col: 'var(--amber)' };
+  return { txt: days + 'd left', col: days <= 7 ? 'var(--amber)' : 'var(--text-tertiary)' };
 }
 function renderJstfQuestions(cell) {
   var host = document.getElementById('jstf-questions');
@@ -4959,24 +5019,34 @@ function renderJstfQuestions(cell) {
     var st = q.status || 'open';
     var sym = st === 'met' ? '✓' : st === 'at-risk' ? '△' : '—';
     var col = st === 'met' ? 'var(--green)' : st === 'at-risk' ? 'var(--gold)' : 'var(--text-tertiary)';
-    var x = jstfXstfForQuestion(cell, q.id);
-    var probeBadge = x ? ' <span class="tag ' + (x.status === 'Completed' ? 'tag-green' : 'tag-purple') + '" style="font-size:8px">probe: ' + esc(x.status || 'open') + '</span>' : '';
-    var inner = '';
-    if (x) {
-      var dels = x.deliverables || [];
-      inner += '<div style="margin:4px 0 6px">' + xrefChip('cell', x.id, x.title || 'xSTF probe', { color: 'var(--teal)' }) + '</div>';
-      inner += dels.length ? dels.map(function(d) {
-        var done = acceptedIds.indexOf(d.id) >= 0;
-        var mine = accepted.filter(function(f) { return f.deliverableId === d.id; })[0];
-        return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
-          + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + esc(String(d.content || '').slice(0, 220)) + '</div>'
-          + ((canEdit && !done) ? '<div style="margin-top:6px"><button class="btn btn-sm" onclick="acceptJstfFinding(\'' + x.id + '\',\'' + d.id + '\')">Accept as answer</button></div>' : '')
-          + (mine ? '<div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Accepted by ' + esc(mine.acceptedBy || '') + '</div>' : '') + '</div>';
-      }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">Probe commissioned — awaiting its report.</div>';
+    var xs = jstfXstfsForQuestion(cell, q.id);
+    var live = xs.filter(function(x) { return x.status !== 'Completed'; });
+    var eyes = Math.max(1, parseInt(q.assessors) || 1);
+    var due = jstfDueText(q.deadline);
+    var mandate = '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:4px">' + eyes + ' eye' + (eyes === 1 ? '' : 's') + (q.deadline ? ' · due ' + esc(q.deadline) + (due ? ' <span style="color:' + due.col + '">(' + due.txt + ')</span>' : '') : '') + '</div>';
+    var probeBadge = xs.length ? ' <span class="tag ' + (live.length ? 'tag-purple' : 'tag-green') + '" style="font-size:8px">' + xs.length + ' path' + (xs.length === 1 ? '' : 's') + '</span>' : '';
+    var inner = mandate;
+    if (xs.length) {
+      inner += xs.map(function(x) {
+        var inv = ((x.source || {}).investigator) || (((x.team || [])[0] || {}).name) || '';
+        var xd = jstfDueText(x.deadline);
+        var dels = x.deliverables || [];
+        var head = '<div style="margin:4px 0 6px">' + xrefChip('cell', x.id, x.title || 'xSTF probe', { color: 'var(--teal)' }) + ' <span class="tag ' + (x.status === 'Completed' ? 'tag-green' : 'tag-purple') + '" style="font-size:8px">' + esc(inv) + ' · ' + esc(x.status || 'open') + '</span>' + (xd ? ' <span style="font-family:var(--mono);font-size:9px;color:' + xd.col + '">' + xd.txt + '</span>' : '') + '</div>';
+        var body = dels.length ? dels.map(function(d) {
+          var done = acceptedIds.indexOf(d.id) >= 0;
+          var mine = accepted.filter(function(f) { return f.deliverableId === d.id; })[0];
+          return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
+            + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + esc(String(d.content || '').slice(0, 220)) + '</div>'
+            + ((canEdit && !done) ? '<div style="margin-top:6px"><button class="btn btn-sm" onclick="acceptJstfFinding(\'' + x.id + '\',\'' + d.id + '\')">Accept as answer</button></div>' : '')
+            + (mine ? '<div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Accepted by ' + esc(mine.acceptedBy || '') + '</div>' : '') + '</div>';
+        }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">Path commissioned — awaiting its report.</div>';
+        return '<div style="border-top:1px solid var(--border-subtle);padding-top:4px;margin-top:4px">' + head + body + '</div>';
+      }).join('');
+      if (canEdit && live.length < eyes) inner += '<div style="margin-top:6px"><button class="btn btn-sm" onclick="openCommissionModal(\'' + String(q.id).replace(/'/g, "\\'") + '\')">Commission path (' + live.length + '/' + eyes + ' filled)</button></div>';
     } else if (canEdit) {
-      inner = '<div style="margin-top:6px"><button class="btn btn-sm" onclick="openCommissionModal(\'' + String(q.id).replace(/'/g, "\\'") + '\')">Commission xSTF probe</button></div>';
+      inner += '<div style="margin-top:6px"><button class="btn btn-sm" onclick="openCommissionModal(\'' + String(q.id).replace(/'/g, "\\'") + '\')">Commission xSTF probe</button></div>';
     } else {
-      inner = '<div style="font-size:11px;color:var(--text-tertiary)">No probe commissioned for this question.</div>';
+      inner += '<div style="font-size:11px;color:var(--text-tertiary)">No probe commissioned for this question.</div>';
     }
     return '<details style="margin-bottom:8px;border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;background:var(--surface-raised)"><summary style="cursor:pointer;font-size:12px;color:var(--text);display:flex;gap:6px;align-items:flex-start;list-style:none"><span style="flex:1">' + esc(q.label) + '</span>' + probeBadge + '<span class="jstf-q-toggle" data-qid="' + esc(q.id) + '" data-st="' + st + '" style="color:' + col + ';font-size:12px;flex-shrink:0" title="Cycle status open/at-risk/met">' + sym + '</span></summary><div style="margin-top:6px">' + inner + '</div></details>';
   }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No questions framed yet.</div>';
@@ -5011,7 +5081,9 @@ function addJstfQuestion() {
   var inp = document.getElementById('jstf-question-input');
   var label = inp ? inp.value.trim() : '';
   if (!cell || !label) { toast('Write a question first.', 'error'); return; }
-  SolisApi.addJstfQuestion(cell.id, { label: label }).then(function(r) {
+  var eyesEl = document.getElementById('jstf-question-eyes');
+  var dueEl = document.getElementById('jstf-question-due');
+  SolisApi.addJstfQuestion(cell.id, { label: label, assessors: eyesEl ? Math.max(1, parseInt(eyesEl.value) || 1) : 1, deadline: dueEl && dueEl.value ? dueEl.value : (cell.deadline || '') }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Could not add: ' + ((r && r.error) || 'server error'), 'error'); return; }
     setTimeout(function() { window.location.reload(); }, 400);
   }).catch(function() { toast('Could not add. Is the server running?', 'error'); });
@@ -5040,12 +5112,15 @@ function openCommissionModal(qid) {
   var q = ((cell.objectives) || []).filter(function(x) { return x.id === qid; })[0];
   if (!q) { toast('Question not found.', 'error'); return; }
   var teamIni = (cell.team || []).map(function(t) { return t.initials; });
+  var mandate = Math.max(1, parseInt(q.assessors) || 1);
+  var picked = 0;
   var opts = jstfStewardOptions().map(function(m) {
-    var checked = teamIni.indexOf(m.initials) >= 0;
+    var checked = teamIni.indexOf(m.initials) >= 0 && picked < mandate;
+    if (checked) picked++;
     return '<label style="display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer;font-size:12px;color:var(--text-secondary)"><input type="checkbox" class="jstf-probe-member" data-name="' + esc(m.name) + '" data-ini="' + esc(m.initials) + '"' + (checked ? ' checked' : '') + '><span>' + esc(m.name) + ' <span style="color:var(--text-tertiary)">(' + esc(m.initials) + ')</span></span></label>';
   }).join('');
   openModal('<div class="sec">Commission xSTF Probe</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One question, one siloed probe team. The deliverable report becomes the answer.</span></div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One question, one siloed probe per investigator. Each path delivers its own report' + (q.deadline ? ' by ' + esc(q.deadline) : '') + '. This question mandates ' + mandate + ' eye' + (mandate === 1 ? '' : 's') + ' — select exactly ' + mandate + '.</span></div>' +
     '<div class="form-group"><label class="form-label">Brief for the probe team (optional)</label><textarea class="msg-input" rows="2" id="jstf-commission-brief" placeholder="Scope, constraints, deadlines..."></textarea></div>' +
     '<div class="form-group"><label class="form-label">jSTF-xSTF investigators (siloed team for this question)</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitCommission(\'' + String(qid).replace(/'/g, "\\'") + '\')">Commission Probe</button></div>',
@@ -11116,13 +11191,20 @@ function renderDelibCell(cellId) {
           '<span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Rubric: ' + rt + '/30</span>' +
           spawnBtn + '</div>';
       } else {
+        var isJudicial = ((cell.source || {}).type === 'judicial-audit');
+        var rubricHtml = isJudicial
+          ? '<div><label style="font-size:10px;color:var(--text-tertiary)">Due diligence (0–9)</label><input type="number" id="astf-j-dd" min="0" max="9" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Justice of verdict (0–9)</label><input type="number" id="astf-j-ju" min="0" max="9" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Proportionality (0–6)</label><input type="number" id="astf-j-pr" min="0" max="6" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Integrity of process (0–6)</label><input type="number" id="astf-j-in" min="0" max="6" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>'
+          : '<div><label style="font-size:10px;color:var(--text-tertiary)">Jurisdiction (0–9)</label><input type="number" id="astf-r-jur" min="0" max="9" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Depth/Effort (0–5)</label><input type="number" id="astf-r-depth" min="0" max="5" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Alignment/Conflict (0–10)</label><input type="number" id="astf-r-align" min="0" max="10" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+            '<div><label style="font-size:10px;color:var(--text-tertiary)">Competence (0–6)</label><input type="number" id="astf-r-comp" min="0" max="6" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>';
         decisionBar.innerHTML =
           '<div style="width:100%">' +
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">' +
-          '<div><label style="font-size:10px;color:var(--text-tertiary)">Jurisdiction (0–9)</label><input type="number" id="astf-r-jur" min="0" max="9" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
-          '<div><label style="font-size:10px;color:var(--text-tertiary)">Depth/Effort (0–5)</label><input type="number" id="astf-r-depth" min="0" max="5" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
-          '<div><label style="font-size:10px;color:var(--text-tertiary)">Alignment/Conflict (0–10)</label><input type="number" id="astf-r-align" min="0" max="10" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
-          '<div><label style="font-size:10px;color:var(--text-tertiary)">Competence (0–6)</label><input type="number" id="astf-r-comp" min="0" max="6" value="0" class="form-input" style="width:100%;font-size:11px;padding:4px"></div>' +
+          rubricHtml +
           '</div>' +
           '<textarea id="astf-rationale" placeholder="Rationale…" class="form-input" style="height:60px;resize:none;font-size:11px;margin-bottom:8px"></textarea>' +
           '<div class="flex gap-2">' +
