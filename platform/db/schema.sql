@@ -190,7 +190,9 @@ CREATE TABLE IF NOT EXISTS policies (
   status   TEXT,                   -- Enacted | Proposed | Repealed
   circle   TEXT,
   passed   TEXT,
-  category TEXT
+  category TEXT,
+  supersedes TEXT DEFAULT NULL,
+  upholds    TEXT DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS circle_activity (
@@ -300,7 +302,20 @@ CREATE TABLE IF NOT EXISTS draft_resolutions (
   action        TEXT,
   votes_nullified INTEGER DEFAULT 0,
   status        TEXT DEFAULT 'draft',   -- draft | submitted | crystallised
+  supersedes    TEXT DEFAULT NULL,
   UNIQUE(cell_id, res_id)
+);
+
+CREATE TABLE IF NOT EXISTS sanctions (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id       TEXT NOT NULL,
+  kind          TEXT NOT NULL,   -- ws_freeze | candidacy_freeze | guest
+  scope         TEXT DEFAULT NULL,
+  until         TEXT DEFAULT NULL,
+  prior_status  TEXT DEFAULT NULL,
+  reason        TEXT DEFAULT NULL,
+  case_id       TEXT DEFAULT NULL,
+  created_at    TEXT DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS resolution_versions (

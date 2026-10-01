@@ -258,7 +258,15 @@ $TABLES = [
         `id` INT AUTO_INCREMENT PRIMARY KEY, `cell_id` VARCHAR(255) NOT NULL,
         `res_id` INT, `title` TEXT, `text` TEXT, `action` TEXT,
         `votes_nullified` INT DEFAULT 0, `status` TEXT DEFAULT 'draft',
+        `supersedes` TEXT DEFAULT NULL,
         UNIQUE(`cell_id`, `res_id`)
+    )",
+
+    "CREATE TABLE IF NOT EXISTS `sanctions` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY, `user_id` VARCHAR(255) NOT NULL,
+        `kind` VARCHAR(32) NOT NULL, `scope` TEXT DEFAULT NULL, `until` TEXT DEFAULT NULL,
+        `prior_status` TEXT DEFAULT NULL, `reason` TEXT DEFAULT NULL, `case_id` VARCHAR(255) DEFAULT NULL,
+        `created_at` TEXT DEFAULT NULL, KEY `user_id` (`user_id`)
     )",
 
     "CREATE TABLE IF NOT EXISTS `resolution_versions` (
@@ -443,7 +451,8 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `policies` (
         `id` VARCHAR(255) PRIMARY KEY, `ref` VARCHAR(32) NOT NULL, `title` TEXT,
-        `text` TEXT, `status` TEXT, `circle` TEXT, `passed` TEXT, `category` TEXT
+        `text` TEXT, `status` TEXT, `circle` TEXT, `passed` TEXT, `category` TEXT,
+        `supersedes` TEXT DEFAULT NULL, `upholds` TEXT DEFAULT NULL
     )",
 ];
 
@@ -766,10 +775,11 @@ foreach ($cells as $c) {
         'text' => $d['text'] ?? null, 'action' => $d['action'] ?? null,
         'votes_nullified' => !empty($d['votesNullified']) ? 1 : 0,
         'status' => $d['status'] ?? 'draft',
+        'supersedes' => $d['supersedes'] ?? null,
     ], $drafts);
     dbRun('DELETE FROM resolution_implementing_circles WHERE draft_id IN (SELECT id FROM draft_resolutions WHERE cell_id = ?)', [$c['id']]);
     dbRun('DELETE FROM draft_resolutions WHERE cell_id = ?', [$c['id']]);
-    insert($db, 'draft_resolutions', $drRows, ['cell_id','res_id','title','text','action','votes_nullified','status']);
+    insert($db, 'draft_resolutions', $drRows, ['cell_id','res_id','title','text','action','votes_nullified','status','supersedes']);
     $idByRes = [];
     foreach (dbAll('SELECT id, res_id FROM draft_resolutions WHERE cell_id = ?', [$c['id']]) as $r) {
         $idByRes[(string)$r['res_id']] = $r['id'];
@@ -1052,8 +1062,9 @@ $polRows = array_map(fn($r) => [
     'id' => $r['id'], 'ref' => $r['ref'] ?? $r['id'], 'title' => $r['title'] ?? null,
     'text' => $r['text'] ?? null, 'status' => $r['status'] ?? 'Enacted', 'circle' => $r['circle'] ?? null,
     'passed' => $r['passed'] ?? null, 'category' => $r['category'] ?? null,
+    'supersedes' => $r['supersedes'] ?? null, 'upholds' => $r['upholds'] ?? null,
 ], $pol);
-upsert($db, 'policies', $polRows, ['id','ref','title','text','status','circle','passed','category']);
+upsert($db, 'policies', $polRows, ['id','ref','title','text','status','circle','passed','category','supersedes','upholds']);
 
 // Governance ledger
 $gl = $mock['governanceLedger'] ?? [];

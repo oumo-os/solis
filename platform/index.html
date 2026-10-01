@@ -786,11 +786,11 @@
           </div>
         </div>
 
-        <!-- Disciplinary Motion -->
-        <div class="sec" style="margin-top:16px">Disciplinary Motion</div>
+        <!-- Resolution (the verdict) -->
+        <div class="sec" style="margin-top:16px">Resolution</div>
         <div class="card" style="margin-bottom:16px">
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">When the investigation concludes, the jSTF pushes a disciplinary motion. This motion goes to aSTF for audit — aSTF reviews the <strong>decision</strong>, not the jSTF members (complete separation).</div>
-          <div id="jstf-motion-status" style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);margin-bottom:10px">Motion not yet filed — investigation ongoing.</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px">When the investigation concludes, the jSTF passes a resolution. This resolution goes to aSTF for audit — aSTF reviews the <strong>decision</strong>, not the jSTF members (complete separation).</div>
+          <div id="jstf-motion-status" style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);margin-bottom:10px">Resolution not yet filed — investigation ongoing.</div>
           <div id="jstf-motion-xref" style="margin-bottom:10px"></div>
         </div>
 
@@ -1542,6 +1542,7 @@
             <button class="feed-filter" onclick="filterResolutions('enacted',this)">Enacted</button>
             <button class="feed-filter" onclick="filterResolutions('pending',this)">Pending</button>
             <button class="feed-filter" onclick="filterResolutions('failed',this)">Failed</button>
+            <button class="feed-filter" onclick="filterResolutions('superseded',this)">Superseded</button>
           </div>
           <div id="resolutions-list"></div>
         </div>
@@ -2048,6 +2049,12 @@
             <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Policy Circle</span>
             <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Education Circle</span>
           </div>
+        </div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Supersedes (optional)</div>
+          <select class="form-input" id="res-modal-supersedes" style="font-size:11px;padding:5px 8px;width:100%"><option value="">No earlier resolution</option></select>
+        </div>
+      </div>
         </div>
       </div>
       <!-- Version History — single line -->
@@ -3267,6 +3274,21 @@ function openResolutionModal(idx) {
      res.status === 'failed' ? 'Failed — recorded' :
      res.status === 'submitted' ? 'Submitted to aSTF' : 'Draft');
 
+  // Supersedes picker: prior enacted resolutions this draft may replace
+  var supSel = document.getElementById('res-modal-supersedes');
+  if (supSel) {
+    var seenRefs = {};
+    var supOpts = ['<option value="">No earlier resolution</option>'];
+    (typeof resolutionsData !== 'undefined' ? resolutionsData : []).forEach(function(r) {
+      if (!r || r.status !== 'enacted' || !r.id || seenRefs[r.id]) return;
+      if (res.rowId && String(r.rowId) === String(res.rowId)) return;
+      seenRefs[r.id] = true;
+      supOpts.push('<option value="' + esc(r.id) + '"' + (res.supersedes === r.id ? ' selected' : '') + '>' + esc(r.id) + ' — ' + esc((r.title || '').slice(0, 60)) + '</option>');
+    });
+    supSel.innerHTML = supOpts.join('');
+    if (!res.supersedes) supSel.value = '';
+  }
+
   // Redraft button in header
   var redraftBtn = document.getElementById('btn-redraft-resolution');
   var redraftCount = document.getElementById('res-redraft-count');
@@ -3508,6 +3530,8 @@ function saveResolution() {
   res.text = text;
   res.action = action;
   res.votesNullified = true;
+  var supEl = document.getElementById('res-modal-supersedes');
+  res.supersedes = supEl ? (supEl.value || null) : (res.supersedes || null);
   var cell = currentDelibCellId ? cellsById[currentDelibCellId] : null;
   if (cell && cell.settingsSnapshot) {
     var updatedSnap = collectResolutionSettings(cell);
@@ -3689,10 +3713,13 @@ function renderAstfMotion() {
     var vi = (jcell && jcell.verdict) || src.verdict || {};
     var restriction = (jcell && jcell.restriction) || {};
     var body = 'Originating case: ' + (jcell ? (jcell.title || jcell.id) : (src.sourceCellId || '')) + '. '
-      + 'Disciplinary verdict: ' + (vi.type || '—') + (vi.description ? ' — ' + vi.description : '') + '. '
+      + 'Disciplinary resolution: ' + (vi.type || '—') + (vi.description ? ' — ' + vi.description : '') + '. '
       + (vi.policyRefs && vi.policyRefs.length ? 'Cites ' + vi.policyRefs.join(', ') + '. ' : '')
+      + ((vi.executingCircles && vi.executingCircles.length) ? 'Executing: ' + vi.executingCircles.join(', ') + '. ' : '')
+      + ((vi.systemActions && vi.systemActions.length) ? 'System actions: ' + vi.systemActions.map(function(a) { return a.kind + (a.kind === 'remove_from_circle' ? ' (' + (a.circles || []).join(', ') + ')' : (a.until ? ' until ' + a.until : '')); }).join('; ') + '. ' : '')
+      + (vi.appealDirection ? 'Appeal direction: ' + vi.appealDirection + '. ' : '')
       + (restriction.state ? 'Target activity is currently ' + restriction.state + '. ' : '')
-      + 'Audit whether the verdict was proportionate, within jurisdiction, and supported by the evidence. Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.';
+      + 'Audit whether the resolution was proportionate, within jurisdiction, and supported by the evidence. Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.';
     setText('astf-motion-body', body);
     if (xrA) {
       xrA.innerHTML = (src.targetId ? xrefChip('user', src.targetId, src.targetName || src.targetId, { color: 'var(--red)' }) : '')
@@ -4817,9 +4844,22 @@ function renderJstfReportStatus(cell) {
     jstfStatusRow('aSTF audit', auditState, auditWord) + extra;
 }
 var _jstfCitedRefs = [];
+function jstfSupersededRefs() {
+  var live = {};
+  ((MOCK && MOCK.policies) || []).forEach(function(p) {
+    if ((p.status === 'Enacted' || p.status === 'Passed') && p.supersedes) live[String(p.supersedes).toUpperCase()] = true;
+  });
+  ((MOCK && MOCK.cells) || []).forEach(function(c) {
+    ((c.draftResolutions) || []).forEach(function(d) {
+      if (d.status === 'passed' && d.supersedes) live[String(d.supersedes).toUpperCase()] = true;
+    });
+  });
+  return live;
+}
 function jstfPassedPolicies() {
   var pols = (MOCK && MOCK.policies) || [];
-  return pols.filter(function(p) { return p.status === 'Enacted' || p.status === 'Passed'; });
+  var sup = jstfSupersededRefs();
+  return pols.filter(function(p) { return (p.status === 'Enacted' || p.status === 'Passed') && !sup[String(p.ref || p.id || '').toUpperCase()]; });
 }
 function jstfToggleCite(ref, on) {
   ref = String(ref || '').toUpperCase();
@@ -5037,6 +5077,8 @@ function renderJstfResolutionRecord(cell) {
     + (execs.length ? '<div class="mb-2">Executing: ' + execs.map(function(c) { return esc(c); }).join(', ') + '</div>' : '<div class="mb-2" style="color:var(--text-tertiary)">No executing circle appointed.</div>')
     + ((impl.actions || []).length ? '<div class="mb-2">' + impl.actions.map(function(a) { return '<div>• ' + esc(a) + '</div>'; }).join('') + '</div>' : '')
     + (ir ? '<div style="color:var(--text-tertiary)">Integrity record ' + esc(ir.id || '') + ' · ' + esc(ir.date || '') + '</div>' : '');
+  var sanc = ((MOCK && MOCK.sanctions) || []).filter(function(s) { return s.caseId === cell.id; });
+  if (sanc.length) host.innerHTML += '<div class="mb-2" style="margin-top:6px">Sanctions:' + sanc.map(function(s) { return '<div>• ' + esc(s.kind || '') + (s.until ? ' until ' + esc(s.until) : ' indefinitely') + '</div>'; }).join('') + '</div>';
   if (card) card.open = true;
 }
 function jstfThreadPartyClient(t) {
@@ -5053,46 +5095,44 @@ function jstfThreadPartyClient(t) {
   }
   return null;
 }
+function jstfThreadPhase(t) {
+  if (!t) return { key: 'open', label: 'Open' };
+  if (t.jstfCellId) {
+    var c = null;
+    ((MOCK && MOCK.cells) || []).forEach(function(x) { if (x.id === t.jstfCellId) c = x; });
+    var st = c ? c.status : '';
+    if (['Resolution Applied', 'Exonerated', 'Closed', 'Archived'].indexOf(st) >= 0) return { key: 'resolved', label: 'Resolved', caseId: t.jstfCellId };
+    return { key: 'jstf', label: 'Under jSTF deliberation', caseId: t.jstfCellId };
+  }
+  var ppc = t.proposalCellId || '';
+  if (ppc) {
+    var d = null;
+    ((MOCK && MOCK.cells) || []).forEach(function(x) {
+      if (d) return;
+      if (x.id === ppc) d = x;
+      else if (x.source && x.source.threadId === t.id) d = x;
+    });
+    if (d) {
+      var rst = (d.resolution || {}).status || '';
+      if (['Applied', 'Approved', 'Passed'].indexOf(rst) >= 0) return { key: 'resolved', label: 'Resolved', cellId: d.id };
+      return { key: 'circle', label: 'Under circle deliberation', cellId: d.id };
+    }
+    return { key: 'circle', label: 'Linked deliberation', cellId: null };
+  }
+  return { key: 'open', label: 'Open' };
+}
 function renderJstfThread(cell, thread) {
   var host = document.getElementById('jstf-thread');
   if (!host) return;
-  if (!thread) { host.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Thread sealed — visible to stewards and the parties.</div>'; return; }
+  if (!thread) { host.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Thread sealed \u2014 visible to stewards and the parties.</div>'; return; }
   var replies = thread.repliesList || [];
-  var party = jstfThreadPartyClient(thread);
-  var isAppeal = !!(cell.isAppeal || cell.appealOf);
-  var who = (thread.author && thread.author !== 'Anonymous') ? 'by ' + thread.author : 'anonymous';
-  var html = '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:6px">' + replies.length + ' comment' + (replies.length === 1 ? '' : 's') + ' · ' + esc(who) + '</div>';
-  html += replies.length ? replies.map(function(r) {
-    return '<div class="flex gap-2" style="padding:5px 0;border-bottom:1px solid var(--border-subtle)"><div class="hav" style="width:24px;height:24px;font-size:9px;background:var(--border-subtle);color:var(--text-secondary);flex-shrink:0">' + esc(((r.initials || r.author || '?') + '').slice(0, 2).toUpperCase()) + '</div><div style="flex:1;min-width:0"><span style="font-size:11px;font-weight:600;color:var(--text)">' + esc(r.author || '') + '</span> <span style="font-size:10px;color:var(--text-tertiary)">' + esc(r.time || '') + '</span><div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + esc(r.body || '') + '</div></div></div>';
-  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No comments yet.</div>';
-  if (party) {
-    var me = (MOCK && MOCK.currentUser) || {};
-    var hint = (party === 'submitter' && !isAppeal) ? 'Posting as Anonymous' : 'Posting as ' + (me.name || '');
-    html += '<div class="flex gap-2" style="margin-top:8px"><input class="form-input" id="jstf-thread-input" placeholder="Comment on this thread..." style="flex:1;font-size:11px"><button class="btn btn-sm" onclick="postJstfThreadReply()">Post</button></div><div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">' + esc(hint) + '</div>';
-  }
-  host.innerHTML = html;
-}
-function postJstfThreadReply() {
-  var cell = getActiveJstfCell();
-  var inp = document.getElementById('jstf-thread-input');
-  var body = inp ? inp.value.trim() : '';
-  if (!cell || !body) { toast('Write a comment first.', 'error'); return; }
-  var thread = null;
-  ((MOCK && MOCK.threads) || []).forEach(function(t) {
-    if (thread) return;
-    if (t.jstfCellId === cell.id) thread = t;
-    else if (t.proposalCellId === ('case:' + cell.id)) thread = t;
-    else if (cell.targetId && t.proposalCellId === ('user:' + cell.targetId)) thread = t;
-  });
-  if (!thread) { toast('Thread not available.', 'error'); return; }
-  SolisApi.addThreadReply(thread.id, { body: body }).then(function(r) {
-    if (!r || r.__status >= 400) { toast('Could not post: ' + ((r && r.error) || 'server error'), 'error'); return; }
-    thread.replies = (thread.replies || 0) + 1;
-    thread.repliesList = thread.repliesList || [];
-    thread.repliesList.push({ author: r.author || 'You', initials: r.initials || '?', time: 'just now', body: body });
-    renderJstfThread(cell, thread);
-    toast('Comment posted.', 'success');
-  }).catch(function() { toast('Could not post. Is the server running?', 'error'); });
+  var phase = jstfThreadPhase(thread);
+  var trail = '';
+  if (phase.key === 'resolved' && phase.caseId) trail = ' ' + xrefChip('cell', phase.caseId, 'resolution trail', { color: 'var(--green)' });
+  else if (phase.key === 'resolved' && phase.cellId) trail = ' ' + xrefChip('cell', phase.cellId, 'resolution trail', { color: 'var(--green)' });
+  host.innerHTML = '<div class="flex gap-2" style="align-items:center;flex-wrap:wrap">'
+    + xrefChip('thread', thread.id, 'open thread', {})
+    + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + replies.length + ' comment' + (replies.length === 1 ? '' : 's') + ' \u00b7 ' + esc(phase.label) + '</span>' + trail + '</div>';
 }
 function renderJstfClosed(cell) {
   var card = document.getElementById('jstf-closed-card');
@@ -5130,13 +5170,21 @@ function renderJstfDraft(cell) {
   var en = votes.filter(function(v) { return v.vote === 'endorse'; }).length;
   var ob = votes.filter(function(v) { return v.vote === 'object'; }).length;
   var open = cell.status === 'Under Investigation' && !cell.verdict;
-  if (!draft || (!draft.description && !(draft.policyRefs || []).length && !(draft.executingCircles || []).length)) {
+  if (!draft || (!draft.description && !(draft.policyRefs || []).length && !(draft.executingCircles || []).length && !(draft.systemActions || []).length)) {
     host.innerHTML = '<div style="color:var(--text-tertiary)">No draft yet — the team composes it as deliberation converges.</div>';
   } else {
-    host.innerHTML = '<div class="mb-2"><span class="tag tag-purple" style="font-size:8px">' + esc(draft.type || 'policy-cited') + '</span> <span style="color:var(--text-tertiary)">by ' + esc(draft.updatedBy || '') + '</span></div>'
+    var dActs = (draft.systemActions || []).map(function(a) {
+      var lbl = jstfActKindLabel(a.kind);
+      if (a.kind === 'remove_from_circle') lbl += ': ' + (a.circles || []).join(', ');
+      else if (a.until) lbl += ' until ' + a.until;
+      return '<div>• ' + esc(lbl) + '</div>';
+    }).join('');
+    host.innerHTML = '<div class="mb-2"><span class="tag tag-purple" style="font-size:8px">' + esc(draft.type || 'resolution') + '</span> <span style="color:var(--text-tertiary)">by ' + esc(draft.updatedBy || '') + '</span></div>'
+      + (draft.appealDirection ? '<div class="mb-2">Appeal direction: <strong style="color:var(--text)">' + esc(draft.appealDirection) + '</strong></div>' : '')
       + (draft.description ? '<div class="mb-2">' + esc(draft.description) + '</div>' : '')
       + ((draft.policyRefs || []).length ? '<div class="mb-2">Cites ' + draft.policyRefs.map(function(r) { return '<span class="tag tag-purple" style="font-size:8px">#' + esc(r) + '</span>'; }).join(' ') + '</div>' : '')
       + ((draft.executingCircles || []).length ? '<div class="mb-2">Executing: ' + draft.executingCircles.map(function(c) { return esc(c); }).join(', ') + '</div>' : '')
+      + (dActs ? '<div class="mb-2">System actions:<div style="margin-top:2px">' + dActs + '</div></div>' : '')
       + (draft.findings ? '<div style="color:var(--text-tertiary)">Findings: ' + esc(String(draft.findings).slice(0, 140)) + '</div>' : '');
   }
   if (!voteHost) return;
@@ -5157,11 +5205,11 @@ function voteJstfDraftFlow(stance) {
 function saveJstfVerdictDraft() {
   var cell = getActiveJstfCell();
   if (!cell) return;
-  var type = (document.getElementById('jstf-verdict-type') || {}).value || 'policy-cited';
   var desc = ((document.getElementById('jstf-verdict-desc') || {}).value || '').trim();
   var findings = ((document.getElementById('jstf-verdict-findings') || {}).value || '').trim();
   var execs = Array.prototype.map.call(document.querySelectorAll('.jstf-verdict-exec:checked'), function(i) { return i.getAttribute('data-name'); });
-  SolisApi.saveJstfDraft(cell.id, { type: type, description: desc, policyRefs: _jstfCitedRefs.slice(), executingCircles: execs, findings: findings }).then(function(r) {
+  var appealDirEl = document.getElementById('jstf-appeal-direction');
+  SolisApi.saveJstfDraft(cell.id, { description: desc, policyRefs: _jstfCitedRefs.slice(), executingCircles: execs, systemActions: collectJstfSysActions(), appealDirection: appealDirEl ? (appealDirEl.value || null) : null, findings: findings }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Could not save draft: ' + ((r && r.error) || 'server error'), 'error'); return; }
     cell.resolutionDraft = r.draft;
     renderJstfDraft(cell);
@@ -5322,9 +5370,9 @@ function renderJstfCase() {
   if (motion) {
     var res = cell.resolution || {};
     var audit = res.audit || null;
-    if (audit) motion.textContent = audit.verdict === 'approved' ? '✓ Motion passed aSTF audit — resolution applied.' : '△ aSTF ordered revision — composition shuffled, investigation continues.';
-    else if (cell.verdict) motion.textContent = 'Motion filed: ' + cell.verdict.type + (cell.verdict.policyRefs && cell.verdict.policyRefs.length ? ' · cites ' + cell.verdict.policyRefs.join(', ') : '') + ' — awaiting aSTF audit.';
-    else motion.textContent = 'Motion not yet filed — investigation ongoing.';
+    if (audit) motion.textContent = audit.verdict === 'approved' ? '✓ Resolution passed aSTF audit — applied.' : '△ aSTF ordered revision — composition shuffled, investigation continues.';
+    else if (cell.verdict) motion.textContent = 'Resolution filed: ' + cell.verdict.type + (cell.verdict.policyRefs && cell.verdict.policyRefs.length ? ' · cites ' + cell.verdict.policyRefs.join(', ') : '') + ' — awaiting aSTF audit.';
+    else motion.textContent = 'Resolution not yet filed — investigation ongoing.';
   }
   var xrCase = document.getElementById('jstf-case-xref');
   if (xrCase) xrCase.innerHTML = thread ? xrefChip('thread', thread.id, isAppealCase ? 'appeal thread' : 'case thread') : '';
@@ -5434,6 +5482,47 @@ function toggleJstfRestriction(cellId, stance) {
   }).catch(function() { toast('Could not record vote. Is the server running?', 'error'); });
 }
 
+var _jstfSysActions = [];
+function jstfActKindLabel(kind) {
+  var m = { remove_from_circle: 'Remove from circle(s)', freeze_ws_until: 'Freeze Ws until', candidacy_freeze_until: 'Freeze steward candidacy until', guest_until: 'Guest privilege level until' };
+  return m[kind] || kind;
+}
+function jstfAddSysAction() { _jstfSysActions.push({ kind: 'remove_from_circle', circles: [], until: '' }); renderJstfSysActions(); }
+function jstfRemoveSysAction(i) { _jstfSysActions.splice(i, 1); renderJstfSysActions(); }
+function jstfActKindChanged(i, v) { _jstfSysActions[i] = { kind: v, circles: [], until: '' }; renderJstfSysActions(); }
+function jstfActUntilChanged(i, v) { if (_jstfSysActions[i]) _jstfSysActions[i].until = v; }
+function jstfActCircleToggled(i, name, on) {
+  var a = _jstfSysActions[i];
+  if (!a) return;
+  a.circles = a.circles || [];
+  var x = a.circles.indexOf(name);
+  if (on && x < 0) a.circles.push(name);
+  if (!on && x >= 0) a.circles.splice(x, 1);
+}
+function renderJstfSysActions() {
+  var host = document.getElementById('jstf-verdict-actions');
+  if (!host) return;
+  var kinds = ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'];
+  host.innerHTML = _jstfSysActions.length ? _jstfSysActions.map(function(a, i) {
+    var opts = kinds.map(function(k) { return '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + jstfActKindLabel(k) + '</option>'; }).join('');
+    var params = '';
+    if (a.kind === 'remove_from_circle') {
+      params = ((MOCK && MOCK.circles) || []).map(function(c) {
+        var on = (a.circles || []).indexOf(c.name) >= 0;
+        return '<label style="display:flex;gap:6px;align-items:center;font-size:11px;color:var(--text-secondary);padding:2px 0;cursor:pointer"><input type="checkbox"' + (on ? ' checked' : '') + ' onchange="jstfActCircleToggled(' + i + ',\'' + String(c.name).replace(/'/g, "\\'") + '\',this.checked)"> ' + esc(c.name) + '</label>';
+      }).join('');
+    } else {
+      params = '<input type="date" class="form-input jstf-act-until" value="' + esc(a.until || '') + '" onchange="jstfActUntilChanged(' + i + ',this.value)" style="font-size:11px;padding:4px 8px"><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Empty = indefinite.</div>';
+    }
+    return '<div class="jstf-sysact" style="border:1px solid var(--border);border-radius:var(--radius);padding:8px;margin-bottom:6px;background:var(--surface-raised)"><div class="flex gap-2" style="align-items:center;margin-bottom:6px"><select class="form-input" onchange="jstfActKindChanged(' + i + ',this.value)" style="flex:1;font-size:11px">' + opts + '</select><button type="button" class="btn btn-sm" onclick="jstfRemoveSysAction(' + i + ')">×</button></div>' + params + '</div>';
+  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No system actions — policy directive only.</div>';
+}
+function collectJstfSysActions() {
+  return _jstfSysActions.map(function(a) {
+    if (a.kind === 'remove_from_circle') return { kind: a.kind, circles: (a.circles || []).slice() };
+    return { kind: a.kind, until: a.until || null };
+  }).filter(function(a) { return a.kind === 'remove_from_circle' ? a.circles.length > 0 : true; });
+}
 function openJstfVerdictModal(cell) {
   var draft0 = (cell && cell.resolutionDraft) || null;
   if (draft0) _jstfCitedRefs = ((draft0.policyRefs || []).map(function(r) { return String(r).toUpperCase(); }));
@@ -5444,18 +5533,22 @@ function openJstfVerdictModal(cell) {
   }).join('');
   var preFindings = (draft0 && draft0.findings) || ((cell && cell.findings) || []).map(function(f) { return (f.title || 'Finding') + ': ' + (f.content || ''); }).join('\n\n');
   var preDesc = (draft0 && draft0.description) || '';
-  var preType = (draft0 && draft0.type) || 'policy-cited';
-  openModal('<div class="sec">File Disciplinary Verdict — ' + (cell.targetName || cell.title) + '</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF files a verdict as a single action (like a motion). It must cite existing policy resolutions — narrated judgements are <strong>policy-cited (non-system)</strong>; changes to system settings are <strong>system-bound</strong>. The verdict goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
-    '<div class="form-group"><label class="form-label">Verdict type</label><select class="form-input" id="jstf-verdict-type"><option value="policy-cited">Policy-cited (non-system, narrated judgement)</option><option value="system-bound">System-bound (system settings)</option></select></div>' +
-    '<div class="form-group"><label class="form-label">Verdict</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review...">' + esc(preDesc) + '</textarea></div>' +
+  _jstfSysActions = ((draft0 && draft0.systemActions) || []).map(function(a) {
+    return { kind: a.kind, circles: (a.circles || []).slice(), until: a.until || '' };
+  });
+  var preAppealDir = (draft0 && draft0.appealDirection) || '';
+  var isAppealModal = !!((cell && (cell.isAppeal || cell.appealOf)));
+  openModal('<div class="sec">File Resolution — ' + (cell.targetName || cell.title) + '</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">The jSTF passes a resolution as a single action: a policy directive to executing circles, system actions, or both combined. The resolution goes to a blind aSTF audit that weighs the decision, never the jSTF members.</div>' +
+    '<div class="form-group"><label class="form-label">Verdict — the resolution</label><textarea class="msg-input" rows="2" id="jstf-verdict-desc" placeholder="e.g. Credential misrepresentation confirmed; steward privileges suspended pending review...">' + esc(preDesc) + '</textarea></div>' +
     '<div class="form-group"><label class="form-label">Cited policy resolutions (select from passed resolutions)</label><div id="jstf-verdict-cites" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div><button type="button" class="btn btn-sm" onclick="openPolicyPickerModal()">+ Add policy resolution</button></div>' +
-    '<div class="form-group"><label class="form-label">Responsible circles for execution (optional)</label><div style="max-height:130px;overflow-y:auto;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-raised)">' + execRows + '</div></div>' +
+    '<div class="form-group"><label class="form-label">Responsible circles for execution (policy directive)</label><div style="max-height:130px;overflow-y:auto;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-raised)">' + execRows + '</div></div>' +
+    '<div class="form-group"><label class="form-label">System actions (executed on approval)</label><div id="jstf-verdict-actions"></div><button type="button" class="btn btn-sm" onclick="jstfAddSysAction()">+ Add system action</button></div>' +
+    (isAppealModal ? '<div class="form-group"><label class="form-label">Appeal direction</label><select class="form-input" id="jstf-appeal-direction"><option value="">Select…</option><option value="uphold"' + (preAppealDir === 'uphold' ? ' selected' : '') + '>Uphold original</option><option value="overturn"' + (preAppealDir === 'overturn' ? ' selected' : '') + '>Overturn (supersede original)</option></select></div>' : '') +
     '<div class="form-group"><label class="form-label">Findings</label><textarea class="msg-input" rows="3" id="jstf-verdict-findings" placeholder="Evidence summary and conclusions...">' + esc(preFindings) + '</textarea></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-sm" onclick="saveJstfVerdictDraft()">Save Draft</button><button class="btn btn-danger btn-sm" onclick="submitJstfVerdict(\'' + cell.id + '\')">Finalise &amp; Forward to aSTF</button></div>',
     { size: 'md' });
-  var typeSel = document.getElementById('jstf-verdict-type');
-  if (typeSel) typeSel.value = preType;
+  renderJstfSysActions();
   refreshVerdictCites();
 }
 
@@ -5469,15 +5562,18 @@ function submitJstfVerdict(cellId) {
     var ven = ((vcell.draftVotes || []).filter(function(v) { return v.vote === 'endorse'; })).length;
     if (ven < vmaj) { toast('Resolution needs team endorsement (' + ven + '/' + vmaj + ') before filing.', 'error'); return; }
   }
-  var type = document.getElementById('jstf-verdict-type').value;
   var desc = (document.getElementById('jstf-verdict-desc').value || '').trim();
   var policyRefs = _jstfCitedRefs.slice();
   var execs = Array.prototype.map.call(document.querySelectorAll('.jstf-verdict-exec:checked'), function(i) { return i.getAttribute('data-name'); });
+  var sysActs = collectJstfSysActions();
+  var appealDirEl = document.getElementById('jstf-appeal-direction');
+  var appealDir = appealDirEl ? appealDirEl.value : '';
   var findings = (document.getElementById('jstf-verdict-findings').value || '').trim();
   if (!desc) { toast('State the verdict.', 'error'); return; }
-  if (!policyRefs.length) { toast('Cite at least one policy resolution.', 'error'); return; }
+  if (!policyRefs.length && !sysActs.length) { toast('Add a policy directive or at least one system action.', 'error'); return; }
+  if (appealDirEl && !appealDir) { toast('Choose whether this appeal upholds or overturns the original.', 'error'); return; }
   confirmModal('Finalise and forward to blind aSTF audit? The aSTF weighs the decision, never the jSTF members.', function() {
-    SolisApi.fileJstfVerdict(cellId, { type: type, description: desc, policyRefs: policyRefs, executingCircles: execs, findings: findings }).then(function(r) {
+    SolisApi.fileJstfVerdict(cellId, { description: desc, policyRefs: policyRefs, executingCircles: execs, systemActions: sysActs, appealDirection: appealDir || null, findings: findings }).then(function(r) {
       if (!r || (r.__status && r.__status >= 400)) { toast('Verdict failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
       closeModal();
       toast('Verdict filed. aSTF audit opened.', 'success');
@@ -5499,22 +5595,6 @@ function renderJstfPanel() {
   var cell = getActiveJstfCell();
   var html = '';
   var isSteward = jstfClientIsSteward();
-  var pending = ((MOCK && MOCK.threads) || []).filter(function(t) { return t.visibility === 'stewards-only' && !t.jstfCellId; });
-  if (isSteward && pending.length) {
-    html += '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--red)"><div class="sec">Pending Escalation (stewards only)</div>';
-    pending.forEach(function(t) {
-      html += '<div class="flex gap-2" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + t.title + ' <span class="tag tag-red" style="font-size:8px">' + t.replies + ' post' + (t.replies > 1 ? 's' : '') + '</span></div><div style="font-size:11px;color:var(--text-tertiary)">' + (t.body || '') + '</div></div><button class="btn btn-sm btn-danger" onclick="escalateJstfThread(\'' + t.id + '\')">Escalate</button></div>';
-    });
-    html += '</div>';
-  }
-  var newRows = '';
-  ((MOCK && MOCK.cells) || []).forEach(function(c) {
-    if (!c || c.type !== 'jSTF Cell' || !c.id) return;
-    if (['Resolution Applied', 'Exonerated', 'Closed', 'Archived'].indexOf(c.status) >= 0) return;
-    var n = jstfNewReports(c);
-    if (n > 0) newRows += '<div class="flex gap-2" style="align-items:center;margin-bottom:6px"><div style="flex:1;font-size:11px;color:var(--text)">' + esc(c.title || c.id) + ' <span class="tag tag-red" style="font-size:8px">' + n + ' new report' + (n === 1 ? '' : 's') + '</span></div><button class="btn btn-sm" onclick="setActiveJstfCase(\'' + c.id + '\');nav(\'stf-jstf\')">Open case</button></div>';
-  });
-  if (newRows) html += '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--gold)"><div class="sec">New Reports on Open Cases</div>' + newRows + '</div>';
   if (!cell) {
     html += '<div class="card" style="margin-bottom:12px"><div class="sec">Judicial Proceedings</div><div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">No open investigation. Any member can report any member; reports are posted anonymously to Commons, visible only to stewards, and accumulate per target until a steward escalates.</div><button class="btn btn-sm" onclick="openReportModal()">Report a Member</button></div>';
     host.innerHTML = html;
@@ -5527,7 +5607,7 @@ function renderJstfPanel() {
     + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Target: <strong>' + (cell.targetName || '') + '</strong>' + (cell.targetIsSteward ? ' · steward' : ' · member') + (cell.revisionOf ? ' · recomposed' : '') + '</div>';
   html += '<div style="font-size:10px;font-family:var(--mono);color:var(--text-tertiary);margin-bottom:8px">Team: ' + (cell.team || []).map(function(t){ return t.name + ' (' + t.initials + ')'; }).join(' · ') + '</div>';
   if (verdict) {
-    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--text-secondary)">Verdict:</span> <strong>' + verdict.type + '</strong> · ' + verdict.description + (verdict.policyRefs && verdict.policyRefs.length ? ' · cites ' + verdict.policyRefs.join(', ') : '') + '</div>';
+    html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--text-secondary)">Resolution:</span> <strong>' + verdict.type + '</strong> · ' + verdict.description + (verdict.policyRefs && verdict.policyRefs.length ? ' · cites ' + verdict.policyRefs.join(', ') : '') + '</div>';
   }
   if (resolution.status === 'Applied') {
     html += '<div style="font-size:11px;padding:8px 10px;background:var(--surface-raised);border:1px solid var(--green);border-radius:var(--radius);margin-bottom:8px"><span style="color:var(--green)">✓ Resolution applied</span>' + ((resolution.implementation || {}).actions || []).map(function(a){ return '<div>' + a + '</div>'; }).join('') + '</div>';
@@ -5539,7 +5619,7 @@ function renderJstfPanel() {
     html += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--mono)">Revisions: ' + cell.revisions.length + '</div>';
   }
   if (cell.status === 'Under Investigation' && !verdict && isSteward) {
-    html += '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="fileJstfVerdictFlow()">File Disciplinary Verdict</button>';
+    html += '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="fileJstfVerdictFlow()">File Resolution</button>';
   }
   if (cell.status === 'Finalised' && isSteward) {
     html += '<div style="font-size:11px;color:var(--amber);margin-top:8px">Awaiting aSTF audit.</div>';
@@ -5551,10 +5631,29 @@ function renderJstfPanel() {
 function renderJstfIntake() {
   var host = document.getElementById('jstf-intake');
   if (!host) return;
+  var isSteward = jstfClientIsSteward();
   var html = '<div class="flex gap-2" style="flex-direction:column;gap:6px">'
     + '<button class="btn btn-sm" onclick="openReportModal()">Report a Member</button>'
     + '<div style="font-size:10px;color:var(--text-tertiary);line-height:1.5">To appeal an enacted resolution, open it in <a href="#" onclick="nav(\'resolutions\');return false;" style="color:var(--gold)">Governance</a>.</div>'
     + '</div>';
+  if (isSteward) {
+    var pending = ((MOCK && MOCK.threads) || []).filter(function(t) { return t.visibility === 'stewards-only' && !t.jstfCellId; });
+    if (pending.length) {
+      html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle)"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Pending escalation</div>';
+      pending.forEach(function(t) {
+        html += '<div class="flex gap-2" style="align-items:flex-start;margin-bottom:8px"><div style="flex:1"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(t.title || '') + ' <span class="tag tag-red" style="font-size:8px">' + (t.replies || 0) + ' post' + ((t.replies || 0) > 1 ? 's' : '') + '</span></div></div><button class="btn btn-sm btn-danger" onclick="escalateJstfThread(\'' + t.id + '\')">Escalate</button></div>';
+      });
+      html += '</div>';
+    }
+    var newRows = '';
+    ((MOCK && MOCK.cells) || []).forEach(function(c) {
+      if (!c || c.type !== 'jSTF Cell' || !c.id) return;
+      if (['Resolution Applied', 'Exonerated', 'Closed', 'Archived'].indexOf(c.status) >= 0) return;
+      var n = (typeof jstfNewReports === 'function') ? jstfNewReports(c) : 0;
+      if (n > 0) newRows += '<div class="flex gap-2" style="align-items:center;margin-bottom:6px"><div style="flex:1;font-size:11px;color:var(--text)">' + esc(c.title || c.id) + ' <span class="tag tag-red" style="font-size:8px">' + n + ' new</span></div><button class="btn btn-sm" onclick="setActiveJstfCase(\'' + c.id + '\');nav(\'stf-jstf\')">Open</button></div>';
+    });
+    if (newRows) html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle)"><div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">New reports on open cases</div>' + newRows + '</div>';
+  }
   host.innerHTML = html;
 }
 
@@ -6175,12 +6274,13 @@ function buildResolutionsData() {
       out.push({
         id: 'D-' + String(cell.id || '').toUpperCase() + '-' + d.id,
         title: d.title || '',
-        status: 'pending',
+        status: String(d.status || 'pending').toLowerCase(),
         date: ts.split(' ').slice(0, 3).join(' '),
         circles: d.implementingCircles || [],
         visibility: 'internal',
         text: d.text || '',
-        forPublication: false
+        forPublication: false,
+        supersedes: d.supersedes || null
       });
     });
   });
@@ -6194,7 +6294,9 @@ function buildResolutionsData() {
       circles: [p.circle || 'Commons'],
       visibility: 'public',
       text: p.text || '',
-      forPublication: false
+      forPublication: false,
+      supersedes: p.supersedes || null,
+      upholds: p.upholds || null
     });
   });
   ((MOCK && MOCK.cells) || []).forEach(function(cell) {
@@ -6202,6 +6304,9 @@ function buildResolutionsData() {
     if (cell.type !== 'jSTF Cell' || cres.status !== 'Applied') return;
     var v = cell.verdict || {};
     var cimpl = cres.implementation || {};
+    // if a JR policy row carries this resolution, it renders instead (single row)
+    var jrCovered = ((MOCK && MOCK.policies) || []).some(function(p) { return p.ref === cimpl.jrRef; });
+    if (cimpl.jrRef && jrCovered) return;
     var cc = (v.executingCircles && v.executingCircles.length ? v.executingCircles : (cimpl.executingCircles && cimpl.executingCircles.length ? cimpl.executingCircles : []));
     var cdate = '';
     ((MOCK && MOCK.integrityRecords) || []).forEach(function(r) {
@@ -6218,9 +6323,17 @@ function buildResolutionsData() {
       forPublication: false
     });
   });
+  // derived supersession: enacted/passed rows naming supersedes archive their targets
+  var liveRefs = {};
+  out.forEach(function(r) {
+    if (r.supersedes && (r.status === 'enacted' || r.status === 'passed')) liveRefs[String(r.supersedes).toUpperCase()] = r.id;
+  });
+  out.forEach(function(r) {
+    var hit = liveRefs[String(r.id).toUpperCase()];
+    if (hit && hit !== r.id) { r.status = 'superseded'; r.supersededBy = hit; }
+  });
   return out;
 }
-
 function renderResolutionsList(filter) {
   var list = document.getElementById('resolutions-list');
   if (!list) return;
@@ -6231,16 +6344,30 @@ function renderResolutionsList(filter) {
     return;
   }
   list.innerHTML = filtered.map(function(r) {
-    var badgeClass = r.status === 'enacted' ? 'b-enacted' : r.status === 'pending' ? 'b-pending' : 'b-failed';
+    var badgeClass = (r.status === 'enacted' || r.status === 'passed') ? 'b-enacted' : r.status === 'superseded' ? 'b-review' : r.status === 'failed' ? 'b-failed' : 'b-pending';
     var statusLabel = r.status.charAt(0).toUpperCase() + r.status.slice(1);
     var circlesHtml = r.circles.map(function(c) { return '<span class="tag tag-purple" style="font-size:8px">' + c + '</span>'; }).join(' ');
     var pubBadge = r.forPublication ? '<span class="tag" style="font-size:7px;margin-left:4px;background:var(--purple-soft);color:var(--purple)">For Publication</span>' : '';
     var visIcon = r.visibility === 'public' ? '&#9673; Public' : '&#9678; Internal';
+    var chainHtml = '';
+    if (r.supersededBy) chainHtml += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Superseded by ' + esc(r.supersededBy) + '</div>';
+    else if (r.supersedes) chainHtml += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Supersedes ' + esc(r.supersedes) + '</div>';
+    if (r.upholds) chainHtml += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Upholds ' + esc(r.upholds) + '</div>';
+    if (String(r.id || '').indexOf('JR-') === 0) {
+      var jrCase = null;
+      ((MOCK && MOCK.cells) || []).forEach(function(x) {
+        if (jrCase) return;
+        var xi = ((x.resolution || {}).implementation || {});
+        if (xi.jrRef === r.id) jrCase = x;
+      });
+      if (jrCase) chainHtml += '<div style="margin-bottom:6px">' + xrefChip('cell', jrCase.id, 'case record', { color: 'var(--red)' }) + '</div>';
+    }
     return '<div class="card" style="margin-bottom:8px">'
       + '<div class="flex justify-between mb-2"><span class="badge ' + badgeClass + '">' + statusLabel + '</span>'
       + '<span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + r.id + ' &middot; ' + r.date + '</span></div>'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">' + r.title + '</div>'
       + '<div style="font-size:12px;color:var(--text-tertiary);line-height:1.4;margin-bottom:6px">' + r.text + '</div>'
+      + chainHtml
       + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">' + circlesHtml
       + (r.status === 'enacted' ? '<button class="btn btn-sm" style="font-size:9px;padding:2px 8px" onclick="openResolutionAppealModal(\'' + String(r.id).replace(/'/g, "\\'") + '\',\'' + String(r.title).replace(/'/g, "\\'") + '\')">Appeal</button>' : '')
       + '<span style="font-size:9px;color:var(--text-tertiary);margin-left:auto">' + visIcon + '</span>' + pubBadge
@@ -6525,6 +6652,15 @@ function renderThreadDetail(threadId) {
   row('Replies', t.replies || 0);
   row('Likes', t.likes || 0);
   row('Shares', t.shares || 0);
+  if ((t.badge || '') === 'b-judicial' && typeof jstfThreadPhase === 'function') {
+    try {
+      var tph = jstfThreadPhase(t);
+      infoRows += '<div class="aside-row"><span class="aside-label">Deliberation</span><span style="font-size:12px;color:var(--text)">' + escapeHtml(tph.label) + '</span></div>';
+      if (tph.key === 'resolved' && (tph.caseId || tph.cellId) && typeof xrefChip === 'function') {
+        infoRows += '<div class="aside-row"><span class="aside-label">Resolution trail</span><span>' + xrefChip('cell', tph.caseId || tph.cellId, 'open record', { color: 'var(--green)' }) + '</span></div>';
+      }
+    } catch (e) {}
+  }
   set('td-info', infoRows);
 
   var seen = {};

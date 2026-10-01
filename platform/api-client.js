@@ -154,11 +154,11 @@ var SolisApi = (function() {
         }
       }
       var patch = {
-        title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0
+        title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null
       };
       var save = row
         ? req('PATCH', 'cells/' + cellId + '/draft-resolutions/' + row.id, patch)
-        : req('POST', 'cells/' + cellId + '/draft-resolutions', { res_id: draft.id, title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0 });
+        : req('POST', 'cells/' + cellId + '/draft-resolutions', { res_id: draft.id, title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null });
       return save.then(function(res) {
         var rowId = row ? row.id : (res && res.id != null ? res.id : null);
         if (rowId == null) return res;

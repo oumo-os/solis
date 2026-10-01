@@ -42,9 +42,9 @@ function getAuthHeader() {
     }
     return '';
 }
-function authUser() { $h = getAuthHeader(); if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; return dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); }
+function authUser() { $h = getAuthHeader(); if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; $u = dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); if ($u) maybeLiftSanctions($u['id'] ?? null); return $u; }
 function isSteward($userId) { if (!$userId) return false; return (bool)dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$userId]); }
-function assertActiveMember($user) { if (!$user) return; $st = $user['status'] ?? ''; if ($st === 'Restricted' || $st === 'Suspended') send(403, ['error' => $st === 'Suspended' ? 'Activity frozen pending jSTF resolution' : 'Activity restricted pending jSTF investigation']); }
+function assertActiveMember($user) { if (!$user) return; $st = $user['status'] ?? ''; if ($st === 'Restricted' || $st === 'Suspended') send(403, ['error' => $st === 'Suspended' ? 'Activity frozen pending jSTF resolution' : 'Activity restricted pending jSTF investigation']); if ($st === 'Guest') send(403, ['error' => 'Guest privilege level — read and appeal only']); }
 function syncTargetRestriction($userId, $restricted, $severity) {
     if (!$userId) return;
     $want = $restricted ? ($severity === 'frozen' ? 'Suspended' : 'Restricted') : 'Active';
@@ -231,7 +231,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     }
         $cell['draftResolutions'] = [];
         foreach (($draftByCell[$c['id']] ?? []) as $d) {
-            $cell['draftResolutions'][] = ['id' => $d['res_id'] ?? $d['id'], 'rowId' => $d['id'], 'status' => $d['status'] ?: 'draft', 'title' => $d['title'], 'text' => $d['text'], 'action' => $d['action'], 'votesNullified' => (bool)$d['votes_nullified'], 'versions' => array_map(function($v) { return ['title' => $v['title'], 'text' => $v['text'], 'action' => $v['action'], 'author' => $v['author'], 'ts' => $v['ts']]; }, $verByDraft[$d['id']] ?? []), 'implementingCircles' => array_map(function($i) { return $i['circle_name']; }, $impByDraft[$d['id']] ?? [])];
+            $cell['draftResolutions'][] = ['id' => $d['res_id'] ?? $d['id'], 'rowId' => $d['id'], 'status' => $d['status'] ?: 'draft', 'title' => $d['title'], 'text' => $d['text'], 'action' => $d['action'], 'votesNullified' => (bool)$d['votes_nullified'], 'supersedes' => $d['supersedes'] ?? null, 'versions' => array_map(function($v) { return ['title' => $v['title'], 'text' => $v['text'], 'action' => $v['action'], 'author' => $v['author'], 'ts' => $v['ts']]; }, $verByDraft[$d['id']] ?? []), 'implementingCircles' => array_map(function($i) { return $i['circle_name']; }, $impByDraft[$d['id']] ?? [])];
         }
         $vs = $voteByCell[$c['id']] ?? [];
         if ($vs || isset($vsumByCell[$c['id']])) {
@@ -269,6 +269,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
     $registration = ['domains' => array_map(function($r) { return ['name' => $r['name'], 'type' => $r['type']]; }, $regRows), 'eloMap' => $regMeta ? pJson($regMeta['elo_map']) ?: [] : [], 'knowledgeLevels' => $regMeta ? pJson($regMeta['knowledge_levels']) ?: [] : [], 'experientialLevels' => $regMeta ? pJson($regMeta['experiential_levels']) ?: [] : [], 'defaultInterests' => $regMeta ? pJson($regMeta['default_interests']) ?: [] : []];
     $integrityRecords = dbAll('SELECT * FROM integrity_records');
+    $sanctions = array_map(function($s) { return ['id' => $s['id'], 'userId' => $s['user_id'], 'kind' => $s['kind'], 'scope' => $s['scope'], 'until' => $s['until'], 'reason' => $s['reason'], 'caseId' => $s['case_id'], 'created' => $s['created_at']]; }, dbAll("SELECT * FROM sanctions WHERE until IS NULL OR until > ?", [date('Y-m-d')]));
     $policies = dbAll('SELECT * FROM policies');
     $governanceEvents = array_map(function($g) { $o = ['id' => $g['id'], 'type' => $g['type'], 'circle' => $g['circle'], 'date' => $g['date'], 'text' => $g['text']]; if ($g['participant'] !== null) $o['participant'] = $g['participant']; return $o; }, dbAll('SELECT * FROM governance_events'));
     $domByApp = groupBy(dbAll('SELECT * FROM circle_application_domains'), 'app_id');
@@ -277,9 +278,9 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $governanceLedger = array_map(function($l) { return ['id' => $l['id'], 'type' => $l['type'], 'target' => $l['target'], 'settings' => pJson($l['settings']), 'appliedBy' => $l['applied_by'], 'appliedAt' => $l['applied_at'], 'status' => $l['status']]; }, dbAll('SELECT * FROM governance_ledger'));
     $myEngagements = [];
     if ($currentRow) { foreach (dbAll('SELECT t.id, (SELECT COUNT(*) FROM thread_endorsements e WHERE e.thread_id = t.id AND e.user_id = ?) AS endorsed, (SELECT COUNT(*) FROM thread_bookmarks b WHERE b.thread_id = t.id AND b.user_id = ?) AS bookmarked FROM threads t', [strval($cuid), strval($cuid)]) as $r) $myEngagements[] = ['threadId' => $r['id'], 'endorsed' => $r['endorsed'] > 0, 'bookmarked' => $r['bookmarked'] > 0]; }
-    $payload = ['currentUser' => $currentUser, 'participants' => $participants, 'organisations' => $organisations, 'domains' => $domains, 'domainLayout' => $domainLayout, 'circles' => $circles, 'cells' => $cells, 'stfs' => $stfShape, 'stfCandidates' => $stfCandidates, 'threads' => $threads, 'inbox' => $inbox, 'publications' => $publications, 'news' => $news, 'events' => $events, 'opportunities' => $opportunities, 'projects' => $projects, 'library' => $library, 'exitReasonLabels' => $exitReasonLabels, 'systemSettings' => $systemSettings, 'stats' => $stats, 'registration' => $registration, 'integrityRecords' => $integrityRecords, 'governanceEvents' => $governanceEvents, 'circleApplications' => $circleApplications, 'projectApplications' => $projectApplications, 'governanceLedger' => $governanceLedger, 'myEngagements' => $myEngagements];
+    $payload = ['currentUser' => $currentUser, 'participants' => $participants, 'organisations' => $organisations, 'domains' => $domains, 'domainLayout' => $domainLayout, 'circles' => $circles, 'cells' => $cells, 'stfs' => $stfShape, 'stfCandidates' => $stfCandidates, 'threads' => $threads, 'inbox' => $inbox, 'publications' => $publications, 'news' => $news, 'events' => $events, 'opportunities' => $opportunities, 'projects' => $projects, 'library' => $library, 'exitReasonLabels' => $exitReasonLabels, 'systemSettings' => $systemSettings, 'stats' => $stats, 'registration' => $registration, 'sanctions' => $sanctions, 'integrityRecords' => $integrityRecords, 'governanceEvents' => $governanceEvents, 'circleApplications' => $circleApplications, 'projectApplications' => $projectApplications, 'governanceLedger' => $governanceLedger, 'myEngagements' => $myEngagements];
     $payload['policies'] = $policies;
-    if ($empty) { foreach (['participants','organisations','circles','cells','threads','inbox','publications','news','events','opportunities','projects','library','integrityRecords','governanceEvents','circleApplications','projectApplications','governanceLedger','stfCandidates','policies','myEngagements'] as $k) $payload[$k] = []; $payload['stfs'] = ['pending' => [], 'active' => [], 'completed' => []]; $payload['domains'] = []; $payload['stats'] = []; }
+    if ($empty) { foreach (['participants','organisations','circles','cells','threads','inbox','publications','news','events','opportunities','projects','library','integrityRecords','governanceEvents','circleApplications','projectApplications','governanceLedger','stfCandidates','policies','sanctions','myEngagements'] as $k) $payload[$k] = []; $payload['stfs'] = ['pending' => [], 'active' => [], 'completed' => []]; $payload['domains'] = []; $payload['stats'] = []; }
     send(200, $payload);
 }
 
@@ -320,6 +321,12 @@ function updateRow($table, $body, $id = null) {
     return true;
 }
 function parseId($reqUrl, $base) { if (strpos($reqUrl, $base . '/') !== 0) return null; $rest = substr($reqUrl, strlen($base) + 1); if (!$rest || strpos($rest, '/') !== false) return null; return urldecode($rest); }
+// Candidacy applications: frozen members and Guests may not apply.
+if ($cleanPath === '/circle-applications' && $method === 'POST') {
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    if (($user['status'] ?? '') === 'Guest') send(403, ['error' => 'Guest privilege level — read and appeal only']);
+    if (jstfActiveSanction($user['id'] ?? null, 'candidacy_freeze')) send(403, ['error' => 'Steward candidacy frozen by jSTF sanction']);
+}
 foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
     if ($cleanPath === $r['path'] || $id !== null) {
@@ -628,10 +635,45 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
             $jm = pJson($jstf['meta'] ?? '{}') ?: []; $jr = pJson($jstf['resolution'] ?? '{}') ?: []; $jr['audit'] = $ar;
             if ($verdict === 'approved') {
                 $jr['status'] = 'Applied'; $vi = $src['verdict'] ?? $jm['verdict'] ?? [];
-                $jr['implementation'] = ['type' => $vi['type'] ?? 'policy-cited', 'executingCircles' => $vi['executingCircles'] ?? [], 'actions' => (($vi['type'] ?? '') === 'system-bound') ? ['target role/privileges updated per system settings', 'Ws recalculated', 'fresh vSTF composition triggered'] : ['applied per cited policy resolutions: ' . implode(', ', $vi['policyRefs'] ?? [])]];
-                if (!empty($vi['executingCircles'])) $jr['implementation']['actions'][] = 'execution appointed to: ' . implode(', ', $vi['executingCircles']);
+                $targetId = $jm['targetId'] ?? null; $targetName = $jm['targetName'] ?? '';
+                $actions = [];
+                $hasPolicy = !empty($vi['policyRefs']);
+                $sysActs = $vi['systemActions'] ?? [];
+                $appealDir = $vi['appealDirection'] ?? null;
+                $appealOf = $jm['appealOf'] ?? null;
+                $revOf = $jm['revisionOf'] ?? null;
+                if ($hasPolicy) $actions[] = 'applied per cited policy resolutions: ' . implode(', ', $vi['policyRefs']);
+                if (!empty($vi['executingCircles'])) $actions[] = 'execution appointed to: ' . implode(', ', $vi['executingCircles']);
+                if (($vi['type'] ?? '') === 'system-bound' && empty($sysActs)) $actions = array_merge($actions, ['target role/privileges updated per system settings', 'Ws recalculated', 'fresh vSTF composition triggered']);
+                // citeable judicial resolution
+                $jrRef = jstfMintPolicyRef();
+                $jrTitle = 'jSTF verdict — ' . ($targetName ?: $src['sourceCellId']);
+                $jrText = ($vi['description'] ?? '') . "\n\nImplementation: " . implode('; ', $actions);
+                dbRun("INSERT INTO policies (id, ref, title, text, status, circle, passed, category, supersedes, upholds) VALUES (?,?,?,?,?,?,?,?,?,?)", [$jrRef, $jrRef, $jrTitle, $jrText, 'Enacted', 'Judicial', date('Y-m-d'), 'Judicial', ($appealDir === 'overturn' ? $appealOf : null), ($appealDir === 'uphold' ? $appealOf : null)]);
+                $actions[] = 'recorded as ' . $jrRef;
+                // system actions execute for real
+                $guestApplied = false;
+                foreach ($sysActs as $act) {
+                    jstfExecuteSystemAction($src['sourceCellId'], $targetId, $targetName, $act, $actions);
+                    if (($act['kind'] ?? '') === 'guest_until' && $targetId) $guestApplied = true;
+                }
+                // appeal direction: overturn supersedes, uphold supports
+                if ($appealDir === 'overturn') {
+                    if ($appealOf) $actions[] = 'supersedes ' . $appealOf;
+                    if ($revOf) {
+                        $orig = dbGet('SELECT * FROM cells WHERE id = ?', [$revOf]);
+                        if ($orig) { $or = pJson($orig['resolution'] ?? '{}') ?: []; $or['status'] = 'Superseded'; $or['supersededBy'] = $src['sourceCellId']; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $revOf]); $actions[] = 'supersedes case ' . $revOf; }
+                    }
+                } elseif ($appealDir === 'uphold') {
+                    if ($revOf) {
+                        $orig = dbGet('SELECT * FROM cells WHERE id = ?', [$revOf]);
+                        if ($orig) { $or = pJson($orig['resolution'] ?? '{}') ?: []; $sup = $or['supportedBy'] ?? []; $sup[] = $src['sourceCellId']; $or['supportedBy'] = array_values(array_unique($sup)); dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $revOf]); $actions[] = 'upholds case ' . $revOf; }
+                    }
+                    if ($appealOf) $actions[] = 'upholds ' . $appealOf;
+                }
+                $jr['implementation'] = ['type' => $vi['type'] ?? 'policy-cited', 'executingCircles' => $vi['executingCircles'] ?? [], 'actions' => $actions, 'jrRef' => $jrRef];
                 dbRun("UPDATE cells SET status = 'Resolution Applied', resolution = ? WHERE id = ?", [json_encode($jr), $src['sourceCellId']]);
-                syncTargetRestriction($jm['targetId'] ?? null, false, null);
+                if (!$guestApplied) syncTargetRestriction($targetId, false, null);
             } else {
                 $jr['status'] = 'Revision Ordered'; $jr['revisionNotes'] = $rationale;
                 dbRun("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?", [json_encode($jr), $src['sourceCellId']]);
@@ -939,6 +981,91 @@ function jstfCanSeeThread($user, $t) {
     if (isSteward($user['id'] ?? null)) return true;
     return jstfThreadParty($user, $t) !== null;
 }
+// Active sanction of a kind for a user (respects until-expiry). Returns row or null.
+function jstfActiveSanction($userId, $kind) {
+    if (!$userId) return null;
+    $today = date('Y-m-d');
+    foreach (dbAll('SELECT * FROM sanctions WHERE user_id = ? AND kind = ? ORDER BY id DESC', [$userId, $kind]) as $s) {
+        if (empty($s['until']) || $s['until'] > $today) return $s;
+    }
+    return null;
+}
+function jstfSanction($userId, $kind, $scope, $until, $reason, $caseId, $prior = null) {
+    dbRun('INSERT INTO sanctions (user_id, kind, scope, until, prior_status, reason, case_id, created_at) VALUES (?,?,?,?,?,?,?,?)', [$userId, $kind, $scope, $until, $prior, $reason, $caseId, date('Y-m-d')]);
+}
+function jstfMintPolicyRef() {
+    $max = 0;
+    foreach (dbAll('SELECT ref FROM policies') as $pr) {
+        if (preg_match('/(\d+)\s*$/', (string)($pr['ref'] ?? ''), $m)) $max = max($max, (int)$m[1]);
+    }
+    return 'JR-' . str_pad($max + 1, 3, '0', STR_PAD_LEFT);
+}
+function jstfSpawnSuccessorVstf($candName, $candIni, $circleName, $caseId, $proposalId) {
+    $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+    $src = ['type' => 'steward-candidacy', 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'vacancyFor' => $caseId, 'proposalId' => $proposalId, 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', 'vSTF · Steward Candidacy · ' . $candName, 'Pending Assessment', 'steward-candidacy', 3, $circleName, $caseId, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => [], 'assessments' => []])]);
+    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', 'Steward Candidacy', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
+    return $vId;
+}
+function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes) {
+    $kind = $act['kind'] ?? '';
+    if ($kind === 'remove_from_circle') {
+        foreach (($act['circles'] ?? []) as $cname) {
+            $circle = dbGet('SELECT * FROM circles WHERE LOWER(name) = LOWER(?)', [$cname]);
+            if (!$circle) $circle = dbGet('SELECT * FROM circles WHERE id = ?', [$cname]);
+            if (!$circle) { $notes[] = 'circle not found: ' . $cname; continue; }
+            $row = $targetId ? dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$circle['id'], $targetId]) : null;
+            if (!$row && $targetName) $row = dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND name = ? AND status = 'active'", [$circle['id'], $targetName]);
+            if (!$row) { $notes[] = 'not an active member of ' . $circle['name']; continue; }
+            markFormer($row['id'], 'jstf-removal');
+            $notes[] = 'removed from ' . $circle['name'];
+            $apps = dbAll("SELECT * FROM circle_applications WHERE circle_id = ? AND status = 'pending' ORDER BY queue_position, applied_date", [$circle['id']]);
+            if (!$apps) {
+                $cm = pJson($circle['meta'] ?? '{}') ?: [];
+                $vac = $cm['vacancies'] ?? [];
+                $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => 'jstf-removal'];
+                $cm['vacancies'] = $vac;
+                dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]);
+                $notes[] = 'vacancy open in ' . $circle['name'] . ' (no queued successors)';
+            } else {
+                foreach ($apps as $ap) {
+                    $vid = jstfSpawnSuccessorVstf($ap['applicant'] ?? '', $ap['initials'] ?? '', $circle['name'], $caseId, $ap['id'] ?? null);
+                    $notes[] = 'candidacy vSTF for successor ' . ($ap['applicant'] ?? '') . ' (' . $vid . ')';
+                }
+            }
+        }
+    } elseif (in_array($kind, ['freeze_ws_until', 'candidacy_freeze_until'])) {
+        if (!$targetId) { $notes[] = ($kind === 'freeze_ws_until' ? 'Ws freeze' : 'Candidacy freeze') . ' skipped (no member target)'; }
+        else {
+            $sk = $kind === 'freeze_ws_until' ? 'ws_freeze' : 'candidacy_freeze';
+            jstfSanction($targetId, $sk, null, $act['until'] ?? null, 'jSTF resolution', $caseId);
+            $notes[] = ($kind === 'freeze_ws_until' ? 'Ws frozen' : 'Steward candidacy frozen') . (!empty($act['until']) ? ' until ' . $act['until'] : ' indefinitely');
+        }
+    } elseif ($kind === 'guest_until') {
+        if (!$targetId) { $notes[] = 'Guest level skipped (no member target)'; }
+        else {
+            $until = $act['until'] ?? null;
+            if ($until && $until <= date('Y-m-d')) { $notes[] = 'Guest level already expired, not applied'; }
+            else {
+                $cur = dbGet('SELECT status FROM users WHERE id = ?', [$targetId]);
+                $prior = $cur['status'] ?? 'Active';
+                dbRun("UPDATE users SET status = 'Guest' WHERE id = ?", [$targetId]);
+                jstfSanction($targetId, 'guest', null, $until, 'jSTF resolution', $caseId, $prior);
+                $notes[] = 'guest privilege level' . ($until ? ' until ' . $until : ' indefinitely') . ' (appeals still allowed)';
+            }
+        }
+    }
+}
+// Restore Guest users whose guest sanction expired. Called on auth.
+function maybeLiftSanctions($userId) {
+    if (!$userId) return;
+    $today = date('Y-m-d');
+    foreach (dbAll("SELECT * FROM sanctions WHERE user_id = ? AND kind = 'guest' AND until IS NOT NULL AND until <= ?", [$userId, $today]) as $s) {
+        if (jstfActiveSanction($userId, 'guest')) continue;
+        $prior = $s['prior_status'] ?: 'Active';
+        dbRun("UPDATE users SET status = ? WHERE id = ? AND status = 'Guest'", [$prior, $userId]);
+    }
+}
 if (preg_match('/^\/jstf\/report$/', $cleanPath)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
@@ -1042,27 +1169,48 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'jSTF Cell') send(400, ['error' => 'Not a jSTF cell']);
     $meta = pJson($cell['meta'] ?? '{}') ?: []; if ($meta['verdict']) send(409, ['error' => 'Verdict already filed']);
     if ($cell['status'] !== 'Under Investigation') send(400, ['error' => 'Not under investigation']);
-    $body = readBody(); $type = trim((string)($body->type ?? '')); $desc = trim((string)($body->description ?? ''));
+    $body = readBody(); $desc = trim((string)($body->description ?? ''));
     $pRefs = is_array($body->policyRefs ?? null) ? $body->policyRefs : []; $findings = trim((string)($body->findings ?? ''));
     $execs = array_values(array_filter(array_map('strval', is_array($body->executingCircles ?? null) ? $body->executingCircles : [])));
-    if (!in_array($type, ['system-bound', 'policy-cited'])) send(400, ['error' => 'type must be system-bound or policy-cited']);
+    $sysActs = [];
+    foreach (is_array($body->systemActions ?? null) ? $body->systemActions : [] as $a) {
+        $a = (array)$a; $kind = trim((string)($a['kind'] ?? ''));
+        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'])) continue;
+        $act = ['kind' => $kind];
+        if ($kind === 'remove_from_circle') {
+            $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
+            if (!$circles) continue;
+            $act['circles'] = $circles;
+        } else {
+            $until = trim((string)($a['until'] ?? ''));
+            if ($until !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $until)) continue;
+            $act['until'] = $until !== '' ? $until : null;
+        }
+        $sysActs[] = $act;
+    }
+    $appealDir = trim((string)($body->appealDirection ?? ''));
+    $isAppealCase = !empty($meta['isAppeal']) || !empty($meta['appealOf']);
+    if ($isAppealCase && !in_array($appealDir, ['uphold', 'overturn'])) send(400, ['error' => 'appealDirection must be uphold or overturn']);
     if (!$desc) send(400, ['error' => 'description required']);
-    if ($type === 'policy-cited' && !$pRefs) send(400, ['error' => 'At least one policy reference required for policy-cited verdicts']);
+    $hasPolicy = !empty($pRefs);
+    $hasSystem = !empty($sysActs);
+    if (!$hasPolicy && !$hasSystem && !$isAppealCase) send(400, ['error' => 'Resolution must include a policy directive or system actions']);
     if ($pRefs) {
         $polMap = []; foreach (dbAll('SELECT ref, status FROM policies') as $pr) $polMap[strtolower($pr['ref'])] = $pr['status'];
         $badRefs = [];
         foreach ($pRefs as $prf) { $pk = strtolower(strval($prf)); if (!isset($polMap[$pk])) $badRefs[] = strval($prf) . ' (unknown)'; elseif (!in_array($polMap[$pk], ['Enacted', 'Passed'])) $badRefs[] = strval($prf) . ' (' . $polMap[$pk] . ')'; }
         if ($badRefs) send(400, ['error' => 'Policy references must cite enacted resolutions: ' . implode(', ', $badRefs)]);
     }
+    $type = $hasPolicy && $hasSystem ? 'combined' : ($hasSystem ? 'system-bound' : 'policy-cited');
     $vts = (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
     $vmaj = (int)floor($vts / 2) + 1;
     $ven = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'resolution' AND vote = 'endorse'", [$cId])['n'] ?? 0);
     if ($ven < $vmaj) send(403, ['error' => 'Resolution needs team endorsement (' . $ven . '/' . $vmaj . ') before filing']);
-    $meta['verdict'] = ['type' => $type, 'description' => $desc, 'policyRefs' => array_map('strval', $pRefs), 'findings' => $findings, 'executingCircles' => $execs, 'filedBy' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    $meta['verdict'] = ['type' => $type, 'description' => $desc, 'policyRefs' => array_map('strval', $pRefs), 'findings' => $findings, 'executingCircles' => $execs, 'systemActions' => $sysActs, 'appealDirection' => $appealDir ?: null, 'filedBy' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $src = pJson($cell['source'] ?? '{}') ?: []; $src['verdict'] = $meta['verdict'];
     dbRun("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?", [json_encode($meta), json_encode($src), $cId]);
     $aId = 'astf-audit-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $aSrc = ['type' => 'judicial-audit', 'sourceCellId' => $cId, 'sourceTitle' => 'jSTF Disciplinary Verdict', 'targetId' => $meta['targetId'], 'targetName' => $meta['targetName'], 'verdict' => ['type' => $type, 'description' => $desc, 'policyRefs' => $meta['verdict']['policyRefs'], 'findings' => $findings, 'executingCircles' => $execs]];
+    $aSrc = ['type' => 'judicial-audit', 'sourceCellId' => $cId, 'sourceTitle' => 'jSTF Disciplinary Verdict', 'targetId' => $meta['targetId'], 'targetName' => $meta['targetName'], 'verdict' => ['type' => $type, 'description' => $desc, 'policyRefs' => $meta['verdict']['policyRefs'], 'findings' => $findings, 'executingCircles' => $execs, 'systemActions' => $sysActs, 'appealDirection' => $appealDir ?: null]];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$aId, 'aSTF Cell', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), 'Blind Review', 'judicial-audit', 1, '', $cId, json_encode($aSrc), json_encode(['status' => 'Pending']), json_encode(['blind' => 1, 'targetName' => $meta['targetName'], 'verdict' => $meta['verdict']])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $aId, 'aSTF', 'Judicial Audit', $meta['targetName'] ?? '', 'active', 'Blind Review', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), date('Y-m-d', time() + 30 * 86400)]);
     dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [$aId, $cId]);
@@ -1169,11 +1317,28 @@ if (preg_match('/^\/cells\/([^\/]+)\/resolution-draft$/', $cleanPath, $m)) {
     if (($cell['status'] ?? '') !== 'Under Investigation') send(400, ['error' => 'Case is closed']);
     if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may draft']);
     $body = readBody();
+    $draftSys = [];
+    foreach (is_array($body->systemActions ?? null) ? $body->systemActions : [] as $a) {
+        $a = (array)$a; $kind = trim((string)($a['kind'] ?? ''));
+        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'])) continue;
+        $act = ['kind' => $kind];
+        if ($kind === 'remove_from_circle') {
+            $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
+            if (!$circles) continue;
+            $act['circles'] = $circles;
+        } else {
+            $until = trim((string)($a['until'] ?? ''));
+            $act['until'] = ($until !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $until)) ? $until : null;
+        }
+        $draftSys[] = $act;
+    }
     $draft = [
         'type' => in_array(trim((string)($body->type ?? '')), ['system-bound', 'policy-cited']) ? trim((string)$body->type) : 'policy-cited',
         'description' => trim((string)($body->description ?? '')),
         'policyRefs' => array_values(array_filter(array_map('strval', is_array($body->policyRefs ?? null) ? $body->policyRefs : []))),
         'executingCircles' => array_values(array_filter(array_map('strval', is_array($body->executingCircles ?? null) ? $body->executingCircles : []))),
+        'systemActions' => $draftSys,
+        'appealDirection' => in_array(trim((string)($body->appealDirection ?? '')), ['uphold', 'overturn']) ? trim((string)$body->appealDirection) : null,
         'findings' => trim((string)($body->findings ?? '')),
         'updatedBy' => $user['name'] ?? $user['initials'],
         'updatedAt' => date('Y-m-d\TH:i:s.000\Z'),
@@ -1207,7 +1372,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-vote$/', $cleanPath, $m)) {
 // MEMBERSHIP ROUTES
 // ═════════════════════════════════════════════════════════
 function markFormer($rosterId, $reason) {
-    dbRun("UPDATE circle_roster SET status = 'former', left = ?, left_reason = ? WHERE id = ?", [date('Y-m-d'), $reason, $rosterId]);
+    dbRun("UPDATE circle_roster SET status = 'former', `left` = ?, `left_reason` = ? WHERE id = ?", [date('Y-m-d'), $reason, $rosterId]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/resign$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
@@ -1273,6 +1438,7 @@ if ($cleanPath === '/competence/ws-drift' && $method === 'POST') {
     $now = time() * 1000; $DAY = 86400000;
     $rows = dbAll("SELECT * FROM user_competence WHERE kind = 'roster'"); $changes = []; $updated = 0;
     foreach ($rows as $r) {
+        if (jstfActiveSanction($r['user_id'] ?? null, 'ws_freeze')) continue;
         $last = dbGet('SELECT MAX(time) AS t FROM user_activity WHERE user_id = ?', [$r['user_id']]); $delta = 0;
         if ($last && $last['t']) { $days = ($now - strtotime($last['t']) * 1000) / $DAY; if ($days <= 30) $delta = 10; elseif ($days > 90) $delta = -10; } else $delta = -10;
         if ($delta === 0) continue;
@@ -1288,6 +1454,7 @@ if ($cleanPath === '/competence/endorse' && $method === 'POST') {
     $body = readBody(); $tid = trim((string)($body->targetId ?? '')); $domain = trim((string)($body->domain ?? ''));
     if (!$tid || !$domain) send(400, ['error' => 'targetId and domain required']);
     $target = dbGet('SELECT * FROM users WHERE id = ?', [$tid]); if (!$target) send(404, ['error' => 'Target member not found']);
+    if (jstfActiveSanction($tid, 'ws_freeze')) send(403, ['error' => 'Ws frozen by jSTF sanction']);
     $row = dbGet('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?', [$tid, $domain]);
     if (!$row) send(404, ['error' => 'Member has no competence in that domain']);
     $prev = $row['ws'] ?? 0; $next = min(3000, $prev + 50);
@@ -1298,6 +1465,7 @@ if ($cleanPath === '/competence/declare-wh' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $body = readBody(); $domain = trim((string)($body->domain ?? '')); $wh = (int)($body->wh ?? 0); $evidence = trim((string)($body->evidence ?? ''));
     if (!$domain) send(400, ['error' => 'domain required']); if ($wh < 0 || $wh > 3000) send(400, ['error' => 'wh must be between 0 and 3000']); if (!$evidence) send(400, ['error' => 'evidence required']);
+    if (jstfActiveSanction($user['id'], 'ws_freeze')) send(403, ['error' => 'Ws frozen by jSTF sanction']);
     $ex = dbGet('SELECT id FROM user_competence WHERE user_id = ? AND domain = ?', [$user['id'], $domain]);
     if ($ex) dbRun('UPDATE user_competence SET wh = ?, evidence = ?, verified = 0, kind = ?, ws = ? WHERE id = ?', [$wh, $evidence, 'self', $wh, $ex['id']]);
     else dbRun('INSERT INTO user_competence (user_id, domain, wh, evidence, verified, kind, ws) VALUES (?,?,?,?,0,?,?)', [$user['id'], $domain, $wh, $evidence, 'self', $wh]);
@@ -1308,6 +1476,7 @@ if ($cleanPath === '/competence/verify-wh' && $method === 'POST') {
     if (!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']])) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $tid = trim((string)($body->targetId ?? '')); $domain = trim((string)($body->domain ?? '')); $verified = !empty($body->verified) ? 1 : 0;
     if (!$tid || !$domain) send(400, ['error' => 'targetId and domain required']);
+    if (jstfActiveSanction($tid, 'ws_freeze')) send(403, ['error' => 'Ws frozen by jSTF sanction']);
     $row = dbGet('SELECT * FROM user_competence WHERE user_id = ? AND domain = ?', [$tid, $domain]);
     if (!$row) send(404, ['error' => 'No competence row for target domain']);
     dbRun('UPDATE user_competence SET verified = ? WHERE id = ?', [$verified, $row['id']]);

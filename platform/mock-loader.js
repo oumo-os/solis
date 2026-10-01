@@ -107,6 +107,17 @@ function renderDiscussionThreads(list, emptyMsg) {
     var avatarBg = 'background:var(--navy-light)';
     if (t.avatar && t.avatar.gradient) avatarBg = 'background:' + t.avatar.gradient;
     var badgeHtml = t.badge ? '<span class="badge ' + t.badgeClass + '" style="font-size:8px">' + t.badge + '</span>' : '';
+    var phaseHtml = '';
+    if ((t.badge || '') === 'b-judicial' && typeof jstfThreadPhase === 'function') {
+      try {
+        var ph = jstfThreadPhase(t);
+        var phColor = ph.key === 'resolved' ? 'var(--green)' : ph.key === 'open' ? 'var(--text-tertiary)' : 'var(--gold)';
+        phaseHtml = '<span class="tag" style="font-size:8px;color:' + phColor + '">' + ph.label + '</span>';
+        if (ph.key === 'resolved' && (ph.caseId || ph.cellId) && typeof xrefChip === 'function') {
+          phaseHtml += ' ' + xrefChip('cell', ph.caseId || ph.cellId, 'resolution trail', { color: 'var(--green)' });
+        }
+      } catch (e) {}
+    }
     var pinnedClass = t.pinned ? ' pinned' : '';
     var pinnedIcon = t.pinned ? '<span class="post-pin-icon" title="Pinned">&#9733;</span>' : '';
     var pinBtn = canPin ? '<button class="post-action' + (t.pinned ? ' pin-on' : '') + '" onclick="event.stopPropagation();toggleThreadPinned(\'' + t.id + '\')" title="' + (t.pinned ? 'Unpin' : 'Pin') + '"><span>&#9873;</span></button>' : '';
@@ -129,7 +140,7 @@ function renderDiscussionThreads(list, emptyMsg) {
       + '<span>' + t.time + '</span>'
       + pinnedIcon
       + '</div></div>'
-      + '<div class="post-footer">' + badgeHtml + '</div>'
+      + '<div class="post-footer">' + badgeHtml + phaseHtml + '</div>'
       + '</div>'
       + '<div class="post-title">' + t.title + '</div>'
       + '<div class="post-body">' + t.body + '</div>'
