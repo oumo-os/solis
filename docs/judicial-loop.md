@@ -21,21 +21,28 @@ Any steward escalates the thread (`POST /jstf/escalate {threadId}`).
 A jSTF cell is created (`Under Investigation`) **without a team**.
 Instead a **vacancy** opens (`meta.formation.state = 'inviting'`):
 
-- Quorum comes from settings (`jstf_quorum`, default 3).
-- The eligible pool is sampled randomly (`ORDER BY RAND()`):
-  - **competence pool** (default): active stewards in good standing
-    with `user_competence.ws > 0` in one of `jstf_domains`. Empty
-    domain list means every steward is eligible.
+- Adjudicators comes from settings (`jstf_adjudicators`, default 3) —
+  the minimum acceptances to seat a team. (Vote quorums for decisions
+  live under the Quorum tab; team size lives here, per STF type.)
+- The eligible pool is randomly sampled from the top half:
+  - **competence pool** (default): every member in good standing,
+    stewards first, then everyone else ordered by summed domain
+    competence. With `jstf_domains` set, only members competent
+    (`ws > 0`) in a listed domain qualify; blank means every member
+    is eligible. Steward = member of a circle.
   - **stewards pool** (`jstf_pool_mode = 'stewards'`): active stewards
-    in good standing, no competence filter. The already-entrusted pool.
+    in good standing only. The already-entrusted pool.
 - Excluded from every pool: the **target** and the **petitioner**
   (thread `submitter_id`). The escalating sponsor is eligible and must
   be sampled like anyone else — sponsorship confers no seat.
-- `quorum + 2` invitations go out (`stf_candidates`, `status=invited`).
+- Oversampled invitations go out (`stf_candidates`, `status=invited`):
+  roughly 3× quorum drawn from the top half; the first quorum
+  acceptances start deliberation and lock the invitation.
 
-Toggle the pool in Settings → STF: jSTF Pool, jSTF Domains (comma
-list, blank = all), jSTF Quorum. Like other STF settings these go
-through the settings proposal flow and persist to `system_settings`.
+Toggle the pool in Settings → STF → jSTF: Pool, Domains (comma
+list, blank = every member eligible), Adjudicators. Like other STF
+settings these go through the settings proposal flow and persist to
+`system_settings`.
 
 ## 3. Invitation → seating
 
@@ -77,11 +84,15 @@ A probe operates **only on its assigned information package**:
 - Mandate, objectives, and prefilled tasks (by the commissioner),
   written to the probe's tasks/objectives so progress is shared.
 
-**Two kinds of return.** A *composition* is something the team makes
-(draft, research, investigation report). An *activity proof* reports
-work done (built, attended, delivered). Each deliverable is stamped
-with its kind at submit; stewards review (approve / request revision)
-and the team accepts reports into case findings per deliverable.
+**Every deliverable is a composition** — a draft, research, an
+investigation report; a report on attended work is a composition too.
+The team composes, stewards review (approve / request revision), and
+the commissioning team accepts reports into case findings per
+deliverable. The probe talks to its commissioners through **task
+status** (pending → in-progress → complete), visible on the
+commissioning question — and commissioning-body members may post
+directly in the probe deliberation, as if on the team, even on
+siloed paths.
 
 The probe talks to its commissioners through **task status**
 (pending → in-progress → complete), visible as task counts on the

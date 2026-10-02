@@ -265,7 +265,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $exitReasonLabels = []; foreach (dbAll('SELECT * FROM exit_reason_labels') as $r) $exitReasonLabels[$r['key']] = $r['label'];
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: [];
     $jstfDomainsRaw = $ss['jstf_domains'] ?? '[]'; $jstfDomains = pJson(is_string($jstfDomainsRaw) ? $jstfDomainsRaw : json_encode($jstfDomainsRaw)) ?: []; if (!is_array($jstfDomains)) $jstfDomains = [];
-    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfQuorum' => (int)($ss['jstf_quorum'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
+    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
     $sr = dbGet('SELECT stats FROM stats WHERE id = 1');
     $stats = $sr ? pJson($sr['stats']) ?: [] : [];
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
@@ -417,6 +417,19 @@ foreach ($childDefs as $d) {
                     if (($pc['status'] ?? '') !== 'Under Investigation') send(400, ['error' => 'Case is closed']);
                     $onTeam = (bool)dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$parentId, $wuser['initials'] ?? null]);
                     if (!$onTeam) send(403, ['error' => 'Only the investigation team may deliberate']);
+                }
+                if ($pc && ($pc['type'] ?? '') === 'xSTF Cell') {
+                    if (($pc['status'] ?? '') === 'Completed') send(400, ['error' => 'Execution cell is completed']);
+                    $allowed = array_map(function($t) { return $t['initials']; }, dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$parentId]));
+                    $psrc = pJson($pc['source'] ?? '{}') ?: [];
+                    if (!empty($psrc['jstfId'])) {
+                        foreach (dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$psrc['jstfId']]) as $jt) $allowed[] = $jt['initials'];
+                    }
+                    if (!empty($pc['circle'])) {
+                        $cc = dbGet('SELECT id FROM circles WHERE id = ? OR LOWER(name) = LOWER(?)', [$pc['circle'], $pc['circle']]);
+                        if ($cc) foreach (dbAll("SELECT initials FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cc['id']]) as $cr) $allowed[] = $cr['initials'];
+                    }
+                    if (!in_array($wuser['initials'] ?? null, $allowed)) send(403, ['error' => 'Only the probe team or the commissioning body may deliberate here']);
                 }
             }
             $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) use ($d) { return $c !== $d['parentKey'] && $c !== 'id'; });
@@ -740,16 +753,14 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-xstf$/', $cleanPath, $m)) {
     $team = is_array($body->team ?? null) ? $body->team : []; $specs = $body->deliverableSpecs ?? new \stdClass();
     $xId = 'xstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4); $blind = isset($body->blind) ? ($body->blind ? 1 : 0) : 1;
     $deadline = trim((string)($body->deadline ?? '')) ?: date('Y-m-d', time() + 30 * 86400);
-    $deliverableKind = trim((string)($body->deliverableKind ?? 'composition'));
-    if (!in_array($deliverableKind, ['composition', 'activity'])) send(400, ['error' => 'deliverableKind must be composition or activity']);
     // Authority is explicit and visible: the approved aSTF resolution that
     // permits this execution, plus any additional cited refs.
     $authorityRefs = array_values(array_filter(array_map('strval', is_array($body->authorityRefs ?? null) ? $body->authorityRefs : [])));
     $mandateRefs = array_values(array_filter(array_map('strval', is_array($body->mandateRefs ?? null) ? $body->mandateRefs : [])));
     $citedContent = trim((string)($body->citedContent ?? ''));
-    $dSpecs = ['name' => (string)($specs->name ?? $title), 'description' => (string)($specs->description ?? ''), 'sections' => (int)($specs->sections ?? 4), 'wordCount' => (string)($specs->wordCount ?? 'TBD'), 'language' => (string)($specs->language ?? 'Plain English'), 'reviewProcess' => (string)($specs->reviewProcess ?? 'draft-circle-final'), 'deliverableKind' => $deliverableKind];
+    $dSpecs = ['name' => (string)($specs->name ?? $title), 'description' => (string)($specs->description ?? ''), 'sections' => (int)($specs->sections ?? 4), 'wordCount' => (string)($specs->wordCount ?? 'TBD'), 'language' => (string)($specs->language ?? 'Plain English'), 'reviewProcess' => (string)($specs->reviewProcess ?? 'draft-circle-final')];
     $defTasks = [['id'=>'t0','label'=>'STF formulation','status'=>'pending','locked'=>true],['id'=>'t1','label'=>'Mandate comprehension','status'=>'pending','locked'=>false],['id'=>'t2','label'=>'Research & drafting','status'=>'pending','locked'=>false],['id'=>'t3','label'=>'Internal review','status'=>'pending','locked'=>false],['id'=>'t4','label'=>'Circle review cycle','status'=>'pending','locked'=>false],['id'=>'t5','label'=>'Finalisation','status'=>'pending','locked'=>false],['id'=>'t6','label'=>'Dissolve STF','status'=>'pending','locked'=>true]];
-    $xs = ['type' => 'xstf-execution', 'astfId' => $afId, 'originCellId' => $as2['originCellId'] ?? null, 'circleName' => $as2['circleName'] ?? $af['circle'] ?? '', 'authority' => ['basis' => 'astf-resolution', 'ref' => $afId, 'extraRefs' => $authorityRefs], 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'deliverableKind' => $deliverableKind, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    $xs = ['type' => 'xstf-execution', 'astfId' => $afId, 'originCellId' => $as2['originCellId'] ?? null, 'circleName' => $as2['circleName'] ?? $af['circle'] ?? '', 'authority' => ['basis' => 'astf-resolution', 'ref' => $afId, 'extraRefs' => $authorityRefs], 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', $title, 'Active', count($team) ?: 3, $xs['circleName'], $blind, $afId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => $defTasks, 'objectives' => []]), json_encode($dSpecs), 0, $deadline]);
     foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, (string)($t->name ?? ''), (string)($t->initials ?? ''), (string)($t->role ?? 'Team Member')]);
     foreach ($defTasks as $dt) dbRun('INSERT INTO cell_tasks (cell_id, task_id, label, status, locked, assignee) VALUES (?,?,?,?,?,?)', [$xId, $dt['id'], $dt['label'], $dt['status'], $dt['locked'] ? 1 : 0, null]);
@@ -767,9 +778,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $content = trim((string)($body->content ?? '')); $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $dels = $meta['deliverables'] ?? [];
-    $cellKind = ($csrc['deliverableKind'] ?? pJson($cell['deliverable_specs'] ?? '{}')['deliverableKind'] ?? 'composition');
-    if (!in_array($cellKind, ['composition', 'activity'])) $cellKind = 'composition';
-    $dels[] = ['id' => 'del-' . time() . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'title' => $title, 'content' => $content, 'kind' => $cellKind, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
+    $dels[] = ['id' => 'del-' . time() . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'title' => $title, 'content' => $content, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
     $meta['deliverables'] = $dels; dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(201, ['ok' => true, 'deliverableId' => end($dels)['id']]);
 }
@@ -1031,8 +1040,8 @@ function jstfDurationDays() {
     return $d > 0 ? $d : 30;
 }
 function jstfQuorum() {
-    $ss = dbGet('SELECT jstf_quorum FROM system_settings WHERE id = 1');
-    $q = (int)($ss['jstf_quorum'] ?? 0);
+    $ss = dbGet('SELECT jstf_adjudicators FROM system_settings WHERE id = 1');
+    $q = (int)($ss['jstf_adjudicators'] ?? 0);
     return $q > 0 ? $q : 3;
 }
 function jstfPoolMode() {
@@ -1046,36 +1055,46 @@ function jstfPoolDomains() {
     $d = pJson(is_string($raw) ? $raw : json_encode($raw)) ?: [];
     return is_array($d) ? array_values(array_filter(array_map('strval', $d))) : [];
 }
-// Eligible adjudicator pool: active stewards, minus target + petitioner,
-// optionally restricted to domain-competent members. Random order.
+// Eligible adjudicator pool, ranked: stewards first, then the rest ordered
+// by summed domain competence. Stewards mode = entrusted pool only.
+// Competence mode = every member in good standing; stewards preferred,
+// then everyone else at the top of the competence requirements.
 function jstfEligiblePool($excludeIds, $domains = null, $mode = null) {
     if ($domains === null) $domains = jstfPoolDomains();
     if ($mode === null) $mode = jstfPoolMode();
     $ex = array_values(array_filter(array_map('strval', (array)$excludeIds)));
-    $stewards = dbAll("SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r JOIN users u ON u.id = r.member_id WHERE r.status = 'active' AND (u.status IS NULL OR u.status NOT IN ('Restricted','Suspended','Former'))");
+    $ph = $domains ? implode(',', array_fill(0, count($domains), '?')) : null;
+    $rows = dbAll(
+        "SELECT u.id AS id, u.name AS name, u.initials AS initials, " .
+        ($ph ? "(SELECT COALESCE(SUM(uc.ws),0) FROM user_competence uc WHERE uc.user_id = u.id AND uc.domain IN ($ph))" : "(SELECT COALESCE(SUM(uc.ws),0) FROM user_competence uc WHERE uc.user_id = u.id)") . " AS score, " .
+        "CASE WHEN EXISTS (SELECT 1 FROM circle_roster r WHERE r.member_id = u.id AND r.status = 'active') THEN 0 ELSE 1 END AS nonsteward " .
+        "FROM users u WHERE (u.status IS NULL OR u.status NOT IN ('Restricted','Suspended','Former','Guest'))",
+        $domains ?: []
+    );
     $pool = [];
-    foreach ($stewards as $s) {
+    foreach ($rows as $s) {
         if (in_array((string)$s['id'], $ex, true)) continue;
-        if ($mode === 'competence' && $domains) {
-            $ok = false;
-            foreach ($domains as $d) {
-                $w = dbGet('SELECT ws FROM user_competence WHERE user_id = ? AND domain = ?', [$s['id'], $d]);
-                if ($w && (int)($w['ws'] ?? 0) > 0) { $ok = true; break; }
-            }
-            if (!$ok) continue;
-        }
-        $pool[] = $s;
+        if (empty($s['initials'])) continue;
+        if ($mode === 'stewards' && (int)$s['nonsteward'] === 1) continue;
+        if ($mode === 'competence' && $domains && (int)($s['score'] ?? 0) <= 0) continue;
+        $pool[] = ['id' => $s['id'], 'name' => $s['name'], 'initials' => $s['initials'], 'score' => (int)($s['score'] ?? 0), 'nonsteward' => (int)$s['nonsteward']];
     }
-    shuffle($pool);
+    usort($pool, function($a, $b) {
+        if ($a['nonsteward'] !== $b['nonsteward']) return $a['nonsteward'] - $b['nonsteward'];
+        return $b['score'] - $a['score'];
+    });
     return array_values($pool);
 }
-// Invite a batch of eligible members to a jSTF vacancy. Returns invited rows.
+// Invitation batch: top half of the qualifying pool, randomly sampled.
 function jstfInviteBatch($jId, $excludeIds, $count) {
     $invitedIds = array_map(function($r) { return (string)($r['user_id'] ?? ''); }, dbAll("SELECT user_id FROM stf_candidates WHERE stf_id = ?", ['stf-' . $jId]));
-    $pool = array_values(array_filter(jstfEligiblePool($excludeIds), function($s) use ($invitedIds) { return !in_array((string)$s['id'], $invitedIds, true); }));
-    $batch = array_slice($pool, 0, max(0, (int)$count));
+    $ranked = array_values(array_filter(jstfEligiblePool($excludeIds), function($s) use ($invitedIds) { return !in_array((string)$s['id'], $invitedIds, true); }));
+    $topHalf = array_slice($ranked, 0, max(1, (int)ceil(count($ranked) / 2)));
+    shuffle($topHalf);
+    $batch = array_slice($topHalf, 0, max(0, (int)$count));
     $now = date('Y-m-d\TH:i:s.000\Z');
     foreach ($batch as $s) {
+        if (!$s['initials']) continue;
         $cid = 'cand-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $s['initials'] ?: 'x'));
         dbRun('INSERT INTO stf_candidates (id, stf_id, name, initials, status, invited_date, user_id) VALUES (?,?,?,?,?,?,?)', [$cid, 'stf-' . $jId, $s['name'], $s['initials'], 'invited', $now, $s['id']]);
     }
@@ -1507,8 +1526,6 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     // Every probe carries its authority package and only operates on it.
     $mode = trim((string)($body->mode ?? 'siloed'));
     if (!in_array($mode, ['siloed', 'collaborative'])) send(400, ['error' => 'mode must be siloed or collaborative']);
-    $deliverableKind = trim((string)($body->deliverableKind ?? 'composition'));
-    if (!in_array($deliverableKind, ['composition', 'activity'])) send(400, ['error' => 'deliverableKind must be composition or activity']);
     $blind = isset($body->blind) ? (!empty($body->blind) ? 1 : 0) : 1;
     $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $brief = trim((string)($body->brief ?? ''));
@@ -1521,12 +1538,13 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     $authority = ['basis' => 'jstf-case', 'ref' => $cId, 'extraRefs' => $authorityRefs];
     $objectives = array_values(array_filter(array_map(function($o) { $s = trim((string)(is_array($o) ? ($o['label'] ?? '') : $o)); return $s !== '' ? $s : null; }, is_array($body->objectives ?? null) ? $body->objectives : [])));
     $tasks = array_values(array_filter(array_map(function($o) { $s = trim((string)(is_array($o) ? ($o['label'] ?? '') : $o)); return $s !== '' ? $s : null; }, is_array($body->tasks ?? null) ? $body->tasks : [])));
+    $compDomains = array_values(array_filter(array_map(function($d) { $s = trim((string)$d); return $s !== '' ? $s : null; }, is_array($body->competenceDomains ?? null) ? $body->competenceDomains : [])));
     $made = [];
-    $spawnProbe = function($members) use (&$made, $cId, $cell, $meta, $qId, $qlabel, $qDue, $brief, $authority, $authorityRefs, $mandateRefs, $citedContent, $deliverableKind, $blind, $objectives, $tasks, $user) {
+    $spawnProbe = function($members) use (&$made, $cId, $cell, $meta, $qId, $qlabel, $qDue, $brief, $authority, $authorityRefs, $mandateRefs, $citedContent, $blind, $objectives, $tasks, $compDomains, $user) {
         $names = implode(', ', array_map(function($t) { return $t['name']; }, $members));
         $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', ($members[0]['initials'] ?? 'x') . count($members)));
-        $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'mode' => count($members) > 1 ? 'collaborative' : 'siloed', 'investigators' => array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $members), 'investigator' => $members[0]['name'], 'investigatorInitials' => $members[0]['initials'], 'authority' => $authority, 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'deliverableKind' => $deliverableKind, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
-        $dSpecs = ['name' => 'Answer the mandate question', 'description' => $brief . "\n\nMandate (question):\n" . $qlabel . ($citedContent !== '' ? "\n\nCited content:\n" . $citedContent : ''), 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept', 'deliverableKind' => $deliverableKind];
+        $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'mode' => count($members) > 1 ? 'collaborative' : 'siloed', 'investigators' => array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $members), 'investigator' => $members[0]['name'], 'investigatorInitials' => $members[0]['initials'], 'authority' => $authority, 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'competenceDomains' => $compDomains, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
+        $dSpecs = ['name' => 'Answer the mandate question', 'description' => $brief . "\n\nMandate (question):\n" . $qlabel . ($citedContent !== '' ? "\n\nCited content:\n" . $citedContent : ''), 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
         dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId) . ' — ' . $names, 'Active', count($members), $cell['circle'] ?? '', $blind, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, $qDue]);
         foreach ($members as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
         foreach ($objectives as $oi => $ol) dbRun('INSERT INTO cell_objectives (cell_id, obj_id, label, status) VALUES (?,?,?,?)', [$xId, 'qo-' . $oi . '-' . substr($xId, -4), $ol, 'open']);

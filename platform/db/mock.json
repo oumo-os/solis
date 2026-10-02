@@ -4379,7 +4379,7 @@
     "astfDurationDays": 10,
     "vstfDurationDays": 14,
     "jstfDomains": [],
-    "jstfQuorum": 3,
+    "jstfAdjudicators": 3,
     "jstfPoolMode": "competence"
   },
   "policies": [

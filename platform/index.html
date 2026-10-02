@@ -911,7 +911,11 @@
         <div class="card" style="margin-bottom:16px">
           <div id="xstf-messages"></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" placeholder="Add to the execution cell..."></textarea>
+          <textarea class="msg-input" rows="2" id="xstf-composer" placeholder="Add to the execution cell..."></textarea>
+          <div class="flex justify-between items-center" style="margin-top:8px;gap:8px" id="xstf-composer-wrap">
+            <span class="text-xs" style="color:var(--text-tertiary)">Probe team and commissioning body deliberate here.</span>
+            <button class="btn btn-primary btn-sm" onclick="sendXstfMessage()">Post</button>
+          </div>
         </div>
       </div>
       <div class="layout-aside" id="xstf-aside">
@@ -2058,24 +2062,40 @@
       </div>
       <div class="settings-tab-content" id="settings-tab-0">
         <div class="card" style="margin-bottom:12px">
-          <div class="sec">STF Composition & Durations</div>
+          <div class="sec">vSTF — Verification</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Min vSTF Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-min-vstf"></div>
-            <div class="form-group"><label class="form-label">Max vSTF Assessors</label><input class="form-input" type="number" value="7" id="settings-stf-max-vstf"></div>
-            <div class="form-group"><label class="form-label">aSTF Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-astf-assessors"></div>
-            <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14" id="settings-stf-vstf-duration"></div>
-            <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10" id="settings-stf-astf-duration"></div>
-            <div class="form-group"><label class="form-label">jSTF Duration (days)</label><input class="form-input" type="number" value="30" id="settings-stf-jstf-duration"><span style="font-size:10px;color:var(--text-tertiary)">Deliberation deadline per team composition</span></div>
-            <div class="form-group"><label class="form-label">jSTF Quorum</label><input class="form-input" type="number" value="3" id="settings-stf-jstf-quorum"><span style="font-size:10px;color:var(--text-tertiary)">Acceptances needed to seat a team</span></div>
-            <div class="form-group"><label class="form-label">jSTF Pool</label><select class="form-input" id="settings-stf-jstf-pool"><option value="competence">Competence pool (sampled)</option><option value="stewards">Stewards (entrusted pool)</option></select><span style="font-size:10px;color:var(--text-tertiary)">Who may be invited to adjudicate</span></div>
-            <div class="form-group"><label class="form-label">jSTF Domains</label><input class="form-input" id="settings-stf-jstf-domains" placeholder="Space Law, Liability..."><span style="font-size:10px;color:var(--text-tertiary)">Competence domains for the pool (blank = all stewards)</span></div>
-            <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6" id="settings-stf-pastf-cycle"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
+            <div class="form-group"><label class="form-label">Min Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-min-vstf"></div>
+            <div class="form-group"><label class="form-label">Max Assessors</label><input class="form-input" type="number" value="7" id="settings-stf-max-vstf"></div>
+            <div class="form-group"><label class="form-label">Duration (days)</label><input class="form-input" type="number" value="14" id="settings-stf-vstf-duration"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">aSTF — Adjudication</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Assessors</label><input class="form-input" type="number" value="3" id="settings-stf-astf-assessors"></div>
+            <div class="form-group"><label class="form-label">Duration (days)</label><input class="form-input" type="number" value="10" id="settings-stf-astf-duration"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">jSTF — Judicial Investigation</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Adjudicators</label><input class="form-input" type="number" value="3" id="settings-stf-jstf-adjudicators"><span style="font-size:10px;color:var(--text-tertiary)">Minimum acceptances to seat a team</span></div>
+            <div class="form-group"><label class="form-label">Duration (days)</label><input class="form-input" type="number" value="30" id="settings-stf-jstf-duration"><span style="font-size:10px;color:var(--text-tertiary)">Deliberation deadline per team composition</span></div>
+            <div class="form-group"><label class="form-label">Pool</label><select class="form-input" id="settings-stf-jstf-pool"><option value="competence">Competence pool (sampled)</option><option value="stewards">Stewards (entrusted pool)</option></select><span style="font-size:10px;color:var(--text-tertiary)">Who may be invited to adjudicate</span></div>
+            <div class="form-group"><label class="form-label">Domains</label><input class="form-input" id="settings-stf-jstf-domains" placeholder="Space Law, Liability..."><span style="font-size:10px;color:var(--text-tertiary)">Competence domains for the pool (blank = every member eligible)</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="sec">p-aSTF — Periodic Review</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Cycle Duration (months)</label><input class="form-input" type="number" value="6" id="settings-stf-pastf-cycle"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
           </div>
         </div>
       </div>
       <div class="settings-tab-content" id="settings-tab-1" style="display:none">
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Deliberation Quorum Thresholds</div>
+          <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Vote quorum for decisions — resolutions, polls and motions. Team sizes live under the STF tab.</div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Minimum Participants</label><input class="form-input" type="number" value="4" id="settings-quorum-min-participants"></div>
             <div class="form-group"><label class="form-label">Minimum % of Members</label><input class="form-input" type="number" value="60" id="settings-quorum-min-percent"><span style="font-size:10px;color:var(--text-tertiary)">%</span></div>
@@ -3271,7 +3291,7 @@ function renderResolutionSettingsForm(cell, container) {
   if (cell.delibType === 'system-settings') {
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfQuorum:'jSTF Quorum', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfAdjudicators:'jSTF Adjudicators', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
@@ -3280,7 +3300,7 @@ function renderResolutionSettingsForm(cell, container) {
       aiConfirmQuorum:'AI Confirm Quorum', aiSetsDomainWeights:'AI Sets Domain Weights'
     };
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfQuorum:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfAdjudicators:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -5243,8 +5263,7 @@ function renderJstfQuestions(cell) {
         var body = dels.length ? dels.map(function(d) {
           var done = acceptedIds.indexOf(d.id) >= 0;
           var mine = accepted.filter(function(f) { return f.deliverableId === d.id; })[0];
-          var kindTag = (d.kind === 'activity') ? ' <span class="tag tag-gold" style="font-size:8px">activity proof</span>' : ' <span class="tag tag-green" style="font-size:8px">composition</span>';
-          return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + kindTag + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
+          return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
             + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + esc(String(d.content || '').slice(0, 220)) + '</div>'
             + ((canEdit && !done) ? '<div style="margin-top:6px"><button class="btn btn-sm" onclick="acceptJstfFinding(\'' + x.id + '\',\'' + d.id + '\')">Accept as answer</button></div>' : '')
             + (mine ? '<div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Accepted by ' + esc(mine.acceptedBy || '') + '</div>' : '') + '</div>';
@@ -5331,7 +5350,6 @@ function openCommissionModal(qid) {
   openModal('<div class="sec">Commission xSTF Probe</div>' +
     '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One xSTF, two settings. <strong>Siloed</strong>: one isolated probe per investigator, each delivering its own report' + (q.deadline ? ' by ' + esc(q.deadline) : '') + '. <strong>Collaborative</strong>: one shared probe, the team works together. This question mandates ' + mandate + ' eye' + (mandate === 1 ? '' : 's') + ' — select exactly ' + mandate + '.</span></div>' +
     '<div class="form-group"><label class="form-label">Mode</label><select class="form-input" id="jstf-commission-mode" style="font-size:12px"><option value="siloed">Siloed — isolated path per investigator</option><option value="collaborative">Collaborative — one shared probe</option></select></div>' +
-    '<div class="form-group"><label class="form-label">Deliverable kind</label><select class="form-input" id="jstf-commission-kind" style="font-size:12px"><option value="composition">Composition — draft, research, report the team composes</option><option value="activity">Activity proof — report on work done</option></select></div>' +
     '<div class="form-group"><label class="form-label">Brief for the probe team (required)</label><textarea class="msg-input" rows="2" id="jstf-commission-brief" placeholder="Scope, constraints, deadlines..."></textarea></div>' +
     '<div class="form-group"><label class="form-label">Authority refs (optional — the jSTF commission itself is the authority)</label><input class="form-input" id="jstf-commission-auth" placeholder="JR-001, PR-014..." style="font-size:12px"></div>' +
     '<div class="form-group"><label class="form-label">Mandate refs (optional — resolutions explaining the deliverable)</label><input class="form-input" id="jstf-commission-mandate" placeholder="PR-014..." style="font-size:12px"></div>' +
@@ -5339,6 +5357,7 @@ function openCommissionModal(qid) {
     '<div class="form-group"><label class="form-label">Objectives (optional — one per line)</label><textarea class="msg-input" rows="2" id="jstf-commission-objectives" placeholder="Answer the mandate question..."></textarea></div>' +
     '<div class="form-group"><label class="form-label">Prefilled tasks (optional — one per line)</label><textarea class="msg-input" rows="2" id="jstf-commission-tasks" placeholder="Gather evidence..."></textarea></div>' +
     '<div class="form-group"><label class="form-check" style="font-size:12px;color:var(--text-secondary);cursor:pointer"><input type="checkbox" id="jstf-commission-blind" checked style="margin-right:6px">Blind — investigators stay anonymous to each other</label></div>' +
+    '<div class="form-group"><label class="form-label">Preferred competence domains (optional)</label><input class="form-input" id="jstf-commission-domains" placeholder="Space Law, Liability..." style="font-size:12px"><span style="font-size:10px;color:var(--text-tertiary)">Blank = all domains. Recorded on each probe for future assessor matching.</span></div>' +
     '<div class="form-group"><label class="form-label">jSTF-xSTF investigators</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitCommission(\'' + String(qid).replace(/'/g, "\\'") + '\')">Commission Probe</button></div>',
     { size: 'md' });
@@ -5352,10 +5371,10 @@ function submitCommission(qid) {
   if (!team.length) { toast('Select at least one jSTF-xSTF investigator.', 'error'); return; }
   var splitLines = function(id) { var el = document.getElementById(id); if (!el || !el.value) return []; return el.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean); };
   var splitRefs = function(id) { var el = document.getElementById(id); if (!el || !el.value) return []; return el.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean); };
+  var domEl = document.getElementById('jstf-commission-domains');
   var modeEl = document.getElementById('jstf-commission-mode');
-  var kindEl = document.getElementById('jstf-commission-kind');
   var blindEl = document.getElementById('jstf-commission-blind');
-  SolisApi.commissionJstfXstf(cell.id, { questionId: qid, brief: brief, team: team, mode: modeEl ? modeEl.value : 'siloed', deliverableKind: kindEl ? kindEl.value : 'composition', blind: blindEl ? !!blindEl.checked : true, authorityRefs: splitRefs('jstf-commission-auth'), mandateRefs: splitRefs('jstf-commission-mandate'), citedContent: ((document.getElementById('jstf-commission-cited') || {}).value || '').trim(), objectives: splitLines('jstf-commission-objectives'), tasks: splitLines('jstf-commission-tasks') }).then(function(r) {
+  SolisApi.commissionJstfXstf(cell.id, { questionId: qid, brief: brief, team: team, mode: modeEl ? modeEl.value : 'siloed', blind: blindEl ? !!blindEl.checked : true, competenceDomains: domEl ? domEl.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [], authorityRefs: splitRefs('jstf-commission-auth'), mandateRefs: splitRefs('jstf-commission-mandate'), citedContent: ((document.getElementById('jstf-commission-cited') || {}).value || '').trim(), objectives: splitLines('jstf-commission-objectives'), tasks: splitLines('jstf-commission-tasks') }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Commission failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     closeModal();
     toast('Probe commissioned for this question.', 'success');
@@ -5571,6 +5590,34 @@ function sendJstfMessage() {
   renderJstfQuestions(cell);
   renderJstfResolutionRecord(cell);
     toast('Posted to sealed deliberation.', 'success');
+  }).catch(function() { toast('Could not post. Is the server running?', 'error'); });
+}
+function xstfCanDeliberate(cell) {
+  if (!cell) return false;
+  var meIni = ((MOCK && MOCK.currentUser) || {}).initials;
+  if ((cell.team || []).some(function(t) { return t.initials === meIni; })) return true;
+  var src = cell.source || {};
+  if (src.jstfId) {
+    var jc = (typeof cellsById !== 'undefined' && cellsById[src.jstfId]) || null;
+    if (!jc) { ((MOCK && MOCK.cells) || []).forEach(function(c) { if (c.id === src.jstfId) jc = c; }); }
+    if (jc && (jc.team || []).some(function(t) { return t.initials === meIni; })) return true;
+  }
+  return false;
+}
+function sendXstfMessage() {
+  var cell = (typeof getActiveXstfCell === 'function') ? getActiveXstfCell() : null;
+  var ta = document.getElementById('xstf-composer');
+  if (!cell || !ta) return;
+  var text = (ta.value || '').trim();
+  if (!text) { toast('Write a message first.', 'error'); return; }
+  var me = (MOCK && MOCK.currentUser) || {};
+  SolisApi.addCellMessage(cell.id, { author: me.name || 'Member', initials: me.initials || '?', text: text, time: 'just now' }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not post: ' + ((r && r.error) || ('HTTP ' + (r && r.__status))), 'error'); return; }
+    cell.messages = cell.messages || [];
+    cell.messages.push({ author: me.name || 'Member', initials: me.initials || '?', text: text, time: 'just now' });
+    ta.value = '';
+    renderMessages(cell.id, 'xstf-messages');
+    toast('Posted to execution deliberation.', 'success');
   }).catch(function() { toast('Could not post. Is the server running?', 'error'); });
 }
 function renderJstfCase() {
@@ -6204,7 +6251,7 @@ function openSettingsModal() {
   setNum('settings-stf-vstf-duration', ss.vstfDurationDays);
   setNum('settings-stf-astf-duration', ss.astfDurationDays);
   setNum('settings-stf-jstf-duration', ss.jstfDurationDays);
-  setNum('settings-stf-jstf-quorum', ss.jstfQuorum);
+  setNum('settings-stf-jstf-adjudicators', ss.jstfAdjudicators);
   var poolEl = document.getElementById('settings-stf-jstf-pool');
   if (poolEl && ss.jstfPoolMode) poolEl.value = ss.jstfPoolMode;
   var domEl = document.getElementById('settings-stf-jstf-domains');
@@ -6454,7 +6501,7 @@ function applySettingsSnapshot(snapshot) {
     if (s.stf && typeof SolisApi !== 'undefined' && SolisApi.saveSystemSettings) {
       var persist = {};
       if (s.stf.jstfDurationDays != null) persist.jstf_duration_days = s.stf.jstfDurationDays;
-      if (s.stf.jstfQuorum != null) persist.jstf_quorum = s.stf.jstfQuorum;
+      if (s.stf.jstfAdjudicators != null) persist.jstf_adjudicators = s.stf.jstfAdjudicators;
       if (s.stf.jstfPoolMode != null) persist.jstf_pool_mode = s.stf.jstfPoolMode;
       if (s.stf.jstfDomains != null) persist.jstf_domains = JSON.stringify(s.stf.jstfDomains);
       if (s.stf.astfDurationDays != null) persist.astf_duration_days = s.stf.astfDurationDays;
@@ -7684,7 +7731,7 @@ function submitSystemProposal() {
       vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
       astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
       jstfDurationDays: parseInt(document.getElementById('settings-stf-jstf-duration').value) || 30,
-      jstfQuorum: Math.max(1, parseInt(document.getElementById('settings-stf-jstf-quorum').value) || 3),
+      jstfAdjudicators: Math.max(1, parseInt(document.getElementById('settings-stf-jstf-adjudicators').value) || 3),
       jstfPoolMode: (document.getElementById('settings-stf-jstf-pool').value === 'stewards' ? 'stewards' : 'competence'),
       jstfDomains: (document.getElementById('settings-stf-jstf-domains').value || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
       pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
@@ -10884,21 +10931,22 @@ function renderXstf(cellId) {
       if (auth.ref) authTxt += ' · ' + auth.ref;
       if (auth.extraRefs && auth.extraRefs.length) authTxt += ' + ' + auth.extraRefs.join(', ');
     }
-    var kindTxt = ((cell.source || {}).deliverableKind) || 'composition';
     meta.innerHTML = '<div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>' +
       '<div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">' + modeTxt + '</span></div>' +
-      '<div class="aside-row"><span class="aside-label">Authority</span><span style="font-size:11px;color:var(--text)">' + esc(authTxt) + '</span></div>' +
-      '<div class="aside-row"><span class="aside-label">Deliverable</span><span style="font-size:11px;color:var(--text)">' + (kindTxt === 'activity' ? 'Activity proof' : 'Composition') + '</span></div>' +
       '<div class="aside-row"><span class="aside-label">Commissioned</span><span style="font-size:11px;color:var(--text)">' + esc(cell.commissionedBy || 'Unknown') + '</span></div>' +
       (jstfSrc ? '<div class="aside-row"><span class="aside-label">Case</span><span id="xstf-jstf-link"></span></div>' : '') +
       '<div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">' + esc(cell.deadline || 'TBD') + '</span></div>' +
       '<div class="aside-row"><span class="aside-label">Resolution</span><span style="font-size:11px;color:var(--green)">' + esc(cell.resolutionRef || 'Approved') + '</span></div>';
     if (jstfSrc) {
-      var jl = document.getElementById('xstf-jstf-link');
-      if (jl && typeof xrefChip === 'function') {
-        var jc = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.id === jstfSrc; })[0];
-        jl.innerHTML = xrefChip('cell', jstfSrc, (jc && (jc.targetName || jc.title)) || 'jSTF case', { color: 'var(--red)' });
-      }
+    var jl = document.getElementById('xstf-jstf-link');
+    if (jl && typeof xrefChip === 'function') {
+      var jc = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.id === jstfSrc; })[0];
+      jl.innerHTML = xrefChip('cell', jstfSrc, (jc && (jc.targetName || jc.title)) || 'jSTF case', { color: 'var(--red)' });
+    }
+    var compDom = ((cell.source || {}).competenceDomains) || [];
+    if (compDom.length) {
+      meta.innerHTML += '<div class="aside-row"><span class="aside-label">Domains</span><span style="font-size:11px;color:var(--text)">' + compDom.map(function(d) { return esc(d); }).join(', ') + '</span></div>';
+    }
     }
   }
   renderDeliverables(cellId, 'xstf-specs');
@@ -10920,7 +10968,7 @@ function renderXstf(cellId) {
         var statusClass = d.status === 'approved' ? 'tag-green' : d.status === 'revision' ? 'tag-gold' : 'tag-purple';
         html += '<div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);margin-bottom:6px">';
         html += '<div class="flex justify-between"><strong style="color:var(--text)">' + esc(d.title) + '</strong>';
-        html += '<span class="tag ' + statusClass + '" style="font-size:8px">' + esc(d.status) + '</span>' + ((d.kind === 'activity') ? '<span class="tag tag-gold" style="font-size:8px">activity proof</span>' : '<span class="tag tag-green" style="font-size:8px">composition</span>') + '</div>';
+        html += '<span class="tag ' + statusClass + '" style="font-size:8px">' + esc(d.status) + '</span></div>';
         if (d.submittedBy) html += '<div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">By ' + esc(d.submittedBy) + '</div>';
         if (d.reviewComment) html += '<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">"' + esc(d.reviewComment) + '"</div>';
         if (d.status === 'submitted' && isStewardOfAnyCircle()) {
@@ -10940,6 +10988,8 @@ function renderXstf(cellId) {
   }
   renderTeam(cellId, 'xstf-team');
   renderMessages(cellId, 'xstf-messages');
+  var xcw = document.getElementById('xstf-composer-wrap');
+  if (xcw) xcw.style.display = (xstfCanDeliberate(cell) && cell.status !== 'Completed') ? '' : 'none';
   var xstf = null;
   if (MOCK.stfs) {
     for (var kk in MOCK.stfs) {
@@ -11644,7 +11694,7 @@ function renderDelibOrigin(cell, container) {
     var snapSettings = snap.settings || {};
     var targetLabel = snap.target ? snap.target.charAt(0).toUpperCase() + snap.target.slice(1) : 'System';
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfQuorum:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfAdjudicators:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -11657,7 +11707,7 @@ function renderDelibOrigin(cell, container) {
     var sectionLabels = { stf: 'STF Configuration', quorum: 'Quorum Thresholds', circles: 'Circle Governance', deliberation: 'Deliberation Defaults' };
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfQuorum:'jSTF Quorum', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfAdjudicators:'jSTF Adjudicators', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
