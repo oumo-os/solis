@@ -3823,9 +3823,13 @@ function renderGuides() {
       '<div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ circle deliberates</div>' +
       '<div style="margin-bottom:4px"><span style="color:var(--purple)">●</span> Motion</div>' +
       '<div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ aSTF adjudicates (blind)</div>' +
-      '<div><span style="color:var(--green)">●</span> Resolution → xSTF → Deliverable</div>') +
+      '<div><span style="color:var(--green)">●</span> Resolution → xSTF → Deliverable</div>' +
+      '<div style="margin-top:6px"><span style="color:var(--red)">●</span> Report → jSTF (sealed) → Verdict → aSTF audit</div>' +
+      '<div style="margin-top:6px;color:var(--text-tertiary)">System settings travel the same path: proposed, deliberated, audited, then applied automatically.</div>') +
     sec('g-circles', 'How Circles Work',
-      'Circles are mandate-defined deliberation bodies. Each circle stewards specific domains. Discussions can be sponsored into proposals, which circle cells deliberate into motions. Motions go to aSTF for blind adjudication.') +
+      '<div style="margin-bottom:6px">Circles are mandate-defined deliberation bodies. Each circle stewards specific domains — a primary mandate plus secondary interests — with desired Ws levels that candidates are matched against.</div>' +
+      '<div style="margin-bottom:6px">Discussions can be sponsored into proposals, which circle cells deliberate into motions. Motions go to aSTF for blind adjudication, and enacted resolutions can spawn xSTF execution cells.</div>' +
+      '<div>Stewards serve terms with cool-offs between them; circles track membership, health (via p-aSTF reviews), and a public resolution record. Joining is by application or invitation depending on the circle.</div>') +
     sec('g-cells', 'Cells & Lifecycle',
       '<div style="margin-bottom:8px"><strong>Cell types:</strong> ▣ Project (task-oriented work) · ⬡ Circle (steward deliberation) · ◎ Deliberation (motion crystallisation) · ✔ vSTF (credential verification) · ◈ aSTF (blind adjudication) · ⚖ jSTF (judicial investigation) · ⬢ xSTF (blind execution) · ↻ p-aSTF (periodic circle review).</div>' +
       '<div style="margin-bottom:6px"><span style="color:var(--teal)">Discussion</span> → <span style="color:var(--gold)">Proposal</span> (steward-sponsored)</div>' +
@@ -3838,42 +3842,52 @@ function renderGuides() {
       '<div>Projects have their own cells. Periodic review aSTFs (p-aSTF) audit circle health + individual member performance.</div>') +
     sec('g-deliberation', 'Deliberation Guide',
       '<div style="margin-bottom:6px">A deliberation cell is a focused discussion space where participants draft and vote on <strong>resolutions</strong>.</div>' +
-      '<div style="margin-bottom:6px">Proposals enter via discussion threads, direct steward action, or system-bound edits.</div>' +
-      '<div style="margin-bottom:6px">Resolutions pass to <strong>aSTF</strong> for blind adjudication. Failed resolutions are still recorded.</div>' +
+      '<div style="margin-bottom:6px">Proposals enter via discussion threads, direct steward action, or system-bound edits. Discussion matures into one or more draft resolutions; AI redrafts are capped per draft with a cooldown, and every edit resets endorsements so agreement is always measured against current wording.</div>' +
+      '<div style="margin-bottom:6px">Crystallising a motion locks the text. Submitted resolutions pass to <strong>aSTF</strong> for blind adjudication — approved motions enact (and can apply settings or spawn execution), rejected ones still stay on record.</div>' +
       '<div><strong>Flow:</strong> Proposal → Deliberation → Draft Resolution(s) → Vote → aSTF / Record</div>') +
     sec('g-stf', 'How STFs Work',
-      '<div style="margin-bottom:6px">STFs operate in <strong>blind isolated cells</strong> — members don\'t know each other\'s identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body.</div>' +
-      '<div><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of candidacies and competence claims · ' +
-      '<span style="color:var(--red);font-weight:600">aSTF</span> — Blind adjudication of motions · ' +
-      '<span style="color:var(--teal);font-weight:600">jSTF</span> — Judicial investigations · ' +
-      '<span style="color:var(--gold);font-weight:600">p-aSTF</span> — Periodic circle health reviews</div>') +
+      '<div style="margin-bottom:6px">STFs (short-term facilitators) operate in <strong>blind isolated cells</strong> — members don\'t know each other\'s identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body, and dissolves when its deliverable lands.</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of steward candidacies and competence claims, scored by assessors against circle requirements.</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--red);font-weight:600">aSTF</span> — Blind adjudication of motions and judicial verdicts; rubric guides, human determination decides.</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--teal);font-weight:600">jSTF</span> — Judicial investigations: report, vacancy, seated team, verdict, blind audit.</div>' +
+      '<div><span style="color:var(--gold);font-weight:600">p-aSTF</span> — Periodic circle health reviews on a fixed cycle; <span style="color:var(--blue);font-weight:600">xSTF</span> — Execution cells that turn approved mandates into deliverables.</div>') +
     sec('g-vstf', 'vSTF Evaluation Rules',
+      '<div style="margin-bottom:6px">Two tracks: <strong>steward candidacy</strong> (approve/disapprove with a 0–100 score against the circle\'s domain requirements) and <strong>competence claims</strong> (adjust claimed Wh per domain where the evidence doesn\'t support it).</div>' +
       '<div style="margin-bottom:6px">• Adjust claimed Wh if evidence doesn\'t support it</div>' +
       '<div style="margin-bottom:6px">• Mark evaluated claims with checkbox</div>' +
-      '<div style="margin-bottom:6px">• Leave unmarked with reason if needed</div>' +
-      '<div>• Final weights = aggregate of all assessors</div>') +
+      '<div style="margin-bottom:6px">• Leave unmarked with reason if needed (insufficient evidence, outside expertise)</div>' +
+      '<div>• Final weights = aggregate of all assessors; a minimum assessor count must file before the assessment completes.</div>') +
     sec('g-jstf', 'How jSTF Works',
-      steps([
-        '<strong>1. Anonymous report</strong> — Any member can report any member. Report is posted anonymously to Commons, visible to stewards.',
-        '<strong>2. Steward sponsorship</strong> — Any steward can sponsor the report, taking responsibility for the claim.',
-        '<strong>3. Activity restriction</strong> — jSTF can restrict reported member\'s activity during investigation.',
-        '<strong>4. Policy citation</strong> — Punishment must cite existing policy resolutions, not ad hoc.',
-        '<strong>5. Disciplinary motion</strong> — Goes to aSTF for audit. aSTF sees the decision, never the jSTF members.',
-        '<strong>6. Resolution</strong> — System-bound (circle removal, vSTF trigger, Ws freeze) or non-system (policy citation).'
-      ])) +
+      '<div style="margin-bottom:8px"><strong>1. Anonymous report</strong> — Any member can report any member. The report opens a thread visible only to stewards, the target, and the author, and further reports on the same target accumulate onto it. No one else ever sees it.</div>' +
+      '<div style="margin-bottom:8px"><strong>2. Steward sponsorship & escalation</strong> — Any steward can escalate the thread, taking responsibility as sponsor. Escalation creates the jSTF case — but <strong>no team yet</strong>. Instead a <strong>vacancy</strong> opens.</div>' +
+      '<div style="margin-bottom:8px"><strong>3. Invitation, not appointment</strong> — The pool is randomly sampled from eligible members: active stewards in good standing with competence in the configured jSTF domains (or the whole entrusted steward pool, per the jSTF Pool setting). Target and petitioner are always excluded; the sponsor is only seated if sampled. The first quorum acceptances close the vacancy and the deadline starts.</div>' +
+      '<div style="margin-bottom:8px"><strong>4. Activity restriction</strong> — Once seated, the team can restrict the reported member\'s activity by live majority vote (restrict vs lift, recomputed on every vote). Restriction lifts automatically when the case closes.</div>' +
+      '<div style="margin-bottom:8px"><strong>5. Deliberation & probes</strong> — Adjudicators deliberate on the sealed case thread and frame mandate questions (how many eyes, due when). Deep questions go to xSTF probes — one isolated path per investigator, or one collaborative probe — whose reports are accepted back into the findings.</div>' +
+      '<div style="margin-bottom:8px"><strong>6. Draft, endorse, file</strong> — A seated adjudicator drafts the verdict; saving a draft resets endorsements, so agreement is always measured against current wording. Endorsement is one-member-one-vote, majority carries. Filing needs endorsement majority plus stewardship.</div>' +
+      '<div><strong>7. Resolution</strong> — Policy directive to executing circles, system actions (circle removal, Ws freeze, guest level), both combined — or an empty verdict, which records <strong>exoneration</strong>: claims found insignificant, no action attaches. Every verdict goes to aSTF audit, which weighs the decision, never the members.</div>') +
     sec('g-astf', 'How aSTF Works',
-      '<div style="margin-bottom:8px">' + guideHowAstf() + '</div>' + guideWeightsHtml('motion')) +
+      '<div style="margin-bottom:8px">' + guideHowAstf() + '</div>' +
+      '<div style="margin-bottom:8px"><strong>Motion audits.</strong> A crystallised motion submitted from a deliberation cell opens a blind review: three assessors score Jurisdiction 9 (mandate authority?) · Depth 5 (was deliberation substantive?) · Alignment 10 (advance org tenets? undisclosed conflicts?) · Competence 6 (right people in the room?). <strong>Approve</strong> enacts the resolution (and can trigger settings or spawn execution); <strong>reject</strong> fails it but still records it; <strong>revision</strong> sends the draft back while it stays submitted.</div>' +
+      guideWeightsHtml('motion')) +
     sec('g-judicial', 'How Judicial Audit Works',
-      '<div style="margin-bottom:8px">' + guideHowJudicial() + '</div>' + guideWeightsHtml('judicial')) +
+      '<div style="margin-bottom:8px">' + guideHowJudicial() + '</div>' +
+      '<div style="margin-bottom:8px"><strong>Formation by invitation.</strong> A filed, endorsed verdict opens an assessor vacancy — invitations disclose the assignment only, never the case content, which stays sealed until acceptance. Each seated adjudicator files rubric + stance (approve / reject / revision) + rationale, then their task is complete.</div>' +
+      '<div style="margin-bottom:8px"><strong>Quorum decides.</strong> The case view tracks approvals and rejections toward quorum: an <strong>approval</strong> quorum applies the verdict (JR policy minted and citeable, system actions executed, restriction lifted, implementing circles receive it in their mandated resolutions); a <strong>rejection</strong> quorum flushes the jSTF to a new composition; a <strong>revision</strong> quorum returns the verdict to the same team for redraft.</div>' +
+      '<div style="margin-bottom:8px"><strong>Rubric (30 pts).</strong> Due diligence 9 (was the investigation complete and properly run?) · Justice of verdict 9 (right outcome on the evidence?) · Proportionality 6 (does the sanction fit — or dismissal hold?) · Integrity of process 6 (blind intact, no interference?).</div>' +
+      '<div><strong>Closeout.</strong> On close the case thread freezes with the verdict as its last entry; new reports on the target open a fresh thread and, if escalated, a fresh case. Appeals carry <em>appealOf / revisionOf</em> links — overturning supersedes the original, upholding records support. No one can overturn a jSTF outcome except through a fresh case and a blind audit.</div>' +
+      guideWeightsHtml('judicial')) +
     sec('g-pastf', 'Periodic Reviews (p-aSTF)',
-      'All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.') +
+      '<div style="margin-bottom:6px">Circles are reviewed on a fixed cycle: Layer 1 scores the circle as a whole (activity, competence fit), Layer 2 scores member contributions. Reviewers see only their assigned members — never the full roster.</div>' +
+      '<div>All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.</div>') +
     sec('g-orgs', 'What are Organisations?',
-      'Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.') +
+      '<div style="margin-bottom:6px">Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.</div>' +
+      '<div>Endorsement is itself a governed act: proposed, deliberated, and recorded like any other decision — which is why organisations carry standing in votes rather than just a listing.</div>') +
     sec('g-governance', 'Intake, Competence & Weight',
-      '<div style="margin-bottom:6px"><strong>Case intake:</strong> Any member can report any member. Reports surface anonymously to stewards only, accumulating per target.</div>' +
-      '<div>Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws.</div>') +
+      '<div style="margin-bottom:6px"><strong>Case intake:</strong> Any member can report any member. Reports surface anonymously to stewards only, accumulating per target — one thread per target until a steward escalates it into a case. Escalation is itself the sponsor taking public responsibility for the claim.</div>' +
+      '<div>Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws. Endorsements, bookmarks, and votes all feed back into these weights, so standing is a living record of participation, not a static badge.</div>') +
     sec('g-observatory', 'About Observatory',
-      'The public knowledge space. Curated content for the curious. No login required.');
+      '<div style="margin-bottom:6px">The public knowledge space. Curated content for the curious. No login required.</div>' +
+      '<div>Publications, news, events, library items and opportunities live here — the Commons\' outward face. Anything published went through review first; the Observatory itself never deliberates, it exhibits.</div>');
 }
 function submitStaticAstfAdjudication() {
   var cells = (MOCK && MOCK.cells) || [];
