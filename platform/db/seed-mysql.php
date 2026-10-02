@@ -300,7 +300,8 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `stf_candidates` (
         `id` VARCHAR(255) PRIMARY KEY, `stf_id` VARCHAR(255) NOT NULL, `name` TEXT, `initials` TEXT,
-        `match_score` INT, `interest_score` INT, `competence_score` INT, `status` TEXT, `invited_date` TEXT
+        `match_score` INT, `interest_score` INT, `competence_score` INT, `status` TEXT, `invited_date` TEXT,
+        `user_id` VARCHAR(255) NULL
     )",
 
     "CREATE TABLE IF NOT EXISTS `stf_candidate_domains` (
@@ -394,7 +395,7 @@ $TABLES = [
         `id` INT PRIMARY KEY, `steward_term_months` INT, `max_consecutive_terms` INT,
         `cooloff_months` INT, `p_astf_cycle_months` INT, `auto_expire_circles` INT DEFAULT 0,
         `default_circle_expiry_months` INT, `jstf_duration_days` INT, `astf_duration_days` INT,
-        `vstf_duration_days` INT
+        `vstf_duration_days` INT, `jstf_domains` TEXT, `jstf_quorum` INT, `jstf_pool_mode` VARCHAR(32)
     )",
 
     "CREATE TABLE IF NOT EXISTS `stats` (
@@ -832,8 +833,9 @@ $scRows = array_map(fn($c) => [
     'competence_score' => $c['competenceScore'] ?? $c['competence_score'] ?? null,
     'status' => $c['status'] ?? null,
     'invited_date' => $c['invitedDate'] ?? $c['invited_date'] ?? null,
+    'user_id' => $c['userId'] ?? $c['user_id'] ?? null,
 ], $mock['stfCandidates'] ?? []);
-upsert($db, 'stf_candidates', $scRows, ['id','stf_id','name','initials','match_score','interest_score','competence_score','status','invited_date']);
+upsert($db, 'stf_candidates', $scRows, ['id','stf_id','name','initials','match_score','interest_score','competence_score','status','invited_date','user_id']);
 // STF candidate matched domains
 $scdRows = [];
 foreach ($mock['stfCandidates'] ?? [] as $c) {
@@ -986,7 +988,7 @@ if (!empty($mock['stats'])) {
 // System settings
 if (!empty($mock['systemSettings'])) {
     $s = $mock['systemSettings'];
-    $stmt = $db->prepare("INSERT INTO system_settings (id, steward_term_months, max_consecutive_terms, cooloff_months, p_astf_cycle_months, auto_expire_circles, default_circle_expiry_months, jstf_duration_days, astf_duration_days, vstf_duration_days) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE steward_term_months=VALUES(steward_term_months)");
+    $stmt = $db->prepare("INSERT INTO system_settings (id, steward_term_months, max_consecutive_terms, cooloff_months, p_astf_cycle_months, auto_expire_circles, default_circle_expiry_months, jstf_duration_days, astf_duration_days, vstf_duration_days, jstf_domains, jstf_quorum, jstf_pool_mode) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE steward_term_months=VALUES(steward_term_months)");
     if (!$stmt) { seedErr("system_settings prepare failed: " . $db->error); }
     else {
         $auto = ($s['autoExpireCircles'] ?? $s['auto_expire_circles'] ?? false) ? 1 : 0;
@@ -998,7 +1000,11 @@ if (!empty($mock['systemSettings'])) {
         $jd = $s['jstfDurationDays'] ?? $s['jstf_duration_days'] ?? 30;
         $ad = $s['astfDurationDays'] ?? $s['astf_duration_days'] ?? 10;
         $vd = $s['vstfDurationDays'] ?? $s['vstf_duration_days'] ?? 14;
-        $stmt->bind_param('iiiiiiiii', $stm, $mct, $co, $pc, $auto, $dce, $jd, $ad, $vd);
+        $jdom = $s['jstfDomains'] ?? $s['jstf_domains'] ?? [];
+        if (is_array($jdom)) $jdom = json_encode(array_values($jdom));
+        $jq = $s['jstfQuorum'] ?? $s['jstf_quorum'] ?? 3;
+        $jpm = $s['jstfPoolMode'] ?? $s['jstf_pool_mode'] ?? 'competence';
+        $stmt->bind_param('iiiiiiiiisis', $stm, $mct, $co, $pc, $auto, $dce, $jd, $ad, $vd, $jdom, $jq, $jpm);
         if (!$stmt->execute()) seedErr("system_settings execute failed: " . $stmt->error);
         $stmt->close();
     }

@@ -2112,6 +2112,9 @@
             <div class="form-group"><label class="form-label">vSTF Duration (days)</label><input class="form-input" type="number" value="14" id="settings-stf-vstf-duration"></div>
             <div class="form-group"><label class="form-label">aSTF Duration (days)</label><input class="form-input" type="number" value="10" id="settings-stf-astf-duration"></div>
             <div class="form-group"><label class="form-label">jSTF Duration (days)</label><input class="form-input" type="number" value="30" id="settings-stf-jstf-duration"><span style="font-size:10px;color:var(--text-tertiary)">Deliberation deadline per team composition</span></div>
+            <div class="form-group"><label class="form-label">jSTF Quorum</label><input class="form-input" type="number" value="3" id="settings-stf-jstf-quorum"><span style="font-size:10px;color:var(--text-tertiary)">Acceptances needed to seat a team</span></div>
+            <div class="form-group"><label class="form-label">jSTF Pool</label><select class="form-input" id="settings-stf-jstf-pool"><option value="competence">Competence pool (sampled)</option><option value="stewards">Stewards (entrusted pool)</option></select><span style="font-size:10px;color:var(--text-tertiary)">Who may be invited to adjudicate</span></div>
+            <div class="form-group"><label class="form-label">jSTF Domains</label><input class="form-input" id="settings-stf-jstf-domains" placeholder="Space Law, Liability..."><span style="font-size:10px;color:var(--text-tertiary)">Competence domains for the pool (blank = all stewards)</span></div>
             <div class="form-group"><label class="form-label">p-aSTF Cycle Duration (months)</label><input class="form-input" type="number" value="6" id="settings-stf-pastf-cycle"><span style="font-size:10px;color:var(--text-tertiary)">How often circle health reviews run</span></div>
           </div>
         </div>
@@ -3313,7 +3316,7 @@ function renderResolutionSettingsForm(cell, container) {
   if (cell.delibType === 'system-settings') {
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfQuorum:'jSTF Quorum', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',
@@ -3322,7 +3325,7 @@ function renderResolutionSettingsForm(cell, container) {
       aiConfirmQuorum:'AI Confirm Quorum', aiSetsDomainWeights:'AI Sets Domain Weights'
     };
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfQuorum:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -5582,6 +5585,27 @@ function renderJstfCase() {
   if (rCard) rCard.style.display = isPersonCase ? '' : 'none';
   var teamHost = document.getElementById('jstf-team');
   if (teamHost) {
+    var formation = cell.formation || {};
+    if (formation.state === 'inviting' && cell.status === 'Under Investigation') {
+      var cands = ((MOCK && MOCK.stfCandidates) || []).filter(function(x) { return x.stfId === 'stf-' + cell.id; });
+      var acceptedN = cands.filter(function(x) { return x.status === 'accepted'; }).length;
+      var quorum = Math.max(1, parseInt(formation.quorum) || 3);
+      var meId = ((MOCK && MOCK.currentUser) || {}).id;
+      var mine = null;
+      cands.forEach(function(x) { if ((x.userId && x.userId === meId) || (!x.userId && x.initials === meIni)) mine = x; });
+      var showNames = jstfClientIsSteward() || onTeam;
+      var rows = cands.map(function(x) {
+        var st = x.status === 'accepted' ? '<span class="badge b-active">accepted</span>' : (x.status === 'declined' ? '<span class="badge">declined</span>' : '<span class="badge b-pending">invited</span>');
+        return '<div class="hrow"><div style="flex:1"><div style="font-size:12px;color:var(--text)">' + esc(showNames ? (x.name || '') : 'Invited member') + '</div></div>' + st + '</div>';
+      }).join('') || '<div style="font-size:12px;color:var(--text-tertiary)">Invitations pending.</div>';
+      var cta = '';
+      if (mine && mine.status === 'invited') {
+        cta = '<div class="flex gap-2" style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="jstfMembershipFlow(\'' + esc(cell.id) + '\',\'accept\')">Accept &amp; Join</button><button class="btn btn-sm" onclick="jstfMembershipFlow(\'' + esc(cell.id) + '\',\'decline\')">Decline</button></div>';
+      } else if (mine && mine.status === 'accepted') {
+        cta = '<div style="font-size:11px;color:var(--green);margin-top:8px">You accepted — seating when quorum (' + acceptedN + '/' + quorum + ') is reached.</div>';
+      }
+      teamHost.innerHTML = '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--gold);margin-bottom:6px">VACANCY — ' + acceptedN + '/' + quorum + ' ACCEPTED</div>' + rows + cta;
+    } else {
     teamHost.innerHTML = (cell.team || []).map(function(t) {
       var vote = (restriction.votes || []).filter(function(v) { return v.initials === t.initials; })[0];
       var badge = vote ? '<span class="badge b-judicial">voted ' + esc(vote.vote) + '</span>' : '<span class="badge b-active">Active</span>';
@@ -5591,6 +5615,7 @@ function renderJstfCase() {
       var chip = pid ? xrefChip('user', pid, 'profile') : '';
       return '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860)">' + esc(t.initials || '?') + '</div><div style="flex:1"><div style="font-size:13px;color:var(--text)">' + esc(t.name || '') + '</div><div style="font-size:11px;color:var(--text-tertiary)">' + esc(t.role || 'jSTF adjudicator') + (t.focus ? ' · ' + esc(t.focus) : '') + '</div></div>' + badge + chip + '</div>';
     }).join('') || '<div style="font-size:12px;color:var(--text-tertiary)">No team seated.</div>';
+    }
   }
   renderJstfReportStatus(cell);
   renderJstfQuestions(cell);
@@ -5620,7 +5645,7 @@ function renderJstfCase() {
     xrMotion.innerHTML = mc;
   }
   var wrap = document.getElementById('jstf-finalise-wrap');
-  if (wrap) wrap.style.display = (jstfClientIsSteward() && cell.status === 'Under Investigation' && !cell.verdict) ? '' : 'none';
+  if (wrap) wrap.style.display = (jstfClientIsSteward() && cell.status === 'Under Investigation' && !cell.verdict && (cell.formation || {}).state !== 'inviting') ? '' : 'none';
   var comp = document.getElementById('jstf-composer-wrap');
   if (comp) comp.style.display = (onTeam && cell.status === 'Under Investigation' && !cell.verdict) ? '' : 'none';
   renderJstfClosed(cell);
@@ -5717,6 +5742,16 @@ function toggleJstfRestriction(cellId, stance) {
       if (typeof renderJstfIntake === 'function') renderJstfIntake();
     });
   }).catch(function() { toast('Could not record vote. Is the server running?', 'error'); });
+}
+function jstfMembershipFlow(cellId, decision) {
+  SolisApi.jstfMembership(cellId, { decision: decision }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not record: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast(decision === 'accept' ? ('Accepted — seated ' + r.seated + '/' + r.quorum + (r.state === 'seated' ? '. Team seated.' : '.')) : 'Declined.', 'success');
+    if (typeof loadApiData === 'function') loadApiData().then(function() {
+      if (typeof renderJstfCase === 'function') renderJstfCase();
+      if (typeof renderJstfPanel === 'function') renderJstfPanel();
+    });
+  }).catch(function() { toast('Could not reach the server.', 'error'); });
 }
 
 var _jstfSysActions = [];
@@ -5849,6 +5884,7 @@ function fileJstfVerdictFlow() {
   if (!cell) { toast('No active jSTF case.', 'error'); return; }
   if (!jstfTeamView(cell) && !jstfClientIsSteward()) { toast('Only the team or stewards may work on a verdict.', 'error'); return; }
   if (cell.verdict || cell.status !== 'Under Investigation') { toast('Case is not open for a new verdict.', 'error'); return; }
+  if ((cell.formation || {}).state === 'inviting') { toast('Team still forming — verdicts open once quorum is seated.', 'error'); return; }
   openJstfVerdictModal(cell);
 }
 
@@ -5881,8 +5917,11 @@ function renderJstfPanel() {
   if ((cell.revisions || []).length) {
     html += '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px;font-family:var(--mono)">Revisions: ' + cell.revisions.length + '</div>';
   }
-  if (cell.status === 'Under Investigation' && !verdict && isSteward) {
+  if (cell.status === 'Under Investigation' && !verdict && isSteward && (cell.formation || {}).state !== 'inviting') {
     html += '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="fileJstfVerdictFlow()">File Resolution</button>';
+  }
+  if (cell.status === 'Under Investigation' && !verdict && isSteward && (cell.formation || {}).state === 'inviting') {
+    html += '<div style="font-size:11px;color:var(--text-tertiary);margin-top:8px">Resolution unlocks once the team is seated.</div>';
   }
   if (cell.status === 'Finalised' && isSteward) {
     html += '<div style="font-size:11px;color:var(--amber);margin-top:8px">Awaiting aSTF audit.</div>';
@@ -6087,6 +6126,11 @@ function openSettingsModal() {
   setNum('settings-stf-vstf-duration', ss.vstfDurationDays);
   setNum('settings-stf-astf-duration', ss.astfDurationDays);
   setNum('settings-stf-jstf-duration', ss.jstfDurationDays);
+  setNum('settings-stf-jstf-quorum', ss.jstfQuorum);
+  var poolEl = document.getElementById('settings-stf-jstf-pool');
+  if (poolEl && ss.jstfPoolMode) poolEl.value = ss.jstfPoolMode;
+  var domEl = document.getElementById('settings-stf-jstf-domains');
+  if (domEl && ss.jstfDomains) domEl.value = (ss.jstfDomains || []).join(', ');
 }
 
 function closeSettingsModal() {
@@ -6332,6 +6376,9 @@ function applySettingsSnapshot(snapshot) {
     if (s.stf && typeof SolisApi !== 'undefined' && SolisApi.saveSystemSettings) {
       var persist = {};
       if (s.stf.jstfDurationDays != null) persist.jstf_duration_days = s.stf.jstfDurationDays;
+      if (s.stf.jstfQuorum != null) persist.jstf_quorum = s.stf.jstfQuorum;
+      if (s.stf.jstfPoolMode != null) persist.jstf_pool_mode = s.stf.jstfPoolMode;
+      if (s.stf.jstfDomains != null) persist.jstf_domains = JSON.stringify(s.stf.jstfDomains);
       if (s.stf.astfDurationDays != null) persist.astf_duration_days = s.stf.astfDurationDays;
       if (s.stf.vstfDurationDays != null) persist.vstf_duration_days = s.stf.vstfDurationDays;
       if (Object.keys(persist).length) SolisApi.saveSystemSettings(persist);
@@ -7559,6 +7606,9 @@ function submitSystemProposal() {
       vstfDurationDays: parseInt(document.getElementById('settings-stf-vstf-duration').value) || 14,
       astfDurationDays: parseInt(document.getElementById('settings-stf-astf-duration').value) || 10,
       jstfDurationDays: parseInt(document.getElementById('settings-stf-jstf-duration').value) || 30,
+      jstfQuorum: Math.max(1, parseInt(document.getElementById('settings-stf-jstf-quorum').value) || 3),
+      jstfPoolMode: (document.getElementById('settings-stf-jstf-pool').value === 'stewards' ? 'stewards' : 'competence'),
+      jstfDomains: (document.getElementById('settings-stf-jstf-domains').value || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean),
       pastfCycleMonths: parseInt(document.getElementById('settings-stf-pastf-cycle').value) || 6
     };
   } else if (target === 'quorum') {
@@ -10885,10 +10935,13 @@ function renderStfIntegrity(key, stf) {
   var norm = function(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
   var want = typeMap[key];
   var titleNorm = norm(stf && (stf.title || stf.candidate));
+  var caseFrag = (stf && stf.id && stf.id.indexOf('stf-') === 0) ? stf.id.substring(4) : null;
   var best = null;
   var bestLen = 0;
   (recs || []).forEach(function(r) {
     if (r.type !== want) return;
+    if (caseFrag && String(r.id || '').indexOf(caseFrag) !== -1) { best = r; bestLen = Infinity; return; }
+    if (key === 'stf-jstf') return;
     var subj = norm(r.subject);
     if (!subj) return;
     if (titleNorm && (subj.indexOf(titleNorm) >= 0 || titleNorm.indexOf(subj) >= 0) && subj.length >= bestLen) {
@@ -11501,7 +11554,7 @@ function renderDelibOrigin(cell, container) {
     var snapSettings = snap.settings || {};
     var targetLabel = snap.target ? snap.target.charAt(0).toUpperCase() + snap.target.slice(1) : 'System';
     var defaults = {
-      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, pastfCycleMonths:6 },
+      stf: { minVstfAssessors:3, maxVstfAssessors:7, astfAssessors:3, vstfDurationDays:14, astfDurationDays:10, jstfDurationDays:30, jstfQuorum:3, jstfPoolMode:'competence', jstfDomains:[], pastfCycleMonths:6 },
       quorum: { minParticipants:4, minPercentMembers:60, passThreshold:50, abstainLimit:30 },
       circles: { stewardTermMonths:12, maxConsecutiveTerms:2, cooloffMonths:6, autoExpireCircles:false, defaultCircleExpiryMonths:24 },
       deliberation: { maxDeliberationDays:14, autoCloseInactivityDays:7, voteNullifyOnEdit:true, aiMaxRedrafts:3, aiRedraftCooldown:5, aiConfirmQuorum:'1/3 participants', aiSetsDomainWeights:true }
@@ -11514,7 +11567,7 @@ function renderDelibOrigin(cell, container) {
     var sectionLabels = { stf: 'STF Configuration', quorum: 'Quorum Thresholds', circles: 'Circle Governance', deliberation: 'Deliberation Defaults' };
     var fieldLabels = {
       minVstfAssessors:'Min vSTF Assessors', maxVstfAssessors:'Max vSTF Assessors', astfAssessors:'aSTF Assessors',
-      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', pastfCycleMonths:'p-aSTF Cycle (mo)',
+      vstfDurationDays:'vSTF Duration (days)', astfDurationDays:'aSTF Duration (days)', jstfDurationDays:'jSTF Duration (days)', jstfQuorum:'jSTF Quorum', jstfPoolMode:'jSTF Pool', jstfDomains:'jSTF Domains', pastfCycleMonths:'p-aSTF Cycle (mo)',
       minParticipants:'Min Participants', minPercentMembers:'Min % Members', passThreshold:'Pass Threshold %', abstainLimit:'Abstain Limit %',
       stewardTermMonths:'Steward Term (mo)', maxConsecutiveTerms:'Max Consecutive Terms', cooloffMonths:'Cool-off (mo)',
       autoExpireCircles:'Auto-Expire Circles', defaultCircleExpiryMonths:'Default Expiry (mo)',

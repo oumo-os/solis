@@ -247,7 +247,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $stfShape[$s['bucket']][] = $obj;
     }
     $cdByCand = groupBy(dbAll('SELECT * FROM stf_candidate_domains'), 'candidate_id');
-    $stfCandidates = array_map(function($c) use ($cdByCand) { return ['id' => $c['id'], 'stfId' => $c['stf_id'], 'name' => $c['name'], 'initials' => $c['initials'], 'matchScore' => $c['match_score'], 'matchedDomains' => array_values(array_map(function($d) { return $d['domain']; }, $cdByCand[$c['id']] ?? [])), 'interestScore' => $c['interest_score'], 'competenceScore' => $c['competence_score'], 'status' => $c['status'], 'invitedDate' => $c['invited_date']]; }, dbAll('SELECT * FROM stf_candidates'));
+    $stfCandidates = array_map(function($c) use ($cdByCand) { return ['id' => $c['id'], 'stfId' => $c['stf_id'], 'name' => $c['name'], 'initials' => $c['initials'], 'matchScore' => $c['match_score'], 'matchedDomains' => array_values(array_map(function($d) { return $d['domain']; }, $cdByCand[$c['id']] ?? [])), 'interestScore' => $c['interest_score'], 'competenceScore' => $c['competence_score'], 'status' => $c['status'], 'invitedDate' => $c['invited_date'], 'userId' => $c['user_id'] ?? null]; }, dbAll('SELECT * FROM stf_candidates'));
     $replyByThread = groupBy(dbAll('SELECT * FROM thread_replies'), 'thread_id');
     $threads = array_map(function($t) use ($replyByThread) { return ['id' => $t['id'], 'title' => $t['title'], 'body' => $t['body'], 'author' => $t['author'], 'initials' => $t['initials'], 'avatar' => pJson($t['avatar'] ?? null) ?: [], 'domain' => $t['domain'], 'domainColor' => $t['domain_color'], 'badge' => $t['badge'], 'badgeClass' => $t['badge_class'], 'replies' => $t['replies'], 'likes' => $t['likes'], 'shares' => $t['shares'], 'time' => $t['time'], 'pinned' => (bool)$t['pinned'], 'endorsements' => $t['endorsements'] ?? 0, 'proposalCellId' => $t['proposal_cell_id'] ?? null, 'submitterId' => $t['submitter_id'] ?? null, 'visibility' => $t['visibility'] ?: 'public', 'jstfCellId' => $t['jstf_cell_id'] ?? null, 'repliesList' => array_map(function($r) { return ['id' => $r['id'], 'author' => $r['author'], 'initials' => $r['initials'], 'avatar' => pJson($r['avatar'] ?? null) ?: [], 'time' => $r['time'], 'body' => $r['body'], 'likes' => $r['likes']]; }, $replyByThread[$t['id']] ?? [])]; }, dbAll('SELECT * FROM threads'));
     if (!$isSteward) $threads = array_values(array_filter($threads, function($t) use ($currentRow) { return jstfCanSeeThread($currentRow, $t); }));
@@ -264,7 +264,8 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $projects = array_map(function($p) use ($domByProject) { return ['id' => $p['id'], 'title' => $p['title'], 'lead' => $p['lead'], 'progress' => $p['progress'], 'role' => $p['role'], 'domains' => array_values(array_map(function($d) { return $d['domain']; }, $domByProject[$p['id']] ?? []))]; }, dbAll('SELECT * FROM projects'));
     $exitReasonLabels = []; foreach (dbAll('SELECT * FROM exit_reason_labels') as $r) $exitReasonLabels[$r['key']] = $r['label'];
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: [];
-    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14];
+    $jstfDomainsRaw = $ss['jstf_domains'] ?? '[]'; $jstfDomains = pJson(is_string($jstfDomainsRaw) ? $jstfDomainsRaw : json_encode($jstfDomainsRaw)) ?: []; if (!is_array($jstfDomains)) $jstfDomains = [];
+    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfQuorum' => (int)($ss['jstf_quorum'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
     $sr = dbGet('SELECT stats FROM stats WHERE id = 1');
     $stats = $sr ? pJson($sr['stats']) ?: [] : [];
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
@@ -400,6 +401,10 @@ foreach ($childDefs as $d) {
                 if ($pt && ($pt['badge'] ?? '') === 'b-judicial') {
                     $party = jstfThreadParty($wuser, $pt);
                     if (!$party) send(403, ['error' => 'Not a party to this case']);
+                    if (!empty($pt['jstf_cell_id'])) {
+                        $lc = dbGet('SELECT status FROM cells WHERE id = ?', [$pt['jstf_cell_id']]);
+                        if ($lc && in_array($lc['status'] ?? '', jstfTerminalStatuses(), true)) send(403, ['error' => 'Case thread frozen — verdict recorded']);
+                    }
                     $isInitial = str_starts_with($pt['proposal_cell_id'] ?? '', 'user:');
                     if ($isInitial && $party === 'submitter') { $body->author = 'Anonymous'; $body->initials = '?'; }
                     else { $body->author = $wuser['name'] ?? $wuser['initials']; $body->initials = $wuser['initials'] ?? '?'; }
@@ -688,6 +693,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 $caseStatus = (($vi['type'] ?? '') === 'exonerating') ? 'Exonerated' : 'Resolution Applied';
                 dbRun("UPDATE cells SET status = ?, resolution = ? WHERE id = ?", [$caseStatus, json_encode($jr), $src['sourceCellId']]);
                 if (!$guestApplied) syncTargetRestriction($targetId, false, null);
+                if (!empty($jm['threadId'])) jstfAppendReply($jm['threadId'], 'Verdict recorded: ' . $caseStatus . ' — ' . substr((string)($vi['description'] ?? ''), 0, 300));
                 dbRun("UPDATE stfs SET status = ?, bucket = 'completed' WHERE id = ?", [$caseStatus, 'stf-' . $src['sourceCellId']]);
                 // The case is closed: no restriction survives on the record either.
                 $jmClose = pJson(dbGet('SELECT meta FROM cells WHERE id = ?', [$src['sourceCellId']])['meta'] ?? '{}') ?: [];
@@ -1014,6 +1020,96 @@ function jstfDurationDays() {
     $d = (int)($ss['jstf_duration_days'] ?? 0);
     return $d > 0 ? $d : 30;
 }
+function jstfQuorum() {
+    $ss = dbGet('SELECT jstf_quorum FROM system_settings WHERE id = 1');
+    $q = (int)($ss['jstf_quorum'] ?? 0);
+    return $q > 0 ? $q : 3;
+}
+function jstfPoolMode() {
+    $ss = dbGet('SELECT jstf_pool_mode FROM system_settings WHERE id = 1');
+    $m = $ss['jstf_pool_mode'] ?? '';
+    return in_array($m, ['stewards', 'competence']) ? $m : 'competence';
+}
+function jstfPoolDomains() {
+    $ss = dbGet('SELECT jstf_domains FROM system_settings WHERE id = 1');
+    $raw = $ss['jstf_domains'] ?? '[]';
+    $d = pJson(is_string($raw) ? $raw : json_encode($raw)) ?: [];
+    return is_array($d) ? array_values(array_filter(array_map('strval', $d))) : [];
+}
+// Eligible adjudicator pool: active stewards, minus target + petitioner,
+// optionally restricted to domain-competent members. Random order.
+function jstfEligiblePool($excludeIds, $domains = null, $mode = null) {
+    if ($domains === null) $domains = jstfPoolDomains();
+    if ($mode === null) $mode = jstfPoolMode();
+    $ex = array_values(array_filter(array_map('strval', (array)$excludeIds)));
+    $stewards = dbAll("SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r JOIN users u ON u.id = r.member_id WHERE r.status = 'active' AND (u.status IS NULL OR u.status NOT IN ('Restricted','Suspended','Former'))");
+    $pool = [];
+    foreach ($stewards as $s) {
+        if (in_array((string)$s['id'], $ex, true)) continue;
+        if ($mode === 'competence' && $domains) {
+            $ok = false;
+            foreach ($domains as $d) {
+                $w = dbGet('SELECT ws FROM user_competence WHERE user_id = ? AND domain = ?', [$s['id'], $d]);
+                if ($w && (int)($w['ws'] ?? 0) > 0) { $ok = true; break; }
+            }
+            if (!$ok) continue;
+        }
+        $pool[] = $s;
+    }
+    shuffle($pool);
+    return array_values($pool);
+}
+// Invite a batch of eligible members to a jSTF vacancy. Returns invited rows.
+function jstfInviteBatch($jId, $excludeIds, $count) {
+    $invitedIds = array_map(function($r) { return (string)($r['user_id'] ?? ''); }, dbAll("SELECT user_id FROM stf_candidates WHERE stf_id = ?", ['stf-' . $jId]));
+    $pool = array_values(array_filter(jstfEligiblePool($excludeIds), function($s) use ($invitedIds) { return !in_array((string)$s['id'], $invitedIds, true); }));
+    $batch = array_slice($pool, 0, max(0, (int)$count));
+    $now = date('Y-m-d\TH:i:s.000\Z');
+    foreach ($batch as $s) {
+        $cid = 'cand-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $s['initials'] ?: 'x'));
+        dbRun('INSERT INTO stf_candidates (id, stf_id, name, initials, status, invited_date, user_id) VALUES (?,?,?,?,?,?,?)', [$cid, 'stf-' . $jId, $s['name'], $s['initials'], 'invited', $now, $s['id']]);
+    }
+    return $batch;
+}
+// Seat accepted members; when quorum is reached the vacancy closes:
+// participants/majority recompute from the real team and the deliberation
+// deadline starts. Returns seated count.
+function jstfSeatAccepted($cId) {
+    $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+    if (!$cell) return 0;
+    $meta = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($meta['formation']['state'] ?? '') !== 'inviting') return (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
+    $quorum = max(1, (int)($meta['formation']['quorum'] ?? jstfQuorum()));
+    $acc = dbAll("SELECT * FROM stf_candidates WHERE stf_id = ? AND status = 'accepted' ORDER BY invited_date", ['stf-' . $cId]);
+    $seated = dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$cId]);
+    $seatedIni = array_map(function($t) { return $t['initials']; }, $seated);
+    foreach ($acc as $a) {
+        if (count($seatedIni) >= $quorum) break;
+        if (in_array($a['initials'], $seatedIni)) continue;
+        dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$cId, $a['name'], $a['initials'], 'jSTF adjudicator', 'Judicial review']);
+        $seatedIni[] = $a['initials'];
+    }
+    $n = count($seatedIni);
+    if ($n >= $quorum) {
+        $maj = (int)floor($n / 2) + 1;
+        $meta['formation']['state'] = 'seated';
+        $meta['formation']['seated'] = $n;
+        dbRun("UPDATE stf_candidates SET status = 'expired' WHERE stf_id = ? AND status = 'invited'", ['stf-' . $cId]);
+        $meta['restriction'] = $meta['restriction'] ?? [];
+        $meta['restriction']['teamSize'] = $n; $meta['restriction']['majority'] = $maj;
+        $teamRows = dbAll('SELECT * FROM cell_team WHERE cell_id = ?', [$cId]);
+        $uidByIni = []; foreach ($acc as $a) { $uidByIni[$a['initials']] = $a['user_id'] ?? null; }
+        $js = pJson($cell['source'] ?? '{}') ?: [];
+        $js['team'] = array_map(function($t) use ($uidByIni) { return ['id' => $uidByIni[$t['initials']] ?? null, 'name' => $t['name'], 'initials' => $t['initials']]; }, $teamRows);
+        $newDl = date('Y-m-d', time() + jstfDurationDays() * 86400);
+        dbRun('UPDATE cells SET participants = ?, source = ?, meta = ?, deadline = ? WHERE id = ?', [$n, json_encode($js), json_encode($meta), $newDl, $cId]);
+        dbRun("UPDATE stfs SET status = 'Under Investigation', bucket = 'active', deadline = ? WHERE id = ?", [$newDl, 'stf-' . $cId]);
+        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-seated', '', date('Y-m-d'), 'jSTF team seated on ' . $cId . ' — ' . $n . ' adjudicators, deadline ' . $newDl, 'system']);
+    } else {
+        dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
+    }
+    return $n;
+}
 // Refresh a jSTF composition: seat a fresh team (excluding the previous
 // members where the steward pool allows), clear the verdict, reset the
 // deliberation deadline to a full allowance, drop departed members' votes
@@ -1061,6 +1157,8 @@ function jstfEnsureFresh($cId) {
     $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell || $cell['type'] !== 'jSTF Cell') return;
     if (($cell['status'] ?? '') !== 'Under Investigation') return;
+    $jm = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($jm['formation']['state'] ?? '') === 'inviting') return;
     $dl = $cell['deadline'] ?? null;
     if (!$dl || $dl >= date('Y-m-d')) return;
     jstfRefreshComposition($cId, 'system', 'deadline');
@@ -1183,20 +1281,55 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
         $revisionOf = substr($link2, 5);
     } else { $targetId = substr($link2, 5); $tgt = dbGet('SELECT * FROM users WHERE id = ?', [$targetId]); if ($tgt) $targetName = $tgt['name'] ?? $tgt['initials']; }
     $jId = 'jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $stewards = dbAll("SELECT DISTINCT r.member_id AS id, r.name, r.initials FROM circle_roster r JOIN users u ON u.id = r.member_id WHERE r.status = 'active' ORDER BY r.name LIMIT 3");
-    $team = $stewards;
-    if (!array_reduce($team, function($c, $t) use ($user) { return $c || $t['id'] === $user['id']; }, false))
-        $team = array_values(array_slice(array_merge([['id' => $user['id'], 'name' => $user['name'], 'initials' => $user['initials']]], $stewards), 0, 3));
     $tIs = $targetId ? !!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$targetId]) : false;
-    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => array_map(function($t) { return ['id' => $t['id'], 'name' => $t['name'], 'initials' => $t['initials']]; }, $team)];
-    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => count($team), 'majority' => (int)floor(count($team) / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null];
+    $quorum = jstfQuorum();
+    $poolMode = jstfPoolMode();
+    $poolDomains = jstfPoolDomains();
+    $petitioner = $thread['submitter_id'] ?? null;
+    $exclude = array_values(array_filter([$targetId, $petitioner]));
+    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => []];
+    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => (int)floor($quorum / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null, 'formation' => ['state' => 'inviting', 'quorum' => $quorum, 'poolMode' => $poolMode, 'domains' => $poolDomains, 'seated' => 0]];
     $caseDl = date('Y-m-d', time() + jstfDurationDays() * 86400);
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', count($team), '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta), $caseDl]);
-    foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus) VALUES (?,?,?,?,?)', [$jId, $t['name'], $t['initials'], 'jSTF adjudicator', 'Judicial review']);
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', 0, '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta), $caseDl]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, $caseDl]);
     dbRun('UPDATE threads SET jstf_cell_id = ? WHERE id = ?', [$jId, $thrId]);
-    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — ' . count($team) . ' jSTF adjudicators', (string)($user['name'] ?? $user['initials'])]);
+    $invited = jstfInviteBatch($jId, $exclude, $quorum + 2);
+    $invNames = implode(', ', array_map(function($s) { return $s['name']; }, $invited));
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened against ' . $targetName . ' (' . ($isAppeal ? 'appeal' : 'report') . ') — vacancy open, invited ' . count($invited) . ' (' . $invNames . '), quorum ' . $quorum, (string)($user['name'] ?? $user['initials'])]);
     send(201, ['ok' => true, 'jstfId' => $jId]);
+}
+// ---- jSTF vacancy: invited member accepts or declines ----
+if (preg_match('/^\/cells\/([^\/]+)\/jstf-membership$/', $cleanPath, $m)) {
+    if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+    if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'jSTF Cell') send(400, ['error' => 'Not a jSTF cell']);
+    if (($cell['status'] ?? '') !== 'Under Investigation') send(400, ['error' => 'Case is closed']);
+    $meta = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($meta['formation']['state'] ?? '') !== 'inviting') send(409, ['error' => 'Team already seated']);
+    $body = readBody(); $decision = trim((string)($body->decision ?? ''));
+    if (!in_array($decision, ['accept', 'decline'])) send(400, ['error' => 'decision must be accept or decline']);
+    $cand = dbGet("SELECT * FROM stf_candidates WHERE stf_id = ? AND user_id = ? AND status = 'invited'", ['stf-' . $cId, $user['id']]);
+    if (!$cand) $cand = dbGet("SELECT * FROM stf_candidates WHERE stf_id = ? AND initials = ? AND status = 'invited'", ['stf-' . $cId, $user['initials']]);
+    if (!$cand) send(404, ['error' => 'No pending invitation for you on this case']);
+    dbRun('UPDATE stf_candidates SET status = ? WHERE id = ?', [$decision === 'accept' ? 'accepted' : 'declined', $cand['id']]);
+    $seated = 0;
+    if ($decision === 'accept') $seated = jstfSeatAccepted($cId);
+    else {
+        $cell2 = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+        $meta2 = pJson($cell2['meta'] ?? '{}') ?: [];
+        $quorum = max(1, (int)($meta2['formation']['quorum'] ?? jstfQuorum()));
+        $seated = (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
+        $pending = (int)(dbGet("SELECT COUNT(*) AS n FROM stf_candidates WHERE stf_id = ? AND status = 'invited'", ['stf-' . $cId])['n'] ?? 0);
+        if ($pending < 2 && ($meta2['formation']['state'] ?? '') === 'inviting') {
+            $tgt = $meta2['targetId'] ?? null;
+            $sub = dbGet('SELECT submitter_id FROM threads WHERE id = ?', [$meta2['threadId'] ?? null]);
+            jstfInviteBatch($cId, array_values(array_filter([$tgt, $sub['submitter_id'] ?? null])), 2 - $pending);
+        }
+    }
+    $cell3 = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+    $meta3 = pJson($cell3['meta'] ?? '{}') ?: [];
+    send(200, ['ok' => true, 'decision' => $decision, 'seated' => $seated, 'quorum' => $meta3['formation']['quorum'] ?? jstfQuorum(), 'state' => $meta3['formation']['state'] ?? 'inviting']);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
@@ -1206,6 +1339,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'jSTF Cell') send(400, ['error' => 'Not a jSTF cell']);
     if ($cell['status'] !== 'Under Investigation') send(400, ['error' => 'Not under investigation']);
     if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may vote']);
+    $metaVote = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($metaVote['formation']['state'] ?? '') === 'inviting') send(403, ['error' => 'Team still forming — votes open once quorum is seated']);
     $body = readBody(); $stance = trim((string)($body->stance ?? ''));
     if (!in_array($stance, ['restrict', 'lift'])) send(400, ['error' => 'stance must be restrict or lift']);
     $ts = $cell['participants'] ?? (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
