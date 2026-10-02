@@ -56,18 +56,37 @@ seated.
 
 ## 4. Deliberation → xSTF probes
 
-The seated team deliberates on the sealed case thread. For deep
-questions the team frames mandate questions (`cell_objectives` carry
-`assessors` = how many eyes, and a due date) and commissions xSTF
-probes per question — **siloed** (one isolated probe per investigator)
-or **collaborative** (one shared probe, chosen per commission).
+There is one xSTF with different settings — judicial and circle
+probes are the same entity, a project task group. The seated team
+deliberates on the sealed case thread. For deep questions the team
+frames mandate questions (`cell_objectives` carry `assessors` = how
+many eyes, and a due date) and commissions xSTF probes per question —
+**siloed** (one isolated probe per investigator, each delivering its
+own report, so one task yields many deliverables) or
+**collaborative** (one shared probe whose team works together,
+sometimes blind to each other), chosen per commission.
 
-- Each siloed probe has a single-investigator team
-  (`jSTF-xSTF investigator` — the only xSTF role), its own deadline
-  (the question due date), and only the assignee may file into it.
-- Probe deliverables are reviewed by stewards; the team accepts
-  reports into case findings per deliverable (`POST .../accept-findings`).
-- One probe per (question, investigator); completed probes don't block.
+A probe operates **only on its assigned information package**:
+
+- Authority proving the commissioning body may task it — a jSTF
+  commission is itself the authority; circle commissions cite the
+  approved resolution plus any extra refs. Recorded visibly on the
+  probe; nothing else may be acted on.
+- The deliberated and approved deliverable description, cited
+  resolutions, and useful content.
+- Mandate, objectives, and prefilled tasks (by the commissioner),
+  written to the probe's tasks/objectives so progress is shared.
+
+**Two kinds of return.** A *composition* is something the team makes
+(draft, research, investigation report). An *activity proof* reports
+work done (built, attended, delivered). Each deliverable is stamped
+with its kind at submit; stewards review (approve / request revision)
+and the team accepts reports into case findings per deliverable.
+
+The probe talks to its commissioners through **task status**
+(pending → in-progress → complete), visible as task counts on the
+commissioning question. One probe per (question, investigator);
+completed probes don't block.
 
 ## 5. Draft → endorsement → filing
 

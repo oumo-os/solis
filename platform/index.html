@@ -3876,6 +3876,11 @@ function renderGuides() {
       '<div style="margin-bottom:8px"><strong>Rubric (30 pts).</strong> Due diligence 9 (was the investigation complete and properly run?) · Justice of verdict 9 (right outcome on the evidence?) · Proportionality 6 (does the sanction fit — or dismissal hold?) · Integrity of process 6 (blind intact, no interference?).</div>' +
       '<div><strong>Closeout.</strong> On close the case thread freezes with the verdict as its last entry; new reports on the target open a fresh thread and, if escalated, a fresh case. Appeals carry <em>appealOf / revisionOf</em> links — overturning supersedes the original, upholding records support. No one can overturn a jSTF outcome except through a fresh case and a blind audit.</div>' +
       guideWeightsHtml('judicial')) +
+    sec('g-xstf', 'How xSTF Works',
+      '<div style="margin-bottom:8px">There is one xSTF with different settings — judicial probes and circle commissions are the same entity. A probe operates <strong>only on its assigned information package</strong>: the authority proving the commissioning body may task it (a jSTF commission is itself the authority; circles cite the approved resolution), the deliberated and approved deliverable description, cited resolutions and useful content, plus mandate, objectives and prefilled tasks.</div>' +
+      '<div style="margin-bottom:8px"><strong>Siloed</strong> means one isolated probe per investigator, each delivering its own report — so one task yields many deliverables. <strong>Collaborative</strong> means one shared probe whose team works together, sometimes blind to each other. The commission sets the mode per question.</div>' +
+      '<div style="margin-bottom:8px"><strong>Two kinds of return.</strong> A <em>composition</em> is something the team makes — a draft, research, an investigation report. An <em>activity proof</em> reports work done — something built, attended, delivered. Stewards review each deliverable (approve or request revision); the commissioning team accepts reports into its findings.</div>' +
+      '<div>The probe talks to its commissioners through <strong>task status</strong>: pending → in-progress → complete on each prefilled or added task, visible on the commissioning question. When the work is delivered and approved, the cell completes and dissolves.</div>') +
     sec('g-pastf', 'Periodic Reviews (p-aSTF)',
       '<div style="margin-bottom:6px">Circles are reviewed on a fixed cycle: Layer 1 scores the circle as a whole (activity, competence fit), Layer 2 scores member contributions. Reviewers see only their assigned members — never the full roster.</div>' +
       '<div>All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.</div>') +
@@ -5230,11 +5235,16 @@ function renderJstfQuestions(cell) {
         var inv = ((x.source || {}).investigator) || (((x.team || [])[0] || {}).name) || '';
         var xd = jstfDueText(x.deadline);
         var dels = x.deliverables || [];
-        var head = '<div style="margin:4px 0 6px">' + xrefChip('cell', x.id, x.title || 'xSTF probe', { color: 'var(--teal)' }) + ' <span class="tag ' + (x.status === 'Completed' ? 'tag-green' : 'tag-purple') + '" style="font-size:8px">' + esc(inv) + ' · ' + esc(x.status || 'open') + '</span>' + (xd ? ' <span style="font-family:var(--mono);font-size:9px;color:' + xd.col + '">' + xd.txt + '</span>' : '') + '</div>';
+        var xTasks = x.tasks || [];
+        var xDone = xTasks.filter(function(t) { return t.status === 'complete'; }).length;
+        var taskBit = xTasks.length ? ' <span style="font-family:var(--mono);font-size:9px;color:var(--text-tertiary)">tasks ' + xDone + '/' + xTasks.length + '</span>' : '';
+        var modeBit = ((x.source || {}).mode === 'collaborative') ? ' <span class="tag" style="font-size:8px">collaborative</span>' : '';
+        var head = '<div style="margin:4px 0 6px">' + xrefChip('cell', x.id, x.title || 'xSTF probe', { color: 'var(--teal)' }) + ' <span class="tag ' + (x.status === 'Completed' ? 'tag-green' : 'tag-purple') + '" style="font-size:8px">' + esc(inv) + ' · ' + esc(x.status || 'open') + '</span>' + modeBit + taskBit + (xd ? ' <span style="font-family:var(--mono);font-size:9px;color:' + xd.col + '">' + xd.txt + '</span>' : '') + '</div>';
         var body = dels.length ? dels.map(function(d) {
           var done = acceptedIds.indexOf(d.id) >= 0;
           var mine = accepted.filter(function(f) { return f.deliverableId === d.id; })[0];
-          return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
+          var kindTag = (d.kind === 'activity') ? ' <span class="tag tag-gold" style="font-size:8px">activity proof</span>' : ' <span class="tag tag-green" style="font-size:8px">composition</span>';
+          return '<div style="padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:6px"><div style="font-size:11px;font-weight:600;color:var(--text)">' + esc(d.title) + ' <span class="tag" style="font-size:8px">' + esc(d.status || 'submitted') + '</span>' + kindTag + (done ? ' <span style="font-size:9px;color:var(--green)">✓ accepted as answer</span>' : '') + '</div>'
             + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + esc(String(d.content || '').slice(0, 220)) + '</div>'
             + ((canEdit && !done) ? '<div style="margin-top:6px"><button class="btn btn-sm" onclick="acceptJstfFinding(\'' + x.id + '\',\'' + d.id + '\')">Accept as answer</button></div>' : '')
             + (mine ? '<div style="font-size:9px;color:var(--text-tertiary);margin-top:4px">Accepted by ' + esc(mine.acceptedBy || '') + '</div>' : '') + '</div>';
@@ -5319,9 +5329,17 @@ function openCommissionModal(qid) {
     return '<label style="display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer;font-size:12px;color:var(--text-secondary)"><input type="checkbox" class="jstf-probe-member" data-name="' + esc(m.name) + '" data-ini="' + esc(m.initials) + '"' + (checked ? ' checked' : '') + '><span>' + esc(m.name) + ' <span style="color:var(--text-tertiary)">(' + esc(m.initials) + ')</span></span></label>';
   }).join('');
   openModal('<div class="sec">Commission xSTF Probe</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One question, one siloed probe per investigator. Each path delivers its own report' + (q.deadline ? ' by ' + esc(q.deadline) : '') + '. This question mandates ' + mandate + ' eye' + (mandate === 1 ? '' : 's') + ' — select exactly ' + mandate + '.</span></div>' +
-    '<div class="form-group"><label class="form-label">Brief for the probe team (optional)</label><textarea class="msg-input" rows="2" id="jstf-commission-brief" placeholder="Scope, constraints, deadlines..."></textarea></div>' +
-    '<div class="form-group"><label class="form-label">jSTF-xSTF investigators (siloed team for this question)</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:10px">Mandate: <strong>' + esc(q.label) + '</strong><br><span style="color:var(--text-tertiary)">One xSTF, two settings. <strong>Siloed</strong>: one isolated probe per investigator, each delivering its own report' + (q.deadline ? ' by ' + esc(q.deadline) : '') + '. <strong>Collaborative</strong>: one shared probe, the team works together. This question mandates ' + mandate + ' eye' + (mandate === 1 ? '' : 's') + ' — select exactly ' + mandate + '.</span></div>' +
+    '<div class="form-group"><label class="form-label">Mode</label><select class="form-input" id="jstf-commission-mode" style="font-size:12px"><option value="siloed">Siloed — isolated path per investigator</option><option value="collaborative">Collaborative — one shared probe</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Deliverable kind</label><select class="form-input" id="jstf-commission-kind" style="font-size:12px"><option value="composition">Composition — draft, research, report the team composes</option><option value="activity">Activity proof — report on work done</option></select></div>' +
+    '<div class="form-group"><label class="form-label">Brief for the probe team (required)</label><textarea class="msg-input" rows="2" id="jstf-commission-brief" placeholder="Scope, constraints, deadlines..."></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Authority refs (optional — the jSTF commission itself is the authority)</label><input class="form-input" id="jstf-commission-auth" placeholder="JR-001, PR-014..." style="font-size:12px"></div>' +
+    '<div class="form-group"><label class="form-label">Mandate refs (optional — resolutions explaining the deliverable)</label><input class="form-input" id="jstf-commission-mandate" placeholder="PR-014..." style="font-size:12px"></div>' +
+    '<div class="form-group"><label class="form-label">Cited content (optional — useful material for the team)</label><textarea class="msg-input" rows="2" id="jstf-commission-cited" placeholder="Excerpts, links, context..."></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Objectives (optional — one per line)</label><textarea class="msg-input" rows="2" id="jstf-commission-objectives" placeholder="Answer the mandate question..."></textarea></div>' +
+    '<div class="form-group"><label class="form-label">Prefilled tasks (optional — one per line)</label><textarea class="msg-input" rows="2" id="jstf-commission-tasks" placeholder="Gather evidence..."></textarea></div>' +
+    '<div class="form-group"><label class="form-check" style="font-size:12px;color:var(--text-secondary);cursor:pointer"><input type="checkbox" id="jstf-commission-blind" checked style="margin-right:6px">Blind — investigators stay anonymous to each other</label></div>' +
+    '<div class="form-group"><label class="form-label">jSTF-xSTF investigators</label><div style="max-height:160px;overflow-y:auto">' + opts + '</div></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-primary btn-sm" onclick="submitCommission(\'' + String(qid).replace(/'/g, "\\'") + '\')">Commission Probe</button></div>',
     { size: 'md' });
 }
@@ -5329,9 +5347,15 @@ function submitCommission(qid) {
   var cell = getActiveJstfCell();
   if (!cell) return;
   var brief = ((document.getElementById('jstf-commission-brief') || {}).value || '').trim();
+  if (!brief) { toast('State the mandate brief first.', 'error'); return; }
   var team = Array.prototype.map.call(document.querySelectorAll('.jstf-probe-member:checked'), function(i) { return { name: i.getAttribute('data-name'), initials: i.getAttribute('data-ini') }; });
   if (!team.length) { toast('Select at least one jSTF-xSTF investigator.', 'error'); return; }
-  SolisApi.commissionJstfXstf(cell.id, { questionId: qid, brief: brief, team: team }).then(function(r) {
+  var splitLines = function(id) { var el = document.getElementById(id); if (!el || !el.value) return []; return el.value.split('\n').map(function(s) { return s.trim(); }).filter(Boolean); };
+  var splitRefs = function(id) { var el = document.getElementById(id); if (!el || !el.value) return []; return el.value.split(',').map(function(s) { return s.trim(); }).filter(Boolean); };
+  var modeEl = document.getElementById('jstf-commission-mode');
+  var kindEl = document.getElementById('jstf-commission-kind');
+  var blindEl = document.getElementById('jstf-commission-blind');
+  SolisApi.commissionJstfXstf(cell.id, { questionId: qid, brief: brief, team: team, mode: modeEl ? modeEl.value : 'siloed', deliverableKind: kindEl ? kindEl.value : 'composition', blind: blindEl ? !!blindEl.checked : true, authorityRefs: splitRefs('jstf-commission-auth'), mandateRefs: splitRefs('jstf-commission-mandate'), citedContent: ((document.getElementById('jstf-commission-cited') || {}).value || '').trim(), objectives: splitLines('jstf-commission-objectives'), tasks: splitLines('jstf-commission-tasks') }).then(function(r) {
     if (!r || r.__status >= 400) { toast('Commission failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     closeModal();
     toast('Probe commissioned for this question.', 'success');
@@ -10851,8 +10875,20 @@ function renderXstf(cellId) {
   var meta = document.getElementById('xstf-meta');
   if (meta) {
     var jstfSrc = (cell.source || {}).jstfId || null;
+    var srcMode = (cell.source || {}).mode;
+    var modeTxt = srcMode === 'collaborative' ? 'Collaborative' : (srcMode === 'siloed' ? 'Siloed' : 'Collaborative');
+    var auth = (cell.source || {}).authority || null;
+    var authTxt = '—';
+    if (auth) {
+      authTxt = auth.basis === 'jstf-case' ? 'jSTF commission' : (auth.basis === 'astf-resolution' ? 'aSTF resolution' : auth.basis);
+      if (auth.ref) authTxt += ' · ' + auth.ref;
+      if (auth.extraRefs && auth.extraRefs.length) authTxt += ' + ' + auth.extraRefs.join(', ');
+    }
+    var kindTxt = ((cell.source || {}).deliverableKind) || 'composition';
     meta.innerHTML = '<div class="aside-row"><span class="aside-label">Type</span><span style="font-size:11px;color:var(--text)">xSTF — Execution</span></div>' +
-      '<div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">Collaborative</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Mode</span><span style="font-size:11px;color:var(--text)">' + modeTxt + '</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Authority</span><span style="font-size:11px;color:var(--text)">' + esc(authTxt) + '</span></div>' +
+      '<div class="aside-row"><span class="aside-label">Deliverable</span><span style="font-size:11px;color:var(--text)">' + (kindTxt === 'activity' ? 'Activity proof' : 'Composition') + '</span></div>' +
       '<div class="aside-row"><span class="aside-label">Commissioned</span><span style="font-size:11px;color:var(--text)">' + esc(cell.commissionedBy || 'Unknown') + '</span></div>' +
       (jstfSrc ? '<div class="aside-row"><span class="aside-label">Case</span><span id="xstf-jstf-link"></span></div>' : '') +
       '<div class="aside-row"><span class="aside-label">Deadline</span><span style="font-size:11px;color:var(--text)">' + esc(cell.deadline || 'TBD') + '</span></div>' +
@@ -10884,7 +10920,7 @@ function renderXstf(cellId) {
         var statusClass = d.status === 'approved' ? 'tag-green' : d.status === 'revision' ? 'tag-gold' : 'tag-purple';
         html += '<div style="padding:8px 10px;background:var(--bg-secondary);border-radius:var(--radius);margin-bottom:6px">';
         html += '<div class="flex justify-between"><strong style="color:var(--text)">' + esc(d.title) + '</strong>';
-        html += '<span class="tag ' + statusClass + '" style="font-size:8px">' + esc(d.status) + '</span></div>';
+        html += '<span class="tag ' + statusClass + '" style="font-size:8px">' + esc(d.status) + '</span>' + ((d.kind === 'activity') ? '<span class="tag tag-gold" style="font-size:8px">activity proof</span>' : '<span class="tag tag-green" style="font-size:8px">composition</span>') + '</div>';
         if (d.submittedBy) html += '<div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">By ' + esc(d.submittedBy) + '</div>';
         if (d.reviewComment) html += '<div style="font-size:10px;color:var(--text-secondary);margin-top:4px;font-style:italic">"' + esc(d.reviewComment) + '"</div>';
         if (d.status === 'submitted' && isStewardOfAnyCircle()) {

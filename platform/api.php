@@ -740,11 +740,19 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-xstf$/', $cleanPath, $m)) {
     $team = is_array($body->team ?? null) ? $body->team : []; $specs = $body->deliverableSpecs ?? new \stdClass();
     $xId = 'xstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4); $blind = isset($body->blind) ? ($body->blind ? 1 : 0) : 1;
     $deadline = trim((string)($body->deadline ?? '')) ?: date('Y-m-d', time() + 30 * 86400);
-    $dSpecs = ['name' => (string)($specs->name ?? $title), 'description' => (string)($specs->description ?? ''), 'sections' => (int)($specs->sections ?? 4), 'wordCount' => (string)($specs->wordCount ?? 'TBD'), 'language' => (string)($specs->language ?? 'Plain English'), 'reviewProcess' => (string)($specs->reviewProcess ?? 'draft-circle-final')];
+    $deliverableKind = trim((string)($body->deliverableKind ?? 'composition'));
+    if (!in_array($deliverableKind, ['composition', 'activity'])) send(400, ['error' => 'deliverableKind must be composition or activity']);
+    // Authority is explicit and visible: the approved aSTF resolution that
+    // permits this execution, plus any additional cited refs.
+    $authorityRefs = array_values(array_filter(array_map('strval', is_array($body->authorityRefs ?? null) ? $body->authorityRefs : [])));
+    $mandateRefs = array_values(array_filter(array_map('strval', is_array($body->mandateRefs ?? null) ? $body->mandateRefs : [])));
+    $citedContent = trim((string)($body->citedContent ?? ''));
+    $dSpecs = ['name' => (string)($specs->name ?? $title), 'description' => (string)($specs->description ?? ''), 'sections' => (int)($specs->sections ?? 4), 'wordCount' => (string)($specs->wordCount ?? 'TBD'), 'language' => (string)($specs->language ?? 'Plain English'), 'reviewProcess' => (string)($specs->reviewProcess ?? 'draft-circle-final'), 'deliverableKind' => $deliverableKind];
     $defTasks = [['id'=>'t0','label'=>'STF formulation','status'=>'pending','locked'=>true],['id'=>'t1','label'=>'Mandate comprehension','status'=>'pending','locked'=>false],['id'=>'t2','label'=>'Research & drafting','status'=>'pending','locked'=>false],['id'=>'t3','label'=>'Internal review','status'=>'pending','locked'=>false],['id'=>'t4','label'=>'Circle review cycle','status'=>'pending','locked'=>false],['id'=>'t5','label'=>'Finalisation','status'=>'pending','locked'=>false],['id'=>'t6','label'=>'Dissolve STF','status'=>'pending','locked'=>true]];
-    $xs = ['type' => 'xstf-execution', 'astfId' => $afId, 'originCellId' => $as2['originCellId'] ?? null, 'circleName' => $as2['circleName'] ?? $af['circle'] ?? '', 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    $xs = ['type' => 'xstf-execution', 'astfId' => $afId, 'originCellId' => $as2['originCellId'] ?? null, 'circleName' => $as2['circleName'] ?? $af['circle'] ?? '', 'authority' => ['basis' => 'astf-resolution', 'ref' => $afId, 'extraRefs' => $authorityRefs], 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'deliverableKind' => $deliverableKind, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', $title, 'Active', count($team) ?: 3, $xs['circleName'], $blind, $afId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => $defTasks, 'objectives' => []]), json_encode($dSpecs), 0, $deadline]);
     foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, (string)($t->name ?? ''), (string)($t->initials ?? ''), (string)($t->role ?? 'Team Member')]);
+    foreach ($defTasks as $dt) dbRun('INSERT INTO cell_tasks (cell_id, task_id, label, status, locked, assignee) VALUES (?,?,?,?,?,?)', [$xId, $dt['id'], $dt['label'], $dt['status'], $dt['locked'] ? 1 : 0, null]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', $title, $xs['circleName'], 'active', 'Active', $title, $deadline]);
     send(201, ['ok' => true, 'xstfId' => $xId]);
 }
@@ -759,7 +767,9 @@ if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $content = trim((string)($body->content ?? '')); $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $dels = $meta['deliverables'] ?? [];
-    $dels[] = ['id' => 'del-' . time() . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'title' => $title, 'content' => $content, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
+    $cellKind = ($csrc['deliverableKind'] ?? pJson($cell['deliverable_specs'] ?? '{}')['deliverableKind'] ?? 'composition');
+    if (!in_array($cellKind, ['composition', 'activity'])) $cellKind = 'composition';
+    $dels[] = ['id' => 'del-' . time() . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'title' => $title, 'content' => $content, 'kind' => $cellKind, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z'), 'status' => 'submitted'];
     $meta['deliverables'] = $dels; dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(201, ['ok' => true, 'deliverableId' => end($dels)['id']]);
 }
@@ -1492,19 +1502,46 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
         if (!$team) send(400, ['error' => 'team must list investigators']);
     }
     if (count($team) !== $mandate) send(400, ['error' => 'This question mandates ' . $mandate . ' investigator' . ($mandate === 1 ? '' : 's') . ' (' . count($team) . ' selected)']);
+    // One xSTF, two settings: siloed (one isolated probe per investigator)
+    // or collaborative (one shared probe, whole team, optionally blind).
+    // Every probe carries its authority package and only operates on it.
+    $mode = trim((string)($body->mode ?? 'siloed'));
+    if (!in_array($mode, ['siloed', 'collaborative'])) send(400, ['error' => 'mode must be siloed or collaborative']);
+    $deliverableKind = trim((string)($body->deliverableKind ?? 'composition'));
+    if (!in_array($deliverableKind, ['composition', 'activity'])) send(400, ['error' => 'deliverableKind must be composition or activity']);
+    $blind = isset($body->blind) ? (!empty($body->blind) ? 1 : 0) : 1;
     $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $brief = trim((string)($body->brief ?? ''));
+    if ($brief === '') send(400, ['error' => 'mandate brief required: the team must state what is to be delivered']);
     $qlabel = $qrow['label'] ?? '';
+    $authorityRefs = array_values(array_filter(array_map('strval', is_array($body->authorityRefs ?? null) ? $body->authorityRefs : [])));
+    $mandateRefs = array_values(array_filter(array_map('strval', is_array($body->mandateRefs ?? null) ? $body->mandateRefs : [])));
+    $citedContent = trim((string)($body->citedContent ?? ''));
+    // Commissioning authority: a jSTF commission is itself the authority.
+    $authority = ['basis' => 'jstf-case', 'ref' => $cId, 'extraRefs' => $authorityRefs];
+    $objectives = array_values(array_filter(array_map(function($o) { $s = trim((string)(is_array($o) ? ($o['label'] ?? '') : $o)); return $s !== '' ? $s : null; }, is_array($body->objectives ?? null) ? $body->objectives : [])));
+    $tasks = array_values(array_filter(array_map(function($o) { $s = trim((string)(is_array($o) ? ($o['label'] ?? '') : $o)); return $s !== '' ? $s : null; }, is_array($body->tasks ?? null) ? $body->tasks : [])));
     $made = [];
-    foreach ($team as $t) {
-        foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; $tm2 = dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cc2['id'], $t['initials']]); if (($cs2['questionId'] ?? null) === $qId && $tm2) send(409, ['error' => $t['name'] . ' already has an open probe on this question']); }
-        $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $t['initials'] ?: 'x'));
-        $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'investigator' => $t['name'], 'investigatorInitials' => $t['initials'], 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
-        $dSpecs = ['name' => 'Answer the mandate question', 'description' => ($brief !== '' ? $brief . "\n\n" : '') . "Mandate (question):\n" . $qlabel, 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept'];
-        dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId) . ' — ' . $t['name'], 'Active', 1, $cell['circle'] ?? '', 1, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, $qDue]);
-        dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
-        dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', 'jSTF investigation probe', $cell['circle'] ?? '', 'active', 'Active', 'xSTF investigation — ' . ($meta['targetName'] ?? '') . ' — ' . $t['name'], $qDue]);
+    $spawnProbe = function($members) use (&$made, $cId, $cell, $meta, $qId, $qlabel, $qDue, $brief, $authority, $authorityRefs, $mandateRefs, $citedContent, $deliverableKind, $blind, $objectives, $tasks, $user) {
+        $names = implode(', ', array_map(function($t) { return $t['name']; }, $members));
+        $xId = 'xstf-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', ($members[0]['initials'] ?? 'x') . count($members)));
+        $xs = ['type' => 'jstf-investigation', 'jstfId' => $cId, 'questionId' => $qId, 'questionLabel' => $qlabel, 'mode' => count($members) > 1 ? 'collaborative' : 'siloed', 'investigators' => array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $members), 'investigator' => $members[0]['name'], 'investigatorInitials' => $members[0]['initials'], 'authority' => $authority, 'mandateRefs' => $mandateRefs, 'citedContent' => $citedContent, 'deliverableKind' => $deliverableKind, 'targetName' => $meta['targetName'] ?? null, 'commissionedBy' => $user['name'] ?? $user['initials'], 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')];
+        $dSpecs = ['name' => 'Answer the mandate question', 'description' => $brief . "\n\nMandate (question):\n" . $qlabel . ($citedContent !== '' ? "\n\nCited content:\n" . $citedContent : ''), 'sections' => 3, 'wordCount' => 'TBD', 'language' => 'Plain English', 'reviewProcess' => 'jstf-accept', 'deliverableKind' => $deliverableKind];
+        dbRun('INSERT INTO cells (id, type, title, status, participants, circle, blind, commissioned_by, source, resolution, meta, deliverable_specs, progress, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)', [$xId, 'xSTF Cell', 'xSTF investigation — ' . ($meta['targetName'] ?? $cell['title'] ?? $cId) . ' — ' . $names, 'Active', count($members), $cell['circle'] ?? '', $blind, $cId, json_encode($xs), json_encode(['status' => 'In Progress']), json_encode(['tasks' => [], 'objectives' => []]), json_encode($dSpecs), 0, $qDue]);
+        foreach ($members as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role) VALUES (?,?,?,?)', [$xId, $t['name'], $t['initials'], 'jSTF-xSTF investigator']);
+        foreach ($objectives as $oi => $ol) dbRun('INSERT INTO cell_objectives (cell_id, obj_id, label, status) VALUES (?,?,?,?)', [$xId, 'qo-' . $oi . '-' . substr($xId, -4), $ol, 'open']);
+        foreach ($tasks as $ti => $tl) dbRun('INSERT INTO cell_tasks (cell_id, task_id, label, status, locked, assignee) VALUES (?,?,?,?,?,?)', [$xId, 'qt-' . $ti . '-' . substr($xId, -4), $tl, 'pending', 0, null]);
+        dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $xId, 'xSTF', 'jSTF investigation probe', $cell['circle'] ?? '', 'active', 'Active', 'xSTF investigation — ' . ($meta['targetName'] ?? '') . ' — ' . $names, $qDue]);
         $made[] = $xId;
+    };
+    if ($mode === 'collaborative') {
+        foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; if (($cs2['questionId'] ?? null) === $qId) send(409, ['error' => 'This question already has an open probe']); }
+        $spawnProbe($team);
+    } else {
+        foreach ($team as $t) {
+            foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; $tm2 = dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cc2['id'], $t['initials']]); if (($cs2['questionId'] ?? null) === $qId && $tm2) send(409, ['error' => $t['name'] . ' already has an open probe on this question']); }
+            $spawnProbe([$t]);
+        }
     }
     $byQ = $meta['xstfByQuestion'] ?? []; $prevQ = isset($byQ[$qId]) ? (is_array($byQ[$qId]) ? $byQ[$qId] : [$byQ[$qId]]) : []; $byQ[$qId] = array_values(array_unique(array_merge($prevQ, $made)));
     $meta['xstfByQuestion'] = $byQ;
