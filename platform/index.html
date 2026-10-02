@@ -57,6 +57,7 @@
     </div>
     <div class="nav-section" id="nav-settings-section">
       <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
+      <div class="nav-item" data-v="guides" onclick="nav('guides')"><span class="nav-icon"><i class="fa-solid fa-book-open"></i></span> Guides</div>
     </div>
   </nav>
 
@@ -162,15 +163,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">From Discussion to Action</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
-            <div style="margin-bottom:4px"><span style="color:var(--teal)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Discussion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> steward sponsors</div>
-            <div style="margin-bottom:4px"><span style="color:var(--gold)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Proposal</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> circle deliberates</div>
-            <div style="margin-bottom:4px"><span style="color:var(--purple)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Motion</div>
-            <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)"><i class="fa-solid fa-arrow-down" style="font-size:8px"></i> aSTF adjudicates (blind)</div>
-            <div><span style="color:var(--green)"><i class="fa-solid fa-circle" style="font-size:8px"></i></span> Resolution <i class="fa-solid fa-arrow-right" style="font-size:8px"></i> xSTF <i class="fa-solid fa-arrow-right" style="font-size:8px"></i> Deliverable</div>
-          </div>
+          <div style="font-size:11px"><a onclick="navGuide('g-flow')" style="cursor:pointer;color:var(--gold)">ⓘ Discussion → Resolution flow →</a></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Stats</div>
@@ -269,7 +262,7 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">About Observatory</div>
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">The public knowledge space. Curated content for the curious. No login required.</div>
+          <div style="font-size:11px"><a onclick="navGuide('g-observatory')" style="cursor:pointer;color:var(--gold)">ⓘ What is the Observatory? →</a></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Trending Domains</div>
@@ -328,7 +321,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">How Circles Work</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Circles are mandate-defined deliberation bodies. Each circle stewards specific domains. Discussions can be sponsored into proposals, which circle cells deliberate into motions. Motions go to aSTF for blind adjudication.</div>
+          <div style="font-size:11px"><a onclick="navGuide('g-circles')" style="cursor:pointer;color:var(--gold)">ⓘ How circles work →</a></div>
         </div>
       </div>
     </div>
@@ -364,27 +357,11 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Cell Lifecycle</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.7;font-family:var(--mono)">
-            <div style="margin-bottom:6px"><span style="color:var(--teal)">Discussion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">(steward-sponsored)</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--purple)">Deliberation Cell</span> <span style="color:var(--text-tertiary)">(multi-circle)</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--purple)">Deliberation</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--gold)">Motion</span> <span style="color:var(--text-tertiary)">(crystallised)</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--gold)">Motion</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">aSTF</span> <span style="color:var(--text-tertiary)">(blind) → Verdict</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--green)">Resolution</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--blue)">xSTF</span> <span style="color:var(--text-tertiary)">(blind) → Deliverable</span></div>
-            <div style="margin-bottom:6px"><span style="color:var(--red)">Report</span> <span style="color:var(--text-tertiary)">→</span> <span style="color:var(--red)">jSTF</span> <span style="color:var(--text-tertiary)">(sealed) → Verdict → aSTF audit</span></div>
-            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Circle Cells originate proposals. Project Cells spawn deliverables. Deliberation Cells produce motions.</div>
-            <div style="color:var(--text-tertiary);margin-top:8px;font-size:10px">Projects have their own cells. Periodic review aSTFs (p-aSTF) audit circle health + individual member performance.</div>
-          </div>
+          <div style="font-size:11px"><a onclick="navGuide('g-cells')" style="cursor:pointer;color:var(--gold)">ⓘ Cells & lifecycle →</a></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Cell Types</div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--green-soft);color:var(--green)">▣ Project</span><span style="font-size:11px;color:var(--text)">Task-oriented work</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--purple-soft);color:var(--purple)">⬡ Circle</span><span style="font-size:11px;color:var(--text)">Steward deliberation</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--gold-soft);color:var(--gold)">◎ Deliberation</span><span style="font-size:11px;color:var(--text)">Motion crystallisation</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--purple-soft);color:var(--purple)">✔ vSTF</span><span style="font-size:11px;color:var(--text)">Credential verification</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--red-soft);color:var(--red)">◈ aSTF</span><span style="font-size:11px;color:var(--text)">Blind adjudication</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--red-soft);color:var(--red)">⚖ jSTF</span><span style="font-size:11px;color:var(--text)">Judicial investigation</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--blue-soft);color:var(--blue)">⬢ xSTF</span><span style="font-size:11px;color:var(--text)">Blind execution</span></div>
-          <div class="aside-row"><span class="aside-label" style="background:var(--teal-soft);color:var(--teal)">↻ p-aSTF</span><span style="font-size:11px;color:var(--text)">Periodic circle review</span></div>
+          <div style="font-size:11px"><a onclick="navGuide('g-cells')" style="cursor:pointer;color:var(--gold)">ⓘ Cell types →</a></div>
         </div>
       </div>
     </div>
@@ -535,12 +512,7 @@
     </div>
     <div class="aside-card">
       <div class="aside-title">Deliberation Guide</div>
-      <div style="font-size:10px;color:var(--text-secondary);line-height:1.6;margin-top:4px">
-        <div style="margin-bottom:6px">A deliberation cell is a focused discussion space where participants draft and vote on <strong>resolutions</strong>.</div>
-        <div style="margin-bottom:6px">Proposals enter via discussion threads, direct steward action, or system-bound edits.</div>
-        <div style="margin-bottom:6px">Resolutions pass to <strong>aSTF</strong> for blind adjudication. Failed resolutions are still recorded.</div>
-        <div style="font-size:9px;color:var(--text-tertiary);border-top:1px solid var(--border-subtle);padding-top:6px;margin-top:6px"><strong>Flow:</strong> Proposal → Deliberation → Draft Resolution(s) → Vote → aSTF / Record</div>
-      </div>
+      <div style="font-size:11px"><a onclick="navGuide('g-deliberation')" style="cursor:pointer;color:var(--gold)">ⓘ Deliberation guide →</a></div>
     </div>
     <div class="aside-card">
       <div class="aside-title">Resolution</div>
@@ -583,7 +555,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">How STFs Work</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">STFs operate in <strong>blind isolated cells</strong> — members don't know each other's identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body.</div>
+          <div style="font-size:11px;margin-bottom:8px"><a onclick="navGuide('g-stf')" style="cursor:pointer;color:var(--gold)">ⓘ How STFs work →</a></div>
           <div class="flex gap-2" style="margin-top:10px;flex-wrap:wrap"><button class="btn btn-sm" onclick="openVstfSpawnModal()">Spawn vSTF</button><button class="btn btn-sm" onclick="spawnPastfFromStfDash()">Spawn p-aSTF</button></div>
         </div>
       </div>
@@ -733,12 +705,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Evaluation Rules</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
-            <div class="mb-2">• Adjust claimed Wh if evidence doesn't support it</div>
-            <div class="mb-2">• Mark evaluated claims with checkbox</div>
-            <div class="mb-2">• Leave unmarked with reason if needed</div>
-            <div>• Final weights = aggregate of all assessors</div>
-          </div>
+          <div style="font-size:11px"><a onclick="navGuide('g-vstf')" style="cursor:pointer;color:var(--gold)">ⓘ vSTF evaluation rules →</a></div>
         </div>
       </div>
     </div>
@@ -914,14 +881,7 @@
         </details>
         <details class="aside-card">
           <summary class="aside-title">How jSTF Works</summary>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">
-            <div class="mb-2"><strong>1. Anonymous report</strong> — Any member can report any member. Report is posted anonymously to Commons, visible to stewards.</div>
-            <div class="mb-2"><strong>2. Steward sponsorship</strong> — Any steward can sponsor the report, taking responsibility for the claim.</div>
-            <div class="mb-2"><strong>3. Activity restriction</strong> — jSTF can restrict reported member's activity during investigation.</div>
-            <div class="mb-2"><strong>4. Policy citation</strong> — Punishment must cite existing policy resolutions, not ad hoc.</div>
-            <div class="mb-2"><strong>5. Disciplinary motion</strong> — Goes to aSTF for audit. aSTF sees the decision, never the jSTF members.</div>
-            <div><strong>6. Resolution</strong> — System-bound (circle removal, vSTF trigger, Ws freeze) or non-system (policy citation).</div>
-          </div>
+          <div style="font-size:11px"><a onclick="navGuide('g-jstf')" style="cursor:pointer;color:var(--gold)">ⓘ How jSTF works →</a></div>
         </details>
       </div>
     </div>
@@ -1063,7 +1023,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Ledger Rules</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.</div>
+          <div style="font-size:11px"><a onclick="navGuide('g-pastf')" style="cursor:pointer;color:var(--gold)">ⓘ Ledger rules →</a></div>
         </div>
       </div>
     </div>
@@ -1135,10 +1095,17 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">What are Organisations?</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.</div>
+          <div style="font-size:11px"><a onclick="navGuide('g-orgs')" style="cursor:pointer;color:var(--gold)">ⓘ About organisations →</a></div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- ═══ GUIDES ═══ -->
+  <div class="view" id="view-guides">
+    <div class="page-title">Guides</div>
+    <div class="page-sub">How each part of Solis works — the same notes linked from the sidebars</div>
+    <div id="guides-root"></div>
   </div>
 
   <!-- ═══ PROFILE ═══ -->
@@ -1496,15 +1463,7 @@
           </div>
           <div class="aside-card">
             <div class="aside-title">Resolution Lifecycle</div>
-            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;font-family:var(--mono)">
-              <div style="margin-bottom:4px"><span style="color:var(--teal)">&#9679;</span> Discussion</div>
-              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; steward sponsors</div>
-              <div style="margin-bottom:4px"><span style="color:var(--gold)">&#9679;</span> Proposal</div>
-              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; circle deliberates</div>
-              <div style="margin-bottom:4px"><span style="color:var(--purple)">&#9679;</span> Motion</div>
-              <div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">&#8595; aSTF adjudicates (blind)</div>
-              <div><span style="color:var(--green)">&#9679;</span> Enacted Resolution</div>
-            </div>
+            <div style="font-size:11px"><a onclick="navGuide('g-flow')" style="cursor:pointer;color:var(--gold)">ⓘ Discussion → Resolution flow →</a></div>
           </div>
           <div class="aside-card">
             <div class="aside-title">By Circle</div>
@@ -1542,12 +1501,12 @@
           </div>
           <div class="aside-card">
             <div class="aside-title">Case Intake</div>
-            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px">Any member can report any member. Reports surface anonymously to stewards only, accumulating per target.</div>
+            <div style="font-size:11px;margin-bottom:8px"><a onclick="navGuide('g-governance')" style="cursor:pointer;color:var(--gold)">ⓘ How intake works →</a></div>
             <div id="jstf-intake"></div>
           </div>
           <div class="aside-card">
             <div class="aside-title">Competence & Weight</div>
-            <div style="font-size:11px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px">Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws.</div>
+            <div style="font-size:11px;margin-bottom:8px"><a onclick="navGuide('g-governance')" style="cursor:pointer;color:var(--gold)">ⓘ Ws, Wh & standing →</a></div>
             <div class="flex gap-2" style="flex-direction:column;gap:6px" id="competence-card">
               <button class="btn btn-sm" onclick="openStandingModal()">Standing & Competence</button>
               <button class="btn btn-sm" onclick="openDeclareWhModal()">Declare Wh</button>
@@ -1556,12 +1515,7 @@
           </div>
           <div class="aside-card">
             <div class="aside-title">STF Types</div>
-            <div style="font-size:10px;color:var(--text-secondary);line-height:1.6">
-              <div style="margin-bottom:4px"><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of candidacies and competence claims</div>
-              <div style="margin-bottom:4px"><span style="color:var(--red);font-weight:600">aSTF</span> — Blind adjudication of motions</div>
-              <div style="margin-bottom:4px"><span style="color:var(--teal);font-weight:600">jSTF</span> — Judicial investigations</div>
-              <div><span style="color:var(--gold);font-weight:600">p-aSTF</span> — Periodic circle health reviews</div>
-            </div>
+            <div style="font-size:11px"><a onclick="navGuide('g-stf')" style="cursor:pointer;color:var(--gold)">ⓘ STF types →</a></div>
           </div>
         </div>
       </div>
@@ -2555,6 +2509,7 @@ var views = {
   'thread-detail':  ['Discussions', 'Thread'],
   'domain-map':     ['Domain Map'],
   'resolutions':    ['Governance'],
+  'guides':         ['Guides'],
   'observatory-publications': ['Observatory', 'Publications'],
   'registration':   ['Registration']
 };
@@ -2567,7 +2522,7 @@ var navMap = {
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
   stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf-motion':'stf', 'stf-astf-judicial':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
-  participants:'participants', organisations:'organisations', profile:'profile',
+  participants:'participants', organisations:'organisations', profile:'profile', guides:'guides',
   'domain-map':'domain-map'
 };
 
@@ -3705,15 +3660,10 @@ function renderAstfMotion(cell) {
           '<div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)">' + esc(implCircles.length ? implCircles.join(', ') : '—') + '</span></div>' +
         '</div>' +
         '<div class="aside-card"><div class="aside-title">Rubric Weights</div>' +
-          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.8">' +
-            '<div class="flex justify-between"><span>Alignment/Conflict</span><span style="color:var(--text);font-weight:500">10 pts</span></div>' +
-            '<div class="flex justify-between"><span>Jurisdiction</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
-            '<div class="flex justify-between"><span>Competence</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
-            '<div class="flex justify-between"><span>Depth/Effort</span><span style="color:var(--text);font-weight:500">5 pts</span></div>' +
-          '</div>' +
+          guideWeightsHtml('motion') +
         '</div>' +
         '<div class="aside-card"><div class="aside-title">How aSTF Works</div>' +
-          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The rubric <strong>guides, it does not decide</strong>. Scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + guideHowAstf() + ' ' + guideCardLinkInline('g-astf') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -3795,15 +3745,10 @@ function renderAstfJudicial(cell) {
           '<div class="aside-row"><span class="aside-label">Target</span><span style="font-size:11px;color:var(--text)">' + esc(target) + '</span></div>' +
         '</div>' +
         '<div class="aside-card"><div class="aside-title">Rubric Weights</div>' +
-          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.8">' +
-            '<div class="flex justify-between"><span>Justice of verdict</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
-            '<div class="flex justify-between"><span>Due diligence</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
-            '<div class="flex justify-between"><span>Integrity of process</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
-            '<div class="flex justify-between"><span>Proportionality</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
-          '</div>' +
+          guideWeightsHtml('judicial') +
         '</div>' +
         '<div class="aside-card"><div class="aside-title">How Judicial Audit Works</div>' +
-          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The audit weighs the <strong>decision, not the jSTF members</strong> (complete separation). Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + guideHowJudicial() + ' ' + guideCardLinkInline('g-judicial') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -3834,6 +3779,101 @@ function astfCollectStaticRubric() {
   }
   var m = { jurisdiction: num('astf-s-jur'), depth: num('astf-s-depth'), alignment: num('astf-s-align'), competence: num('astf-s-comp') };
   return { rubric: m, total: m.jurisdiction + m.depth + m.alignment + m.competence };
+}
+// Shared guide copy: single source for the How/Rubric explainer cards so the
+// aSTF sidebars and the Guides section never drift apart.
+function guideHowAstf() {
+  return 'The rubric <strong>guides, it does not decide</strong>. Scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.';
+}
+function guideHowJudicial() {
+  return 'The audit weighs the <strong>decision, not the jSTF members</strong> (complete separation). Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.';
+}
+function guideWeightsHtml(kind) {
+  var rows = kind === 'judicial'
+    ? [['Justice of verdict', 9], ['Due diligence', 9], ['Integrity of process', 6], ['Proportionality', 6]]
+    : [['Alignment/Conflict', 10], ['Jurisdiction', 9], ['Competence', 6], ['Depth/Effort', 5]];
+  return '<div style="font-size:11px;color:var(--text-secondary);line-height:1.8">' + rows.map(function(r) {
+    return '<div class="flex justify-between"><span>' + r[0] + '</span><span style="color:var(--text);font-weight:500">' + r[1] + ' pts</span></div>';
+  }).join('') + '</div>';
+}
+function guideCardLink(id, label) {
+  return '<div class="aside-card"><div class="aside-title">Guide</div><div style="font-size:11px"><a onclick="navGuide(\'' + id + '\')" style="cursor:pointer;color:var(--gold)">ⓘ ' + label + ' →</a></div></div>';
+}
+function guideCardLinkInline(id) {
+  return '<a onclick="navGuide(\'' + id + '\')" style="cursor:pointer;color:var(--gold);white-space:nowrap">Full guide →</a>';
+}
+function navGuide(id) {
+  nav('guides');
+  setTimeout(function() { var el = document.getElementById(id); if (el && el.scrollIntoView) el.scrollIntoView(); }, 80);
+}
+function renderGuides() {
+  var host = document.getElementById('guides-root');
+  if (!host) return;
+  var sec = function(id, title, body) {
+    return '<div class="card" style="margin-bottom:16px" id="' + id + '"><div class="sec">' + title + '</div><div style="font-size:12px;color:var(--text-secondary);line-height:1.7">' + body + '</div></div>';
+  };
+  var steps = function(items) {
+    return items.map(function(s) { return '<div style="margin-bottom:6px">' + s + '</div>'; }).join('');
+  };
+  host.innerHTML =
+    sec('g-flow', 'From Discussion to Resolution',
+      '<div style="margin-bottom:4px"><span style="color:var(--gold)">●</span> Discussion</div>' +
+      '<div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ steward sponsors</div>' +
+      '<div style="margin-bottom:4px"><span style="color:var(--gold)">●</span> Proposal</div>' +
+      '<div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ circle deliberates</div>' +
+      '<div style="margin-bottom:4px"><span style="color:var(--purple)">●</span> Motion</div>' +
+      '<div style="margin-bottom:4px;padding-left:12px;color:var(--text-tertiary)">↓ aSTF adjudicates (blind)</div>' +
+      '<div><span style="color:var(--green)">●</span> Resolution → xSTF → Deliverable</div>') +
+    sec('g-circles', 'How Circles Work',
+      'Circles are mandate-defined deliberation bodies. Each circle stewards specific domains. Discussions can be sponsored into proposals, which circle cells deliberate into motions. Motions go to aSTF for blind adjudication.') +
+    sec('g-cells', 'Cells & Lifecycle',
+      '<div style="margin-bottom:8px"><strong>Cell types:</strong> ▣ Project (task-oriented work) · ⬡ Circle (steward deliberation) · ◎ Deliberation (motion crystallisation) · ✔ vSTF (credential verification) · ◈ aSTF (blind adjudication) · ⚖ jSTF (judicial investigation) · ⬢ xSTF (blind execution) · ↻ p-aSTF (periodic circle review).</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--teal)">Discussion</span> → <span style="color:var(--gold)">Proposal</span> (steward-sponsored)</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--gold)">Proposal</span> → <span style="color:var(--purple)">Deliberation Cell</span> (multi-circle)</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--purple)">Deliberation</span> → <span style="color:var(--gold)">Motion</span> (crystallised)</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--gold)">Motion</span> → <span style="color:var(--red)">aSTF</span> (blind) → Verdict</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--green)">Resolution</span> → <span style="color:var(--blue)">xSTF</span> (blind) → Deliverable</div>' +
+      '<div style="margin-bottom:6px"><span style="color:var(--red)">Report</span> → <span style="color:var(--red)">jSTF</span> (sealed) → Verdict → aSTF audit</div>' +
+      '<div style="margin-bottom:6px">Circle Cells originate proposals. Project Cells spawn deliverables. Deliberation Cells produce motions.</div>' +
+      '<div>Projects have their own cells. Periodic review aSTFs (p-aSTF) audit circle health + individual member performance.</div>') +
+    sec('g-deliberation', 'Deliberation Guide',
+      '<div style="margin-bottom:6px">A deliberation cell is a focused discussion space where participants draft and vote on <strong>resolutions</strong>.</div>' +
+      '<div style="margin-bottom:6px">Proposals enter via discussion threads, direct steward action, or system-bound edits.</div>' +
+      '<div style="margin-bottom:6px">Resolutions pass to <strong>aSTF</strong> for blind adjudication. Failed resolutions are still recorded.</div>' +
+      '<div><strong>Flow:</strong> Proposal → Deliberation → Draft Resolution(s) → Vote → aSTF / Record</div>') +
+    sec('g-stf', 'How STFs Work',
+      '<div style="margin-bottom:6px">STFs operate in <strong>blind isolated cells</strong> — members don\'t know each other\'s identities during deliberation. Each STF has a specific mandate, deadline, and commissioning body.</div>' +
+      '<div><span style="color:var(--purple);font-weight:600">vSTF</span> — Verification of candidacies and competence claims · ' +
+      '<span style="color:var(--red);font-weight:600">aSTF</span> — Blind adjudication of motions · ' +
+      '<span style="color:var(--teal);font-weight:600">jSTF</span> — Judicial investigations · ' +
+      '<span style="color:var(--gold);font-weight:600">p-aSTF</span> — Periodic circle health reviews</div>') +
+    sec('g-vstf', 'vSTF Evaluation Rules',
+      '<div style="margin-bottom:6px">• Adjust claimed Wh if evidence doesn\'t support it</div>' +
+      '<div style="margin-bottom:6px">• Mark evaluated claims with checkbox</div>' +
+      '<div style="margin-bottom:6px">• Leave unmarked with reason if needed</div>' +
+      '<div>• Final weights = aggregate of all assessors</div>') +
+    sec('g-jstf', 'How jSTF Works',
+      steps([
+        '<strong>1. Anonymous report</strong> — Any member can report any member. Report is posted anonymously to Commons, visible to stewards.',
+        '<strong>2. Steward sponsorship</strong> — Any steward can sponsor the report, taking responsibility for the claim.',
+        '<strong>3. Activity restriction</strong> — jSTF can restrict reported member\'s activity during investigation.',
+        '<strong>4. Policy citation</strong> — Punishment must cite existing policy resolutions, not ad hoc.',
+        '<strong>5. Disciplinary motion</strong> — Goes to aSTF for audit. aSTF sees the decision, never the jSTF members.',
+        '<strong>6. Resolution</strong> — System-bound (circle removal, vSTF trigger, Ws freeze) or non-system (policy citation).'
+      ])) +
+    sec('g-astf', 'How aSTF Works',
+      '<div style="margin-bottom:8px">' + guideHowAstf() + '</div>' + guideWeightsHtml('motion')) +
+    sec('g-judicial', 'How Judicial Audit Works',
+      '<div style="margin-bottom:8px">' + guideHowJudicial() + '</div>' + guideWeightsHtml('judicial')) +
+    sec('g-pastf', 'Periodic Reviews (p-aSTF)',
+      'All scores, verdicts, and health tiers published after review. <strong>Reviewer attribution permanently sealed.</strong> Maximum transparency; zero retaliation surface.') +
+    sec('g-orgs', 'What are Organisations?',
+      'Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.') +
+    sec('g-governance', 'Intake, Competence & Weight',
+      '<div style="margin-bottom:6px"><strong>Case intake:</strong> Any member can report any member. Reports surface anonymously to stewards only, accumulating per target.</div>' +
+      '<div>Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws.</div>') +
+    sec('g-observatory', 'About Observatory',
+      'The public knowledge space. Curated content for the curious. No login required.');
 }
 function submitStaticAstfAdjudication() {
   var cells = (MOCK && MOCK.cells) || [];
@@ -11772,6 +11812,7 @@ var _origNav=nav;
     renderStfViews();
   }
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
+  if(key==='guides'&&typeof renderGuides==='function'){renderGuides();}
   if(key==='commons'){renderCommonsFeed();document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f){f.classList.toggle('active',f.getAttribute('data-filter')===_commonsFilter);});}
  };
 
