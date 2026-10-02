@@ -926,79 +926,16 @@
     </div>
   </div>
 
-  <!-- ═══ aSTF: Adjudication ═══ -->
-  <div class="view" id="view-stf-astf">
+  <!-- ═══ aSTF: Motion Adjudication (data-driven) ═══ -->
+  <div class="view" id="view-stf-astf-motion">
     <div class="back" onclick="nav('stf')">← STF Dash</div>
-    <div class="layout-split">
-      <div class="layout-main">
-        <div id="stf-header-astf" style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>
-        <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER'S IDENTITIES &nbsp; 🔒</div>
-        <div id="stf-integrity-stf-astf"></div>
-        <div class="sec">Motion Record</div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)" id="astf-motion-from">From Cell #Cell-21 · Crystallised Jul 21</span></div>
-          <div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px" id="astf-motion-title">Debris Liability Framework — Allocation of Responsibility</div>
-          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6" id="astf-motion-body">Proposes that liability for debris-generating manoeuvres be assigned to the operator of the spacecraft that created the debris, with a secondary liability pathway for manufacturers when hardware failure is the proximate cause. Establishes a mandatory debris reporting window of 24 hours.</div>
-        </div>
-        <div id="astf-backlink" style="display:none;margin:-8px 0 16px"></div>
-        <div id="astf-motion-xref" style="margin:-8px 0 16px"></div>
-        <div class="sec" id="astf-rubric-sec">4-Dimension Rubric (30 pts max)</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px" id="astf-rubric-desc">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>
-        <table class="tbl" style="margin-bottom:12px" id="astf-rubric-table">
-          <tr><th>Dimension</th><th>Max</th><th>Your Score</th><th>What to assess</th></tr>
-          <tr><td style="font-weight:500">Jurisdiction</td><td class="m">9</td><td><input type="number" id="astf-s-jur" value="0" min="0" max="9" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the Circle have mandate authority here?</td></tr>
-          <tr><td style="font-weight:500">Depth / Effort</td><td class="m">5</td><td><input type="number" id="astf-s-depth" value="0" min="0" max="5" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Was deliberation substantive?</td></tr>
-          <tr><td style="font-weight:500">Alignment / Conflict</td><td class="m">10</td><td><input type="number" id="astf-s-align" value="0" min="0" max="10" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Does the decision advance org tenets? Undisclosed conflicts?</td></tr>
-          <tr><td style="font-weight:500">Competence</td><td class="m">6</td><td><input type="number" id="astf-s-comp" value="0" min="0" max="6" class="form-input" style="width:50px;padding:2px 4px;font-family:var(--mono);font-size:11px"></td><td style="font-size:10px;color:var(--text-tertiary)">Were the right people in the deliberation?</td></tr>
-        </table>
-        <div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">
-          <span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>
-          <span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="astf-total">0 / 30</span>
-        </div>
-        <div class="divider" style="margin:12px 0"></div>
-        <div class="sec">Verdict</div>
-        <div class="flex gap-2 mb-3">
-          <button class="btn btn-primary btn-sm" id="astf-approve" onclick="window._astfStaticVerdict='approved';document.getElementById('astf-approve').classList.add('btn-primary');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Approve (Resolution)</button>
-          <button class="btn btn-sm" id="astf-revision" onclick="window._astfStaticVerdict='revision';document.getElementById('astf-revision').classList.add('btn-sm');document.getElementById('astf-revision').style.background='var(--gold-soft)';document.getElementById('astf-revision').style.color='var(--gold)';document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-reject').classList.remove('btn-danger');document.getElementById('astf-reject').classList.add('btn-sm')">Revision Request</button>
-          <button class="btn btn-sm" id="astf-reject" onclick="window._astfStaticVerdict='rejected';document.getElementById('astf-reject').classList.add('btn-danger');document.getElementById('astf-reject').classList.remove('btn-sm');document.getElementById('astf-approve').classList.remove('btn-primary');document.getElementById('astf-approve').classList.add('btn-sm');document.getElementById('astf-revision').classList.remove('btn-sm')">Reject</button>
-        </div>
-        <div class="text-label mb-2">Rationale</div>
-        <textarea id="astf-s-rationale" placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
-        <div class="divider" style="margin:12px 0"></div>
-        <div class="sec" id="astf-flags-sec">Malpractice Flagging (optional)</div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px" id="astf-flags-desc">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant's behaviour was not.</div>
-        <div id="astf-flags"></div>
-        <div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft('view-stf-astf')">Save Draft</button></div></div>
-      </div>
-      <div class="layout-aside">
-        <div class="aside-card">
-          <div class="aside-title">Assignment</div>
-          <div id="stf-assignment-astf"></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Commissioning Circle</div>
-          <div class="hrow" id="astf-circle-row"><div class="hav" id="astf-circle-ini" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="astf-circle-name">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)" id="astf-circle-sub">Mandated: Space Law &amp; Policy</div></div></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Motion Type</div>
-          <div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)" id="astf-type-cat">non_system (Directive)</span></div>
-          <div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)" id="astf-type-impl">Space Law Circle</span></div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">Rubric Weights</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8">
-            <div class="flex justify-between"><span>Alignment/Conflict</span><span style="color:var(--text);font-weight:500">10 pts</span></div>
-            <div class="flex justify-between"><span>Jurisdiction</span><span style="color:var(--text);font-weight:500">9 pts</span></div>
-            <div class="flex justify-between"><span>Competence</span><span style="color:var(--text);font-weight:500">6 pts</span></div>
-            <div class="flex justify-between"><span>Depth/Effort</span><span style="color:var(--text);font-weight:500">5 pts</span></div>
-          </div>
-        </div>
-        <div class="aside-card">
-          <div class="aside-title">How aSTF Works</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The rubric <strong>guides, it does not decide</strong>. Scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.</div>
-        </div>
-      </div>
-    </div>
+    <div id="astf-motion-root"></div>
+  </div>
+
+  <!-- ═══ aSTF: Judicial Audit (data-driven) ═══ -->
+  <div class="view" id="view-stf-astf-judicial">
+    <div class="back" onclick="nav('stf')">← STF Dash</div>
+    <div id="astf-judicial-root"></div>
   </div>
 
   <!-- ═══ xSTF: Execution ═══ -->
@@ -2603,7 +2540,8 @@ var views = {
   stf:              ['STF Dash'],
   'stf-vstf-steward': ['STF Dash', 'vSTF — Steward Candidacy'],
   'stf-vstf-competence': ['STF Dash', 'vSTF — Competence Claims'],
-  'stf-astf':       ['STF Dash', 'aSTF — Adjudication'],
+  'stf-astf-motion': ['STF Dash', 'aSTF — Motion Adjudication'],
+  'stf-astf-judicial': ['STF Dash', 'aSTF — Judicial Audit'],
   'stf-jstf':       ['STF Dash', 'jSTF — Investigation'],
   'stf-xstf':       ['STF Dash', 'xSTF — Execution'],
   'stf-pastf':      ['STF Dash', 'p-aSTF — Circle Health'],
@@ -2624,7 +2562,7 @@ var navMap = {
   'resolutions':'resolutions',
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
-  stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
+  stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf-motion':'stf', 'stf-astf-judicial':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
   participants:'participants', organisations:'organisations', profile:'profile',
   'domain-map':'domain-map'
 };
@@ -3602,10 +3540,12 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
     }
     if (cell && cell.source && cell.source.type === 'judicial-audit' && typeof loadApiData === 'function') {
       loadApiData().then(function() {
-        renderAstfMotion();
+        if (typeof renderAstfJudicial === 'function') renderAstfJudicial();
         if (typeof renderJstfCase === 'function') renderJstfCase();
         if (typeof renderJstfPanel === 'function') renderJstfPanel();
       });
+    } else if (typeof loadApiData === 'function') {
+      loadApiData().then(function() { if (typeof renderAstfMotion === 'function') renderAstfMotion(); });
     }
     renderDelibCell(cellId);
   }).catch(function() { toast('Could not file verdict. Is the server running?', 'error'); });
@@ -3620,8 +3560,6 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
 // aSTF rubric: zero-scored inputs (reviewer judgment) with a live running
 // total — no pre-filled demo scores.
 function wireAstfRubric() {
-  var view = document.getElementById('view-stf-astf');
-  if (!view) return;
   var judicial = !!document.getElementById('astf-s-dd');
   var ids = judicial ? ['astf-s-dd', 'astf-s-ju', 'astf-s-pr', 'astf-s-in'] : ['astf-s-jur', 'astf-s-depth', 'astf-s-align', 'astf-s-comp'];
   var maxes = judicial ? [9, 9, 6, 6] : [9, 5, 10, 6];
@@ -3644,148 +3582,228 @@ function wireAstfRubric() {
   sync();
 }
 
-function renderAstfMotion() {
-  var cells = (MOCK && MOCK.cells) || [];
-  var delibAstf = null, auditAstf = null;
-  for (var i = cells.length - 1; i >= 0; i--) {
-    var c = cells[i];
-    if (!c || c.type !== 'aSTF Cell') continue;
-    var isAudit = (c.source || {}).type === 'judicial-audit';
-    var open = c.status !== 'Verdict Filed';
-    if (isAudit && open && !auditAstf) auditAstf = c;
-    if (!isAudit && open && !delibAstf) delibAstf = c;
-    if (auditAstf && delibAstf) break;
-  }
-  var pick = auditAstf || delibAstf;
-  if (typeof getActiveAstfCell === 'function') {
-    var bound = getActiveAstfCell();
-    if (bound) pick = bound;
-  }
-  if (!pick) {
-    var xrNone = document.getElementById('astf-motion-xref');
-    if (xrNone) xrNone.innerHTML = '';
-    for (var i2 = cells.length - 1; i2 >= 0; i2--) {
-      if (cells[i2] && cells[i2].type === 'aSTF Cell') { pick = cells[i2]; break; }
-    }
-  }
-  if (!pick) return;
-  window._astfActiveCellId = pick.id;
-  wireAstfRubric();
-  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
-  var src = pick.source || {};
-  var bl = document.getElementById('astf-backlink');
-  var xrA = document.getElementById('astf-motion-xref');
-  if (xrA) xrA.innerHTML = '';
-  var setCircle = function(name, ini, sub) {
-    setText('astf-circle-name', name || '—');
-    var iniEl = document.getElementById('astf-circle-ini');
-    if (iniEl) iniEl.textContent = ini || '—';
-    setText('astf-circle-sub', sub || '');
-  };
-  var showFlags = function(list, note) {
-    var sec = document.getElementById('astf-flags-sec');
-    var desc = document.getElementById('astf-flags-desc');
-    var box = document.getElementById('astf-flags');
-    if (sec) sec.style.display = '';
-    if (desc) desc.style.display = '';
-    if (!box) return;
-    if (!list.length) {
-      box.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml(note || 'No deliberation participants recorded.') + '</div>';
-      return;
-    }
-    box.innerHTML = list.map(function(n) {
-      return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox" data-flag-name="' + escapeHtml(n) + '"> <span>' + escapeHtml(n) + '</span><span style="font-size:10px;color:var(--text-tertiary)">— In deliberation record</span></label>';
-    }).join('');
-  };
-  var hideFlags = function() {
-    ['astf-flags-sec', 'astf-flags-desc', 'astf-flags'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
-  };
-  if (src.type === 'judicial-audit' && src.sourceCellId) {
-    if (bl) {
-      bl.style.display = '';
-      bl.innerHTML = '<button class="btn btn-sm" onclick="navStf(\'' + String(src.sourceCellId).replace(/'/g, '\\\'') + '\')"><i class="fa-solid fa-arrow-left"></i> Open originating jSTF case</button> <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">cross-reference: ' + String(src.sourceCellId) + '</span>';
-    }
-    var jcell = (typeof cellsById !== 'undefined' && cellsById[src.sourceCellId]) || null;
-    if (!jcell) {
-      for (var j = 0; j < cells.length; j++) { if (cells[j].id === src.sourceCellId) { jcell = cells[j]; break; } }
-    }
-    setText('astf-motion-from', 'From jSTF judicial proceeding' + (jcell ? ' · ' + (jcell.status || '') : ''));
-    setText('astf-motion-title', 'Judicial Audit — ' + (src.sourceTitle || 'jSTF Disciplinary Verdict') + (src.targetName ? ' · ' + src.targetName : ''));
-    var vi = (jcell && jcell.verdict) || src.verdict || {};
-    var restriction = (jcell && jcell.restriction) || {};
-    var body = 'Originating case: ' + (jcell ? (jcell.title || jcell.id) : (src.sourceCellId || '')) + '. '
-      + 'Disciplinary resolution: ' + (vi.type || '—') + (vi.description ? ' — ' + vi.description : '') + '. '
-      + (vi.policyRefs && vi.policyRefs.length ? 'Cites ' + vi.policyRefs.join(', ') + '. ' : '')
-      + ((vi.executingCircles && vi.executingCircles.length) ? 'Executing: ' + vi.executingCircles.join(', ') + '. ' : '')
-      + ((vi.systemActions && vi.systemActions.length) ? 'System actions: ' + vi.systemActions.map(function(a) { return a.kind + (a.kind === 'remove_from_circle' ? ' (' + (a.circles || []).join(', ') + ')' : (a.until ? ' until ' + a.until : '')); }).join('; ') + '. ' : '')
-      + (vi.appealDirection ? 'Appeal direction: ' + vi.appealDirection + '. ' : '')
-      + (restriction.state ? 'Target activity is currently ' + restriction.state + '. ' : '')
-      + 'Audit whether the resolution was proportionate, within jurisdiction, and supported by the evidence. Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.';
-    setText('astf-motion-body', body);
-    if (xrA) {
-      xrA.innerHTML = (src.targetId ? xrefChip('user', src.targetId, src.targetName || src.targetId, { color: 'var(--red)' }) : '')
-        + (src.sourceCellId ? xrefChip('cell', src.sourceCellId, 'jSTF case', { color: 'var(--red)' }) : '');
-    }
-    hideFlags();
-    setCircle('Judicial Circle', 'JC', 'Mandated: Integrity audit');
-    setText('astf-type-cat', 'system (judicial audit)');
-    setText('astf-type-impl', 'Judicial Circle');
-    setText('astf-rubric-sec', 'Justice Rubric (30 pts max)');
-    setText('astf-rubric-desc', 'Score each dimension. The rubric guides your judgment — the verdict is filed separately.');
-    var rtJ = document.getElementById('astf-rubric-table');
-    if (rtJ) rtJ.innerHTML = astfStaticRubricRows('judicial');
-    wireAstfRubric();
-    return;
-  }
-  if (bl) { bl.style.display = 'none'; bl.innerHTML = ''; }
-  setText('astf-rubric-sec', '4-Dimension Rubric (30 pts max)');
-  setText('astf-rubric-desc', 'Score each dimension. The rubric guides your judgment — the verdict is filed separately.');
-  var rtM = document.getElementById('astf-rubric-table');
-  if (rtM) rtM.innerHTML = astfStaticRubricRows('motion');
-  wireAstfRubric();
-  var origin = (typeof cellsById !== 'undefined' && src.originCellId && cellsById[src.originCellId]) || null;
-  if (!origin) {
-    for (var k0 = 0; k0 < cells.length; k0++) {
-      if (cells[k0].id === src.originCellId) { origin = cells[k0]; break; }
-    }
-  }
-  if (!origin && !src.originCellId) origin = pick;
-  if (!origin) return;
-  setText('astf-motion-from', 'From ' + (origin.id || '') + ' · ' + (origin.status || ''));
-  setText('astf-motion-title', origin.title || pick.title || '');
-  var body2 = '';
-  var drafts = origin.draftResolutions || [];
-  var foundDraft = null;
-  for (var k = drafts.length - 1; k >= 0; k--) {
-    if (drafts[k].status === 'submitted' || drafts[k].status === 'passed' || drafts[k].status === 'crystallised') { foundDraft = drafts[k]; body2 = drafts[k].text || drafts[k].title || ''; break; }
-  }
-  if (!foundDraft && drafts.length) foundDraft = drafts[drafts.length - 1];
-  if (!body2 && foundDraft) body2 = foundDraft.text || foundDraft.title || '';
-  if (body2) setText('astf-motion-body', body2);
-  else setText('astf-motion-body', 'No draft text linked to this motion yet.');
-  if (xrA) xrA.innerHTML = origin && origin.id !== pick.id ? xrefChip('motion', origin.id, origin.title || origin.id, { color: 'var(--gold)' }) : '';
-  // Commissioning circle + motion type from the origin deliberation record.
-  var lead = ((origin.participatingCircles || [])[0]) || ((origin.circles || [])[0]) || null;
-  var cName = lead && lead.name ? lead.name : (origin.commissionedBy || 'Commons');
-  var wordsC = String(cName).split(/\s+/).filter(Boolean);
-  var cIni = wordsC.length >= 2 ? (wordsC[0].charAt(0) + wordsC[1].charAt(0)).toUpperCase() : String(cName).slice(0, 2).toUpperCase();
-  var cDomains = (origin.domains || []).join(', ');
-  setCircle(cName, cIni, cDomains ? 'Mandated: ' + cDomains : 'Mandated: —');
-  setText('astf-type-cat', 'deliberation (' + (origin.delibType || 'general') + ')');
-  var impl = ((foundDraft && foundDraft.implementingCircles) || []).filter(Boolean);
-  setText('astf-type-impl', impl.length ? impl.join(', ') : '—');
-  // Flag candidates: everyone who spoke in the origin deliberation.
-  var names = [];
-  (origin.messages || []).forEach(function(mm) {
-    var n = mm && mm.author;
-    if (n && names.indexOf(n) === -1) names.push(n);
+function astfIntegrityHtml(stf, type, subject) {
+  var recs = (MOCK && MOCK.integrityRecords) || [];
+  var norm = function(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
+  var titleNorm = norm(stf && (stf.title || stf.candidate));
+  var subj = norm(subject);
+  var best = null, bestLen = 0;
+  recs.forEach(function(r) {
+    if (r.type !== type) return;
+    var s = norm(r.subject);
+    if (!s) return;
+    if (subj && (s.indexOf(subj) >= 0 || subj.indexOf(s) >= 0) && s.length >= bestLen) { best = r; bestLen = s.length; }
   });
-  var proposer = (origin.source || {}).proposer;
+  if (!best) return '<div class="card" style="margin-bottom:16px;border-left:3px solid var(--border);padding:12px 14px"><div style="font-size:11px;color:var(--text-tertiary);line-height:1.5">No integrity record on file yet — the outcome of this ' + esc(type) + ' will be archived by the Integrity Engine when it concludes.</div></div>';
+  return '<div class="card" style="margin-bottom:16px;border-left:3px solid var(--green);padding:12px 14px"><div style="font-size:11px;color:var(--text-tertiary)">Integrity record</div><div style="font-size:12px;font-weight:500;color:var(--text);margin:4px 0">' + esc(best.verdict || '') + '</div><div style="font-size:11px;color:var(--text-tertiary)">' + esc(best.id || '') + ' · ' + esc(best.date || '') + '</div></div>';
+}
+function astfStfRow(cell) {
+  if (!cell || !MOCK || !MOCK.stfs) return null;
+  var buckets = [MOCK.stfs.pending, MOCK.stfs.active, MOCK.stfs.completed];
+  for (var b = 0; b < buckets.length; b++) {
+    var list = buckets[b];
+    if (!Array.isArray(list)) continue;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].id === 'stf-' + cell.id) return list[i];
+    }
+  }
+  return null;
+}
+function renderAstfMotion(cell) {
+  var root = document.getElementById('astf-motion-root');
+  if (!root) return;
+  var sib = document.getElementById('astf-judicial-root');
+  if (sib) sib.innerHTML = '';
+  if (!cell) {
+    var cells = (MOCK && MOCK.cells) || [];
+    var bound = (typeof getActiveAstfCell === 'function') ? getActiveAstfCell() : null;
+    if (bound && ((bound.source || {}).type !== 'judicial-audit' && bound.delib_type !== 'judicial-audit')) cell = bound;
+    if (!cell) {
+      for (var i = cells.length - 1; i >= 0; i--) {
+        var c = cells[i];
+        if (c && c.type === 'aSTF Cell' && c.status !== 'Verdict Filed' && ((c.source || {}).type !== 'judicial-audit' && c.delib_type !== 'judicial-audit')) { cell = c; break; }
+      }
+    }
+  }
+  if (!cell) { root.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary)">No motion adjudication assigned.</div>'; return; }
+  window._astfActiveCellId = cell.id;
+  var src = cell.source || {};
+  var origin = (typeof cellsById !== 'undefined' && cellsById[src.originCellId]) || null;
+  if (!origin) { for (var i = 0; i < ((MOCK && MOCK.cells) || []).length; i++) { if (((MOCK.cells)[i] || {}).id === src.originCellId) { origin = MOCK.cells[i]; break; } } }
+  var draft = null;
+  if (origin && origin.draftResolutions) {
+    for (var i = origin.draftResolutions.length - 1; i >= 0; i--) {
+      var d = origin.draftResolutions[i];
+      if (d.status === 'submitted' || d.status === 'passed' || d.status === 'crystallised') { draft = d; break; }
+    }
+    if (!draft && origin.draftResolutions.length) draft = origin.draftResolutions[origin.draftResolutions.length - 1];
+  }
+  var title = src.draftTitle || (draft && draft.title) || cell.title || 'Untitled motion';
+  var body = (draft && draft.text) || src.originTitle || 'No motion text available.';
+  var circleName = src.circleName || (origin && origin.circle) || '—';
+  var words = circleName.split(/\s+/).filter(Boolean);
+  var circleIni = words.length >= 2 ? (words[0].charAt(0) + words[1].charAt(0)).toUpperCase() : circleName.slice(0, 2).toUpperCase();
+  var lead = ((origin && origin.participatingCircles && origin.participatingCircles[0]) || (origin && origin.circles && origin.circles[0]) || {});
+  var typeCat = (origin && origin.delibType) ? origin.delibType : 'general';
+  var implCircles = (draft && draft.implementingCircles) || [];
+  var names = [];
+  if (origin && origin.messages) origin.messages.forEach(function(mm) { var n = mm && mm.author; if (n && names.indexOf(n) === -1) names.push(n); });
+  var proposer = (origin && origin.source && origin.source.proposer);
   if (proposer && names.indexOf(proposer) === -1) names.push(proposer);
-  showFlags(names, 'No deliberation participants recorded for this motion.');
+  var stfRow = astfStfRow(cell);
+  var integHtml = astfIntegrityHtml(stfRow, 'aSTF', title);
+  var flagsHtml = names.length ? names.map(function(n) {
+    return '<label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin-bottom:4px;cursor:pointer"><input type="checkbox" data-flag-name="' + esc(n) + '"> <span>' + esc(n) + '</span><span style="font-size:10px;color:var(--text-tertiary)">— In deliberation record</span></label>';
+  }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No deliberation participants recorded.</div>';
+  var assignRows = [['Type', 'aSTF'], ['Motion', title], ['Circle', circleName], ['Deadline', (stfRow && stfRow.deadline) || cell.deadline || '—'], ['Status', cell.status || 'Blind Review']];
+  root.innerHTML =
+    '<div class="layout-split">' +
+      '<div class="layout-main">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Motion Adjudication</div>' +
+        '<div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER\'S IDENTITIES &nbsp; 🔒</div>' +
+        integHtml +
+        '<div class="sec">Motion Record</div>' +
+        '<div class="card" style="margin-bottom:16px">' +
+          '<div class="flex justify-between mb-2"><span class="badge b-pending">Motion</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + esc(origin ? ('From ' + (origin.id || '') + ' · ' + (origin.status || '')) : 'From ' + (src.originCellId || '')) + '</span></div>' +
+          '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + esc(title) + '</div>' +
+          '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6">' + esc(body) + '</div>' +
+        '</div>' +
+        '<div style="margin:-8px 0 16px">' + (origin ? xrefChip('motion', origin.id, origin.title || origin.id, { color: 'var(--gold)' }) : '') + '</div>' +
+        '<div class="sec">4-Dimension Rubric (30 pts max)</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>' +
+        '<table class="tbl" style="margin-bottom:12px">' + astfStaticRubricRows('motion') + '</table>' +
+        '<div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>' +
+          '<span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="astf-total">0 / 30</span>' +
+        '</div>' +
+        '<div class="divider" style="margin:12px 0"></div>' +
+        '<div class="sec">Verdict</div>' +
+        '<div class="flex gap-2 mb-3">' +
+          '<button class="btn btn-primary btn-sm" onclick="window._astfStaticVerdict=\'approved\'">Approve (Resolution)</button>' +
+          '<button class="btn btn-sm" onclick="window._astfStaticVerdict=\'revision\'">Revision Request</button>' +
+          '<button class="btn btn-sm" onclick="window._astfStaticVerdict=\'rejected\'" style="color:var(--danger)">Reject</button>' +
+        '</div>' +
+        '<div class="text-label mb-2">Rationale</div>' +
+        '<textarea id="astf-s-rationale" placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>' +
+        '<div class="divider" style="margin:12px 0"></div>' +
+        '<div class="sec">Malpractice Flagging (optional)</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Flag specific deliberation participants for jSTF pre-referral. The motion can be sound while a participant\'s behaviour was not.</div>' +
+        '<div>' + flagsHtml + '</div>' +
+        '<div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft(\'view-stf-astf-motion\')">Save Draft</button></div></div>' +
+      '</div>' +
+      '<div class="layout-aside">' +
+        '<div class="aside-card"><div class="aside-title">Assignment</div>' + assignRows.map(function(r) { return '<div class="aside-row"><span class="aside-label">' + esc(r[0]) + '</span><span style="font-size:11px;color:var(--text)">' + esc(r[1]) + '</span></div>'; }).join('') + '</div>' +
+        '<div class="aside-card"><div class="aside-title">Commissioning Circle</div>' +
+          '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">' + esc(circleIni) + '</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(circleName) + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + esc(lead.name ? 'Mandated: ' + (lead.name || '') : 'Mandated: —') + '</div></div></div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">Motion Type</div>' +
+          '<div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)">' + esc(typeCat) + '</span></div>' +
+          '<div class="aside-row"><span class="aside-label">Implementing</span><span style="font-size:11px;color:var(--text)">' + esc(implCircles.length ? implCircles.join(', ') : '—') + '</span></div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">Rubric Weights</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.8">' +
+            '<div class="flex justify-between"><span>Alignment/Conflict</span><span style="color:var(--text);font-weight:500">10 pts</span></div>' +
+            '<div class="flex justify-between"><span>Jurisdiction</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
+            '<div class="flex justify-between"><span>Competence</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
+            '<div class="flex justify-between"><span>Depth/Effort</span><span style="color:var(--text);font-weight:500">5 pts</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">How aSTF Works</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The rubric <strong>guides, it does not decide</strong>. Scores are published evidence; the verdict is human determination. Reviewers can flag malpractice even on Approve verdicts.</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  wireAstfRubric();
+}
+function renderAstfJudicial(cell) {
+  var root = document.getElementById('astf-judicial-root');
+  if (!root) return;
+  var sib = document.getElementById('astf-motion-root');
+  if (sib) sib.innerHTML = '';
+  if (!cell) {
+    var cells = (MOCK && MOCK.cells) || [];
+    var bound = (typeof getActiveAstfCell === 'function') ? getActiveAstfCell() : null;
+    if (bound && ((bound.source || {}).type === 'judicial-audit' || bound.delib_type === 'judicial-audit')) cell = bound;
+    if (!cell) {
+      for (var i = cells.length - 1; i >= 0; i--) {
+        var c = cells[i];
+        if (c && c.type === 'aSTF Cell' && c.status !== 'Verdict Filed' && ((c.source || {}).type === 'judicial-audit' || c.delib_type === 'judicial-audit')) { cell = c; break; }
+      }
+    }
+  }
+  if (!cell) { root.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-tertiary)">No judicial audit assigned.</div>'; return; }
+  window._astfActiveCellId = cell.id;
+  var src = cell.source || {};
+  var jcell = (typeof cellsById !== 'undefined' && cellsById[src.sourceCellId]) || null;
+  if (!jcell) { for (var i = 0; i < ((MOCK && MOCK.cells) || []).length; i++) { if (((MOCK.cells)[i] || {}).id === src.sourceCellId) { jcell = MOCK.cells[i]; break; } } }
+  var vi = (jcell && jcell.verdict) || src.verdict || {};
+  var target = src.targetName || (jcell && jcell.targetName) || '—';
+  var restriction = (jcell && jcell.restriction) || {};
+  var stfRow = astfStfRow(cell);
+  var integHtml = astfIntegrityHtml(stfRow, 'aSTF', target);
+  var sysActs = (vi.systemActions || []).map(function(a) { return a.kind + (a.kind === 'remove_from_circle' ? ' (' + (a.circles || []).join(', ') + ')' : (a.until ? ' until ' + a.until : '')); }).join('; ');
+  var assignRows = [['Type', 'aSTF'], ['Case', jcell ? (jcell.title || jcell.id) : (src.sourceCellId || '—')], ['Target', target], ['Deadline', (stfRow && stfRow.deadline) || cell.deadline || '—'], ['Status', cell.status || 'Blind Review']];
+  root.innerHTML =
+    '<div class="layout-split">' +
+      '<div class="layout-main">' +
+        '<div style="font-family:var(--mono);font-size:10px;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">◆ aSTF — Judicial Audit</div>' +
+        '<div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — ADJUDICATORS DO NOT KNOW EACH OTHER\'S IDENTITIES &nbsp; 🔒</div>' +
+        integHtml +
+        '<div class="sec">Case Under Audit</div>' +
+        '<div class="card" style="margin-bottom:16px">' +
+          '<div class="flex justify-between mb-2"><span class="badge b-review">Judicial Audit</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)">' + esc(jcell ? ('From ' + (jcell.id || '') + ' · ' + (jcell.status || '')) : 'From ' + (src.sourceCellId || '')) + '</span></div>' +
+          '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">' + esc(jcell ? (jcell.title || jcell.id) : (src.sourceTitle || 'jSTF Disciplinary Verdict')) + '</div>' +
+          '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6">Target: <strong>' + esc(target) + '</strong>' + (restriction.state ? ' · Activity currently ' + esc(restriction.state) : '') + '</div>' +
+        '</div>' +
+        '<div style="margin:-8px 0 16px">' + (jcell ? xrefChip('cell', jcell.id, jcell.title || jcell.id, { color: 'var(--red)' }) : '') + '</div>' +
+        '<div class="sec">Verdict Under Audit</div>' +
+        '<div class="card" style="margin-bottom:16px">' +
+          '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px"><span class="tag" style="font-size:8px">' + esc(vi.type || '—') + '</span> ' + esc(vi.description || 'No verdict description.') + '</div>' +
+          ((vi.policyRefs && vi.policyRefs.length) ? '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Cites ' + vi.policyRefs.map(function(r) { return '<span class="tag tag-purple" style="font-size:8px">#' + esc(r) + '</span>'; }).join(' ') + '</div>' : '') +
+          ((vi.executingCircles && vi.executingCircles.length) ? '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:4px">Executing: ' + vi.executingCircles.map(function(c) { return esc(c); }).join(', ') + '</div>' : '') +
+          (sysActs ? '<div style="font-size:11px;color:var(--text-tertiary)">System actions: ' + esc(sysActs) + '</div>' : '') +
+        '</div>' +
+        '<div class="sec">Justice Rubric (30 pts max)</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Score each dimension. The rubric guides your judgment — the verdict is filed separately.</div>' +
+        '<table class="tbl" style="margin-bottom:12px">' + astfStaticRubricRows('judicial') + '</table>' +
+        '<div class="flex justify-between items-center mb-3" style="padding:8px 12px;background:var(--bg-secondary);border-radius:var(--radius)">' +
+          '<span style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">Running Total</span>' +
+          '<span style="font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text)" id="astf-total">0 / 30</span>' +
+        '</div>' +
+        '<div class="divider" style="margin:12px 0"></div>' +
+        '<div class="sec">Verdict</div>' +
+        '<div class="flex gap-2 mb-3">' +
+          '<button class="btn btn-primary btn-sm" onclick="window._astfStaticVerdict=\'approved\'">Approve (Resolution)</button>' +
+          '<button class="btn btn-sm" onclick="window._astfStaticVerdict=\'revision\'">Revision Request</button>' +
+          '<button class="btn btn-sm" onclick="window._astfStaticVerdict=\'rejected\'" style="color:var(--danger)">Reject</button>' +
+        '</div>' +
+        '<div class="text-label mb-2">Rationale</div>' +
+        '<textarea id="astf-s-rationale" placeholder="Explain your adjudication decision..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>' +
+        '<div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft(\'view-stf-astf-judicial\')">Save Draft</button></div></div>' +
+      '</div>' +
+      '<div class="layout-aside">' +
+        '<div class="aside-card"><div class="aside-title">Assignment</div>' + assignRows.map(function(r) { return '<div class="aside-row"><span class="aside-label">' + esc(r[0]) + '</span><span style="font-size:11px;color:var(--text)">' + esc(r[1]) + '</span></div>'; }).join('') + '</div>' +
+        '<div class="aside-card"><div class="aside-title">Originating Case</div>' +
+          '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--red),#3a1860);width:28px;height:28px;font-size:10px">' + esc(jcell ? 'J' : '—') + '</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(jcell ? (jcell.title || jcell.id) : '—') + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + esc(jcell ? (jcell.status || '') : '') + '</div></div></div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">Verdict Type</div>' +
+          '<div class="aside-row"><span class="aside-label">Category</span><span style="font-size:11px;color:var(--text)">' + esc(vi.type || '—') + '</span></div>' +
+          '<div class="aside-row"><span class="aside-label">Target</span><span style="font-size:11px;color:var(--text)">' + esc(target) + '</span></div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">Rubric Weights</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.8">' +
+            '<div class="flex justify-between"><span>Justice of verdict</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
+            '<div class="flex justify-between"><span>Due diligence</span><span style="color:var(--text);font-weight:500">9 pts</span></div>' +
+            '<div class="flex justify-between"><span>Integrity of process</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
+            '<div class="flex justify-between"><span>Proportionality</span><span style="color:var(--text);font-weight:500">6 pts</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="aside-card"><div class="aside-title">How Judicial Audit Works</div>' +
+          '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">The audit weighs the <strong>decision, not the jSTF members</strong> (complete separation). Approving applies the resolution; revision or rejection shuffles the jSTF composition and reopens the investigation.</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  wireAstfRubric();
 }
 
 // Static-card rubric rows: motion craft for deliberation cells, justice
@@ -3821,8 +3839,18 @@ function submitStaticAstfAdjudication() {
     if (cur && cur.type === 'aSTF Cell' && cur.status !== 'Verdict Filed') cell = cur;
   }
   if (!cell) {
+    var wantJudicial = (document.getElementById('view-stf-astf-judicial') || {}).classList &&
+      document.getElementById('view-stf-astf-judicial').classList.contains('active');
     for (var i = cells.length - 1; i >= 0; i--) {
-      if (cells[i].type === 'aSTF Cell' && cells[i].status !== 'Verdict Filed') { cell = cells[i]; break; }
+      var cc = cells[i];
+      if (!cc || cc.type !== 'aSTF Cell' || cc.status === 'Verdict Filed') continue;
+      var isJ = ((cc.source || {}).type === 'judicial-audit' || cc.delib_type === 'judicial-audit');
+      if ((wantJudicial && isJ) || (!wantJudicial && !isJ)) { cell = cc; break; }
+    }
+    if (!cell) {
+      for (var k = cells.length - 1; k >= 0; k--) {
+        if (cells[k].type === 'aSTF Cell' && cells[k].status !== 'Verdict Filed') { cell = cells[k]; break; }
+      }
     }
   }
   if (!cell) { toast('No open aSTF cell to file against.', 'error'); return; }
@@ -3834,7 +3862,7 @@ function submitStaticAstfAdjudication() {
   var rationale = ((document.getElementById('astf-s-rationale') || {}).value || '').trim();
   if (!rationale) { toast('Rationale is required.', 'error'); return; }
   var flags = [];
-  document.querySelectorAll('#astf-flags input[type="checkbox"]').forEach(function(cb) {
+  document.querySelectorAll('[data-flag-name]').forEach(function(cb) {
     var n = cb.getAttribute('data-flag-name');
     if (cb.checked && n) flags.push(n);
   });
@@ -3858,7 +3886,7 @@ function saveViewDraft(viewId) {
 }
 
 function restoreViewDrafts() {
-  ['view-stf-vstf-steward', 'view-stf-vstf-competence', 'view-stf-astf', 'view-stf-pastf'].forEach(function(viewId) {
+  ['view-stf-vstf-steward', 'view-stf-vstf-competence', 'view-stf-astf-motion', 'view-stf-astf-judicial', 'view-stf-pastf'].forEach(function(viewId) {
     var raw = null;
     try { raw = localStorage.getItem('solisDraft:' + viewId); } catch (e) { return; }
     if (!raw) return;
@@ -4840,7 +4868,10 @@ function navStf(stfId) {
     if (row.type === 'aSTF') {
       var aCell = stfId.indexOf('stf-') === 0 ? stfId.substring(4) : null;
       if (aCell && typeof setActiveAstfCell === 'function') setActiveAstfCell(aCell);
-      nav('stf-astf'); return;
+      var ac = null;
+      if (aCell && typeof cellsById !== 'undefined' && cellsById[aCell]) ac = cellsById[aCell];
+      if (!ac && aCell) { for (var ai = 0; ai < ((MOCK && MOCK.cells) || []).length; ai++) { if (((MOCK.cells)[ai] || {}).id === aCell) { ac = MOCK.cells[ai]; break; } } }
+      nav(ac ? astfViewKey(ac) : 'stf-astf-motion'); return;
     }
     if (row.type === 'jSTF') { setActiveJstfCase(stfId.indexOf('stf-') === 0 ? stfId.substring(4) : stfId); nav('stf-jstf'); return; }
   }
@@ -4904,9 +4935,16 @@ function openXstfCase(cellId) {
   setActiveXstfCase(cellId);
   nav('stf-xstf');
 }
+function astfViewKey(cell) {
+  if (!cell) return 'stf-astf-motion';
+  var t = (cell.source || {}).type || cell.delib_type || '';
+  return (t === 'judicial-audit') ? 'stf-astf-judicial' : 'stf-astf-motion';
+}
 function openAstfCell(cellId) {
+  var c = (typeof cellsById !== 'undefined' && cellsById[cellId]) || null;
+  if (!c) { for (var i = 0; i < ((MOCK && MOCK.cells) || []).length; i++) { if (((MOCK.cells)[i] || {}).id === cellId) { c = MOCK.cells[i]; break; } } }
   setActiveAstfCell(cellId);
-  nav('stf-astf');
+  nav(c ? astfViewKey(c) : 'stf-astf-motion');
 }
 
 // jSTF case view: hydrates every block of view-stf-jstf (report, sponsor,
@@ -6741,14 +6779,19 @@ function renderStfAssignments() {
 }
 
 function stfNavKey(stfId) {
-  var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf', 'xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
+  var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf-motion', 'xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
   var id = String(stfId == null ? '' : stfId);
   if (map[id]) return map[id];
   if (typeof stfRowById === 'function') {
     var row = stfRowById(id);
     if (row) {
       if (row.type === 'jSTF') return 'stf-jstf';
-      if (row.type === 'aSTF') return 'stf-astf';
+      if (row.type === 'aSTF') {
+        var cell = null;
+        if (typeof cellsById !== 'undefined' && cellsById[id.substring(4)]) cell = cellsById[id.substring(4)];
+        if (!cell) { for (var i = 0; i < ((MOCK && MOCK.cells) || []).length; i++) { if (((MOCK.cells)[i] || {}).id === id.substring(4)) { cell = MOCK.cells[i]; break; } } }
+        return cell ? astfViewKey(cell) : 'stf-astf-motion';
+      }
       if (row.type === 'xSTF') return 'stf-xstf';
       if (row.type === 'p-aSTF') return 'stf-pastf';
       if (row.type === 'vSTF') return id.toLowerCase().indexOf('competence') !== -1 ? 'stf-vstf-competence' : 'stf-vstf-steward';
@@ -6758,7 +6801,7 @@ function stfNavKey(stfId) {
   if (low.indexOf('pastf') !== -1) return 'stf-pastf';
   if (low.indexOf('xstf') !== -1) return 'stf-xstf';
   if (low.indexOf('vstf') !== -1) return low.indexOf('competence') !== -1 ? 'stf-vstf-competence' : 'stf-vstf-steward';
-  if (low.indexOf('astf') !== -1) return 'stf-astf';
+  if (low.indexOf('astf') !== -1) return 'stf-astf-motion';
   if (low.indexOf('jstf') !== -1) return 'stf-jstf';
   return id ? 'stf-' + id : 'stf-xstf';
 }
@@ -10770,7 +10813,6 @@ function renderStfDetail(key) {
     'stf-vstf-steward': { el: 'stf-assignment-vstf-steward', hdr: 'stf-header-vstf-steward', cand: 'stf-cand-name-vstf-steward', ini: 'stf-cand-ini-vstf-steward' },
     'stf-vstf-competence': { el: 'stf-assignment-vstf-competence', hdr: 'stf-header-vstf-competence' },
     'stf-jstf': { el: 'stf-assignment-jstf' },
-    'stf-astf': { el: 'stf-assignment-astf', hdr: 'stf-header-astf' },
     'stf-pastf': { el: 'stf-assignment-pastf', hdr: 'stf-header-pastf' }
   };
   var viewIds = ids[key] || { el: null, hdr: null };
@@ -10812,7 +10854,7 @@ function renderStfIntegrity(key, stf) {
   var el = document.getElementById('stf-integrity-' + key);
   if (!el) return;
   var recs = (MOCK && MOCK.integrityRecords) || [];
-  var typeMap = { 'stf-vstf-steward': 'vSTF', 'stf-vstf-competence': 'vSTF', 'stf-jstf': 'jSTF', 'stf-astf': 'aSTF', 'stf-xstf': 'xSTF', 'stf-pastf': 'p-aSTF' };
+  var typeMap = { 'stf-vstf-steward': 'vSTF', 'stf-vstf-competence': 'vSTF', 'stf-jstf': 'jSTF', 'stf-astf-motion': 'aSTF', 'stf-astf-judicial': 'aSTF', 'stf-xstf': 'xSTF', 'stf-pastf': 'p-aSTF' };
   var norm = function(s) { return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); };
   var want = typeMap[key];
   var titleNorm = norm(stf && (stf.title || stf.candidate));
@@ -11633,10 +11675,11 @@ var _origNav=nav;
   _origNav(key);
   if(key==='domain-map'&&!_dmInited){_dmInited=true;setTimeout(dmInit,50);}
   if(key==='stf-xstf'){ var _xc = (typeof getActiveXstfCell === 'function') ? getActiveXstfCell() : null; renderXstf(_xc ? _xc.id : 'cell-19'); }
-  if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-astf'||key==='stf-pastf'){renderStfDetail(key);}
+  if(key==='stf-vstf-steward'||key==='stf-vstf-competence'||key==='stf-jstf'||key==='stf-pastf'){renderStfDetail(key);}
   if(key==='stf-vstf-steward'){renderVstfSteward();}
   if(key==='stf-vstf-competence'){renderVstfCompetence();}
-  if(key==='stf-astf'){renderAstfMotion();}
+  if(key==='stf-astf-motion'){renderAstfMotion();}
+  if(key==='stf-astf-judicial'){renderAstfJudicial();}
   if(key==='stf-jstf'){renderJstfCase();renderJstfPanel();renderJstfIntake();}
   if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
   if(key==='commons'){renderCommonsFeed();document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f){f.classList.toggle('active',f.getAttribute('data-filter')===_commonsFilter);});}
