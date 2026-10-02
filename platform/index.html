@@ -4861,13 +4861,24 @@ function navStf(stfId) {
   var row = null;
   if (typeof stfRowById === 'function') row = stfRowById(stfId);
   if (row) {
+    var legacyCell = function(id) {
+      var legacy = { 'xstf-itu': 'cell-19', 'astf-debris': 'cell-24' };
+      return legacy[id] || null;
+    };
+    var resolveCell = function(id) {
+      if (id && id.indexOf('stf-') === 0) return id.substring(4);
+      if (id && legacyCell(id)) return legacyCell(id);
+      var cc = (typeof cellsById !== 'undefined' && cellsById[id]) || null;
+      if (!cc) { for (var ci = 0; ci < ((MOCK && MOCK.cells) || []).length; ci++) { if (((MOCK.cells)[ci] || {}).id === id) { cc = MOCK.cells[ci]; break; } } }
+      return cc ? cc.id : null;
+    };
     if (row.type === 'xSTF') {
-      var xCell = stfId.indexOf('stf-') === 0 ? stfId.substring(4) : null;
+      var xCell = resolveCell(stfId);
       if (xCell && typeof setActiveXstfCase === 'function') setActiveXstfCase(xCell);
       nav('stf-xstf'); return;
     }
     if (row.type === 'aSTF') {
-      var aCell = stfId.indexOf('stf-') === 0 ? stfId.substring(4) : null;
+      var aCell = resolveCell(stfId);
       if (aCell && typeof setActiveAstfCell === 'function') setActiveAstfCell(aCell);
       var ac = null;
       if (aCell && typeof cellsById !== 'undefined' && cellsById[aCell]) ac = cellsById[aCell];
