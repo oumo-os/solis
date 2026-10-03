@@ -43,13 +43,26 @@ function getAuthHeader() {
     return '';
 }
 function authUser() { $h = getAuthHeader(); if (!preg_match('/^Bearer\s+(.+)$/i', $h, $m)) return null; $u = dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > NOW()', [$m[1]]); if ($u) maybeLiftSanctions($u['id'] ?? null); return $u; }
-function isSteward($userId) { if (!$userId) return false; return (bool)dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$userId]); }
+function isSteward($userId) { if (!$userId) return false; $ust = dbGet('SELECT status FROM users WHERE id = ?', [$userId]); if ($ust && in_array($ust['status'] ?? '', ['Restricted', 'Suspended'], true)) return false; return (bool)dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$userId]); }
 function assertActiveMember($user) { if (!$user) return; $st = $user['status'] ?? ''; if ($st === 'Restricted' || $st === 'Suspended') send(403, ['error' => $st === 'Suspended' ? 'Activity frozen pending jSTF resolution' : 'Activity restricted pending jSTF investigation']); if ($st === 'Guest') send(403, ['error' => 'Guest privilege level — read and appeal only']); }
-function syncTargetRestriction($userId, $restricted, $severity) {
+function syncTargetRestriction($userId, $restricted, $severity, $caseId = null) {
     if (!$userId) return;
-    $want = $restricted ? ($severity === 'frozen' ? 'Suspended' : 'Restricted') : 'Active';
-    $cur = dbGet('SELECT status FROM users WHERE id = ?', [$userId]);
-    if ($cur && $cur['status'] !== 'Former' && $cur['status'] !== $want) dbRun('UPDATE users SET status = ? WHERE id = ?', [$want, $userId]);
+    if ($restricted) {
+        $want = $severity === 'frozen' ? 'Suspended' : 'Restricted';
+        $cur = dbGet('SELECT status FROM users WHERE id = ?', [$userId]);
+        if ($cur && $cur['status'] !== 'Former' && $cur['status'] !== $want) dbRun('UPDATE users SET status = ? WHERE id = ?', [$want, $userId]);
+        return;
+    }
+    // Lifting is conservative: another open case still restricting keeps the
+    // freeze; an active guest sanction restores Guest, never Active.
+    foreach (dbAll("SELECT id, meta FROM cells WHERE type = 'jSTF Cell' AND status = 'Under Investigation'") as $oc) {
+        if ($caseId && $oc['id'] === $caseId) continue;
+        $om = pJson($oc['meta'] ?? '{}') ?: [];
+        if (($om['targetId'] ?? null) === $userId && ($om['restriction']['state'] ?? '') === 'restricted') return;
+    }
+    if (jstfActiveSanction($userId, 'guest')) { dbRun("UPDATE users SET status = 'Guest' WHERE id = ?", [$userId]); return; }
+    $cur2 = dbGet('SELECT status FROM users WHERE id = ?', [$userId]);
+    if ($cur2 && in_array($cur2['status'] ?? '', ['Restricted', 'Suspended'], true)) dbRun("UPDATE users SET status = 'Active' WHERE id = ?", [$userId]);
 }
 
 // Strip everything up to /api or /api.php (works under any subdirectory base)
@@ -798,7 +811,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 // restriction in force is lifted automatically.
                 $caseStatus = (($vi['type'] ?? '') === 'exonerating') ? 'Exonerated' : 'Resolution Applied';
                 dbRun("UPDATE cells SET status = ?, resolution = ? WHERE id = ?", [$caseStatus, json_encode($jr), $src['sourceCellId']]);
-                if (!$guestApplied) syncTargetRestriction($targetId, false, null);
+                if (!$guestApplied) syncTargetRestriction($targetId, false, null, $src['sourceCellId']);
                 if (!empty($jm['threadId'])) jstfAppendReply($jm['threadId'], 'Verdict recorded: ' . $caseStatus . ' — ' . substr((string)($vi['description'] ?? ''), 0, 300));
                 dbRun("UPDATE stfs SET status = ?, bucket = 'completed' WHERE id = ?", [$caseStatus, 'stf-' . $src['sourceCellId']]);
                 // The case is closed: no restriction survives on the record either.
@@ -1313,7 +1326,7 @@ function jstfRefreshComposition($cId, $actorName, $reason) {
     $jm['verdict'] = null;
     dbRun('DELETE FROM cell_team WHERE cell_id = ?', [$cId]);
     foreach ($team as $t) dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus, user_id) VALUES (?,?,?,?,?,?)', [$cId, $t['name'], $t['initials'], 'jSTF adjudicator', 'Judicial review', $t['id'] ?? null]);
-    $ts2 = count($team); $maj = (int)floor($ts2 / 2) + 1;
+    $ts2 = count($team); $maj = max(2, (int)floor($ts2 / 2) + 1);
     $ti = array_map(function($t) { return $t['initials']; }, $team);
     if ($ti) { $ph = implode(',', array_fill(0, count($ti), '?')); dbRun("DELETE FROM vote_records WHERE cell_id = ? AND domain IN ('restriction','resolution') AND initials NOT IN ($ph)", array_merge([$cId], $ti)); }
     $rc = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'", [$cId])['n'] ?? 0);
@@ -1327,7 +1340,7 @@ function jstfRefreshComposition($cId, $actorName, $reason) {
     $newDl = date('Y-m-d', time() + jstfDurationDays() * 86400);
     dbRun('UPDATE cells SET participants = ?, source = ?, meta = ?, deadline = ? WHERE id = ?', [$ts2, json_encode($js), json_encode($jm), $newDl, $cId]);
     dbRun("UPDATE stfs SET status = 'Under Investigation', bucket = 'active', deadline = ? WHERE id = ?", [$newDl, 'stf-' . $cId]);
-    syncTargetRestriction($jm['targetId'] ?? null, $cur['state'] === 'restricted', $cur['severity']);
+    syncTargetRestriction($jm['targetId'] ?? null, $cur['state'] === 'restricted', $cur['severity'], $cId);
     dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-refresh', '', date('Y-m-d'), 'jSTF composition refreshed (' . $reason . ') on ' . $cId . ' — ' . count($team) . ' jSTF adjudicators, deadline ' . $newDl, (string)$actorName]);
     return true;
 }
@@ -1473,7 +1486,7 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     $petitioner = $thread['submitter_id'] ?? null;
     $exclude = array_values(array_filter([$targetId, $petitioner]));
     $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => []];
-    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => (int)floor($quorum / 2) + 1, 'severity' => null, 'history' => []], 'verdict' => null, 'formation' => ['state' => 'inviting', 'quorum' => $quorum, 'poolMode' => $poolMode, 'domains' => $poolDomains, 'seated' => 0]];
+    $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => max(2, (int)floor($quorum / 2) + 1), 'severity' => null, 'history' => []], 'verdict' => null, 'formation' => ['state' => 'inviting', 'quorum' => $quorum, 'poolMode' => $poolMode, 'domains' => $poolDomains, 'seated' => 0]];
     $caseDl = date('Y-m-d', time() + jstfDurationDays() * 86400);
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', 0, '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta), $caseDl]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $jId, 'jSTF', 'Judicial Investigation', $targetName ?: '', 'active', 'Under Investigation', 'jSTF — ' . $targetName, $caseDl]);
@@ -1529,7 +1542,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     $body = readBody(); $stance = trim((string)($body->stance ?? ''));
     if (!in_array($stance, ['restrict', 'lift'])) send(400, ['error' => 'stance must be restrict or lift']);
     $ts = (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
-    $maj = (int)floor($ts / 2) + 1;
+    $maj = max(2, (int)floor($ts / 2) + 1);
     jstfCastVote($cId, 'restriction', $user, $stance);
     $rc = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'restriction' AND vote = 'restrict'", [$cId])['n'] ?? 0);
     $restricted = $rc >= $maj;
@@ -1542,7 +1555,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-vote$/', $cleanPath, $m)) {
     $cur['state'] = $newState; $cur['restrictCount'] = $rc; $cur['teamSize'] = $ts; $cur['majority'] = $maj;
     if ($sev) $cur['severity'] = $sev; else $cur['severity'] = null; $cur['votes'] = $votes; $meta['restriction'] = $cur;
     if ($changed) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-restriction', '', date('Y-m-d'), $cId . ' activity ' . $cur['state'] . ' (' . $rc . '/' . $ts . ')', (string)($user['name'] ?? $user['initials'])]);
-    syncTargetRestriction($meta['targetId'] ?? null, $restricted, $sev);
+    syncTargetRestriction($meta['targetId'] ?? null, $restricted, $sev, $cId);
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(200, ['ok' => true, 'state' => $cur['state'], 'restrictCount' => $rc, 'teamSize' => $ts, 'majority' => $maj, 'severity' => $cur['severity'], 'changed' => $changed]);
 }
@@ -1842,7 +1855,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-vote$/', $cleanPath, $m)) {
     if (!in_array($stance, ['endorse', 'object'])) send(400, ['error' => 'stance must be endorse or object']);
     jstfCastVote($cId, 'resolution', $user, $stance);
     $ts = (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
-    $maj = (int)floor($ts / 2) + 1;
+    $maj = max(2, (int)floor($ts / 2) + 1);
     $en = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'resolution' AND vote = 'endorse'", [$cId])['n'] ?? 0);
     $ob = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'resolution' AND vote = 'object'", [$cId])['n'] ?? 0);
     $votes = dbAll("SELECT name, initials, vote FROM vote_records WHERE cell_id = ? AND domain = 'resolution'", [$cId]);
