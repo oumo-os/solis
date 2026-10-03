@@ -5198,9 +5198,15 @@ function refreshVerdictCites() {
     return '<span class="tag tag-purple" style="font-size:9px">#' + esc(r) + (p ? ' — ' + esc(p.title) : '') + '<span onclick="jstfToggleCite(\'' + r + '\',false);refreshVerdictCites()" style="cursor:pointer;margin-left:4px">×</span></span>';
   }).join('') || '<span style="font-size:11px;color:var(--text-tertiary)">None selected — add at least one passed resolution.</span>';
 }
+function jstfIsMe(t) {
+  if (!t) return false;
+  if (t.self !== undefined) return !!t.self;
+  var me = (typeof MOCK !== 'undefined' && MOCK && MOCK.currentUser) || {};
+  if (me.id && t.userId) return t.userId === me.id;
+  return t.initials === me.initials;
+}
 function jstfTeamView(cell) {
-  var meIni = ((MOCK && MOCK.currentUser) || {}).initials;
-  return (cell.team || []).some(function(t) { return t.initials === meIni; });
+  return (cell.team || []).some(jstfIsMe);
 }
 function jstfNewReports(cell) {
   if (!cell) return 0;
@@ -5594,13 +5600,12 @@ function sendJstfMessage() {
 }
 function xstfCanDeliberate(cell) {
   if (!cell) return false;
-  var meIni = ((MOCK && MOCK.currentUser) || {}).initials;
-  if ((cell.team || []).some(function(t) { return t.initials === meIni; })) return true;
+  if ((cell.team || []).some(jstfIsMe)) return true;
   var src = cell.source || {};
   if (src.jstfId) {
     var jc = (typeof cellsById !== 'undefined' && cellsById[src.jstfId]) || null;
     if (!jc) { ((MOCK && MOCK.cells) || []).forEach(function(c) { if (c.id === src.jstfId) jc = c; }); }
-    if (jc && (jc.team || []).some(function(t) { return t.initials === meIni; })) return true;
+    if (jc && (jc.team || []).some(jstfIsMe)) return true;
   }
   return false;
 }
@@ -5697,8 +5702,7 @@ function renderJstfCase() {
     else { rBox.style.background = 'rgba(47,158,110,.08)'; rBox.style.borderColor = 'rgba(47,158,110,.35)'; if (rTitle) rTitle.style.color = 'var(--green)'; }
   }
   if (rNote) rNote.textContent = restriction.state ? 'Restriction is temporary and proportionate (PR-007). Team tally ' + (restriction.restrictCount || 0) + '/' + (restriction.teamSize || 0) + ' restrict · majority ' + (restriction.majority || 0) + '.' : 'No restriction votes recorded yet.';
-  var meIni = ((MOCK && MOCK.currentUser) || {}).initials;
-  var onTeam = (cell.team || []).some(function(t) { return t.initials === meIni; });
+  var onTeam = (cell.team || []).some(jstfIsMe);
   if (rVotes) {
     var tally = (restriction.votes || []).map(function(v) { return esc(v.initials) + ':' + (v.vote === 'restrict' ? 'R' : 'L'); }).join(' · ');
     rVotes.innerHTML = (tally ? '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Votes: ' + tally + '</div>' : '')
@@ -6007,7 +6011,7 @@ function submitJstfVerdict(cellId) {
 function fileJstfVerdictFlow() {
   var cell = getActiveJstfCell();
   if (!cell) { toast('No active jSTF case.', 'error'); return; }
-  if (!jstfTeamView(cell) && !jstfClientIsSteward()) { toast('Only the team or stewards may work on a verdict.', 'error'); return; }
+  if (!jstfTeamView(cell)) { toast('Only a seated adjudicator may file the verdict.', 'error'); return; }
   if (cell.verdict || cell.status !== 'Under Investigation') { toast('Case is not open for a new verdict.', 'error'); return; }
   if ((cell.formation || {}).state === 'inviting') { toast('Team still forming — verdicts open once quorum is seated.', 'error'); return; }
   openJstfVerdictModal(cell);

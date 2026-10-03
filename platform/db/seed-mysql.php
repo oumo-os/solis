@@ -251,7 +251,7 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `cell_team` (
         `id` INT AUTO_INCREMENT PRIMARY KEY, `cell_id` VARCHAR(255) NOT NULL,
-        `name` TEXT, `initials` TEXT, `role` TEXT, `focus` TEXT
+        `name` TEXT, `initials` TEXT, `role` TEXT, `focus` TEXT, `user_id` VARCHAR(255) NULL
     )",
 
     "CREATE TABLE IF NOT EXISTS `draft_resolutions` (
@@ -285,7 +285,7 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `vote_records` (
         `id` INT AUTO_INCREMENT PRIMARY KEY, `cell_id` VARCHAR(255) NOT NULL, `domain` VARCHAR(255) NOT NULL,
-        `name` TEXT, `initials` TEXT, `ws` INT, `vote` TEXT
+        `name` TEXT, `initials` TEXT, `ws` INT, `vote` TEXT, `user_id` VARCHAR(255) NULL
     )",
 
     "CREATE TABLE IF NOT EXISTS `cell_vote_summary` (
@@ -717,10 +717,10 @@ foreach ($cells as $c) {
         $ctRows = array_map(fn($t) => [
             'cell_id' => $c['id'], 'name' => $t['name'] ?? null,
             'initials' => $t['initials'] ?? null, 'role' => $t['role'] ?? null,
-            'focus' => $t['focus'] ?? null,
+            'focus' => $t['focus'] ?? null, 'user_id' => $t['userId'] ?? $t['user_id'] ?? null,
         ], $c['team']);
         dbRun('DELETE FROM cell_team WHERE cell_id = ?', [$c['id']]);
-        insert($db, 'cell_team', $ctRows, ['cell_id','name','initials','role','focus']);
+        insert($db, 'cell_team', $ctRows, ['cell_id','name','initials','role','focus','user_id']);
     }
 }
 
@@ -803,9 +803,10 @@ foreach (($mock['voteRecords'] ?? []) as $vrCell) {
     $vrRows = array_map(fn($v) => [
         'cell_id' => $cid, 'domain' => $dom, 'name' => $v['name'] ?? null,
         'initials' => $v['initials'] ?? null, 'ws' => $v['ws'] ?? null, 'vote' => $v['vote'] ?? null,
+        'user_id' => $v['userId'] ?? $v['user_id'] ?? null,
     ], $vrCell['rows']);
     dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ?', [$cid, $dom]);
-    insert($db, 'vote_records', $vrRows, ['cell_id','domain','name','initials','ws','vote']);
+    insert($db, 'vote_records', $vrRows, ['cell_id','domain','name','initials','ws','vote','user_id']);
 }
 
 // STFs
