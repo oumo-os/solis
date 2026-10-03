@@ -5516,7 +5516,9 @@ function renderJstfDraft(cell) {
       else if (a.until) lbl += ' until ' + a.until;
       return '<div>• ' + esc(lbl) + '</div>';
     }).join('');
-    host.innerHTML = '<div class="mb-2"><span class="tag tag-purple" style="font-size:8px">' + esc(draft.type || 'resolution') + '</span> <span style="color:var(--text-tertiary)">by ' + esc(draft.updatedBy || '') + '</span></div>'
+    var dKind = draft.type || 'resolution';
+    if (dKind === 'policy-cited' && !(draft.policyRefs || []).length && !(draft.systemActions || []).length && !(draft.executingCircles || []).length) dKind = 'exonerating (empty verdict)';
+    host.innerHTML = '<div class="mb-2"><span class="tag tag-purple" style="font-size:8px">' + esc(dKind) + '</span> <span style="color:var(--text-tertiary)">by ' + esc(draft.updatedBy || '') + '</span></div>'
       + (draft.appealDirection ? '<div class="mb-2">Appeal direction: <strong style="color:var(--text)">' + esc(draft.appealDirection) + '</strong></div>' : '')
       + (draft.description ? '<div class="mb-2">' + esc(draft.description) + '</div>' : '')
       + ((draft.policyRefs || []).length ? '<div class="mb-2">Cites ' + draft.policyRefs.map(function(r) { return '<span class="tag tag-purple" style="font-size:8px">#' + esc(r) + '</span>'; }).join(' ') + '</div>' : '')
@@ -5758,7 +5760,7 @@ function renderJstfCase() {
   if (motion) {
     var res = cell.resolution || {};
     var audit = res.audit || null;
-    if (audit) motion.textContent = audit.verdict === 'approved' ? (cell.status === 'Exonerated' ? '✓ Target exonerated — aSTF approved, no action attaches.' : '✓ Resolution passed aSTF audit — applied.') : '△ aSTF ordered revision — composition shuffled, investigation continues.';
+    if (audit) motion.textContent = audit.verdict === 'approved' ? (cell.status === 'Exonerated' ? '✓ Target exonerated — aSTF approved, no action attaches.' : '✓ Resolution passed aSTF audit — applied.') : (audit.verdict === 'rejected' ? '△ aSTF rejected the verdict — new composition seated, investigation continues.' : '△ aSTF ordered revision — same team redrafts.');
     else if (cell.verdict) motion.textContent = 'Resolution filed: ' + cell.verdict.type + (cell.verdict.policyRefs && cell.verdict.policyRefs.length ? ' · cites ' + cell.verdict.policyRefs.join(', ') : '') + ' — awaiting aSTF audit.';
     else motion.textContent = 'Resolution not yet filed — investigation ongoing.';
   }
