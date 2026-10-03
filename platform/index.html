@@ -3908,7 +3908,7 @@ function renderGuides() {
       '<div style="margin-bottom:6px">Organisations are officially endorsed partner institutions. They appear on the public page and contribute to domain affiliate weights for resolution voting.</div>' +
       '<div>Endorsement is itself a governed act: proposed, deliberated, and recorded like any other decision — which is why organisations carry standing in votes rather than just a listing.</div>') +
     sec('g-governance', 'Intake, Competence & Weight',
-      '<div style="margin-bottom:6px"><strong>Case intake:</strong> Any member can report any member. Reports surface anonymously to stewards only, accumulating per target — one thread per target until a steward escalates it into a case. Escalation is itself the sponsor taking public responsibility for the claim.</div>' +
+      '<div style="margin-bottom:6px"><strong>Case intake:</strong> Any member can report any member. Reports surface anonymously to stewards only, accumulating per target — one thread per target until a steward escalates it into a case. Escalation is itself the sponsor taking public responsibility for the claim. Once escalated, the case is <strong>sealed: only the seated team can view it</strong> — stewards, the parties and everyone else see a sealed record; the escalated thread stays visible to the team, the parties and the sponsor.</div>' +
       '<div>Ws drifts with activity, Wh is declared + vSTF-verified, interest ranks score priority, standing sums Ws. Endorsements, bookmarks, and votes all feed back into these weights, so standing is a living record of participation, not a static badge.</div>') +
     sec('g-observatory', 'About Observatory',
       '<div style="margin-bottom:6px">The public knowledge space. Curated content for the curious. No login required.</div>' +
@@ -5461,7 +5461,7 @@ function jstfThreadPhase(t) {
 function renderJstfThread(cell, thread) {
   var host = document.getElementById('jstf-thread');
   if (!host) return;
-  if (!thread) { host.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Thread sealed \u2014 visible to stewards and the parties.</div>'; return; }
+  if (!thread) { host.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">Thread sealed \u2014 visible to the seated team and the parties only.</div>'; return; }
   var replies = thread.repliesList || [];
   var phase = jstfThreadPhase(thread);
   var trail = '';
@@ -5637,6 +5637,7 @@ function renderJstfCase() {
     return;
   }
   var src = cell.source || {};
+  var sealedCase = ((cell.restriction || {}).state === 'sealed');
   var thread = null;
   ((MOCK && MOCK.threads) || []).forEach(function(t) {
     if (thread) return;
@@ -5654,6 +5655,7 @@ function renderJstfCase() {
   if (isAppealCase && thread && thread.author && thread.author !== 'Anonymous') appellant = thread.author;
   setText('jstf-case-title', 'Anonymous member report — ' + displayName);
   if (isAppealCase) setText('jstf-case-title', 'Appeal — ' + displayName);
+  if (sealedCase) setText('jstf-case-title', cell.title || 'Sealed jSTF case');
   setText('jstf-case-sec', isAppealCase ? 'Appeal' : 'Anonymous Report');
   setText('jstf-case-tag', isAppealCase ? ('Appeal' + (appellant ? ' by ' + appellant : '')) : 'Anonymous');
   var metaBits = [];
@@ -5663,7 +5665,7 @@ function renderJstfCase() {
   if (src.escalatedAt) metaBits.push('Sponsored ' + String(src.escalatedAt).slice(0, 10));
   if (metaBits.length) setText('jstf-case-meta', metaBits.join(' · '));
   if (thread) setText('jstf-case-desc', thread.body);
-  else setText('jstf-case-desc', 'Report details are sealed. Only the investigation team and stewards can read the case thread. The anonymous reporter\'s identity is permanently protected.');
+  else setText('jstf-case-desc', sealed ? 'Sealed case. Only the seated investigation team can view the report, the evidence and the deliberation.' : 'Report details are sealed. Only the investigation team can read the case thread. The anonymous reporter\'s identity is permanently protected.');
   var sponsor = jstfParticipant(cell.commissionedBy);
   var sponsorName = (sponsor && sponsor.name) || src.escalatedBy || 'Steward sponsor';
   var sponsorIni = (sponsor && sponsor.initials) || jstfInitials(sponsorName, 'SP');
@@ -5674,6 +5676,7 @@ function renderJstfCase() {
   setText('jstf-accused-ini', ini);
   setText('jstf-accused-name', displayName);
   var restriction = cell.restriction || {};
+  var sealed = restriction.state === 'sealed';
   var restricted = restriction.state === 'restricted';
   var subBits = [];
   if (targetUser && targetUser.circles && targetUser.circles.length) subBits.push(targetUser.circles.join(', ') + ' Circle');
@@ -5686,23 +5689,23 @@ function renderJstfCase() {
     setText('jstf-court-charge', 'Trigger: Anonymous report' + (thread.time ? ' — ' + thread.time : ''));
     setText('jstf-court-text', thread.body || '');
   } else {
-    // thread is stewards-only: sealed for everyone outside the team
+    // thread is sealed for everyone outside the team
     setText('jstf-court-charge', 'Trigger: Anonymous report — sealed');
-    setText('jstf-court-text', 'Report details are sealed. Only the investigation team and stewards can read the case thread.');
+    setText('jstf-court-text', 'Report details are sealed. Only the seated investigation team can read the case thread.');
   }
   var rTitle = document.getElementById('jstf-restrict-title');
   var rBody = document.getElementById('jstf-restrict-body');
   var rBox = document.getElementById('jstf-restrict-box');
   var rNote = document.getElementById('jstf-restrict-note');
   var rVotes = document.getElementById('jstf-restrict-votes');
-  if (rTitle) rTitle.textContent = restricted ? (restriction.severity === 'frozen' ? 'Steward privileges frozen' : 'Activity restricted — readonly') : 'No restriction in force';
-  if (rBody) rBody.textContent = restricted ? displayName + ' cannot participate in Circle deliberations or vote on motions during this investigation.' : (cell.status === 'Under Investigation' ? displayName + ' may participate normally. The team can vote to restrict at any time (majority of ' + (restriction.majority || '?') + ').' : displayName + ' — case closed, no restriction in force.');
+  if (rTitle) rTitle.textContent = sealed ? 'Sealed case' : (restricted ? (restriction.severity === 'frozen' ? 'Steward privileges frozen' : 'Activity restricted — readonly') : 'No restriction in force');
+  if (rBody) rBody.textContent = sealed ? 'Only the seated investigation team can view this case — the report, the restriction state and the deliberation are sealed.' : (restricted ? displayName + ' cannot participate in Circle deliberations or vote on motions during this investigation.' : (cell.status === 'Under Investigation' ? displayName + ' may participate normally. The team can vote to restrict at any time (majority of ' + (restriction.majority || '?') + ').' : displayName + ' — case closed, no restriction in force.'));
   if (rBox) {
     if (restricted) { rBox.style.background = 'var(--amber-soft)'; rBox.style.borderColor = 'var(--amber-border)'; if (rTitle) rTitle.style.color = 'var(--amber)'; }
     else { rBox.style.background = 'rgba(47,158,110,.08)'; rBox.style.borderColor = 'rgba(47,158,110,.35)'; if (rTitle) rTitle.style.color = 'var(--green)'; }
   }
-  if (rNote) rNote.textContent = restriction.state ? 'Restriction is temporary and proportionate (PR-007). Team tally ' + (restriction.restrictCount || 0) + '/' + (restriction.teamSize || 0) + ' restrict · majority ' + (restriction.majority || 0) + '.' : 'No restriction votes recorded yet.';
-  var onTeam = (cell.team || []).some(jstfIsMe);
+  if (rNote) rNote.textContent = sealed ? 'Sealed — only the seated team can view votes on this case.' : (restriction.state ? 'Restriction is temporary and proportionate (PR-007). Team tally ' + (restriction.restrictCount || 0) + '/' + (restriction.teamSize || 0) + ' restrict · majority ' + (restriction.majority || 0) + '.' : 'No restriction votes recorded yet.');
+  var onTeam = !sealed && (cell.team || []).some(jstfIsMe);
   if (rVotes) {
     var tally = (restriction.votes || []).map(function(v) { return esc(v.initials) + ':' + (v.vote === 'restrict' ? 'R' : 'L'); }).join(' · ');
     rVotes.innerHTML = (tally ? '<div style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:6px">Votes: ' + tally + '</div>' : '')
