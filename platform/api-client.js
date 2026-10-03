@@ -79,7 +79,7 @@ var SolisApi = (function() {
           return { task_id: t.id, label: t.label, status: t.status, locked: t.locked ? 1 : 0, assignee: t.assignee };
         }),
         sync('cells/' + cellId + '/objectives', cell.objectives || [], function(o) {
-          return { obj_id: o.id, label: o.label, status: o.status };
+          return { obj_id: o.id, label: o.label, status: o.status, assessors: o.assessors != null ? o.assessors : null, deadline: o.deadline || null };
         }),
         sync('cells/' + cellId + '/team', cell.team || [], function(tm) {
           return { name: tm.name, initials: tm.initials, role: tm.role, focus: tm.focus };

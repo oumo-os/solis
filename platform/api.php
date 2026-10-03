@@ -869,12 +869,13 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-xstf$/', $cleanPath, $m)) {
 }
 if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'xSTF Cell') send(400, ['error' => 'Not an xSTF cell']);
+    if (($cell['status'] ?? '') === 'Completed') send(400, ['error' => 'Probe is completed — findings recorded']);
     $csrc = pJson($cell['source'] ?? '{}') ?: [];
     // Isolated investigator paths: only the assigned investigator files here.
-    if (($csrc['type'] ?? '') === 'jstf-investigation' && !dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the assigned investigator may file on this path']);
+    if (($csrc['type'] ?? '') === 'jstf-investigation' && !jstfTeamMember($cId, $user)) send(403, ['error' => 'Only the assigned investigator may file on this path']);
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $content = trim((string)($body->content ?? '')); $meta = pJson($cell['meta'] ?? '{}') ?: [];
     $dels = $meta['deliverables'] ?? [];
@@ -884,7 +885,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/submit-deliverable$/', $cleanPath, $m)) {
 }
 if (preg_match('/^\/cells\/([^\/]+)\/review-deliverable$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $sc = dbGet("SELECT COUNT(*) AS n FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']]);
     if (!($sc['n'] ?? 0)) send(403, ['error' => 'Steward access required']);
     $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
@@ -1666,6 +1667,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     if (!$qId) send(400, ['error' => 'questionId required']);
     $qrow = dbGet('SELECT * FROM cell_objectives WHERE cell_id = ? AND obj_id = ?', [$cId, $qId]);
     if (!$qrow) send(404, ['error' => 'Question not found on this case']);
+    if (($qrow['status'] ?? '') === 'met') send(409, ['error' => 'Question already answered — accepted findings cover the mandate']);
     // The question mandates how many eyes and when: one isolated probe per
     // investigator, each due on the question deadline.
     $mandate = max(1, (int)($qrow['assessors'] ?? 1));
@@ -1713,8 +1715,22 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
         foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; if (($cs2['questionId'] ?? null) === $qId) send(409, ['error' => 'This question already has an open probe']); }
         $spawnProbe($team);
     } else {
+        // Investigator identity resolves to user_id (case team first, then
+        // users by name) so same-initials collisions never share a probe.
+        $resolveProbeUid = function($t) use ($cId) {
+            $ctr = dbGet('SELECT user_id FROM cell_team WHERE cell_id = ? AND initials = ? AND user_id IS NOT NULL', [$cId, $t['initials']]);
+            if (!empty($ctr['user_id'])) return $ctr['user_id'];
+            $uu = dbGet('SELECT id FROM users WHERE name = ?', [$t['name']]);
+            return $uu['id'] ?? null;
+        };
+        $probeHasUid = function($probeId, $uid, $ini) {
+            if ($uid && dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND user_id = ?', [$probeId, $uid])) return true;
+            return (bool)dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ? AND user_id IS NULL', [$probeId, $ini]);
+        };
         foreach ($team as $t) {
-            foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; $tm2 = dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cc2['id'], $t['initials']]); if (($cs2['questionId'] ?? null) === $qId && $tm2) send(409, ['error' => $t['name'] . ' already has an open probe on this question']); }
+            $tUid = $resolveProbeUid($t);
+            foreach ($open as $cc2) { $cs2 = pJson($cc2['source'] ?? '{}') ?: []; if (($cs2['questionId'] ?? null) === $qId && $probeHasUid($cc2['id'], $tUid, $t['initials'])) send(409, ['error' => $t['name'] . ' already has an open probe on this question']); }
+            $t['_uid'] = $tUid;
             $spawnProbe([$t]);
         }
     }
@@ -1741,12 +1757,23 @@ if (preg_match('/^\/cells\/([^\/]+)\/accept-findings$/', $cleanPath, $m)) {
     $xm = pJson($xc['meta'] ?? '{}') ?: []; $found = null;
     foreach ($xm['deliverables'] ?? [] as $d) { if (($d['id'] ?? '') === $dId) { $found = $d; break; } }
     if (!$found) send(404, ['error' => 'Deliverable not found']);
+    if (($found['status'] ?? '') !== 'approved') send(409, ['error' => 'Only review-approved deliverables may be accepted into findings']);
     $meta = pJson($cell['meta'] ?? '{}') ?: []; $acc = $meta['findings'] ?? [];
     foreach ($acc as $a) { if (($a['deliverableId'] ?? '') === $dId) send(409, ['error' => 'Findings already accepted']); }
     $acc[] = ['deliverableId' => $dId, 'xstfId' => $xId, 'title' => $found['title'] ?? '', 'content' => $found['content'] ?? '', 'submittedBy' => $found['submittedBy'] ?? '', 'acceptedBy' => $user['name'] ?? $user['initials'], 'acceptedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $meta['findings'] = $acc;
+    // Question auto-advance: mandate met once accepted findings cover the
+    // mandated eyes across this question's probes.
+    $qMet = null;
+    $xsrc = pJson($xc['source'] ?? '{}') ?: []; $accQ = $xsrc['questionId'] ?? null;
+    if ($accQ) {
+        $byQ = $meta['xstfByQuestion'] ?? []; $qProbes = is_array($byQ[$accQ] ?? null) ? $byQ[$accQ] : [];
+        $nAcc = 0; foreach ($acc as $a) { if (in_array($a['xstfId'] ?? '', $qProbes, true)) $nAcc++; }
+        $qq = dbGet('SELECT assessors FROM cell_objectives WHERE cell_id = ? AND obj_id = ?', [$cId, $accQ]);
+        if ($qq && $nAcc >= max(1, (int)($qq['assessors'] ?? 1))) { dbRun("UPDATE cell_objectives SET status = 'met' WHERE cell_id = ? AND obj_id = ?", [$cId, $accQ]); $qMet = $accQ; }
+    }
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
-    send(200, ['ok' => true, 'accepted' => count($acc)]);
+    send(200, ['ok' => true, 'accepted' => count($acc), 'questionMet' => $qMet]);
 }
 
 // ---- jSTF resolution draft (team-editable working draft, survives reload) ----

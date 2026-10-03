@@ -5232,7 +5232,9 @@ function jstfXstfForQuestion(cell, qid) {
 }
 function jstfDueText(deadline) {
   if (!deadline) return null;
-  var days = Math.ceil((new Date(deadline + 'T23:59:59') - Date.now()) / 86400000);
+  var t = new Date(deadline + 'T23:59:59').getTime();
+  if (isNaN(t)) return null;
+  var days = Math.ceil((t - Date.now()) / 86400000);
   if (days < 0) return { txt: 'overdue', col: 'var(--red)' };
   if (days === 0) return { txt: 'due today', col: 'var(--amber)' };
   return { txt: days + 'd left', col: days <= 7 ? 'var(--amber)' : 'var(--text-tertiary)' };

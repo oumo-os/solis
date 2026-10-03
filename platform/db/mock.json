@@ -1798,8 +1798,8 @@
         { "author": "Namugga Claire", "initials": "NC", "text": "I'll take the credential question. His claimed Ws doesn't match anything in his publication record, but let's be careful — mismatch isn't proof. Can we get the verification logs before we talk sanctions?", "time": "45m ago" }
       ],
       "objectives": [
-        { "id": "q-cred-1", "label": "Did Diallo Mamadou misrepresent Space Law competence credentials during steward candidacy?", "status": "open" },
-        { "id": "q-cred-2", "label": "Do the auditor-assignment anomalies correlate with the accused's own assignments?", "status": "open" }
+        { "id": "q-cred-1", "label": "Did Diallo Mamadou misrepresent Space Law competence credentials during steward candidacy?", "status": "open", "assessors": 2, "deadline": "2026-10-15" },
+        { "id": "q-cred-2", "label": "Do the auditor-assignment anomalies correlate with the accused's own assignments?", "status": "open", "assessors": 1, "deadline": "2026-10-15" }
       ]
     },
     {
