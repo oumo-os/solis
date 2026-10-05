@@ -615,7 +615,7 @@ if (preg_match('/^\/threads\/([^\/]+)\/raise-proposal$/', $cleanPath, $m)) {
     $t = dbGet('SELECT * FROM threads WHERE id = ?', [$threadId]); if (!$t) send(404, ['error' => 'Not found']);
     if ($t['proposal_cell_id']) send(409, ['error' => 'Already raised as a proposal']);
     $mc = (int)(dbGet("SELECT COUNT(*) AS n FROM users WHERE status = 'Active'")['n'] ?? 0) ?: 0;
-    $cellId = 'delib-' . base_convert(time(), 10, 36);
+    $cellId = 'delib-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $source = ['type' => 'commons-thread', 'proposer' => $user['name'] ?? $user['initials'], 'threadId' => $threadId, 'threadTitle' => $t['title'], 'threadAuthor' => $t['author'], 'threadBody' => substr($t['body'] ?? '', 0, 600)];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)', [$cellId, 'Deliberation Cell', $t['title'], 'Active', 'commons-thread', max($mc, 4), json_encode($source), json_encode(['status' => 'Draft'])]);
     dbRun('UPDATE threads SET proposal_cell_id = ? WHERE id = ?', [$cellId, $threadId]);
@@ -631,7 +631,7 @@ if ($cleanPath === '/proposals/direct' && $method === 'POST') {
     if (!($inRoster['n'] ?? 0)) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $mc = (int)(dbGet("SELECT COUNT(*) AS n FROM users WHERE status = 'Active'")['n'] ?? 0) ?: 0;
-    $cellId = 'delib-' . base_convert(time(), 10, 36);
+    $cellId = 'delib-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $source = ['type' => 'direct-proposal', 'proposer' => $user['name'] ?? $user['initials'], 'description' => trim((string)($body->description ?? '')), 'domain' => trim((string)($body->domain ?? ''))];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution) VALUES (?,?,?,?,?,?,?,?)', [$cellId, 'Deliberation Cell', $title, 'Active', 'direct-proposal', max($mc, 4), json_encode($source), json_encode(['status' => 'Draft'])]);
     send(201, ['ok' => true, 'cellId' => $cellId]);
@@ -648,7 +648,7 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
     if (!in_array($delibType, $allowed)) send(400, ['error' => 'delibType required']);
     $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $mc = (int)(dbGet("SELECT COUNT(*) AS n FROM users WHERE status = 'Active'")['n'] ?? 0) ?: 0;
-    $cellId = 'delib-' . base_convert(time(), 10, 36);
+    $cellId = 'delib-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $source = ['type' => (string)($body->sourceType ?? 'settings-proposal'), 'proposer' => $user['name'] ?? $user['initials'], 'submitter' => $user['id']];
     $meta = json_encode(['settingsSnapshot' => is_object($body->snapshot) ? $body->snapshot : new \stdClass()]);
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?)', [$cellId, 'Deliberation Cell', $title, 'Active', $delibType, max($mc, 4), json_encode($source), json_encode(['status' => 'Draft']), $meta]);
@@ -697,7 +697,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/submit$/', $cl
     $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cellId]);
     $rj = ($cell && $cell['resolution']) ? pJson($cell['resolution']) : []; $rj['status'] = 'Submitted';
     dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($rj), $cellId]);
-    $astfId = 'astf-' . base_convert(time(), 10, 36);
+    $astfId = 'astf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $os = $cell ? pJson($cell['source'] ?? '{}') : []; $cn = $os['circleName'] ?? $cell['circle'] ?? '';
     $as = ['type' => 'motion-audit', 'originCellId' => $cellId, 'originTitle' => $cell['title'] ?? '', 'draftId' => strval($draftId), 'draftTitle' => $draft['title'] ?? $cell['title'] ?? '', 'circleName' => $cn, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$astfId, 'aSTF Cell', 'aSTF · ' . ($draft['title'] ?? $cell['title'] ?? ''), 'Blind Review', 'motion-audit', $cell['participants'] ?? 0, $cn, 1, $cellId, json_encode($as), json_encode(['status' => 'Pending']), json_encode(['assessors' => 3, 'rubric' => ['jurisdiction' => 0, 'depth' => 0, 'alignment' => 0, 'competence' => 0]])]);
@@ -925,18 +925,33 @@ if (preg_match('/^\/cells\/([^\/]+)\/review-deliverable$/', $cleanPath, $m)) {
 // ═════════════════════════════════════════════════════════
 // vSTF ROUTES
 // ═════════════════════════════════════════════════════════
+// Resolve a vSTF candidate to a user (initials first — unique per member).
+function vstfResolveCandidate($name, $initials) {
+    if ($initials) { $u = dbGet('SELECT * FROM users WHERE initials = ?', [$initials]); if ($u) return $u; }
+    if ($name) { $u = dbGet('SELECT * FROM users WHERE name = ?', [$name]); if ($u) return $u; }
+    return null;
+}
 if (preg_match('/^\/cells\/([^\/]+)\/spawn-vstf$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $sc = dbGet("SELECT COUNT(*) AS n FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']]);
     if (!($sc['n'] ?? 0)) send(403, ['error' => 'Steward access required']);
     $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell) send(404, ['error' => 'Not found']);
     $body = readBody(); $vt = trim((string)($body->vstfType ?? 'steward-candidacy'));
     if (!in_array($vt, ['steward-candidacy', 'competence-claim'])) send(400, ['error' => 'vstfType must be steward-candidacy or competence-claim']);
-    $ex = dbGet("SELECT id FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?", [$cId, $vt]); if ($ex) send(409, ['error' => 'vSTF already spawned']);
+    // One open claim per candidate per host: completed claims never block a
+    // re-verification, and different candidates never block each other.
+    $candName0 = trim((string)($body->candidateName ?? '')); $candIni0 = trim((string)($body->candidateInitials ?? ''));
+    foreach (dbAll("SELECT id, status, source FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?", [$cId, $vt]) as $exRow) {
+        if (($exRow['status'] ?? '') === 'Assessment Filed') continue;
+        $exSrc = pJson($exRow['source'] ?? '{}') ?: [];
+        $sameName = $candName0 !== '' && ($exSrc['candidateName'] ?? '') === $candName0;
+        $sameIni = $candIni0 !== '' && ($exSrc['candidateInitials'] ?? '') === $candIni0;
+        if ($sameName || $sameIni || ($candName0 === '' && $candIni0 === '')) send(409, ['error' => 'An open vSTF claim for this candidate already exists', 'vstfId' => $exRow['id']]);
+    }
     $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $ma = (int)($body->minAssessors ?? 3);
-    $vId = 'vstf-' . base_convert(time(), 10, 36);
+    $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => $vt, 'candidateName' => trim((string)($body->candidateName ?? '')), 'candidateInitials' => trim((string)($body->candidateInitials ?? '')), 'circleName' => $cn, 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $domains = is_array($body->domains ?? null) ? $body->domains : [];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', ($vt === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $src['candidateName'], 'Pending Assessment', $vt, $ma, $cn, $cId, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $src['candidateName'], 'candidateInitials' => $src['candidateInitials'], 'domains' => $domains, 'assessments' => []])]);
@@ -945,22 +960,45 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-vstf$/', $cleanPath, $m)) {
 }
 if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'vSTF Cell') send(400, ['error' => 'Not a vSTF cell']);
     if ($cell['status'] === 'Assessment Filed') send(409, ['error' => 'Assessment already filed']);
     $body = readBody(); $meta = pJson($cell['meta'] ?? '{}') ?: []; $assessments = $meta['assessments'] ?? [];
-    foreach ($assessments as $a) { if (($a['assessor'] ?? '') === ($user['name'] ?? $user['initials'])) send(409, ['error' => 'You have already filed an assessment']); }
+    // One member one assessment: keyed on user id, legacy name fallback.
+    foreach ($assessments as $a) { if ((!empty($a['assessorId']) && $a['assessorId'] === $user['id']) || (empty($a['assessorId']) && ($a['assessor'] ?? '') === ($user['name'] ?? $user['initials']))) send(409, ['error' => 'You have already filed an assessment']); }
     $vt2 = $meta['type'] ?? (pJson($cell['source'] ?? '{}')['type'] ?? 'steward-candidacy');
-    $ass = ['assessor' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    // Candidates cannot assess their own claim.
+    $srcC0 = pJson($cell['source'] ?? '{}') ?: [];
+    $cand0 = vstfResolveCandidate($srcC0['candidateName'] ?? $meta['candidateName'] ?? '', $srcC0['candidateInitials'] ?? $meta['candidateInitials'] ?? '');
+    if ($cand0 && $cand0['id'] === $user['id']) send(403, ['error' => 'Candidates cannot assess their own claim']);
+    $ass = ['assessor' => $user['name'] ?? $user['initials'], 'assessorId' => $user['id'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     if ($vt2 === 'steward-candidacy') { $score = min(100, max(0, (int)($body->score ?? 0))); $rat = trim((string)($body->rationale ?? '')); if (!$rat) send(400, ['error' => 'rationale required']); $ass['score'] = $score; $ass['rationale'] = $rat; }
     else { $ass['domainEvals'] = is_array($body->domainEvals ?? null) ? $body->domainEvals : []; $ass['comment'] = trim((string)($body->comment ?? '')); }
     $assessments[] = $ass; $meta['assessments'] = $assessments; $minA = $cell['participants'] ?? 3;
     if (count($assessments) >= $minA) {
         $fs = $vt2 === 'steward-candidacy' ? round(array_reduce($assessments, function($s, $a) { return $s + ($a['score'] ?? 0); }, 0) / count($assessments)) : count($assessments);
-        dbRun("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?", [json_encode($meta), json_encode(['status' => 'Complete', 'score' => $fs]), $cId]);
-        $sr = dbGet("SELECT id FROM stfs WHERE type = 'vSTF' AND status = 'Pending Assessment'");
-        if ($sr) dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", [$sr['id']]);
+        $res = ['status' => 'Complete', 'score' => $fs];
+        $srcC = pJson($cell['source'] ?? '{}') ?: [];
+        $cand = vstfResolveCandidate($srcC['candidateName'] ?? $meta['candidateName'] ?? '', $srcC['candidateInitials'] ?? $meta['candidateInitials'] ?? '');
+        $candLabel = $cand ? ($cand['name'] ?? $cId) : ($srcC['candidateName'] ?? $cId);
+        if ($vt2 === 'steward-candidacy') {
+            // Average score of 60+ carries the candidacy (recorded, not seated:
+            // seating remains a governed act of its own).
+            $approved = $fs >= 60;
+            $res['approved'] = $approved;
+            dbRun("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?", [json_encode($meta), json_encode($res), $cId]);
+            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'vstf-candidacy', '', date('Y-m-d'), 'Steward candidacy for ' . $candLabel . ' ' . ($approved ? 'approved' : 'not approved') . ' (avg ' . $fs . '/100 over ' . count($assessments) . ' assessments)', 'vSTF']);
+        } else {
+            // Competence claims verify for real: the candidate's claimed
+            // domains flip to verified on completion.
+            $marked = [];
+            if ($cand) foreach (($meta['domains'] ?? []) as $dmn) { $dn = is_array($dmn) ? ($dmn['name'] ?? '') : (string)$dmn; if ($dn === '') continue; dbRun('UPDATE user_competence SET verified = 1 WHERE user_id = ? AND domain = ?', [$cand['id'], $dn]); $marked[] = $dn; }
+            $res['verifiedDomains'] = $marked;
+            dbRun("UPDATE cells SET status = 'Assessment Filed', meta = ?, resolution = ? WHERE id = ?", [json_encode($meta), json_encode($res), $cId]);
+            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'vstf-competence', '', date('Y-m-d'), 'Competence verified for ' . $candLabel . ': ' . (implode(', ', $marked) ?: 'no matching domains') . ' (' . count($assessments) . ' assessments)', 'vSTF']);
+        }
+        dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", ['stf-' . $cId]);
     } else dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(200, ['ok' => true, 'filed' => count($assessments), 'required' => $minA, 'complete' => count($assessments) >= $minA]);
 }
@@ -993,7 +1031,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-pastf$/', $cleanPath, $m)) {
     if (!$cell) send(404, ['error' => 'Not found']);
     $ex = dbGet("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND commissioned_by = ?", [$cId]); if ($ex) send(409, ['error' => 'p-aSTF already spawned']);
     $body = readBody(); $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $mr = (int)($body->minReviewers ?? 3);
-    $pId = 'pastf-' . base_convert(time(), 10, 36);
+    $pId = 'pastf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => 'periodic-review', 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'circleName' => $cn, 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$pId, 'p-aSTF Cell', 'p-aSTF · ' . $cn . ' Health Review', 'Pending Review', 'periodic-review', $mr, $cn, $cId, json_encode($src), json_encode(['status' => 'Pending']), json_encode(['circleName' => $cn, 'minReviewers' => $mr, 'reviews' => []])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $pId, 'p-aSTF', 'Periodic Circle Health Review', $cn, 'active', 'Pending Review', $cn . ' Health', date('Y-m-d', time() + 30 * 86400)]);
@@ -2086,7 +2124,7 @@ if ($cleanPath === '/observatory/organisations' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     if (!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']])) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $name = trim((string)($body->name ?? '')); if (!$name) send(400, ['error' => 'name required']);
-    $id = 'org-' . base_convert(time(), 10, 36);
+    $id = 'org-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     dbRun('INSERT INTO organisations (id, name, acronym, location, summary, status, website) VALUES (?,?,?,?,?,?,?)', [$id, $name, trim((string)($body->acronym ?? '')), trim((string)($body->location ?? '')), trim((string)($body->summary ?? '')), 'Active', trim((string)($body->website ?? ''))]);
     send(201, ['ok' => true, 'id' => $id]);
 }
