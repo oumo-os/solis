@@ -507,12 +507,15 @@ $userRows = array_map(fn($u) => [
     'email' => strtolower($u['id'] ?? '') . '@solis.local',
     'location' => $u['location'] ?? null, 'joined' => $u['joined'] ?? null,
     'status' => $u['status'] ?? 'Active', 'standing' => $u['standing'] ?? null,
-    'competence' => $u['competence'] ?? null, 'bio' => $u['bio'] ?? null,
+    'competence' => $u['competence'] ?? null, 'competence_note' => $u['competenceNote'] ?? null,
+    'interest_score' => $u['interestScore'] ?? null, 'active_roles' => $u['activeRoles'] ?? null,
+    'roles_breakdown' => $u['rolesBreakdown'] ?? null,
+    'bio' => $u['bio'] ?? null,
     'essay' => $u['essay'] ?? null, 'avatar' => j($u['avatar'] ?? null),
     'is_current' => ($u['is_current'] ?? false) ? 1 : 0,
     'password_hash' => hashPassword('solis123'),
 ], $users);
-upsert($db, 'users', $userRows, ['id','name','initials','email','location','joined','status','standing','competence','bio','essay','avatar','is_current','password_hash']);
+upsert($db, 'users', $userRows, ['id','name','initials','email','location','joined','status','standing','competence','competence_note','interest_score','active_roles','roles_breakdown','bio','essay','avatar','is_current','password_hash']);
 
 // Participants (directory cards)
 $partRows = array_map(fn($u) => [

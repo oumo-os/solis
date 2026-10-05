@@ -96,6 +96,12 @@
       "initials": "AJ",
       "location": "Kampala",
       "joined": "Feb 2025",
+      "standing": 1520,
+      "competence": 1640,
+      "competenceNote": "vSTF-verified Space Law · Astrophysics contributor",
+      "interestScore": 4,
+      "activeRoles": 3,
+      "rolesBreakdown": "jSTF adjudicator · xSTF investigator · Space Law steward",
       "avatar": {},
       "domains": [
         {
@@ -123,6 +129,12 @@
       "initials": "OK",
       "location": "Accra",
       "joined": "Jun 2025",
+      "standing": 1690,
+      "competence": 1690,
+      "competenceNote": "vSTF-verified Propulsion · Launch Systems",
+      "interestScore": 4,
+      "activeRoles": 2,
+      "rolesBreakdown": "jSTF adjudicator · xSTF investigator",
       "avatar": {
         "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
       },
@@ -150,6 +162,12 @@
       "initials": "NC",
       "location": "Entebbe",
       "joined": "Jan 2025",
+      "standing": 1225,
+      "competence": 1225,
+      "competenceNote": "Space Med · Publications contributor",
+      "interestScore": 4,
+      "activeRoles": 3,
+      "rolesBreakdown": "jSTF adjudicator · Space Law steward",
       "avatar": {
         "gradient": "linear-gradient(135deg,var(--amber),#5a3a00)"
       },
@@ -177,6 +195,12 @@
       "initials": "MT",
       "location": "Kampala",
       "joined": "May 2025",
+      "standing": 1045,
+      "competence": 1045,
+      "competenceNote": "Remote Sensing contributor · Events",
+      "interestScore": 4,
+      "activeRoles": 2,
+      "rolesBreakdown": "jSTF adjudicator · Space Law steward",
       "avatar": {},
       "domains": [
         {
@@ -202,6 +226,12 @@
       "initials": "KA",
       "location": "Nairobi",
       "joined": "Mar 2025",
+      "standing": 1040,
+      "competence": 1040,
+      "competenceNote": "Comms · Education contributor",
+      "interestScore": 5,
+      "activeRoles": 1,
+      "rolesBreakdown": "Commons contributor",
       "avatar": {},
       "domains": [
         {
@@ -227,6 +257,12 @@
       "initials": "SD",
       "location": "Kampala",
       "joined": "Apr 2025",
+      "standing": 860,
+      "competence": 860,
+      "competenceNote": "Policy analyst · Space Law steward",
+      "interestScore": 4,
+      "activeRoles": 2,
+      "rolesBreakdown": "Space Law steward · xSTF commissioner",
       "avatar": {
         "gradient": "linear-gradient(135deg,var(--purple),#3a1860)"
       },
@@ -242,7 +278,9 @@
           "color": "tag-blue"
         }
       ],
-      "circles": [],
+      "circles": [
+        "SL Circle"
+      ],
       "orgs": [
         "UAS",
         "SGAC"
@@ -255,6 +293,12 @@
       "initials": "OS",
       "location": "Kampala",
       "joined": "Sep 2024",
+      "standing": 1020,
+      "competence": 1020,
+      "competenceNote": "Founder · Space Law · Remote Sensing",
+      "interestScore": 5,
+      "activeRoles": 2,
+      "rolesBreakdown": "Founder · RS + SL steward",
       "avatar": {
         "gold": true
       },
@@ -297,11 +341,193 @@
           "color": "tag-green"
         }
       ],
-      "circles": [],
+      "circles": [
+        {
+          "name": "SL Circle",
+          "status": "Candidate"
+        }
+      ],
       "orgs": [
         "Sen. Space Agency"
       ],
+      "standing": 760,
+      "competence": 760,
+      "competenceNote": "Space Finance · activity restricted pending jSTF case",
+      "interestScore": 3,
+      "activeRoles": 0,
+      "rolesBreakdown": "None — activity restricted",
       "bio": "Space finance specialist advising on investment frameworks for African space ventures."
+    },
+    {
+      "id": "ao",
+      "name": "Aisha Omondi",
+      "initials": "AO",
+      "location": "Dar es Salaam",
+      "joined": "Oct 2025",
+      "standing": 980,
+      "competence": 980,
+      "competenceNote": "Orbital mechanics · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Space Law steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--teal),#0b3b39)"
+      },
+      "domains": [
+        {
+          "name": "Astrodynamics",
+          "ws": 1100,
+          "color": "tag-blue"
+        },
+        {
+          "name": "Space Law",
+          "ws": 900,
+          "color": "tag-purple"
+        }
+      ],
+      "circles": [
+        "SL Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "Orbital mechanics researcher modelling cislunar trajectories for African ground-station networks."
+    },
+    {
+      "id": "mn",
+      "name": "Mensah Naa",
+      "initials": "MN",
+      "location": "Kumasi",
+      "joined": "Oct 2025",
+      "standing": 960,
+      "competence": 960,
+      "competenceNote": "Space policy · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Space Law steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--green),#0e3a24)"
+      },
+      "domains": [
+        {
+          "name": "Space Policy",
+          "ws": 1000,
+          "color": "tag-green"
+        },
+        {
+          "name": "Space Law",
+          "ws": 950,
+          "color": "tag-purple"
+        }
+      ],
+      "circles": [
+        "SL Circle"
+      ],
+      "orgs": [
+        "GSS"
+      ],
+      "bio": "Space policy researcher focused on licensing regimes for emerging African space actors."
+    },
+    {
+      "id": "zk",
+      "name": "Zanele Khumalo",
+      "initials": "ZK",
+      "location": "Johannesburg",
+      "joined": "Oct 2025",
+      "standing": 1180,
+      "competence": 1180,
+      "competenceNote": "Earth observation · new steward",
+      "interestScore": 5,
+      "activeRoles": 1,
+      "rolesBreakdown": "Remote Sensing steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--blue),#1a2a5a)"
+      },
+      "domains": [
+        {
+          "name": "Remote Sensing",
+          "ws": 1300,
+          "color": "tag-green"
+        },
+        {
+          "name": "Data Analysis",
+          "ws": 1050,
+          "color": "tag-amber"
+        }
+      ],
+      "circles": [
+        "RS Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "Earth-observation analyst turning satellite imagery into drought early-warning for Southern Africa."
+    },
+    {
+      "id": "bo",
+      "name": "Brian Otieno",
+      "initials": "BO",
+      "location": "Kisumu",
+      "joined": "Oct 2025",
+      "standing": 1050,
+      "competence": 1050,
+      "competenceNote": "GIS · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Remote Sensing steward",
+      "avatar": {},
+      "domains": [
+        {
+          "name": "Remote Sensing",
+          "ws": 1150,
+          "color": "tag-green"
+        },
+        {
+          "name": "GIS",
+          "ws": 900,
+          "color": "tag-blue"
+        }
+      ],
+      "circles": [
+        "RS Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "GIS engineer mapping lake-basin change around Lake Victoria from open satellite data."
+    },
+    {
+      "id": "as",
+      "name": "Ama Serwaa",
+      "initials": "AS",
+      "location": "Cape Coast",
+      "joined": "Oct 2025",
+      "standing": 930,
+      "competence": 930,
+      "competenceNote": "Maritime-to-orbital law · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Space Law steward",
+      "avatar": {},
+      "domains": [
+        {
+          "name": "Space Law",
+          "ws": 1000,
+          "color": "tag-purple"
+        },
+        {
+          "name": "Policy",
+          "ws": 850,
+          "color": "tag-blue"
+        }
+      ],
+      "circles": [
+        "SL Circle"
+      ],
+      "orgs": [
+        "GSS"
+      ],
+      "bio": "Maritime-law scholar extending coastal-state practice to orbital-slot coordination."
     }
   ],
   "circles": [
@@ -309,7 +535,7 @@
       "id": "space-law",
       "name": "Space Law Circle",
       "status": "Active",
-      "members": 8,
+      "members": 9,
       "motions": 2,
       "domains": [
         "Space Law",
@@ -460,39 +686,39 @@
             "id": "mn",
             "name": "Mensah Naa",
             "initials": "MN",
-            "color": "var(--navy-light)",
-            "ws": 1040,
+            "color": "linear-gradient(135deg,var(--green),#0e3a24)",
+            "ws": 1000,
             "domains": [
-              "Astronomy",
-              "Education"
+              "Space Policy",
+              "Space Law"
             ],
             "domainWs": [
-              1040,
-              980
+              1000,
+              950
             ],
-            "joined": "Apr 2025",
-            "lastActive": "4d ago",
+            "joined": "Oct 2025",
+            "lastActive": "1d ago",
             "status": "active",
-            "topDomain": "Astronomy"
+            "topDomain": "Space Policy"
           },
           {
             "id": "ao",
             "name": "Aisha Omondi",
             "initials": "AO",
-            "color": "linear-gradient(135deg,var(--green),#0d3a20)",
-            "ws": 980,
+            "color": "linear-gradient(135deg,var(--teal),#0b3b39)",
+            "ws": 1100,
             "domains": [
-              "Comms",
-              "Education"
+              "Astrodynamics",
+              "Space Law"
             ],
             "domainWs": [
-              980,
-              920
+              1100,
+              900
             ],
-            "joined": "Mar 2025",
-            "lastActive": "5d ago",
+            "joined": "Oct 2025",
+            "lastActive": "1d ago",
             "status": "active",
-            "topDomain": "Comms"
+            "topDomain": "Astrodynamics"
           },
           {
             "id": "sd",
@@ -531,6 +757,25 @@
             "lastActive": "2w ago",
             "status": "candidate",
             "topDomain": "Space Finance"
+          },
+          {
+            "id": "as",
+            "name": "Ama Serwaa",
+            "initials": "AS",
+            "color": "var(--navy-light)",
+            "ws": 1000,
+            "domains": [
+              "Space Law",
+              "Policy"
+            ],
+            "domainWs": [
+              1000,
+              850
+            ],
+            "joined": "Oct 2025",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Space Law"
           }
         ],
         "former": [
@@ -599,7 +844,7 @@
       "id": "remote-sensing",
       "name": "Remote Sensing Circle",
       "status": "Active",
-      "members": 6,
+      "members": 8,
       "motions": 1,
       "domains": [
         "Remote Sensing",
@@ -634,6 +879,49 @@
       "mandate": {
         "primary": [],
         "secondary": []
+      },
+      "roster": {
+        "active": [
+          {
+            "id": "zk",
+            "name": "Zanele Khumalo",
+            "initials": "ZK",
+            "color": "linear-gradient(135deg,var(--blue),#1a2a5a)",
+            "ws": 1300,
+            "domains": [
+              "Remote Sensing",
+              "Data Analysis"
+            ],
+            "domainWs": [
+              1300,
+              1050
+            ],
+            "joined": "Oct 2025",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Remote Sensing"
+          },
+          {
+            "id": "bo",
+            "name": "Brian Otieno",
+            "initials": "BO",
+            "color": "var(--navy-light)",
+            "ws": 1150,
+            "domains": [
+              "Remote Sensing",
+              "GIS"
+            ],
+            "domainWs": [
+              1150,
+              900
+            ],
+            "joined": "Oct 2025",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Remote Sensing"
+          }
+        ],
+        "former": []
       }
     },
     {

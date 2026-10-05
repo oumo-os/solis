@@ -11,16 +11,21 @@ function renderParticipantCards() {
     var avatarStyle = 'display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0';
     if (p.avatar.gradient) avatarStyle += ';background:' + p.avatar.gradient + ';color:#fff';
     if (p.avatar.gold) avatarStyle += ';background:var(--gold)';
-    var domains = p.domains.map(function(d) {
-      return '<span class="tag tag-xs ' + d.color + '">' + d.name + ' ' + d.ws + '</span>';
+    var domains = (p.domains || []).map(function(d) {
+      return '<span class="tag tag-xs ' + d.color + '">' + d.name + ' ' + d.ws + (d.verified ? ' ✓' : '') + '</span>';
     }).join('');
+    var badges = [];
+    if (p.steward) badges.push('<span class="tag tag-xs tag-amber">Steward</span>');
+    if (p.status && p.status !== 'Active') badges.push('<span class="tag tag-xs tag-red">' + p.status + '</span>');
+    if (p.standing != null) badges.push('<span class="tag tag-xs tag-default">Ws ' + p.standing + '</span>');
     var bottom = [];
-    p.circles.forEach(function(c) { bottom.push('<span class="tag tag-xs tag-green">' + c + '</span>'); });
-    p.orgs.forEach(function(o) { bottom.push('<span class="tag tag-xs tag-default">' + o + '</span>'); });
+    (p.circles || []).forEach(function(c) { bottom.push('<span class="tag tag-xs tag-green">' + c + '</span>'); });
+    (p.orgs || []).forEach(function(o) { bottom.push('<span class="tag tag-xs tag-default">' + o + '</span>'); });
     return '<div class="card participant-card" style="cursor:pointer;padding:0;overflow:hidden" onclick="openParticipantModal(\'' + p.name + '\',\'' + p.bio + '\',\'' + p.location + '\',\'' + p.joined + '\',\'' + p.initials + '\')">'
       + '<div class="avatar avatar-square" style="' + avatarStyle + '">' + p.initials + '</div>'
       + '<div class="pc-body">'
       + '<div class="pc-top"><div class="pc-name">' + p.name + '</div><div class="pc-sub">' + p.location + ' · ' + p.joined + '</div></div>'
+      + (badges.length ? '<div class="pc-badges" style="margin:4px 0">' + badges.join(' ') + '</div>' : '')
       + '<div class="pc-domains">' + domains + '</div>'
       + '<div class="pc-bottom">' + bottom.join('') + '<span class="tag tag-xs tag-red" style="cursor:pointer" onclick="event.stopPropagation();openReportModal(\'' + p.id + '\',\'' + p.name.replace(/'/g, '\\\'') + '\')">Report</span></div>'
       + '</div></div>';

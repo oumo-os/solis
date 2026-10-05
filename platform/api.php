@@ -141,10 +141,14 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $actByUser = groupBy(dbAll('SELECT * FROM user_activity'), 'user_id');
 
     $participants = [];
+    $stewIds = [];
+    foreach (dbAll("SELECT DISTINCT member_id FROM circle_roster WHERE status = 'active'") as $sr) $stewIds[$sr['member_id']] = true;
     foreach ($users as $u) {
         $dir = $dirByUser[$u['id']][0] ?? [];
         $participants[] = [
             'id' => $u['id'], 'name' => $u['name'], 'initials' => $u['initials'], 'status' => $u['status'],
+            'steward' => !empty($stewIds[$u['id']]) && !in_array($u['status'] ?? '', ['Restricted', 'Suspended'], true),
+            'standing' => $u['standing'] !== null ? (int)$u['standing'] : null,
             'location' => ($dir['location'] ?? $u['location']), 'joined' => ($dir['joined'] ?? $u['joined']),
             'avatar' => pJson($u['avatar'] ?? null) ?: [],
             'domains' => array_values(array_filter(array_map(function($c) { return $c['kind'] === 'roster' ? ['name' => $c['domain'], 'ws' => $c['ws'] ?? 0, 'color' => $c['color'] ?? null, 'evidence' => $c['evidence'] ?? null, 'verified' => (bool)($c['verified'] ?? false)] : null; }, $compByUser[$u['id']] ?? []))),
