@@ -236,6 +236,25 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status'], 'assessors' => $o['assessors'] !== null ? (int)$o['assessors'] : null, 'deadline' => $o['deadline']]; }, $objByCell[$c['id']] ?? []);
         $cell['draftVotes'] = $draftVotesByCell[$c['id']] ?? [];
         $cell['team'] = array_map(function($t) use ($currentRow) { $meId = $currentRow['id'] ?? null; $meIni = $currentRow['initials'] ?? null; $self = $meId && (!empty($t['user_id']) ? $t['user_id'] === $meId : ($t['initials'] ?? null) === $meIni); return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus'], 'self' => (bool)$self]; }, $teamByCell[$c['id']] ?? []);
+        // Adjudication filings stay sealed even from fellow assessors: the
+        // blind wall holds until quorum decides. Everyone sees the count;
+        // each assessor sees only whether they themselves filed.
+        if (!empty($cell['filings']) && is_array($cell['filings'])) {
+            $meF = $currentRow['id'] ?? null;
+            $filedMe = false; foreach ($cell['filings'] as $fl) { if (!empty($fl['assessorId']) && $meF && $fl['assessorId'] === $meF) { $filedMe = true; break; } }
+            $cell['filingsCount'] = count($cell['filings']); $cell['filedMe'] = $filedMe;
+            unset($cell['filings']);
+        }
+        // Blind parallel audits: assessors never learn each other's
+        // identities. Each viewer keeps only their own row; the rest read
+        // as numbered assessors. (Non-stewards get the full sealed view below.)
+        if (($c['type'] ?? '') === 'aSTF Cell' && !empty($c['blind']) && !empty($cell['team'])) {
+            $axN = 0;
+            $cell['team'] = array_map(function($t) use (&$axN) {
+                if (!empty($t['self'])) return $t;
+                $axN++; return ['name' => 'Assessor ' . $axN, 'initials' => 'AX' . $axN, 'role' => $t['role'], 'focus' => $t['focus'], 'self' => false];
+            }, $cell['team']);
+        }
         // Blindness is team-only on judicial cells: anyone off the seated team
         // (or off the probe / commissioning team for xSTF) gets a sealed view —
         // no names, no target, no questions, no draft, no counts. Other blind
@@ -336,7 +355,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $stfShape[$s['bucket']][] = $obj;
     }
     $cdByCand = groupBy(dbAll('SELECT * FROM stf_candidate_domains'), 'candidate_id');
-    $stfCandidates = array_values(array_filter(array_map(function($c) use ($cdByCand) { return ['id' => $c['id'], 'stfId' => $c['stf_id'], 'name' => $c['name'], 'initials' => $c['initials'], 'matchScore' => $c['match_score'], 'matchedDomains' => array_values(array_map(function($d) { return $d['domain']; }, $cdByCand[$c['id']] ?? [])), 'interestScore' => $c['interest_score'], 'competenceScore' => $c['competence_score'], 'status' => $c['status'], 'invitedDate' => $c['invited_date'], 'userId' => $c['user_id'] ?? null]; }, dbAll('SELECT * FROM stf_candidates')), function($sc) use ($sealedStf) { return empty($sealedStf[$sc['stfId']]); }));
+    $auditBlindStf = [];
+    foreach (dbAll("SELECT id FROM cells WHERE type = 'aSTF Cell' AND blind = 1") as $abc) $auditBlindStf['stf-' . $abc['id']] = true;
+    $meCand = $currentRow['id'] ?? null; $meCandIni = $currentRow['initials'] ?? null;
+    $stfCandidates = array_values(array_filter(array_map(function($c) use ($cdByCand) { return ['id' => $c['id'], 'stfId' => $c['stf_id'], 'name' => $c['name'], 'initials' => $c['initials'], 'matchScore' => $c['match_score'], 'matchedDomains' => array_values(array_map(function($d) { return $d['domain']; }, $cdByCand[$c['id']] ?? [])), 'interestScore' => $c['interest_score'], 'competenceScore' => $c['competence_score'], 'status' => $c['status'], 'invitedDate' => $c['invited_date'], 'userId' => $c['user_id'] ?? null]; }, dbAll('SELECT * FROM stf_candidates')), function($sc) use ($sealedStf, $auditBlindStf, $meCand, $meCandIni) { $mine = ($meCand && ($sc['userId'] ?? null) === $meCand) || ($meCandIni && empty($sc['userId']) && ($sc['initials'] ?? null) === $meCandIni); if ($mine) return true; if (!empty($sealedStf[$sc['stfId']])) return false; if (!empty($auditBlindStf[$sc['stfId']])) return false; return true; }));
     $replyByThread = groupBy(dbAll('SELECT * FROM thread_replies'), 'thread_id');
     $threads = array_map(function($t) use ($replyByThread) { return ['id' => $t['id'], 'title' => $t['title'], 'body' => $t['body'], 'author' => $t['author'], 'initials' => $t['initials'], 'avatar' => pJson($t['avatar'] ?? null) ?: [], 'domain' => $t['domain'], 'domainColor' => $t['domain_color'], 'badge' => $t['badge'], 'badgeClass' => $t['badge_class'], 'replies' => $t['replies'], 'likes' => $t['likes'], 'shares' => $t['shares'], 'time' => $t['time'], 'pinned' => (bool)$t['pinned'], 'endorsements' => $t['endorsements'] ?? 0, 'proposalCellId' => $t['proposal_cell_id'] ?? null, 'submitterId' => $t['submitter_id'] ?? null, 'visibility' => $t['visibility'] ?: 'public', 'jstfCellId' => $t['jstf_cell_id'] ?? null, 'repliesList' => array_map(function($r) { return ['id' => $r['id'], 'author' => $r['author'], 'initials' => $r['initials'], 'avatar' => pJson($r['avatar'] ?? null) ?: [], 'time' => $r['time'], 'body' => $r['body'], 'likes' => $r['likes']]; }, $replyByThread[$t['id']] ?? [])]; }, dbAll('SELECT * FROM threads'));
     $threads = array_values(array_filter($threads, function($t) use ($currentRow) { return jstfCanSeeThread($currentRow, $t); }));
@@ -354,7 +376,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $exitReasonLabels = []; foreach (dbAll('SELECT * FROM exit_reason_labels') as $r) $exitReasonLabels[$r['key']] = $r['label'];
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: [];
     $jstfDomainsRaw = $ss['jstf_domains'] ?? '[]'; $jstfDomains = pJson(is_string($jstfDomainsRaw) ? $jstfDomainsRaw : json_encode($jstfDomainsRaw)) ?: []; if (!is_array($jstfDomains)) $jstfDomains = [];
-    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
+    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'astfAssessors' => (int)($ss['astf_assessors'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
     $sr = dbGet('SELECT stats FROM stats WHERE id = 1');
     $stats = $sr ? pJson($sr['stats']) ?: [] : [];
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
@@ -742,9 +764,12 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/submit$/', $cl
     $astfId = 'astf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $os = $cell ? pJson($cell['source'] ?? '{}') : []; $cn = $os['circleName'] ?? $cell['circle'] ?? '';
     $as = ['type' => 'motion-audit', 'originCellId' => $cellId, 'originTitle' => $cell['title'] ?? '', 'draftId' => strval($draftId), 'draftTitle' => $draft['title'] ?? $cell['title'] ?? '', 'circleName' => $cn, 'submittedBy' => $user['name'] ?? $user['initials'], 'submittedAt' => date('Y-m-d\TH:i:s.000\Z')];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$astfId, 'aSTF Cell', 'aSTF · ' . ($draft['title'] ?? $cell['title'] ?? ''), 'Blind Review', 'motion-audit', $cell['participants'] ?? 0, $cn, 1, $cellId, json_encode($as), json_encode(['status' => 'Pending']), json_encode(['assessors' => 3, 'rubric' => ['jurisdiction' => 0, 'depth' => 0, 'alignment' => 0, 'competence' => 0]])]);
+    $aQuorum = astfAssessors();
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, blind, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$astfId, 'aSTF Cell', 'aSTF · ' . ($draft['title'] ?? $cell['title'] ?? ''), 'Blind Review', 'motion-audit', 0, $cn, 1, $cellId, json_encode($as), json_encode(['status' => 'Pending']), json_encode(['assessors' => $aQuorum, 'formation' => ['state' => 'inviting', 'quorum' => $aQuorum, 'seated' => 0], 'filings' => [], 'rubric' => ['jurisdiction' => 0, 'depth' => 0, 'alignment' => 0, 'competence' => 0]])]);
     dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [$astfId, $cellId]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $astfId, 'aSTF', $draft['title'] ?? $cell['title'] ?? '', $cn, 'active', 'Blind Review', $draft['title'] ?? $cell['title'] ?? '', date('Y-m-d', time() + astfDurationDays() * 86400)]);
+    $propUser = dbGet('SELECT id FROM users WHERE name = ?', [$user['name'] ?? '']);
+    astfInviteBatch($astfId, $propUser ? [$propUser['id']] : [], $aQuorum + 2);
     send(200, ['ok' => true, 'status' => 'submitted', 'astfId' => $astfId]);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/debate\/close$/', $cleanPath, $m) && $method === 'POST') {
@@ -793,7 +818,39 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
         $rubOut = ['jurisdiction' => $jur, 'depth' => $dep, 'alignment' => $ali, 'competence' => $com, 'total' => $total];
     }
     $rationale = trim((string)($body->rationale ?? '')); $flags = is_array($body->flags ?? null) ? $body->flags : [];
-    $ar = ['verdict' => $verdict, 'rationale' => $rationale, 'flags' => $flags, 'rubric' => $rubOut, 'rubricKind' => $judicial ? 'judicial' : 'motion', 'adjudicator' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    // Adjudication is seated and parallel: one filing per assessor, sealed
+    // until quorum; a majority stance decides, a split sends it to revision.
+    $am = pJson($cell['meta'] ?? '{}') ?: [];
+    if (empty($am['formation'])) {
+        $aq0 = astfAssessors();
+        $am['formation'] = ['state' => 'inviting', 'quorum' => $aq0, 'seated' => 0]; $am['filings'] = $am['filings'] ?? [];
+        dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($am), $cellId]);
+        astfInviteBatch($cellId, astfInviteExcludes($cellId), $aq0 + 2);
+        send(403, ['error' => 'Assessors still forming — filings open once quorum is seated']);
+    }
+    if (($am['formation']['state'] ?? '') === 'inviting') send(403, ['error' => 'Assessors still forming — filings open once quorum is seated']);
+    if (!jstfTeamMember($cellId, $user)) send(403, ['error' => 'Only a seated assessor may file']);
+    $aquorum = max(1, (int)($am['formation']['quorum'] ?? astfAssessors()));
+    $filings = $am['filings'] ?? [];
+    foreach ($filings as $f) { if (($f['assessorId'] ?? null) === $user['id']) send(409, ['error' => 'You have already filed on this audit']); }
+    $filings[] = ['assessorId' => $user['id'], 'assessor' => $user['name'] ?? $user['initials'], 'verdict' => $verdict, 'rubric' => $rubOut, 'rationale' => $rationale, 'flags' => $flags, 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    $am['filings'] = $filings;
+    if (count($filings) < $aquorum) {
+        dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($am), $cellId]);
+        send(200, ['ok' => true, 'filed' => count($filings), 'required' => $aquorum, 'complete' => false]);
+    }
+    $tally = ['approved' => 0, 'rejected' => 0, 'revision' => 0];
+    foreach ($filings as $f) { if (isset($tally[$f['verdict'] ?? ''])) $tally[$f['verdict']]++; }
+    arsort($tally); $topStance = array_key_first($tally);
+    $decided = ($tally[$topStance] * 2 > count($filings)) ? $topStance : 'revision';
+    $maj = array_values(array_filter($filings, function($f) use ($decided) { return ($f['verdict'] ?? '') === $decided; }));
+    $rubAvg = []; foreach (array_keys($maj[0]['rubric'] ?? []) as $rk) { if ($rk === 'total') continue; $rs = 0; foreach ($maj as $f) $rs += (int)($f['rubric'][$rk] ?? 0); $rubAvg[$rk] = (int)round($rs / count($maj)); }
+    $rubAvg['total'] = array_sum($rubAvg);
+    $flagsU = []; foreach ($maj as $f) foreach (($f['flags'] ?? []) as $fl) { if (!in_array($fl, $flagsU)) $flagsU[] = $fl; }
+    $verdict = $decided; $rubOut = $rubAvg; $total = $rubAvg['total']; $flags = $flagsU;
+    $rationale = implode("\n\n— — —\n\n", array_map(function($f) { return (string)($f['rationale'] ?? ''); }, $maj));
+    $ar = ['verdict' => $verdict, 'rationale' => $rationale, 'flags' => $flags, 'rubric' => $rubOut, 'rubricKind' => $judicial ? 'judicial' : 'motion', 'assessors' => count($filings), 'decidedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($am), $cellId]);
     dbRun("UPDATE cells SET status = 'Verdict Filed', resolution = ? WHERE id = ?", [json_encode($ar), $cellId]);
     if (!$judicial) dbRun('UPDATE cells SET blind = 0 WHERE id = ?', [$cellId]);
     dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", ['stf-' . $cellId]);
@@ -801,7 +858,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
         foreach ($flags as $fn) {
             $fu = jstfResolveUser($fn);
             if (!$fu) continue;
-            jstfRouteIntake('user:' . $fu['id'], 'Anonymous Report — ' . ($fu['name'] ?? $fu['initials']), 'Flagged during aSTF adjudication of "' . ($cell['title'] ?? $cellId) . '" by ' . ($user['name'] ?? $user['initials']) . '.');
+            jstfRouteIntake('user:' . $fu['id'], 'Anonymous Report — ' . ($fu['name'] ?? $fu['initials']), 'Flagged during aSTF adjudication of "' . ($cell['title'] ?? $cellId) . '" by aSTF assessor majority.');
         }
     }
     // jSTF judicial audit path
@@ -877,7 +934,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
                 dbRun("UPDATE cells SET status = 'Under Investigation', resolution = ? WHERE id = ?", [json_encode($jr), $src['sourceCellId']]);
             }
             dbRun('INSERT INTO integrity_records (id, type, subject, purpose, circle, date, verdict, text) VALUES (?,?,?,?,?,?,?,?)', ['ir-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $src['sourceCellId']), 'jSTF', (string)($jm['targetName'] ?? ''), 'Judicial investigation concluded', (string)($jstf['circle'] ?? ''), date('Y-m-d'), $verdict === 'approved' ? ((($vi['type'] ?? '') === 'exonerating') ? 'Exonerated' : 'Resolution Applied') : ($verdict === 'rejected' ? 'Rejected' : 'Revision Ordered'), 'aSTF audit ' . $verdict . ' — ' . substr((string)$rationale, 0, 500)]);
-            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-audit', '', date('Y-m-d'), 'aSTF audit on ' . $src['sourceCellId'] . ': ' . $verdict . ' (rubric ' . $total . '/30)', (string)($user['name'] ?? $user['initials'])]);
+            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-audit', '', date('Y-m-d'), 'aSTF audit on ' . $src['sourceCellId'] . ': ' . $verdict . ' (rubric ' . $total . '/30)', 'aSTF assessors']);
         }
         $asStf = dbGet("SELECT id FROM stfs WHERE type = 'aSTF' AND title = ?", ['aSTF Audit — ' . ($src['targetName'] ?? '')]);
         if ($asStf) dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", [$asStf['id']]);
@@ -891,7 +948,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
             elseif ($verdict === 'rejected') { $or['status'] = 'Rejected'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
             else { $or['status'] = 'Revision Requested'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'draft' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
         }
-        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-' . time(), 'astf-verdict', (string)($src['circleName'] ?? ''), date('Y-m-d'), '"' . ($cell['title'] ?? $cellId) . '" — aSTF verdict: ' . $verdict . ' (rubric ' . $total . '/30)', (string)($user['name'] ?? $user['initials'])]);
+        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-' . time(), 'astf-verdict', (string)($src['circleName'] ?? ''), date('Y-m-d'), '"' . ($judicial ? $cellId : ($cell['title'] ?? $cellId)) . '" — aSTF verdict: ' . $verdict . ' (rubric ' . $total . '/30)', 'aSTF assessors']);
     }
     send(200, ['ok' => true, 'verdict' => $verdict, 'astfId' => $cellId, 'originCellId' => $src['originCellId'] ?? null, 'rubricTotal' => $total]);
 }
@@ -1365,6 +1422,57 @@ function astfDurationDays() {
     $d = (int)($ss['astf_duration_days'] ?? 0);
     return $d > 0 ? $d : 10;
 }
+function astfAssessors() {
+    $ss = dbGet('SELECT astf_assessors FROM system_settings WHERE id = 1');
+    $q = (int)($ss['astf_assessors'] ?? 0);
+    return $q > 0 ? $q : 3;
+}
+// Assessor invitation batch: stewards in good standing only (blind audit
+// is an entrusted function), top half by competence, randomly sampled.
+function astfInviteBatch($aId, $excludeIds, $count) {
+    $invitedIds = array_map(function($r) { return (string)($r['user_id'] ?? ''); }, dbAll("SELECT user_id FROM stf_candidates WHERE stf_id = ?", ['stf-' . $aId]));
+    $ranked = array_values(array_filter(jstfEligiblePool($excludeIds, [], 'stewards'), function($s) use ($invitedIds) { return !in_array((string)$s['id'], $invitedIds, true); }));
+    $topHalf = array_slice($ranked, 0, max(1, (int)ceil(count($ranked) / 2)));
+    shuffle($topHalf);
+    $batch = array_slice($topHalf, 0, max(0, (int)$count));
+    $now = date('Y-m-d\TH:i:s.000\Z');
+    foreach ($batch as $s) {
+        if (!$s['initials']) continue;
+        $cid = 'cand-astf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4) . '-' . strtolower(preg_replace('/[^A-Za-z0-9]/', '', $s['initials'] ?: 'x'));
+        dbRun('INSERT INTO stf_candidates (id, stf_id, name, initials, status, invited_date, user_id) VALUES (?,?,?,?,?,?,?)', [$cid, 'stf-' . $aId, $s['name'], $s['initials'], 'invited', $now, $s['id']]);
+    }
+    return $batch;
+}
+// Seat accepted assessors; close the vacancy at quorum.
+function astfSeatAccepted($aId) {
+    $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$aId]);
+    if (!$cell || ($cell['type'] ?? '') !== 'aSTF Cell') return 0;
+    $meta = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($meta['formation']['state'] ?? '') !== 'inviting') return (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$aId])['n'] ?? 0);
+    $quorum = max(1, (int)($meta['formation']['quorum'] ?? astfAssessors()));
+    $acc = dbAll("SELECT * FROM stf_candidates WHERE stf_id = ? AND status = 'accepted' ORDER BY invited_date", ['stf-' . $aId]);
+    $seated = dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ?', [$aId]);
+    $seatedIds = array_map(function($t) { return (string)($t['user_id'] ?? ''); }, $seated);
+    $seatedIni = array_map(function($t) { return $t['initials']; }, $seated);
+    foreach ($acc as $a) {
+        if (count($seatedIds) >= $quorum) break;
+        if (in_array((string)($a['user_id'] ?? ''), $seatedIds, true) || in_array($a['initials'], $seatedIni)) continue;
+        dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus, user_id) VALUES (?,?,?,?,?,?)', [$aId, $a['name'], $a['initials'], 'aSTF adjudicator', 'Blind audit', $a['user_id'] ?? null]);
+        $seatedIds[] = (string)($a['user_id'] ?? ''); $seatedIni[] = $a['initials'];
+    }
+    $n = count($seatedIds);
+    $meta['formation']['seated'] = $n;
+    if ($n >= $quorum) {
+        $meta['formation']['state'] = 'seated';
+        $newDl = date('Y-m-d', time() + astfDurationDays() * 86400);
+        dbRun('UPDATE cells SET participants = ?, meta = ?, deadline = ? WHERE id = ?', [$n, json_encode($meta), $newDl, $aId]);
+        dbRun('UPDATE stfs SET deadline = ? WHERE id = ?', [$newDl, 'stf-' . $aId]);
+        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'astf-seated', '', date('Y-m-d'), 'aSTF assessors seated on ' . $aId . ' — ' . $n . ' assessors, deadline ' . $newDl, 'system']);
+    } else {
+        dbRun('UPDATE cells SET participants = ?, meta = ? WHERE id = ?', [$n, json_encode($meta), $aId]);
+    }
+    return $n;
+}
 function jstfQuorum() {
     $ss = dbGet('SELECT jstf_adjudicators FROM system_settings WHERE id = 1');
     $q = (int)($ss['jstf_adjudicators'] ?? 0);
@@ -1709,6 +1817,55 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-escalation', '', date('Y-m-d'), 'jSTF opened (' . ($isAppeal ? 'appeal' : 'report') . ') — vacancy open, ' . count($invited) . ' invited, quorum ' . $quorum . ' [' . $jId . ']', (string)($user['name'] ?? $user['initials'])]);
     send(201, ['ok' => true, 'jstfId' => $jId]);
 }
+// Recompute invitation excludes for an audit: motion proposer, or the full
+// separation set (team, target, petitioner, sponsor) on judicial audits.
+function astfInviteExcludes($aId) {
+    $cell = dbGet('SELECT source, meta FROM cells WHERE id = ?', [$aId]);
+    if (!$cell) return [];
+    $src = pJson($cell['source'] ?? '{}') ?: []; $meta = pJson($cell['meta'] ?? '{}') ?: [];
+    $ex = [];
+    if (($src['type'] ?? '') === 'judicial-audit') {
+        if (!empty($meta['targetId'])) $ex[] = $meta['targetId'];
+        $jsrc = $src['sourceCellId'] ?? null;
+        if ($jsrc) foreach (dbAll('SELECT user_id FROM cell_team WHERE cell_id = ?', [$jsrc]) as $jt) { if (!empty($jt['user_id'])) $ex[] = $jt['user_id']; }
+        $jm = $jsrc ? (pJson((dbGet('SELECT meta FROM cells WHERE id = ?', [$jsrc])['meta'] ?? '{}')) ?: []) : [];
+        if (!empty($jm['threadId'])) { $sub = dbGet('SELECT submitter_id FROM threads WHERE id = ?', [$jm['threadId']]); if ($sub && !empty($sub['submitter_id'])) $ex[] = $sub['submitter_id']; }
+        $jss = $jsrc ? (pJson((dbGet('SELECT source FROM cells WHERE id = ?', [$jsrc])['source'] ?? '{}')) ?: []) : [];
+        if (!empty($jss['escalatedBy'])) { $sp = dbGet('SELECT id FROM users WHERE name = ?', [$jss['escalatedBy']]); if ($sp) $ex[] = $sp['id']; }
+    } elseif (!empty($src['submittedBy'])) {
+        $pu = dbGet('SELECT id FROM users WHERE name = ?', [$src['submittedBy']]);
+        if ($pu) $ex[] = $pu['id'];
+    }
+    return array_values(array_filter($ex));
+}
+// ---- aSTF vacancy: invited assessor accepts or declines ----
+if (preg_match('/^\/cells\/([^\/]+)\/astf-membership$/', $cleanPath, $m)) {
+    if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
+    $cId = urldecode($m[1]); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+    if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'aSTF Cell') send(400, ['error' => 'Not an aSTF cell']);
+    if (($cell['status'] ?? '') !== 'Blind Review') send(400, ['error' => 'Audit is closed']);
+    $meta = pJson($cell['meta'] ?? '{}') ?: [];
+    if (($meta['formation']['state'] ?? '') !== 'inviting') send(409, ['error' => 'Assessors already seated']);
+    $body = readBody(); $decision = trim((string)($body->decision ?? ''));
+    if (!in_array($decision, ['accept', 'decline'])) send(400, ['error' => 'decision must be accept or decline']);
+    $cand = dbGet("SELECT * FROM stf_candidates WHERE stf_id = ? AND user_id = ? AND status = 'invited'", ['stf-' . $cId, $user['id']]);
+    if (!$cand) $cand = dbGet("SELECT * FROM stf_candidates WHERE stf_id = ? AND initials = ? AND status = 'invited'", ['stf-' . $cId, $user['initials']]);
+    if (!$cand) send(404, ['error' => 'No pending invitation for you on this audit']);
+    dbRun('UPDATE stf_candidates SET status = ? WHERE id = ?', [$decision === 'accept' ? 'accepted' : 'declined', $cand['id']]);
+    $seated = 0;
+    if ($decision === 'accept') $seated = astfSeatAccepted($cId);
+    else {
+        $seated = (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
+        $pending = (int)(dbGet("SELECT COUNT(*) AS n FROM stf_candidates WHERE stf_id = ? AND status = 'invited'", ['stf-' . $cId])['n'] ?? 0);
+        $cell2 = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+        $meta2 = pJson($cell2['meta'] ?? '{}') ?: [];
+        if ($pending < 2 && ($meta2['formation']['state'] ?? '') === 'inviting') astfInviteBatch($cId, astfInviteExcludes($cId), 2 - $pending);
+    }
+    $cell3 = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
+    $meta3 = pJson($cell3['meta'] ?? '{}') ?: [];
+    send(200, ['ok' => true, 'decision' => $decision, 'seated' => $seated, 'quorum' => $meta3['formation']['quorum'] ?? astfAssessors(), 'state' => $meta3['formation']['state'] ?? 'inviting']);
+}
 // ---- jSTF vacancy: invited member accepts or declines ----
 if (preg_match('/^\/cells\/([^\/]+)\/jstf-membership$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
@@ -1829,9 +1986,17 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
     dbRun("UPDATE cells SET status = 'Finalised', meta = ?, source = ? WHERE id = ?", [json_encode($meta), json_encode($src), $cId]);
     $aId = 'astf-audit-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $aSrc = ['type' => 'judicial-audit', 'sourceCellId' => $cId, 'sourceTitle' => 'jSTF Disciplinary Verdict', 'targetId' => $meta['targetId'], 'targetName' => $meta['targetName'], 'verdict' => ['type' => $type, 'description' => $desc, 'policyRefs' => $meta['verdict']['policyRefs'], 'findings' => $findings, 'executingCircles' => $execs, 'systemActions' => $sysActs, 'appealDirection' => $appealDir ?: null]];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$aId, 'aSTF Cell', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), 'Blind Review', 'judicial-audit', 1, '', $cId, 1, json_encode($aSrc), json_encode(['status' => 'Pending']), json_encode(['blind' => 1, 'targetName' => $meta['targetName'], 'verdict' => $meta['verdict']])]);
+    $aQuorumJ = astfAssessors();
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$aId, 'aSTF Cell', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), 'Blind Review', 'judicial-audit', 0, '', $cId, 1, json_encode($aSrc), json_encode(['status' => 'Pending']), json_encode(['blind' => 1, 'targetName' => $meta['targetName'], 'verdict' => $meta['verdict'], 'formation' => ['state' => 'inviting', 'quorum' => $aQuorumJ, 'seated' => 0], 'filings' => []])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $aId, 'aSTF', 'Judicial Audit', $meta['targetName'] ?? '', 'active', 'Blind Review', 'aSTF Audit — ' . ($meta['targetName'] ?? ''), date('Y-m-d', time() + astfDurationDays() * 86400)]);
     dbRun('UPDATE cells SET resolution_ref = ? WHERE id = ?', [$aId, $cId]);
+    // Complete separation: the jSTF team, the target, the petitioner and
+    // the sponsor can never assess the verdict they made, faced, or filed.
+    $aExclude = array_values(array_filter([$meta['targetId'] ?? null]));
+    foreach (dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ?', [$cId]) as $jt) { if (!empty($jt['user_id'])) $aExclude[] = $jt['user_id']; }
+    if (!empty($meta['threadId'])) { $asub = dbGet('SELECT submitter_id FROM threads WHERE id = ?', [$meta['threadId']]); if ($asub && !empty($asub['submitter_id'])) $aExclude[] = $asub['submitter_id']; }
+    if (!empty($src['escalatedBy'])) { $asp = dbGet('SELECT id FROM users WHERE name = ?', [$src['escalatedBy']]); if ($asp) $aExclude[] = $asp['id']; }
+    astfInviteBatch($aId, $aExclude, $aQuorumJ + 2);
     dbRun("UPDATE stfs SET status = 'Finalised', bucket = 'completed' WHERE id = ?", ['stf-' . $cId]);
     dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-jstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'jstf-verdict', '', date('Y-m-d'), 'jSTF verdict filed on ' . $cId . ' — ' . $type . ' (' . count($pRefs) . ' policies cited)', (string)($user['name'] ?? $user['initials'])]);
     send(200, ['ok' => true, 'jstfId' => $cId, 'astfId' => $aId, 'type' => $type, 'warnings' => $dropWarn]);

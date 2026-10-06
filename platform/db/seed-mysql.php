@@ -395,7 +395,7 @@ $TABLES = [
         `id` INT PRIMARY KEY, `steward_term_months` INT, `max_consecutive_terms` INT,
         `cooloff_months` INT, `p_astf_cycle_months` INT, `auto_expire_circles` INT DEFAULT 0,
         `default_circle_expiry_months` INT, `jstf_duration_days` INT, `astf_duration_days` INT,
-        `vstf_duration_days` INT, `jstf_domains` TEXT, `jstf_adjudicators` INT, `jstf_pool_mode` VARCHAR(32)
+        `vstf_duration_days` INT, `jstf_domains` TEXT, `jstf_adjudicators` INT, `jstf_pool_mode` VARCHAR(32), `astf_assessors` INT
     )",
 
     "CREATE TABLE IF NOT EXISTS `stats` (
@@ -992,7 +992,7 @@ if (!empty($mock['stats'])) {
 // System settings
 if (!empty($mock['systemSettings'])) {
     $s = $mock['systemSettings'];
-    $stmt = $db->prepare("INSERT INTO system_settings (id, steward_term_months, max_consecutive_terms, cooloff_months, p_astf_cycle_months, auto_expire_circles, default_circle_expiry_months, jstf_duration_days, astf_duration_days, vstf_duration_days, jstf_domains, jstf_adjudicators, jstf_pool_mode) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE steward_term_months=VALUES(steward_term_months)");
+    $stmt = $db->prepare("INSERT INTO system_settings (id, steward_term_months, max_consecutive_terms, cooloff_months, p_astf_cycle_months, auto_expire_circles, default_circle_expiry_months, jstf_duration_days, astf_duration_days, vstf_duration_days, jstf_domains, jstf_adjudicators, jstf_pool_mode, astf_assessors) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE steward_term_months=VALUES(steward_term_months)");
     if (!$stmt) { seedErr("system_settings prepare failed: " . $db->error); }
     else {
         $auto = ($s['autoExpireCircles'] ?? $s['auto_expire_circles'] ?? false) ? 1 : 0;
@@ -1008,7 +1008,8 @@ if (!empty($mock['systemSettings'])) {
         if (is_array($jdom)) $jdom = json_encode(array_values($jdom));
         $jq = $s['jstfAdjudicators'] ?? $s['jstf_adjudicators'] ?? 3;
         $jpm = $s['jstfPoolMode'] ?? $s['jstf_pool_mode'] ?? 'competence';
-        $stmt->bind_param('iiiiiiiiisis', $stm, $mct, $co, $pc, $auto, $dce, $jd, $ad, $vd, $jdom, $jq, $jpm);
+        $aa = $s['astfAssessors'] ?? $s['astf_assessors'] ?? 3;
+        $stmt->bind_param('iiiiiiiiisisi', $stm, $mct, $co, $pc, $auto, $dce, $jd, $ad, $vd, $jdom, $jq, $jpm, $aa);
         if (!$stmt->execute()) seedErr("system_settings execute failed: " . $stmt->error);
         $stmt->close();
     }

@@ -309,6 +309,10 @@ var SolisApi = (function() {
     return req('POST', 'cells/' + cellId + '/jstf-membership', payload);
   }
 
+  function astfMembership(cellId, payload) {
+    return req('POST', 'cells/' + cellId + '/astf-membership', payload);
+  }
+
   function fileJstfVerdict(cellId, payload) {
     return req('POST', 'cells/' + cellId + '/jstf-verdict', payload);
   }
@@ -541,6 +545,7 @@ var SolisApi = (function() {
     escalateJstf: escalateJstf,
     voteJstf: voteJstf,
     jstfMembership: jstfMembership,
+    astfMembership: astfMembership,
     fileJstfVerdict: fileJstfVerdict,
     addJstfQuestion: addJstfQuestion,
     setJstfQuestion: setJstfQuestion,

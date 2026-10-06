@@ -3508,6 +3508,11 @@ function closeDebate() {
 function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
   SolisApi.fileAstfVerdict(cellId, { verdict: verdict, rubric: rubric, rationale: rationale, flags: flags || [] }).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Could not file verdict. ' + ((r && r.error) || 'server error'), 'error'); return; }
+    if (r.complete === false) {
+      toast('Adjudication filed (' + r.filed + '/' + r.required + ') — sealed until quorum decides.', 'success');
+      if (typeof loadApiData === 'function') { loadApiData().then(function() { if (typeof renderAstfMotion === 'function') renderAstfMotion(); if (typeof renderAstfJudicial === 'function') renderAstfJudicial(); }); }
+      return;
+    }
     var cell = cellsById[cellId];
     if (cell) { cell.status = 'Verdict Filed'; cell.blind = 0; cell.resolution = { verdict: verdict, rubricTotal: r.rubricTotal }; }
     toast('aSTF verdict filed: ' + verdict + ' (rubric ' + r.rubricTotal + '/30).', 'success');
@@ -3536,6 +3541,48 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
 // a jSTF disciplinary verdict) and cross-links back to the originating case;
 // otherwise binds the static card to the newest open deliberation aSTF cell
 // (title, status, submitted draft text).
+// Assessor formation card (shared by both audit views): vacancy with
+// accept/decline for invitees, filings progress once seated. Assessor
+// identities stay masked — each viewer sees only their own row.
+function astfFormationHtml(cell) {
+  if (!cell) return '';
+  var fm = cell.formation || {};
+  var state = fm.state || (cell.status === 'Verdict Filed' ? 'decided' : 'inviting');
+  var quorum = fm.quorum || 3;
+  if (state === 'decided' || cell.status === 'Verdict Filed') return '';
+  var me = (typeof MOCK !== 'undefined' && MOCK && MOCK.currentUser) || {};
+  var mine = null;
+  ((MOCK && MOCK.stfCandidates) || []).forEach(function(x) {
+    if (String(x.stfId) === 'stf-' + cell.id && ((x.userId && x.userId === me.id) || (!x.userId && x.initials === me.initials))) mine = x;
+  });
+  var html = '<div class="aside-card"><div class="aside-title">Assessor Formation</div>';
+  if (state === 'inviting') {
+    html += '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Vacancy open — ' + (fm.seated || 0) + '/' + quorum + ' seated.</div>';
+    if (mine && mine.status === 'invited') {
+      html += '<div style="font-size:11px;color:var(--text);margin-bottom:8px">You are invited as assessor. The assignment only — case content stays sealed until you accept.</div>'
+        + '<div class="flex gap-2"><button class="btn btn-primary btn-sm" onclick="astfMembershipDecision(\'' + cell.id + '\',\'accept\')">Accept</button><button class="btn btn-sm" onclick="astfMembershipDecision(\'' + cell.id + '\',\'decline\')">Decline</button></div>';
+    } else {
+      html += '<div style="font-size:11px;color:var(--text-tertiary)">Invitations are out. Filings open once quorum (' + quorum + ') is seated.</div>';
+    }
+  } else {
+    var filed = cell.filingsCount || 0;
+    var team = cell.team || [];
+    var meSeated = team.some(function(t) { return !!(t.self || (me.id && t.userId && t.userId === me.id)); });
+    html += '<div style="font-size:11px;color:var(--text-secondary);margin-bottom:8px">Assessors seated (' + team.length + '). Filings sealed until quorum: ' + filed + '/' + quorum + '.</div>';
+    if (!meSeated) html += '<div style="font-size:11px;color:var(--text-tertiary)">You are not seated on this audit.</div>';
+    else if (cell.filedMe) html += '<div style="font-size:11px;color:var(--green)">Your adjudication is filed — sealed until quorum decides.</div>';
+    else html += '<div style="font-size:11px;color:var(--text-tertiary)">File below — your adjudication stays sealed until quorum (' + quorum + ') is reached.</div>';
+  }
+  return html + '</div>';
+}
+function astfMembershipDecision(cellId, decision) {
+  if (typeof SolisApi === 'undefined' || !SolisApi.astfMembership) { toast('Client out of date — reload.', 'error'); return; }
+  SolisApi.astfMembership(cellId, { decision: decision }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Could not record decision. ' + ((r && r.error) || 'server error'), 'error'); return; }
+    toast(decision === 'accept' ? 'Seat accepted (' + r.seated + '/' + r.quorum + ').' : 'Invitation declined.', 'success');
+    if (typeof loadApiData === 'function') { loadApiData().then(function() { if (typeof renderAstfMotion === 'function') renderAstfMotion(); if (typeof renderAstfJudicial === 'function') renderAstfJudicial(); }); }
+  }).catch(function() { toast('Could not record decision. Is the server running?', 'error'); });
+}
 // aSTF rubric: zero-scored inputs (reviewer judgment) with a live running
 // total — no pre-filled demo scores.
 function wireAstfRubric() {
@@ -3671,6 +3718,7 @@ function renderAstfMotion(cell) {
         '<div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft(\'view-stf-astf-motion\')">Save Draft</button></div></div>' +
       '</div>' +
       '<div class="layout-aside">' +
+        astfFormationHtml(cell) +
         '<div class="aside-card"><div class="aside-title">Assignment</div>' + assignRows.map(function(r) { return '<div class="aside-row"><span class="aside-label">' + esc(r[0]) + '</span><span style="font-size:11px;color:var(--text)">' + esc(r[1]) + '</span></div>'; }).join('') + '</div>' +
         '<div class="aside-card"><div class="aside-title">Commissioning Circle</div>' +
           '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">' + esc(circleIni) + '</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(circleName) + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + esc(lead.name ? 'Mandated: ' + (lead.name || '') : 'Mandated: —') + '</div></div></div>' +
@@ -3756,6 +3804,7 @@ function renderAstfJudicial(cell) {
         '<div style="margin-top:16px"><div class="flex gap-2"><button class="btn btn-primary" onclick="submitStaticAstfAdjudication()">Submit Adjudication</button><button class="btn" onclick="saveViewDraft(\'view-stf-astf-judicial\')">Save Draft</button></div></div>' +
       '</div>' +
       '<div class="layout-aside">' +
+        astfFormationHtml(cell) +
         '<div class="aside-card"><div class="aside-title">Assignment</div>' + assignRows.map(function(r) { return '<div class="aside-row"><span class="aside-label">' + esc(r[0]) + '</span><span style="font-size:11px;color:var(--text)">' + esc(r[1]) + '</span></div>'; }).join('') + '</div>' +
         '<div class="aside-card"><div class="aside-title">Originating Case</div>' +
           '<div class="hrow"><div class="hav" style="background:linear-gradient(135deg,var(--red),#3a1860);width:28px;height:28px;font-size:10px">' + esc(jcell ? 'J' : '—') + '</div><div><div style="font-size:12px;font-weight:500;color:var(--text)">' + esc(jcell ? (jcell.title || jcell.id) : '—') + '</div><div style="font-size:10px;color:var(--text-tertiary)">' + esc(jcell ? (jcell.status || '') : '') + '</div></div></div>' +
@@ -6546,6 +6595,7 @@ function applySettingsSnapshot(snapshot) {
       var persist = {};
       if (s.stf.jstfDurationDays != null) persist.jstf_duration_days = s.stf.jstfDurationDays;
       if (s.stf.jstfAdjudicators != null) persist.jstf_adjudicators = s.stf.jstfAdjudicators;
+      if (s.stf.astfAssessors != null) persist.astf_assessors = s.stf.astfAssessors;
       if (s.stf.jstfPoolMode != null) persist.jstf_pool_mode = s.stf.jstfPoolMode;
       if (s.stf.jstfDomains != null) persist.jstf_domains = JSON.stringify(s.stf.jstfDomains);
       if (s.stf.astfDurationDays != null) persist.astf_duration_days = s.stf.astfDurationDays;
