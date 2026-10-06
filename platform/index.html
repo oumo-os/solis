@@ -4128,9 +4128,30 @@ function reviewDeliverable(cellId, deliverableId, decision) {
   });
 }
 
+var _vstfActiveCellId = null;
+function setActiveVstfCell(id) { _vstfActiveCellId = id || null; try { if (id) sessionStorage.setItem('vstfActiveCell', id); else sessionStorage.removeItem('vstfActiveCell'); } catch (e) {} }
+function vstfViewKey(cell) {
+  if (!cell) return 'stf-vstf-competence';
+  var t = (cell.source || {}).type || cell.delibType || cell.delib_type || '';
+  return (t === 'steward-candidacy') ? 'stf-vstf-steward' : 'stf-vstf-competence';
+}
 function getActiveVstfCell() {
   var cells = (MOCK && MOCK.cells) || [];
-  for (var i = cells.length - 1; i >= 0; i--) {
+  var i;
+  if (_vstfActiveCellId) {
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i].id === _vstfActiveCellId && cells[i].type === 'vSTF Cell') return cells[i];
+    }
+  }
+  try {
+    var remembered = sessionStorage.getItem('vstfActiveCell');
+    if (remembered) {
+      for (i = 0; i < cells.length; i++) {
+        if (cells[i].id === remembered && cells[i].type === 'vSTF Cell') { _vstfActiveCellId = remembered; return cells[i]; }
+      }
+    }
+  } catch (e) {}
+  for (i = cells.length - 1; i >= 0; i--) {
     if (cells[i].type === 'vSTF Cell') return cells[i];
   }
   return null;
@@ -4206,7 +4227,10 @@ function vstfSamePerson(name, m) {
 function findVstfContext(vstfType) {
   var cells = (MOCK && MOCK.cells) || [];
   var cell = null, fallback = null;
-  for (var i = cells.length - 1; i >= 0; i--) {
+  // The explicitly selected verification renders — never a sibling type.
+  var bound = (typeof getActiveVstfCell === 'function') ? getActiveVstfCell() : null;
+  if (bound && (bound.delibType === vstfType || ((bound.source || {}).type) === vstfType)) cell = bound;
+  for (var i = cells.length - 1; i >= 0 && !cell; i--) {
     if (cells[i].type !== 'vSTF Cell') continue;
     if (!fallback) fallback = cells[i];
     if (cells[i].delibType === vstfType) { cell = cells[i]; break; }
@@ -4968,6 +4992,14 @@ function navStf(stfId) {
       nav(ac ? astfViewKey(ac) : 'stf-astf-motion'); return;
     }
     if (row.type === 'jSTF') { setActiveJstfCase(stfId.indexOf('stf-') === 0 ? stfId.substring(4) : stfId); nav('stf-jstf'); return; }
+    if (row.type === 'vSTF') {
+      var vCell = resolveCell(stfId);
+      if (!vCell && typeof cellsById !== 'undefined' && cellsById[stfId]) vCell = stfId;
+      if (vCell && typeof setActiveVstfCell === 'function') setActiveVstfCell(vCell);
+      var vc = (typeof cellsById !== 'undefined' && cellsById[vCell]) || null;
+      if (!vc) { for (var vi = 0; vi < ((MOCK && MOCK.cells) || []).length; vi++) { if (((MOCK.cells)[vi] || {}).id === vCell) { vc = MOCK.cells[vi]; break; } } }
+      nav(vc ? vstfViewKey(vc) : 'stf-vstf-competence'); return;
+    }
   }
   // Bare cell ids (circle cards, xref callers) carry no stf- prefix: resolve
   // the cell and bind it, otherwise the view renders a stale binding.
@@ -6998,7 +7030,12 @@ function stfNavKey(stfId) {
       }
       if (row.type === 'xSTF') return 'stf-xstf';
       if (row.type === 'p-aSTF') return 'stf-pastf';
-      if (row.type === 'vSTF') return id.toLowerCase().indexOf('competence') !== -1 ? 'stf-vstf-competence' : 'stf-vstf-steward';
+      if (row.type === 'vSTF') {
+        var vcell = null;
+        if (typeof cellsById !== 'undefined' && cellsById[id.substring(4)]) vcell = cellsById[id.substring(4)];
+        if (!vcell) { for (var vi = 0; vi < ((MOCK && MOCK.cells) || []).length; vi++) { if (((MOCK.cells)[vi] || {}).id === id.substring(4)) { vcell = MOCK.cells[vi]; break; } } }
+        return (typeof vstfViewKey === 'function') ? vstfViewKey(vcell) : 'stf-vstf-competence';
+      }
     }
   }
   var low = id.toLowerCase();
