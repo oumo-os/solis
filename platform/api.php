@@ -241,10 +241,12 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         // no names, no target, no questions, no draft, no counts. Other blind
         // cells (motion audits) keep the steward rule so assessors can work.
         $judicialCell = in_array($c['type'] ?? '', ['jSTF Cell', 'xSTF Cell']);
+        $auditClosed = (($c['type'] ?? '') === 'aSTF Cell') && (($c['delib_type'] ?? '') === 'judicial-audit') && (($c['status'] ?? '') === 'Verdict Filed');
         $caseSealed = false;
         if (!empty($c['blind'])) {
             if ($judicialCell) $caseSealed = !jstfTeamMember($c['id'], $currentRow) && !jstfProbeReader($c['id'], $currentRow);
             elseif (($c['type'] ?? '') === 'vSTF Cell') $caseSealed = !vstfReader($c['id'], $currentRow);
+            elseif ($auditClosed) $caseSealed = true;
             else $caseSealed = !$isSteward;
         }
         if ($caseSealed) {
@@ -257,8 +259,19 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 $cell['assessments'] = [];
                 if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials']);
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
+            } elseif ($auditClosed) {
+                // A closed judicial audit is precedent, not reading material:
+                // the outcome lives in policies/integrity records; assessor
+                // attribution and case theory stay sealed.
+                $cell['title'] = 'aSTF — sealed audit [' . $c['id'] . ']';
+                unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                $cell['verdict'] = null;
+                $cell['assessments'] = [];
+                $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
             } else {
-            $cell['title'] = (($c['type'] ?? '') === 'jSTF Cell' ? 'jSTF — sealed case' : 'xSTF — sealed probe') . ' [' . $c['id'] . ']';
+            $sealedCellKind = (($c['type'] ?? '') === 'jSTF Cell') ? 'jSTF — sealed case' : (((($c['type'] ?? '') === 'aSTF Cell')) ? 'aSTF — sealed audit' : 'xSTF — sealed probe');
+            $cell['title'] = $sealedCellKind . ' [' . $c['id'] . ']';
             $letters = ['A', 'B', 'C', 'D', 'E', 'F'];
             $blindLab = ($c['type'] === 'jSTF Cell') ? 'Adjudicator ' : 'Investigator ';
             $iniMap = []; $li = 0;
@@ -308,7 +321,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     foreach (dbAll('SELECT * FROM stfs') as $s) {
         $obj = ['id' => $s['id'], 'type' => $s['type'], 'purpose' => $s['purpose'], 'circle' => $s['circle'], 'deadline' => $s['deadline'], 'status' => $s['status']];
         $sTitle = $s['title'];
-        if (!empty($sealedStf[$s['id']])) $sTitle = ($s['type'] === 'xSTF' ? 'xSTF — sealed probe' : 'jSTF — sealed case') . ' [' . $s['id'] . ']';
+        if (!empty($sealedStf[$s['id']])) {
+            $sealedKind = ($s['type'] === 'xSTF') ? 'xSTF — sealed probe' : (($s['type'] === 'vSTF') ? 'vSTF — sealed verification' : (($s['type'] === 'aSTF') ? 'aSTF — sealed audit' : 'jSTF — sealed case'));
+            $sTitle = $sealedKind . ' [' . $s['id'] . ']';
+        }
         if ($s['bucket'] === 'pending') $obj['candidate'] = $sTitle; else $obj['title'] = $sTitle;
         $stfShape[$s['bucket']][] = $obj;
     }
@@ -415,10 +431,11 @@ foreach ($routes as $r) {
             if (in_array($r['table'], ['cells', 'stfs'])) {
                 $gv = authUser();
                 $jstfHidden = function($cellId) use ($gv) {
-                    $jc = dbGet('SELECT type, blind FROM cells WHERE id = ?', [$cellId]);
+                    $jc = dbGet('SELECT type, blind, delib_type, status FROM cells WHERE id = ?', [$cellId]);
                     if (!$jc || empty($jc['blind'])) return false;
                     $jt = $jc['type'] ?? '';
                     if ($jt === 'vSTF Cell') return !vstfReader($cellId, $gv);
+                    if ($jt === 'aSTF Cell' && ($jc['delib_type'] ?? '') === 'judicial-audit' && ($jc['status'] ?? '') === 'Verdict Filed') return true;
                     if (!in_array($jt, ['jSTF Cell', 'xSTF Cell'])) return false;
                     return !jstfTeamMember($cellId, $gv);
                 };
@@ -770,7 +787,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
     }
     $rationale = trim((string)($body->rationale ?? '')); $flags = is_array($body->flags ?? null) ? $body->flags : [];
     $ar = ['verdict' => $verdict, 'rationale' => $rationale, 'flags' => $flags, 'rubric' => $rubOut, 'rubricKind' => $judicial ? 'judicial' : 'motion', 'adjudicator' => $user['name'] ?? $user['initials'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
-    dbRun("UPDATE cells SET status = 'Verdict Filed', resolution = ?, blind = 0 WHERE id = ?", [json_encode($ar), $cellId]);
+    dbRun("UPDATE cells SET status = 'Verdict Filed', resolution = ? WHERE id = ?", [json_encode($ar), $cellId]);
+    if (!$judicial) dbRun('UPDATE cells SET blind = 0 WHERE id = ?', [$cellId]);
     dbRun("UPDATE stfs SET status = 'Verdict Filed', bucket = 'completed' WHERE id = ?", ['stf-' . $cellId]);
     if ($flags) {
         foreach ($flags as $fn) {
