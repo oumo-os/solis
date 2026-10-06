@@ -73,7 +73,10 @@ function renderSTFRows() {
   return all.map(function(s) {
     var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : 'tag-blue';
     var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : 'b-pending';
-    var purpose = s.purpose + (s.candidate ? ': ' + s.candidate : s.title ? ': ' + s.title : '');
+    var titleTxt = s.candidate ? s.candidate : (s.title || '');
+    // Sealed titles already name their own kind — no purpose prefix.
+    var sealed = / — sealed (case|probe|verification|audit) \[/.test(titleTxt);
+    var purpose = sealed ? titleTxt : s.purpose + (titleTxt ? ': ' + titleTxt : '');
     var navJs = typeof navStf === 'function'
       ? "navStf('" + String(s.id || '').replace(/'/g, '\\\'') + "')"
       : "nav('" + (typeof stfNavKey === 'function' ? stfNavKey(s.id) : 'stf-' + s.id) + "')";

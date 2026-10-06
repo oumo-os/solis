@@ -222,7 +222,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     foreach (dbAll("SELECT cell_id, name, initials, vote FROM vote_records WHERE domain = 'resolution'") as $vr) { $draftVotesByCell[$vr['cell_id']][] = ['name' => $vr['name'], 'initials' => $vr['initials'], 'vote' => $vr['vote']]; }
     $vsumByCell = groupBy(dbAll('SELECT * FROM cell_vote_summary'), 'cell_id');
     $cells = [];
-    $sealedStf = []; $sealedCase = [];
+    $sealedStf = []; $sealedCase = []; $blankCircle = [];
     foreach (dbAll('SELECT * FROM cells') as $c) {
         $meta = pJson($c['meta'] ?? null) ?: [];
         $cell = ['id' => $c['id'], 'type' => $c['type'], 'title' => $c['title'], 'status' => $c['status'], 'delibType' => $c['delib_type'], 'participants' => $c['participants'], 'members' => $c['members'], 'progress' => $c['progress'], 'daysActive' => $c['days_active'], 'lead' => $c['lead'], 'circle' => $c['circle'], 'created' => $c['created'], 'deadline' => $c['deadline'], 'assessors' => $c['assessors'], 'commissionedBy' => $c['commissioned_by'], 'resolutionRef' => $c['resolution_ref'], 'entityType' => $c['entity_type'], 'source' => pJson($c['source'] ?? null), 'resolution' => pJson($c['resolution'] ?? null), 'deliverableSpecs' => pJson($c['deliverable_specs'] ?? null), 'domains' => array_values(array_map(function($d) { return $d['domain']; }, $cellDomains[$c['id']] ?? []))];
@@ -251,6 +251,9 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         if ($caseSealed) {
             $sealedStf['stf-' . $c['id']] = true; $sealedCase[$c['id']] = true;
+            // jSTF and closed-audit rows carry the target in their circle
+            // column — that column goes blank with the seal.
+            if ($judicialCell || $auditClosed) $blankCircle['stf-' . $c['id']] = true;
             if (($c['type'] ?? '') === 'vSTF Cell') {
                 // Verification is blind: candidate and filed assessors see the
                 // record; everyone else sees that a verification exists.
@@ -324,6 +327,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         if (!empty($sealedStf[$s['id']])) {
             $sealedKind = ($s['type'] === 'xSTF') ? 'xSTF — sealed probe' : (($s['type'] === 'vSTF') ? 'vSTF — sealed verification' : (($s['type'] === 'aSTF') ? 'aSTF — sealed audit' : 'jSTF — sealed case'));
             $sTitle = $sealedKind . ' [' . $s['id'] . ']';
+            // The circle column carries the target on jSTF/closed-audit rows
+            // — sealed means sealed: no name, no circle-derived identity.
+            // (vSTF/motion circles are structural and stay.)
+            if (!empty($blankCircle[$s['id']])) $obj['circle'] = '';
         }
         if ($s['bucket'] === 'pending') $obj['candidate'] = $sTitle; else $obj['title'] = $sTitle;
         $stfShape[$s['bucket']][] = $obj;
