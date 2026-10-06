@@ -5912,7 +5912,7 @@ function submitJstfReport() {
   SolisApi.reportJstf({ targetId: targetId, description: description }).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Report failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     closeModal();
-    toast('Anonymous report filed — thread now has ' + r.replies + ' post(s). Visible to stewards.', 'success');
+    toast(r.attachedCase ? 'Anonymous report filed — attached to open case for context.' : 'Anonymous report filed — thread now has ' + r.replies + ' post(s). Visible to stewards.', 'success');
     setTimeout(function(){ window.location.reload(); }, 900);
   }).catch(function() { toast('Could not file report. Is the server running?', 'error'); });
 }

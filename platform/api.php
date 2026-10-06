@@ -31,6 +31,21 @@ function hashPw($pw) { if (defined('PASSWORD_ARGON2ID')) return password_hash($p
 function verifyPw($pw, $stored) { if (!$stored) return false; if (strpos($stored, '$argon2') === 0 || strpos($stored, '$2y$') === 0) return password_verify($pw, $stored); if (isLegacyHash($stored)) return hash_equals(legacyHash($pw), $stored); return false; }
 $rateBuckets = [];
 function rateLimit($key, $max, $windowMs) { global $rateBuckets; $now = (int)(microtime(true) * 1000); if (!isset($rateBuckets[$key]) || ($now - $rateBuckets[$key]['t'] > $windowMs)) $rateBuckets[$key] = ['n' => 0, 't' => $now]; $rateBuckets[$key]['n']++; $rateBuckets[$key]['t'] = $now; return $rateBuckets[$key]['n'] > $max ? (int)ceil(($rateBuckets[$key]['t'] + $windowMs - $now) / 1000) : null; }
+// Persistent limiter: the in-memory buckets above reset every request,
+// so sustained abuse was never actually throttled. This one counts in the
+// database per key per window. Returns retry-after seconds or null.
+function rateLimitDb($key, $max, $windowSec) {
+    dbRun('CREATE TABLE IF NOT EXISTS rate_limits (`key` VARCHAR(255) PRIMARY KEY, hits INT NOT NULL DEFAULT 0, window_start DATETIME NOT NULL)');
+    $now = time(); $winStart = date('Y-m-d H:i:s', $now - ($now % $windowSec));
+    $row = dbGet('SELECT hits, window_start FROM rate_limits WHERE `key` = ?', [$key]);
+    if (!$row || $row['window_start'] < $winStart) {
+        dbRun("INSERT INTO rate_limits (`key`, hits, window_start) VALUES (?,?,?) ON DUPLICATE KEY UPDATE hits = 1, window_start = VALUES(window_start)", [$key, 1, $winStart]);
+        return null;
+    }
+    if ((int)$row['hits'] >= $max) return max(1, $windowSec - ($now - (int)strtotime($row['window_start'])));
+    dbRun('UPDATE rate_limits SET hits = hits + 1 WHERE `key` = ?', [$key]);
+    return null;
+}
 function clientIp() { return preg_replace('/^::ffff:/', '', $_SERVER['REMOTE_ADDR'] ?? 'unknown'); }
 $AUTH_LIMIT = 10; $AUTH_WINDOW_MS = 15 * 60 * 1000;
 function genToken() { return bin2hex(random_bytes(48)); }
@@ -81,7 +96,7 @@ $cleanPath = rtrim($path, '/');
 if ($method === 'POST' && $cleanPath === '/auth/login') {
     $body = readBody();
     $email = strtolower(trim((string)($body->email ?? '')));
-    $retry = rateLimit('auth:' . clientIp(), $AUTH_LIMIT, $AUTH_WINDOW_MS);
+    $retry = rateLimitDb('auth:' . clientIp(), $AUTH_LIMIT, 900);
     if ($retry) send(429, ['error' => 'Too many attempts', 'retryAfter' => $retry]);
     $user = dbGet('SELECT * FROM users WHERE lower(email) = ?', [$email]);
     $pw = (string)($body->password ?? '');
@@ -98,7 +113,7 @@ if ($method === 'POST' && $cleanPath === '/auth/login') {
     send(200, ['token' => $token, 'user' => $user]);
 }
 if ($method === 'POST' && $cleanPath === '/auth/register') {
-    $retry = rateLimit('reg:' . clientIp(), $AUTH_LIMIT, $AUTH_WINDOW_MS);
+    $retry = rateLimitDb('reg:' . clientIp(), $AUTH_LIMIT, 900);
     $body = readBody(); $name = $body->name ?? ''; $email = $body->email ?? ''; $password = $body->password ?? '';
     if ($retry) send(429, ['error' => 'Too many accounts from this address', 'retryAfter' => $retry]);
     if (!$name || !$email || !$password) send(400, ['error' => 'Name, email, and password required']);
@@ -828,7 +843,11 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
         astfInviteBatch($cellId, astfInviteExcludes($cellId), $aq0 + 2);
         send(403, ['error' => 'Assessors still forming — filings open once quorum is seated']);
     }
-    if (($am['formation']['state'] ?? '') === 'inviting') send(403, ['error' => 'Assessors still forming — filings open once quorum is seated']);
+    if (($am['formation']['state'] ?? '') === 'inviting') {
+        $pendA = (int)(dbGet("SELECT COUNT(*) AS n FROM stf_candidates WHERE stf_id = ? AND status = 'invited'", ['stf-' . $cellId])['n'] ?? 0);
+        if ($pendA < 2) astfInviteBatch($cellId, astfInviteExcludes($cellId), 2 - $pendA);
+        send(403, ['error' => 'Assessors still forming — filings open once quorum is seated']);
+    }
     if (!jstfTeamMember($cellId, $user)) send(403, ['error' => 'Only a seated assessor may file']);
     $aquorum = max(1, (int)($am['formation']['quorum'] ?? astfAssessors()));
     $filings = $am['filings'] ?? [];
@@ -1316,7 +1335,10 @@ function jstfOpenCaseForLink($link) {
     $term = jstfTerminalStatuses();
     $cells = dbAll("SELECT * FROM cells WHERE type = 'jSTF Cell'");
     foreach ($cells as $c) {
-        if (in_array($c['status'] ?? '', $term, true)) continue;
+        // 'Finalised' (verdict filed, audit pending) counts as closed for
+        // intake: a fresh report must open a fresh thread, never append to
+        // a decided case's record.
+        if (in_array($c['status'] ?? '', $term, true) || ($c['status'] ?? '') === 'Finalised') continue;
         $meta = pJson($c['meta'] ?? '{}') ?: []; $src = pJson($c['source'] ?? '{}') ?: [];
         $tid = $meta['threadId'] ?? $src['threadId'] ?? null;
         if (str_starts_with($link, 'user:')) {
@@ -1746,6 +1768,8 @@ function maybeLiftSanctions($userId) {
 if (preg_match('/^\/jstf\/report$/', $cleanPath)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $rl = rateLimitDb('report:' . ($user['id'] ?? clientIp()), 10, 3600);
+    if ($rl) send(429, ['error' => 'Too many reports — slow down', 'retryAfter' => $rl]);
     $body = readBody(); $tid = trim((string)($body->targetId ?? '')); $desc = trim((string)($body->description ?? ''));
     if (!$tid) send(400, ['error' => 'targetId required']); if (!$desc) send(400, ['error' => 'description required']);
     $target = dbGet('SELECT * FROM users WHERE id = ?', [$tid]); if (!$target) send(404, ['error' => 'Target member not found']);
@@ -1758,6 +1782,8 @@ if (preg_match('/^\/jstf\/report$/', $cleanPath)) {
 if (preg_match('/^\/jstf\/appeal$/', $cleanPath)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $rl = rateLimitDb('appeal:' . ($user['id'] ?? clientIp()), 10, 3600);
+    if ($rl) send(429, ['error' => 'Too many appeals — slow down', 'retryAfter' => $rl]);
     $body = readBody(); $cid = trim((string)($body->caseId ?? '')); $desc = trim((string)($body->description ?? ''));
     $rRef = trim((string)($body->resolutionRef ?? '')); $rTitle = trim((string)($body->resolutionTitle ?? ''));
     if (!$desc) send(400, ['error' => 'description required']);
@@ -2126,6 +2152,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
         }
     }
     $byQ = $meta['xstfByQuestion'] ?? []; $prevQ = isset($byQ[$qId]) ? (is_array($byQ[$qId]) ? $byQ[$qId] : [$byQ[$qId]]) : []; $byQ[$qId] = array_values(array_unique(array_merge($prevQ, $made)));
+    // Prune drift: drop probe ids whose cells no longer exist.
+    foreach ($byQ as $pk => $pv) { $byQ[$pk] = array_values(array_filter((array)$pv, function($pid) { return (bool)dbGet('SELECT 1 FROM cells WHERE id = ?', [$pid]); })); if (!$byQ[$pk]) unset($byQ[$pk]); }
     $meta['xstfByQuestion'] = $byQ;
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     send(201, ['ok' => true, 'xstfId' => $made[0], 'xstfIds' => $made]);
