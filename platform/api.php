@@ -240,10 +240,20 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $caseSealed = false;
         if (!empty($c['blind'])) {
             if ($judicialCell) $caseSealed = !jstfTeamMember($c['id'], $currentRow) && !jstfProbeReader($c['id'], $currentRow);
+            elseif (($c['type'] ?? '') === 'vSTF Cell') $caseSealed = !vstfReader($c['id'], $currentRow);
             else $caseSealed = !$isSteward;
         }
         if ($caseSealed) {
             $sealedStf['stf-' . $c['id']] = true; $sealedCase[$c['id']] = true;
+            if (($c['type'] ?? '') === 'vSTF Cell') {
+                // Verification is blind: candidate and filed assessors see the
+                // record; everyone else sees that a verification exists.
+                $cell['title'] = 'vSTF — sealed verification [' . $c['id'] . ']';
+                unset($cell['candidateName'], $cell['candidateInitials']);
+                $cell['assessments'] = [];
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials']);
+                $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
+            } else {
             $cell['title'] = (($c['type'] ?? '') === 'jSTF Cell' ? 'jSTF — sealed case' : 'xSTF — sealed probe') . ' [' . $c['id'] . ']';
             $letters = ['A', 'B', 'C', 'D', 'E', 'F'];
             $blindLab = ($c['type'] === 'jSTF Cell') ? 'Adjudicator ' : 'Investigator ';
@@ -278,6 +288,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
             $cell['findings'] = [];
             $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
             $cell['restriction'] = ['state' => 'sealed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => 0];
+            }
     }
         $cell['draftResolutions'] = [];
         foreach (($draftByCell[$c['id']] ?? []) as $d) {
@@ -401,7 +412,10 @@ foreach ($routes as $r) {
                 $gv = authUser();
                 $jstfHidden = function($cellId) use ($gv) {
                     $jc = dbGet('SELECT type, blind FROM cells WHERE id = ?', [$cellId]);
-                    if (!$jc || empty($jc['blind']) || !in_array($jc['type'] ?? '', ['jSTF Cell', 'xSTF Cell'])) return false;
+                    if (!$jc || empty($jc['blind'])) return false;
+                    $jt = $jc['type'] ?? '';
+                    if ($jt === 'vSTF Cell') return !vstfReader($cellId, $gv);
+                    if (!in_array($jt, ['jSTF Cell', 'xSTF Cell'])) return false;
                     return !jstfTeamMember($cellId, $gv);
                 };
                 if ($r['table'] === 'cells') {
@@ -954,7 +968,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-vstf$/', $cleanPath, $m)) {
     $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => $vt, 'candidateName' => trim((string)($body->candidateName ?? '')), 'candidateInitials' => trim((string)($body->candidateInitials ?? '')), 'circleName' => $cn, 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $domains = is_array($body->domains ?? null) ? $body->domains : [];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', ($vt === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $src['candidateName'], 'Pending Assessment', $vt, $ma, $cn, $cId, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $src['candidateName'], 'candidateInitials' => $src['candidateInitials'], 'domains' => $domains, 'assessments' => []])]);
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', ($vt === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $src['candidateName'], 'Pending Assessment', $vt, $ma, $cn, $cId, 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $src['candidateName'], 'candidateInitials' => $src['candidateInitials'], 'domains' => $domains, 'assessments' => []])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $vt === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $cn, 'active', 'Pending Assessment', $src['candidateName'] ?: $cell['title'] ?? '', date('Y-m-d', time() + 14 * 86400)]);
     send(201, ['ok' => true, 'vstfId' => $vId]);
 }
@@ -1008,7 +1022,17 @@ if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
 // ═════════════════════════════════════════════════════════
 if (preg_match('/^\/cells\/([^\/]+)\/evidence$/', $cleanPath, $m)) {
     $cId = urldecode($m[1]);
-    if ($method === 'GET') { send(200, ['ok' => true, 'evidence' => dbAll('SELECT * FROM stf_evidence WHERE cell_id = ? ORDER BY id', [$cId])]); }
+    if ($method === 'GET') {
+        $evCell = dbGet('SELECT type, blind FROM cells WHERE id = ?', [$cId]);
+        if ($evCell && !empty($evCell['blind']) && in_array($evCell['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell'])) {
+            $evUser = authUser(); $evOk = false;
+            if (($evCell['type'] ?? '') === 'vSTF Cell') $evOk = vstfReader($cId, $evUser);
+            elseif (($evCell['type'] ?? '') === 'xSTF Cell') $evOk = jstfProbeReader($cId, $evUser);
+            else $evOk = jstfTeamMember($cId, $evUser);
+            if (!$evOk) send(404, ['error' => 'Not found']);
+        }
+        send(200, ['ok' => true, 'evidence' => dbAll('SELECT * FROM stf_evidence WHERE cell_id = ? ORDER BY id', [$cId])]);
+    }
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     if (!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']])) send(403, ['error' => 'Steward access required']);
@@ -1200,7 +1224,7 @@ function jstfMintPolicyRef() {
 function jstfSpawnSuccessorVstf($candName, $candIni, $circleName, $caseId, $proposalId) {
     $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => 'steward-candidacy', 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'vacancyFor' => $caseId, 'proposalId' => $proposalId, 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', 'vSTF · Steward Candidacy · ' . $candName, 'Pending Assessment', 'steward-candidacy', 3, $circleName, $caseId, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => [], 'assessments' => []])]);
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', 'vSTF · Steward Candidacy · ' . $candName, 'Pending Assessment', 'steward-candidacy', 3, $circleName, $caseId, 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => [], 'assessments' => []])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', 'Steward Candidacy', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
     return $vId;
 }
@@ -1313,6 +1337,22 @@ function jstfSeatAccepted($cId) {
         dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     }
     return $n;
+}
+// Reader check for a blind vSTF verification: the candidate and the members
+// who filed assessments. Anyone else gets the sealed view.
+function vstfReader($vstfId, $user) {
+    if (!$user) return false;
+    $uid = $user['id'] ?? null; if (!$uid) return false;
+    $vc = dbGet('SELECT source, meta FROM cells WHERE id = ?', [$vstfId]);
+    if (!$vc) return false;
+    $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
+    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+    if ($cand && ($cand['id'] ?? null) === $uid) return true;
+    foreach (($vm['assessments'] ?? []) as $a) {
+        if (!empty($a['assessorId']) && $a['assessorId'] === $uid) return true;
+        if (empty($a['assessorId']) && ($a['assessor'] ?? '') === ($user['name'] ?? $user['initials'])) return true;
+    }
+    return false;
 }
 // Reader check for a blind xSTF probe: the probe team or the commissioning
 // jSTF team. Anyone else sees nothing while the probe is blind.
