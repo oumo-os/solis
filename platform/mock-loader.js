@@ -75,7 +75,7 @@ function renderSTFRows() {
     var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : 'b-pending';
     var titleTxt = s.candidate ? s.candidate : (s.title || '');
     // Sealed titles already name their own kind — no purpose prefix.
-    var sealed = / — sealed (case|probe|verification|audit) \[/.test(titleTxt);
+    var sealed = / — sealed (case|probe|verification|audit) /.test(titleTxt);
     var purpose = sealed ? titleTxt : s.purpose + (titleTxt ? ': ' + titleTxt : '');
     var navJs = typeof navStf === 'function'
       ? "navStf('" + String(s.id || '').replace(/'/g, '\\\'') + "')"

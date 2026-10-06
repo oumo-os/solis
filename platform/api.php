@@ -257,7 +257,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
             if (($c['type'] ?? '') === 'vSTF Cell') {
                 // Verification is blind: candidate and filed assessors see the
                 // record; everyone else sees that a verification exists.
-                $cell['title'] = 'vSTF — sealed verification [' . $c['id'] . ']';
+                $cell['title'] = 'vSTF — sealed verification ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials']);
                 $cell['assessments'] = [];
                 if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials']);
@@ -266,7 +266,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 // A closed judicial audit is precedent, not reading material:
                 // the outcome lives in policies/integrity records; assessor
                 // attribution and case theory stay sealed.
-                $cell['title'] = 'aSTF — sealed audit [' . $c['id'] . ']';
+                $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
                 if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
                 $cell['verdict'] = null;
@@ -274,7 +274,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
             } else {
             $sealedCellKind = (($c['type'] ?? '') === 'jSTF Cell') ? 'jSTF — sealed case' : (((($c['type'] ?? '') === 'aSTF Cell')) ? 'aSTF — sealed audit' : 'xSTF — sealed probe');
-            $cell['title'] = $sealedCellKind . ' [' . $c['id'] . ']';
+            $cell['title'] = $sealedCellKind . ' ···' . sealedRef($c['id']);
             $letters = ['A', 'B', 'C', 'D', 'E', 'F'];
             $blindLab = ($c['type'] === 'jSTF Cell') ? 'Adjudicator ' : 'Investigator ';
             $iniMap = []; $li = 0;
@@ -326,7 +326,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $sTitle = $s['title'];
         if (!empty($sealedStf[$s['id']])) {
             $sealedKind = ($s['type'] === 'xSTF') ? 'xSTF — sealed probe' : (($s['type'] === 'vSTF') ? 'vSTF — sealed verification' : (($s['type'] === 'aSTF') ? 'aSTF — sealed audit' : 'jSTF — sealed case'));
-            $sTitle = $sealedKind . ' [' . $s['id'] . ']';
+            $sTitle = $sealedKind . ' ···' . sealedRef($s['id']);
             // The circle column carries the target on jSTF/closed-audit rows
             // — sealed means sealed: no name, no circle-derived identity.
             // (vSTF/motion circles are structural and stay.)
@@ -969,6 +969,14 @@ if (preg_match('/^\/cells\/([^\/]+)\/review-deliverable$/', $cleanPath, $m)) {
 // vSTF ROUTES
 // ═════════════════════════════════════════════════════════
 // ── Integrity engine ─────────────────────────────────────────────
+// Opaque reference for sealed rows: stable across viewers (unlike a
+// per-viewer sequence number), but shortened to the trailing segment so
+// it reads as a reference, not a database dump.
+function sealedRef($id) {
+    $id = (string)$id;
+    $pos = strrpos($id, '-');
+    return $pos === false ? $id : substr($id, $pos + 1);
+}
 // jSTF never commissions a vSTF. It only sets conditions (unverified
 // competences, recorded vacancies). This lazy poll — run on bootstrap,
 // capped per run — notices the conditions and commissions what they call
