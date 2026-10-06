@@ -3895,6 +3895,7 @@ function renderGuides() {
       '<div style="margin-bottom:8px"><strong>Quorum decides.</strong> The case view tracks approvals and rejections toward quorum: an <strong>approval</strong> quorum applies the verdict (JR policy minted and citeable, system actions executed, restriction lifted, implementing circles receive it in their mandated resolutions); a <strong>rejection</strong> quorum flushes the jSTF to a new composition; a <strong>revision</strong> quorum returns the verdict to the same team for redraft.</div>' +
       '<div style="margin-bottom:8px"><strong>Rubric (30 pts).</strong> Due diligence 9 (was the investigation complete and properly run?) · Justice of verdict 9 (right outcome on the evidence?) · Proportionality 6 (does the sanction fit — or dismissal hold?) · Integrity of process 6 (blind intact, no interference?).</div>' +
       '<div><strong>Closeout.</strong> On close the case thread freezes with the verdict as its last entry; new reports on the target open a fresh thread and, if escalated, a fresh case. Appeals carry <em>appealOf / revisionOf</em> links — overturning supersedes the original, upholding records support. No one can overturn a jSTF outcome except through a fresh case and a blind audit.</div>' +
+      '<div style="margin-top:8px"><strong>After the verdict: ripples, not orders.</strong> jSTF never commissions a vSTF — it only sets conditions. Removing a steward records a vacancy; flagging competences sets them all unverified. The integrity engine polls for these conditions: unverified claims get a verification auto-commissioned, vacancies vet their succession pool and seat the top approved candidate. jSTF neither knows nor cares whether reverification ever happens.</div>' +
       guideWeightsHtml('judicial')) +
     sec('g-xstf', 'How xSTF Works',
       '<div style="margin-bottom:8px">There is one xSTF with different settings — judicial probes and circle commissions are the same entity. A probe operates <strong>only on its assigned information package</strong>: the authority proving the commissioning body may task it (a jSTF commission is itself the authority; circles cite the approved resolution), the deliberated and approved deliverable description, cited resolutions and useful content, plus mandate, objectives and prefilled tasks.</div>' +
@@ -5944,7 +5945,7 @@ function jstfSelectedExecCircles() {
   return Array.prototype.filter.call(sel.options || [], function(o) { return o.selected; }).map(function(o) { return o.value; });
 }
 function jstfActKindLabel(kind) {
-  var m = { remove_from_circle: 'Remove from circle(s)', freeze_ws_until: 'Freeze Ws until', candidacy_freeze_until: 'Freeze steward candidacy until', guest_until: 'Guest privilege level until' };
+  var m = { remove_from_circle: 'Remove from circle(s)', freeze_ws_until: 'Freeze Ws until', candidacy_freeze_until: 'Freeze steward candidacy until', guest_until: 'Guest privilege level until', reverify_competences: 'Flag all competences for reverification' };
   return m[kind] || kind;
 }
 function jstfAddSysAction() { _jstfSysActions.push({ kind: 'remove_from_circle', circles: [], until: '' }); renderJstfSysActions(); }
@@ -5959,7 +5960,7 @@ function jstfActCirclesChanged(i, sel) {
 function renderJstfSysActions() {
   var host = document.getElementById('jstf-verdict-actions');
   if (!host) return;
-  var kinds = ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'];
+  var kinds = ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until', 'reverify_competences'];
   host.innerHTML = _jstfSysActions.length ? _jstfSysActions.map(function(a, i) {
     var opts = kinds.map(function(k) { return '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + jstfActKindLabel(k) + '</option>'; }).join('');
     var params = '';

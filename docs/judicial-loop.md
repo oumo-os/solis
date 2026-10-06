@@ -149,6 +149,25 @@ next team write refreshes the composition automatically — new sample,
 same rules, full allowance, no cap. Votes and drafts from departed
 members are dropped; history is kept.
 
+## 9. After the verdict: ripples, not orders
+
+jSTF has no wire to any vSTF and commissions none. A verdict does two
+things at most: it executes its own sanctions (removal, freezes, guest
+level) and it sets conditions. `remove_from_circle` removes the member
+and records a vacancy on the circle. `reverify_competences` flags every
+competence claim of the target unverified. That is the whole of jSTF's
+act — it neither knows nor cares whether reverification ever happens.
+
+The integrity engine (`integrityEnginePoll`, lazy on bootstrap, capped
+per run, idempotent) notices the conditions and commissions what they
+call for. Ripple A: anyone active with unverified claims and no open
+competence-claim gets one auto-commissioned (`commissioned_by:
+system`). Ripple B: a recorded vacancy vets its succession pool —
+pending applicants without a recent (12-month) candidacy vetting get a
+steward-candidacy vSTF each — and then seats the top approved candidate
+per open seat, accepting their application and clearing the vacancy.
+Capacity is split so a verification backlog can never starve succession.
+
 ## Deferred / known limits
 
 - AI verdict drafting does not exist yet (AI drafting covers
@@ -157,5 +176,3 @@ members are dropped; history is kept.
   opening a new invitation vacancy.
 - `user_competence` pool data is thin in development seeds; small
   pools degrade to whoever is eligible.
-- Vote records still key on initials; a `user_id` migration is pending
-  (invitation accept already matches on `user_id`).

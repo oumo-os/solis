@@ -134,6 +134,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     if (preg_match('/^Bearer\s+(.+)$/i', $h, $m)) $tok = $m[1];
     $currentRow = $tok ? dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?', [$tok, date('Y-m-d\TH:i:s.000\Z')]) : null;
     $isSteward = isSteward($currentRow['id'] ?? null);
+    // Integrity engine runs lazily here (no cron): conditions set by jSTF
+    // verdicts (unverified claims, recorded vacancies) commission their own
+    // vSTFs. Capped and idempotent — new rows appear on the next load.
+    if (!$empty) integrityEnginePoll(3);
     $compByUser = groupBy(dbAll('SELECT * FROM user_competence'), 'user_id');
     $cirByUser = groupBy(dbAll('SELECT * FROM user_circles'), 'user_id');
     $orgByUser = groupBy(dbAll('SELECT * FROM user_orgs'), 'user_id');
@@ -939,6 +943,103 @@ if (preg_match('/^\/cells\/([^\/]+)\/review-deliverable$/', $cleanPath, $m)) {
 // ═════════════════════════════════════════════════════════
 // vSTF ROUTES
 // ═════════════════════════════════════════════════════════
+// ── Integrity engine ─────────────────────────────────────────────
+// jSTF never commissions a vSTF. It only sets conditions (unverified
+// competences, recorded vacancies). This lazy poll — run on bootstrap,
+// capped per run — notices the conditions and commissions what they call
+// for. Idempotent: every action re-checks before writing.
+function engineSpawnVstf($type, $candName, $candIni, $circleName, $domains, $extraSrc = []) {
+    $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+    $src = array_merge(['type' => $type, 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'commissionedBy' => 'integrity-engine', 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')], $extraSrc);
+    $title = ($type === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $candName;
+    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', $title, 'Pending Assessment', $type, 3, $circleName, 'system', 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => $domains, 'assessments' => []])]);
+    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $type === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-commission', $circleName, date('Y-m-d'), 'Integrity engine commissioned ' . ($type === 'steward-candidacy' ? 'candidacy vetting' : 'competence verification') . ' for ' . $candName . ' [' . $vId . ']', 'integrity-engine']);
+    return $vId;
+}
+function engineOpenClaim($candId, $candIni, $type) {
+    foreach (dbAll("SELECT id, source, meta FROM cells WHERE type = 'vSTF Cell' AND delib_type = ? AND status <> 'Assessment Filed'", [$type]) as $oc) {
+        $os = pJson($oc['source'] ?? '{}') ?: []; $om = pJson($oc['meta'] ?? '{}') ?: [];
+        $on = ($os['candidateName'] ?? $om['candidateName'] ?? ''); $oi = ($os['candidateInitials'] ?? $om['candidateInitials'] ?? '');
+        if ($candId && vstfResolveCandidate($on, $oi) && vstfResolveCandidate($on, $oi)['id'] === $candId) return $oc['id'];
+        if (!$candId && $candIni && $oi === $candIni) return $oc['id'];
+    }
+    return null;
+}
+function engineRecentVetting($candId, $candIni, $months = 12) {
+    $cut = date('Y-m-d', time() - $months * 30 * 86400);
+    foreach (dbAll("SELECT source, meta FROM cells WHERE type = 'vSTF Cell' AND delib_type = 'steward-candidacy' AND status = 'Assessment Filed'") as $vc) {
+        $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
+        $vd = $vm['completedAt'] ?? $vs['commissionedAt'] ?? null;
+        $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+        $match = ($cand && $candId && $cand['id'] === $candId) || (!$candId && $candIni && ($vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '') === $candIni);
+        if ($match && (!$vd || substr((string)$vd, 0, 10) >= $cut)) return true;
+    }
+    return false;
+}
+// The poll: ripple A (unverified competence claims get a verification),
+// ripple B (circle vacancies vet their succession pool, then seat the top
+// approved candidate per open seat). Capped per run; safe to run often.
+function integrityEnginePoll($cap = 3) {
+    // Capacity is split so a long verification backlog can never starve
+    // succession: vetting/seating always get their share of the run.
+    $capA = max(1, (int)floor($cap / 2)); $capB = max(1, $cap - $capA);
+    $doneA = 0; $doneB = 0;
+    // Ripple A: anyone active with unverified claims and no open
+    // competence-claim gets one auto-commissioned.
+    foreach (dbAll("SELECT DISTINCT uc.user_id AS uid FROM user_competence uc JOIN users u ON u.id = uc.user_id WHERE uc.verified = 0 AND u.status = 'Active' ORDER BY uc.user_id") as $ur) {
+        if ($doneA >= $capA) break;
+        $uid = $ur['uid']; if (!$uid || engineOpenClaim($uid, null, 'competence-claim')) continue;
+        $u = dbGet('SELECT * FROM users WHERE id = ?', [$uid]); if (!$u) continue;
+        $doms = array_values(array_filter(array_map(function($d) { return $d['domain']; }, dbAll('SELECT domain FROM user_competence WHERE user_id = ? AND verified = 0', [$uid]))));
+        if (!$doms) continue;
+        engineSpawnVstf('competence-claim', $u['name'], $u['initials'], '', $doms, ['reason' => 'unverified-claims']);
+        $doneA++;
+    }
+    // Ripple B: vacancies vet their succession pool, then seat.
+    foreach (dbAll('SELECT * FROM circles') as $circle) {
+        $cm = pJson($circle['meta'] ?? '{}') ?: []; $vacs = $cm['vacancies'] ?? [];
+        if (!$vacs) continue;
+        $pool = dbAll("SELECT * FROM circle_applications WHERE circle_id = ? AND status = 'pending' ORDER BY queue_position, applied_date", [$circle['id']]);
+        foreach ($pool as $ap) {
+            if ($doneB >= $capB) break 2;
+            $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
+            $apid = $apu ? $apu['id'] : null;
+            if (engineOpenClaim($apid, $ap['initials'] ?? '', 'steward-candidacy')) continue;
+            if (engineRecentVetting($apid, $ap['initials'] ?? '')) continue;
+            engineSpawnVstf('steward-candidacy', $ap['applicant'] ?? '', $ap['initials'] ?? '', $circle['name'], [], ['reason' => 'succession-vetting', 'vacancyFor' => $circle['id'], 'proposalId' => $ap['id'] ?? null]);
+            $doneB++;
+        }
+        // Seat: top approved-vetted applicant per open seat.
+        $seatedAny = false;
+        foreach ($vacs as $vi => $vac) {
+            $cands = [];
+            foreach ($pool as $ap) {
+                $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
+                if (!$apu) continue;
+                if (dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$circle['id'], $apu['id']])) continue;
+                $ok = null;
+                foreach (dbAll("SELECT source, meta, resolution FROM cells WHERE type = 'vSTF Cell' AND delib_type = 'steward-candidacy' AND status = 'Assessment Filed'") as $vc) {
+                    $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: []; $vr = pJson($vc['resolution'] ?? '{}') ?: [];
+                    if (empty($vr['approved'])) continue;
+                    $vcand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+                    if ($vcand && $vcand['id'] === $apu['id']) { $ok = $vr; break; }
+                }
+                if ($ok) $cands[] = ['user' => $apu, 'score' => (int)($ok['score'] ?? 0), 'app' => $ap];
+            }
+            if (!$cands) continue;
+            usort($cands, function($a, $b) { return $b['score'] - $a['score']; });
+            $win = $cands[0]; $wu = $win['user'];
+            dbRun("INSERT INTO circle_roster (circle_id, member_id, name, initials, color, ws, status, joined, last_active, `left`, left_reason, top_domain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [$circle['id'], $wu['id'], $wu['name'], $wu['initials'], 'var(--navy-light)', 0, 'active', date('M Y'), 'just now', null, null, null]);
+            dbRun("INSERT INTO user_circles (user_id, circle, status, since, kind) VALUES (?,?,?,?,?)", [$wu['id'], $circle['name'], 'Active', date('M Y'), 'roster']);
+            dbRun("UPDATE circle_applications SET status = 'accepted' WHERE id = ?", [$win['app']['id']]);
+            unset($vacs[$vi]); $seatedAny = true;
+            dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-seating', $circle['name'], date('Y-m-d'), $wu['name'] . ' seated as steward of ' . $circle['name'] . ' (vetted ' . $win['score'] . '/100, succession)', 'integrity-engine']);
+        }
+        if ($seatedAny) { $cm['vacancies'] = array_values($vacs); dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]); }
+    }
+    return $doneA + $doneB;
+}
 // Resolve a vSTF candidate to a user (initials first — unique per member).
 function vstfResolveCandidate($name, $initials) {
     if ($initials) { $u = dbGet('SELECT * FROM users WHERE initials = ?', [$initials]); if ($u) return $u; }
@@ -1221,13 +1322,6 @@ function jstfMintPolicyRef() {
     }
     return 'JR-' . str_pad($max + 1, 3, '0', STR_PAD_LEFT);
 }
-function jstfSpawnSuccessorVstf($candName, $candIni, $circleName, $caseId, $proposalId) {
-    $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $src = ['type' => 'steward-candidacy', 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'vacancyFor' => $caseId, 'proposalId' => $proposalId, 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
-    dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', 'vSTF · Steward Candidacy · ' . $candName, 'Pending Assessment', 'steward-candidacy', 3, $circleName, $caseId, 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => [], 'assessments' => []])]);
-    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', 'Steward Candidacy', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
-    return $vId;
-}
 function jstfDurationDays() {
     $ss = dbGet('SELECT jstf_duration_days FROM system_settings WHERE id = 1');
     $d = (int)($ss['jstf_duration_days'] ?? 0);
@@ -1457,20 +1551,15 @@ function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes)
             if (!$row) { $notes[] = 'not an active member of ' . $circle['name']; continue; }
             markFormer($row['id'], 'jstf-removal');
             $notes[] = 'removed from ' . $circle['name'];
-            $apps = dbAll("SELECT * FROM circle_applications WHERE circle_id = ? AND status = 'pending' ORDER BY queue_position, applied_date", [$circle['id']]);
-            if (!$apps) {
-                $cm = pJson($circle['meta'] ?? '{}') ?: [];
-                $vac = $cm['vacancies'] ?? [];
-                $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => 'jstf-removal'];
-                $cm['vacancies'] = $vac;
-                dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]);
-                $notes[] = 'vacancy open in ' . $circle['name'] . ' (no queued successors)';
-            } else {
-                foreach ($apps as $ap) {
-                    $vid = jstfSpawnSuccessorVstf($ap['applicant'] ?? '', $ap['initials'] ?? '', $circle['name'], $caseId, $ap['id'] ?? null);
-                    $notes[] = 'candidacy vSTF for successor ' . ($ap['applicant'] ?? '') . ' (' . $vid . ')';
-                }
-            }
+            // The removal is the whole of jSTF's act. Succession is a
+            // condition, not a commission: the vacancy is recorded and the
+            // integrity engine vets and seats successors on its own poll.
+            $cm = pJson($circle['meta'] ?? '{}') ?: [];
+            $vac = $cm['vacancies'] ?? [];
+            $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => 'jstf-removal'];
+            $cm['vacancies'] = $vac;
+            dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]);
+            $notes[] = 'vacancy recorded in ' . $circle['name'] . ' — succession runs through the integrity engine';
         }
     } elseif (in_array($kind, ['freeze_ws_until', 'candidacy_freeze_until'])) {
         if (!$targetId) { $notes[] = ($kind === 'freeze_ws_until' ? 'Ws freeze' : 'Candidacy freeze') . ' skipped (no member target)'; }
@@ -1478,6 +1567,15 @@ function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes)
             $sk = $kind === 'freeze_ws_until' ? 'ws_freeze' : 'candidacy_freeze';
             jstfSanction($targetId, $sk, null, $act['until'] ?? null, 'jSTF resolution', $caseId);
             $notes[] = ($kind === 'freeze_ws_until' ? 'Ws frozen' : 'Steward candidacy frozen') . (!empty($act['until']) ? ' until ' . $act['until'] : ' indefinitely');
+        }
+    } elseif ($kind === 'reverify_competences') {
+        // The verdict sets the condition and walks away: every competence
+        // claim of the target goes unverified. The integrity engine's poll
+        // will notice and commission the reverification on its own.
+        if (!$targetId) { $notes[] = 'competence reverification skipped (no member target)'; }
+        else {
+            dbRun('UPDATE user_competence SET verified = 0 WHERE user_id = ?', [$targetId]);
+            $notes[] = 'all competence claims flagged unverified — reverification runs through the integrity engine';
         }
     } elseif ($kind === 'guest_until') {
         if (!$targetId) { $notes[] = 'Guest level skipped (no member target)'; }
@@ -1656,7 +1754,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/jstf-verdict$/', $cleanPath, $m)) {
     $sysActs = []; $dropWarn = [];
     foreach (is_array($body->systemActions ?? null) ? $body->systemActions : [] as $a) {
         $a = (array)$a; $kind = trim((string)($a['kind'] ?? ''));
-        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'])) continue;
+        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until', 'reverify_competences'])) continue;
         $act = ['kind' => $kind];
         if ($kind === 'remove_from_circle') {
             $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
@@ -1884,7 +1982,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/resolution-draft$/', $cleanPath, $m)) {
     $draftSys = []; $draftDropWarn = [];
     foreach (is_array($body->systemActions ?? null) ? $body->systemActions : [] as $a) {
         $a = (array)$a; $kind = trim((string)($a['kind'] ?? ''));
-        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until'])) continue;
+        if (!in_array($kind, ['remove_from_circle', 'freeze_ws_until', 'candidacy_freeze_until', 'guest_until', 'reverify_competences'])) continue;
         $act = ['kind' => $kind];
         if ($kind === 'remove_from_circle') {
             $circles = array_values(array_filter(array_map('strval', is_array($a['circles'] ?? null) ? $a['circles'] : [])));
