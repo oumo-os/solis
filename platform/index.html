@@ -4552,10 +4552,24 @@ function renderPastfLayer1(circle) {
 
 function getActivePastfCell() {
   var cells = (MOCK && MOCK.cells) || [];
-  for (var i = cells.length - 1; i >= 0; i--) {
+  var i;
+  if (window._pastfActiveCellId) {
+    for (i = 0; i < cells.length; i++) {
+      if (cells[i].id === window._pastfActiveCellId && cells[i].type === 'p-aSTF Cell') return cells[i];
+    }
+  }
+  for (i = cells.length - 1; i >= 0; i--) {
     if (cells[i].type === 'p-aSTF Cell') return cells[i];
   }
   return null;
+}
+function setActivePastfCell(id) { window._pastfActiveCellId = id || null; try { if (id) sessionStorage.setItem('pastfActiveCell', id); else sessionStorage.removeItem('pastfActiveCell'); } catch (e) {} }
+function openPastfCell(cellId) { setActivePastfCell(cellId); nav('stf-pastf'); }
+function openVstfCell(cellId) {
+  var c = (typeof cellsById !== 'undefined' && cellsById[cellId]) || null;
+  if (!c) { for (var i = 0; i < ((MOCK && MOCK.cells) || []).length; i++) { if (((MOCK.cells)[i] || {}).id === cellId) { c = MOCK.cells[i]; break; } } }
+  if (typeof setActiveVstfCell === 'function') setActiveVstfCell(cellId);
+  nav(c && typeof vstfViewKey === 'function' ? vstfViewKey(c) : 'stf-vstf-competence');
 }
 
 // Layer-2 member cards + circle profile + score list, driven by the active
@@ -5014,7 +5028,7 @@ function navStf(stfId) {
   if (typeof stfRowById === 'function') row = stfRowById(stfId);
   if (row) {
     var legacyCell = function(id) {
-      var legacy = { 'xstf-itu': 'cell-19', 'astf-debris': 'cell-24' };
+      var legacy = { 'xstf-itu': 'cell-19', 'stf-xstf-itu': 'cell-19', 'astf-debris': 'cell-24', 'stf-astf-debris': 'cell-24' };
       return legacy[id] || null;
     };
     var resolveCell = function(id) {
@@ -5045,6 +5059,11 @@ function navStf(stfId) {
       var vc = (typeof cellsById !== 'undefined' && cellsById[vCell]) || null;
       if (!vc) { for (var vi = 0; vi < ((MOCK && MOCK.cells) || []).length; vi++) { if (((MOCK.cells)[vi] || {}).id === vCell) { vc = MOCK.cells[vi]; break; } } }
       nav(vc ? vstfViewKey(vc) : 'stf-vstf-competence'); return;
+    }
+    if (row.type === 'p-aSTF') {
+      var pCell = resolveCell(stfId);
+      if (pCell && typeof setActivePastfCell === 'function') setActivePastfCell(pCell);
+      nav('stf-pastf'); return;
     }
   }
   // Bare cell ids (circle cards, xref callers) carry no stf- prefix: resolve
@@ -7062,7 +7081,7 @@ function renderStfAssignments() {
 }
 
 function stfNavKey(stfId) {
-  var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf-motion', 'xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
+  var map = { 'vstf-steward': 'stf-vstf-steward', 'vstf-competence': 'stf-vstf-competence', 'astf-debris': 'stf-astf-motion', 'stf-astf-debris': 'stf-astf-motion', 'xstf-itu': 'stf-xstf', 'stf-xstf-itu': 'stf-xstf', 'pastf-space-law': 'stf-pastf', 'stf-pastf-space-law': 'stf-pastf', 'jstf-credential': 'stf-jstf' };
   var id = String(stfId == null ? '' : stfId);
   if (map[id]) return map[id];
   if (typeof stfRowById === 'function') {

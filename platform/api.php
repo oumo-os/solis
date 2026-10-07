@@ -505,6 +505,7 @@ foreach ($routes as $r) {
                     if (!$jc || empty($jc['blind'])) return false;
                     $jt = $jc['type'] ?? '';
                     if ($jt === 'vSTF Cell') return !vstfReader($cellId, $gv);
+                    if ($jt === 'xSTF Cell') return !jstfProbeReader($cellId, $gv);
                     if ($jt === 'aSTF Cell' && ($jc['delib_type'] ?? '') === 'judicial-audit' && ($jc['status'] ?? '') === 'Verdict Filed') return true;
                     if ($jt === 'aSTF Cell' && ($jc['delib_type'] ?? '') === 'judicial-audit') return !jstfTeamMember($cellId, $gv);
                     if ($jt === 'aSTF Cell') return !isSteward($gv['id'] ?? null);
@@ -1100,7 +1101,7 @@ function engineSpawnVstf($type, $candName, $candIni, $circleName, $domains, $ext
     $src = array_merge(['type' => $type, 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'commissionedBy' => 'integrity-engine', 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')], $extraSrc);
     $title = ($type === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $candName;
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', $title, 'Pending Assessment', $type, 3, $circleName, 'system', 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => $domains, 'assessments' => []])]);
-    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $type === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + 14 * 86400)]);
+    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $type === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + vstfDurationDays() * 86400)]);
     dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-commission', $circleName, date('Y-m-d'), 'Integrity engine commissioned ' . ($type === 'steward-candidacy' ? 'candidacy vetting' : 'competence verification') . ' for ' . $candName . ' [' . $vId . ']', 'integrity-engine']);
     return $vId;
 }
@@ -1185,6 +1186,24 @@ function integrityEnginePoll($cap = 3) {
         }
         if ($seatedAny) { $cm['vacancies'] = array_values($vacs); dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]); }
     }
+    // Periodic reviews: every active circle gets a health review each cycle.
+    // Due when no review is open and the last one closed longer ago than
+    // the cycle (or never). One per run; deduped by circle, not by host.
+    $cycDays = pastfCycleMonths() * 30; $cutP = date('Y-m-d', time() - $cycDays * 86400);
+    foreach (dbAll("SELECT * FROM circles WHERE status = 'Active' ORDER BY id") as $pc) {
+        $pname = $pc['name'] ?? $pc['id'];
+        $openP = dbGet("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND circle IN (?, ?) AND status <> 'Review Complete'", [$pname, $pc['id']]);
+        if ($openP) continue;
+        $pcMeta = pJson($pc['meta'] ?? '{}') ?: [];
+        $lastR = $pcMeta['lastPastfReview'] ?? null;
+        if ($lastR && $lastR >= $cutP) continue;
+        $pId = 'pastf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+        $psrc = ['type' => 'periodic-review', 'sourceCellId' => 'system', 'circleName' => $pname, 'spawnedBy' => 'integrity-engine', 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
+        dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$pId, 'p-aSTF Cell', 'p-aSTF · ' . $pname . ' Health Review', 'Pending Review', 'periodic-review', 3, $pname, 'system', json_encode($psrc), json_encode(['status' => 'Pending']), json_encode(['circleName' => $pname, 'minReviewers' => 3, 'reviews' => []])]);
+        dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $pId, 'p-aSTF', 'Periodic Circle Health Review', $pname, 'active', 'Pending Review', $pname . ' Health', date('Y-m-d', time() + 30 * 86400)]);
+        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-commission', $pname, date('Y-m-d'), 'Integrity engine commissioned periodic health review for ' . $pname . ' [' . $pId . ']', 'integrity-engine']);
+        break;
+    }
     return $doneA + $doneB;
 }
 // Resolve a vSTF candidate to a user (initials first — unique per member).
@@ -1212,7 +1231,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-vstf$/', $cleanPath, $m)) {
         $sameIni = $candIni0 !== '' && ($exSrc['candidateInitials'] ?? '') === $candIni0;
         if ($sameName || $sameIni || ($candName0 === '' && $candIni0 === '')) send(409, ['error' => 'An open vSTF claim for this candidate already exists', 'vstfId' => $exRow['id']]);
     }
-    $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $ma = (int)($body->minAssessors ?? 3);
+    $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $ma = min(7, max(2, (int)($body->minAssessors ?? 3)));
     $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => $vt, 'candidateName' => trim((string)($body->candidateName ?? '')), 'candidateInitials' => trim((string)($body->candidateInitials ?? '')), 'circleName' => $cn, 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $domains = is_array($body->domains ?? null) ? $body->domains : [];
@@ -1367,6 +1386,8 @@ if (preg_match('/^\/cells\/([^\/]+)\/pastf-review$/', $cleanPath, $m)) {
         $ft = 'healthy'; if ($tc['concern'] > $tc['healthy'] && $tc['concern'] > $tc['watch']) $ft = 'concern'; elseif ($tc['watch'] >= $tc['healthy']) $ft = 'watch';
         dbRun("UPDATE cells SET status = 'Review Complete', meta = ?, resolution = ? WHERE id = ?", [json_encode($meta), json_encode(['status' => 'Complete', 'avgCircle' => $avgC, 'healthTier' => $ft]), $cId]);
         dbRun("UPDATE stfs SET status = 'Completed', bucket = 'completed' WHERE id = ?", ['stf-' . $cId]);
+        $pcircle = dbGet('SELECT * FROM circles WHERE name = ? OR id = ?', [$cell['circle'] ?? '', $cell['circle'] ?? '']);
+        if ($pcircle) { $pcm = pJson($pcircle['meta'] ?? '{}') ?: []; $pcm['lastPastfReview'] = date('Y-m-d'); dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($pcm), $pcircle['id']]); }
     } else dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     foreach ($pm as $member) {
         if (empty($member['jstfReferral']) || empty($member['name'])) continue;
@@ -1513,6 +1534,16 @@ function astfAssessors() {
     $ss = dbGet('SELECT astf_assessors FROM system_settings WHERE id = 1');
     $q = (int)($ss['astf_assessors'] ?? 0);
     return $q > 0 ? $q : 3;
+}
+function vstfDurationDays() {
+    $ss = dbGet('SELECT vstf_duration_days FROM system_settings WHERE id = 1');
+    $d = (int)($ss['vstf_duration_days'] ?? 0);
+    return $d > 0 ? $d : 14;
+}
+function pastfCycleMonths() {
+    $ss = dbGet('SELECT p_astf_cycle_months FROM system_settings WHERE id = 1');
+    $m = (int)($ss['p_astf_cycle_months'] ?? 0);
+    return $m > 0 ? $m : 6;
 }
 // Assessor invitation batch: stewards in good standing only (blind audit
 // is an entrusted function), top half by competence, randomly sampled.
@@ -2173,6 +2204,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/commission-xstf$/', $cleanPath, $m)) {
     // investigator, each due on the question deadline.
     $mandate = max(1, (int)($qrow['assessors'] ?? 1));
     $qDue = $qrow['deadline'] ?? $cell['deadline'] ?? date('Y-m-d', time() + 30 * 86400);
+    if ($qDue < date('Y-m-d')) $qDue = date('Y-m-d');
     $team = is_array($body->team ?? null) ? $body->team : [];
     $inv = dbAll('SELECT name, initials FROM cell_team WHERE cell_id = ?', [$cId]);
     if (!$team) $team = array_slice(array_map(function($t) { return ['name' => $t['name'], 'initials' => $t['initials']]; }, $inv), 0, $mandate);
@@ -2328,8 +2360,9 @@ if (preg_match('/^\/cells\/([^\/]+)\/resolution-draft$/', $cleanPath, $m)) {
     dbRun('UPDATE cells SET meta = ? WHERE id = ?', [json_encode($meta), $cId]);
     // A saved draft is a new agreement question: prior endorsements were
     // cast on older wording and no longer count.
+    $cleared = (int)(dbGet("SELECT COUNT(*) AS n FROM vote_records WHERE cell_id = ? AND domain = 'resolution'", [$cId])['n'] ?? 0);
     dbRun("DELETE FROM vote_records WHERE cell_id = ? AND domain = 'resolution'", [$cId]);
-    send(200, ['ok' => true, 'draft' => $draft]);
+    send(200, ['ok' => true, 'draft' => $draft, 'clearedEndorsements' => $cleared]);
 }
 
 // ---- jSTF resolution endorsement poll (one member one vote, majority carries) ----

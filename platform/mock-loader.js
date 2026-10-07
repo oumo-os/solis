@@ -71,8 +71,8 @@ function renderSTFRows() {
   var all = s.pending.concat(s.active, s.completed);
   if (!all.length) return '<tr><td colspan="5" style="text-align:center;padding:20px;font-size:12px;color:var(--text-tertiary)">No STFs currently active.</td></tr>';
   return all.map(function(s) {
-    var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : 'tag-blue';
-    var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : 'b-pending';
+    var tagClass = s.type === 'vSTF' ? 'tag-purple' : s.type === 'aSTF' ? 'tag-blue' : s.type === 'jSTF' ? 'tag-red' : s.type === 'xSTF' ? 'tag-amber' : s.type === 'p-aSTF' ? 'tag-green' : 'tag-blue';
+    var badgeClass = s.status === 'Invitation' ? 'b-pending' : s.status === 'Active' ? 'b-active' : s.status === 'Closed' ? 'b-judicial' : s.status === 'Completed' ? 'b-active' : s.status === 'Blind Review' ? 'b-review' : s.status === 'Under Investigation' ? 'b-judicial' : s.status === 'Pending Assessment' ? 'b-review' : s.status === 'Pending Review' ? 'b-review' : s.status === 'Verdict Filed' ? 'b-judicial' : s.status === 'Resolution Applied' ? 'b-active' : s.status === 'Exonerated' ? 'b-active' : s.status === 'Assessment Filed' ? 'b-active' : s.status === 'Review Complete' ? 'b-active' : 'b-pending';
     var titleTxt = s.candidate ? s.candidate : (s.title || '');
     // Sealed titles already name their own kind — no purpose prefix.
     var sealed = / — sealed (case|probe|verification|audit) /.test(titleTxt);
@@ -223,8 +223,8 @@ function cellOnclick(c) {
     case 'jSTF Cell': return "openJstfCase('" + id + "')";
     case 'aSTF Cell': return "openAstfCell('" + id + "')";
     case 'xSTF Cell': return "openXstfCase('" + id + "')";
-    case 'vSTF Cell': return "nav('" + ((c.title && /competence|credential/i.test(c.title)) ? 'stf-vstf-competence' : 'stf-vstf-steward') + "')";
-    case 'p-aSTF Cell': return "nav('stf-pastf')";
+    case 'vSTF Cell': return "openVstfCell('" + id + "')";
+    case 'p-aSTF Cell': return "openPastfCell('" + id + "')";
     default: return "nav('cells')";
   }
 }
