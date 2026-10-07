@@ -377,10 +377,6 @@ var SolisApi = (function() {
     return req('POST', 'competence/declare-wh', payload);
   }
 
-  function verifyWh(payload) {
-    return req('POST', 'competence/verify-wh', payload);
-  }
-
   function rankInterests(payload) {
     return req('POST', 'competence/interest', payload);
   }
@@ -562,7 +558,7 @@ var SolisApi = (function() {
     runWsDrift: runWsDrift,
     endorseCompetence: endorseCompetence,
     declareWh: declareWh,
-    verifyWh: verifyWh,
+    endorseCompetence: endorseCompetence,
     rankInterests: rankInterests,
     fetchStanding: fetchStanding,
     obsNewsList: obsNewsList,
