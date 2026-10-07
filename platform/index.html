@@ -3514,7 +3514,7 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
       return;
     }
     var cell = cellsById[cellId];
-    if (cell) { cell.status = 'Verdict Filed'; cell.blind = 0; cell.resolution = { verdict: verdict, rubricTotal: r.rubricTotal }; }
+    if (cell) { cell.status = 'Verdict Filed'; cell.resolution = { verdict: verdict, rubricTotal: r.rubricTotal }; if (!cell.source || (cell.source || {}).type !== 'judicial-audit') cell.blind = 0; }
     toast('aSTF verdict filed: ' + verdict + ' (rubric ' + r.rubricTotal + '/30).', 'success');
     if (verdict === 'approved' && cell && cell.source && cell.source.originCellId) {
       var origin = cellsById[cell.source.originCellId];
@@ -3987,6 +3987,10 @@ function submitStaticAstfAdjudication() {
     }
   }
   if (!cell) { toast('No open aSTF cell to file against.', 'error'); return; }
+  var wantJudicial2 = (document.getElementById('view-stf-astf-judicial') || {}).classList &&
+    document.getElementById('view-stf-astf-judicial').classList.contains('active');
+  var cellIsJ = ((cell.source || {}).type === 'judicial-audit' || cell.delib_type === 'judicial-audit');
+  if (!!wantJudicial2 !== cellIsJ) { toast('Bound audit does not match this view — reselect the row.', 'error'); return; }
   var num = function(id) { var el = document.getElementById(id); return el ? (Number(el.value) || 0) : 0; };
   var got = astfCollectStaticRubric();
   var rubric = got.rubric;
@@ -4000,7 +4004,9 @@ function submitStaticAstfAdjudication() {
     if (cb.checked && n) flags.push(n);
   });
   var verdict = window._astfStaticVerdict || 'approved';
-  confirmModal('Submit your adjudication (' + verdict + ', rubric ' + total + '/30' + (flags.length ? ', ' + flags.length + ' participant' + (flags.length > 1 ? 's' : '') + ' flagged' : '') + ')? It will be sealed until all 3 adjudicators have filed.', function() {
+  var aq = 3;
+  try { var _ac = getActiveAstfCell ? getActiveAstfCell() : null; if (_ac && _ac.formation && _ac.formation.quorum) aq = _ac.formation.quorum; } catch (e) {}
+  confirmModal('Submit your adjudication (' + verdict + ', rubric ' + total + '/30' + (flags.length ? ', ' + flags.length + ' participant' + (flags.length > 1 ? 's' : '') + ' flagged' : '') + ')? It will be sealed until all ' + aq + ' adjudicators have filed.', function() {
     fileAstfVerdict(cell.id, verdict, rubric, rationale, flags);
   });
 }

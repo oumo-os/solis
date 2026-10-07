@@ -251,14 +251,26 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status'], 'assessors' => $o['assessors'] !== null ? (int)$o['assessors'] : null, 'deadline' => $o['deadline']]; }, $objByCell[$c['id']] ?? []);
         $cell['draftVotes'] = $draftVotesByCell[$c['id']] ?? [];
         $cell['team'] = array_map(function($t) use ($currentRow) { $meId = $currentRow['id'] ?? null; $meIni = $currentRow['initials'] ?? null; $self = $meId && (!empty($t['user_id']) ? $t['user_id'] === $meId : ($t['initials'] ?? null) === $meIni); return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus'], 'self' => (bool)$self]; }, $teamByCell[$c['id']] ?? []);
-        // Adjudication filings stay sealed even from fellow assessors: the
-        // blind wall holds until quorum decides. Everyone sees the count;
-        // each assessor sees only whether they themselves filed.
+        // Adjudication filings stay sealed permanently, even from fellow
+        // assessors: the blind wall outlives the quorum. Everyone sees the
+        // count; each assessor sees only whether they themselves filed. The
+        // decided outcome (never its attribution) ships in the resolution.
         if (!empty($cell['filings']) && is_array($cell['filings'])) {
             $meF = $currentRow['id'] ?? null;
             $filedMe = false; foreach ($cell['filings'] as $fl) { if (!empty($fl['assessorId']) && $meF && $fl['assessorId'] === $meF) { $filedMe = true; break; } }
             $cell['filingsCount'] = count($cell['filings']); $cell['filedMe'] = $filedMe;
             unset($cell['filings']);
+        }
+        // vSTF candidates stay blind to filed assessments until completion.
+        if (($c['type'] ?? '') === 'vSTF Cell' && !empty($c['blind']) && !empty($cell['assessments']) && is_array($cell['assessments']) && ($c['status'] ?? '') !== 'Assessment Filed') {
+            $meV = $currentRow['id'] ?? null; $iAssess = false; $iCand = false;
+            foreach ($cell['assessments'] as $va) { if (!empty($va['assessorId']) && $meV && $va['assessorId'] === $meV) { $iAssess = true; break; } }
+            if (!$iAssess && $meV) {
+                $vsrc = is_array($cell['source'] ?? null) ? $cell['source'] : [];
+                $vcand = vstfResolveCandidate($vsrc['candidateName'] ?? $cell['candidateName'] ?? '', $vsrc['candidateInitials'] ?? $cell['candidateInitials'] ?? '');
+                $iCand = $vcand && ($vcand['id'] ?? null) === $meV;
+            }
+            if ($iCand) $cell['assessments'] = [];
         }
         // Blind parallel audits: assessors never learn each other's
         // identities. Each viewer keeps only their own row; the rest read
@@ -272,22 +284,26 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         // Blindness is team-only on judicial cells: anyone off the seated team
         // (or off the probe / commissioning team for xSTF) gets a sealed view —
-        // no names, no target, no questions, no draft, no counts. Other blind
-        // cells (motion audits) keep the steward rule so assessors can work.
+        // no names, no target, no questions, no draft, no counts. Judicial
+        // audits count as judicial: off-team stewards see a sealed audit, not
+        // the verdict under review. Other blind cells (motion audits) keep
+        // the steward rule so assessors can work.
         $judicialCell = in_array($c['type'] ?? '', ['jSTF Cell', 'xSTF Cell']);
+        $auditOpen = (($c['type'] ?? '') === 'aSTF Cell') && (($c['delib_type'] ?? '') === 'judicial-audit') && (($c['status'] ?? '') !== 'Verdict Filed');
         $auditClosed = (($c['type'] ?? '') === 'aSTF Cell') && (($c['delib_type'] ?? '') === 'judicial-audit') && (($c['status'] ?? '') === 'Verdict Filed');
         $caseSealed = false;
         if (!empty($c['blind'])) {
             if ($judicialCell) $caseSealed = !jstfTeamMember($c['id'], $currentRow) && !jstfProbeReader($c['id'], $currentRow);
             elseif (($c['type'] ?? '') === 'vSTF Cell') $caseSealed = !vstfReader($c['id'], $currentRow);
             elseif ($auditClosed) $caseSealed = true;
+            elseif ($auditOpen) $caseSealed = !jstfTeamMember($c['id'], $currentRow);
             else $caseSealed = !$isSteward;
         }
         if ($caseSealed) {
             $sealedStf['stf-' . $c['id']] = true; $sealedCase[$c['id']] = true;
             // jSTF and closed-audit rows carry the target in their circle
             // column — that column goes blank with the seal.
-            if ($judicialCell || $auditClosed) $blankCircle['stf-' . $c['id']] = true;
+            if ($judicialCell || $auditClosed || $auditOpen) $blankCircle['stf-' . $c['id']] = true;
             if (($c['type'] ?? '') === 'vSTF Cell') {
                 // Verification is blind: candidate and filed assessors see the
                 // record; everyone else sees that a verification exists.
@@ -300,6 +316,16 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 // A closed judicial audit is precedent, not reading material:
                 // the outcome lives in policies/integrity records; assessor
                 // attribution and case theory stay sealed.
+                $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
+                unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                $cell['verdict'] = null;
+                $cell['assessments'] = [];
+                $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
+            } elseif ($auditOpen) {
+                // An open judicial audit hides the verdict under review and
+                // its target from everyone off the seated team. Assessors see
+                // the full record; invitees see only their own invitation.
                 $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
                 if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
@@ -399,7 +425,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $integrityRecords = dbAll('SELECT * FROM integrity_records');
     $sanctions = array_map(function($s) { return ['id' => $s['id'], 'userId' => $s['user_id'], 'kind' => $s['kind'], 'scope' => $s['scope'], 'until' => $s['until'], 'reason' => $s['reason'], 'caseId' => $s['case_id'], 'created' => $s['created_at']]; }, dbAll("SELECT * FROM sanctions WHERE until IS NULL OR until > ?", [date('Y-m-d')]));
     $policies = dbAll('SELECT * FROM policies');
-    $governanceEvents = array_map(function($g) use ($sealedCase) { $o = ['id' => $g['id'], 'type' => $g['type'], 'circle' => $g['circle'], 'date' => $g['date'], 'text' => $g['text']]; if ($g['participant'] !== null) $o['participant'] = $g['participant']; if (str_starts_with($g['type'] ?? '', 'jstf') || ($g['type'] ?? '') === 'astf-verdict') { foreach ($sealedCase as $cid => $_s) { if (strpos($g['text'] ?? '', (string)$cid) !== false) { unset($o['participant']); break; } } } return $o; }, dbAll('SELECT * FROM governance_events'));
+    $governanceEvents = array_map(function($g) use ($sealedCase) { $o = ['id' => $g['id'], 'type' => $g['type'], 'circle' => $g['circle'], 'date' => $g['date'], 'text' => $g['text']]; if ($g['participant'] !== null) $o['participant'] = $g['participant']; if (str_starts_with($g['type'] ?? '', 'jstf') || ($g['type'] ?? '') === 'astf-verdict' || str_starts_with($g['type'] ?? '', 'vstf-')) { foreach ($sealedCase as $cid => $_s) { if (strpos($g['text'] ?? '', (string)$cid) !== false) { unset($o['participant']); break; } } } return $o; }, dbAll('SELECT * FROM governance_events'));
     $domByApp = groupBy(dbAll('SELECT * FROM circle_application_domains'), 'app_id');
     $circleApplications = array_map(function($a) use ($domByApp) { return ['id' => $a['id'], 'circleId' => $a['circle_id'], 'circleName' => $a['circle_name'], 'applicant' => $a['applicant'], 'initials' => $a['initials'], 'motivation' => $a['motivation'], 'relevantDomains' => array_values(array_map(function($d) { return $d['domain']; }, $domByApp[$a['id']] ?? [])), 'status' => $a['status'], 'appliedDate' => $a['applied_date'], 'queuePosition' => $a['queue_position']]; }, dbAll('SELECT * FROM circle_applications'));
     $projectApplications = array_map(function($p) { return ['id' => $p['id'], 'cellId' => $p['cell_id'], 'projectName' => $p['project_name'], 'applicant' => $p['applicant'], 'initials' => $p['initials'], 'motivation' => $p['motivation'], 'status' => $p['status'], 'appliedDate' => $p['applied_date'], 'proposedRole' => $p['proposed_role']]; }, dbAll('SELECT * FROM project_applications'));
@@ -480,6 +506,7 @@ foreach ($routes as $r) {
                     $jt = $jc['type'] ?? '';
                     if ($jt === 'vSTF Cell') return !vstfReader($cellId, $gv);
                     if ($jt === 'aSTF Cell' && ($jc['delib_type'] ?? '') === 'judicial-audit' && ($jc['status'] ?? '') === 'Verdict Filed') return true;
+                    if ($jt === 'aSTF Cell' && ($jc['delib_type'] ?? '') === 'judicial-audit') return !jstfTeamMember($cellId, $gv);
                     if ($jt === 'aSTF Cell') return !isSteward($gv['id'] ?? null);
                     if (!in_array($jt, ['jSTF Cell', 'xSTF Cell'])) return false;
                     return !jstfTeamMember($cellId, $gv);
@@ -544,12 +571,13 @@ foreach ($childDefs as $d) {
             if (in_array($d['child'], ['cell_team','cell_messages','vote_records','cell_votes','draft_resolutions','cell_objectives','cell_tasks','stf_candidates'])) {
                 $gCellId = $parentId;
                 if ($d['child'] === 'stf_candidates' && str_starts_with($parentId, 'stf-')) $gCellId = substr($parentId, 4);
-                $gp = dbGet('SELECT type, blind FROM cells WHERE id = ?', [$gCellId]);
+                $gp = dbGet('SELECT type, blind, delib_type, status FROM cells WHERE id = ?', [$gCellId]);
                 if ($gp && !empty($gp['blind']) && in_array($gp['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell', 'aSTF Cell'])) {
                     $gvr = authUser(); $gt = $gp['type'];
                     if ($gt === 'jSTF Cell') $ok = jstfTeamMember($gCellId, $gvr);
                     elseif ($gt === 'xSTF Cell') $ok = jstfProbeReader($gCellId, $gvr);
                     elseif ($gt === 'vSTF Cell') $ok = vstfReader($gCellId, $gvr);
+                    elseif (($gp['delib_type'] ?? '') === 'judicial-audit') $ok = ($gp['status'] ?? '') === 'Verdict Filed' ? false : jstfTeamMember($gCellId, $gvr);
                     else $ok = isSteward($gvr['id'] ?? null);
                     if (!$ok) send(404, ['error' => 'Not found']);
                 }
@@ -864,8 +892,11 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
     }
     $tally = ['approved' => 0, 'rejected' => 0, 'revision' => 0];
     foreach ($filings as $f) { if (isset($tally[$f['verdict'] ?? ''])) $tally[$f['verdict']]++; }
-    arsort($tally); $topStance = array_key_first($tally);
-    $decided = ($tally[$topStance] * 2 > count($filings)) ? $topStance : 'revision';
+    // Deterministic order: majority wins; ties and plurality-without-majority
+    // fall through to revision in fixed stance order.
+    $topStance = 'revision'; $topN = -1;
+    foreach (['approved', 'rejected', 'revision'] as $st) { if ($tally[$st] > $topN) { $topN = $tally[$st]; $topStance = $st; } }
+    $decided = ($topN * 2 > count($filings)) ? $topStance : 'revision';
     $maj = array_values(array_filter($filings, function($f) use ($decided) { return ($f['verdict'] ?? '') === $decided; }));
     $rubAvg = []; foreach (array_keys($maj[0]['rubric'] ?? []) as $rk) { if ($rk === 'total') continue; $rs = 0; foreach ($maj as $f) $rs += (int)($f['rubric'][$rk] ?? 0); $rubAvg[$rk] = (int)round($rs / count($maj)); }
     $rubAvg['total'] = array_sum($rubAvg);
@@ -1252,11 +1283,14 @@ if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
 if (preg_match('/^\/cells\/([^\/]+)\/evidence$/', $cleanPath, $m)) {
     $cId = urldecode($m[1]);
     if ($method === 'GET') {
-        $evCell = dbGet('SELECT type, blind FROM cells WHERE id = ?', [$cId]);
-        if ($evCell && !empty($evCell['blind']) && in_array($evCell['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell'])) {
-            $evUser = authUser(); $evOk = false;
-            if (($evCell['type'] ?? '') === 'vSTF Cell') $evOk = vstfReader($cId, $evUser);
-            elseif (($evCell['type'] ?? '') === 'xSTF Cell') $evOk = jstfProbeReader($cId, $evUser);
+        $evCell = dbGet('SELECT type, blind, delib_type, status FROM cells WHERE id = ?', [$cId]);
+        if ($evCell && !empty($evCell['blind']) && in_array($evCell['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell', 'aSTF Cell'])) {
+            $evUser = authUser(); $evOk = false; $evt = $evCell['type'];
+            if ($evt === 'vSTF Cell') $evOk = vstfReader($cId, $evUser);
+            elseif ($evt === 'xSTF Cell') $evOk = jstfProbeReader($cId, $evUser);
+            elseif ($evt === 'aSTF Cell' && ($evCell['delib_type'] ?? '') === 'judicial-audit' && ($evCell['status'] ?? '') === 'Verdict Filed') $evOk = false;
+            elseif ($evt === 'aSTF Cell' && ($evCell['delib_type'] ?? '') === 'judicial-audit') $evOk = jstfTeamMember($cId, $evUser);
+            elseif ($evt === 'aSTF Cell') $evOk = isSteward($evUser['id'] ?? null);
             else $evOk = jstfTeamMember($cId, $evUser);
             if (!$evOk) send(404, ['error' => 'Not found']);
         }
@@ -1265,7 +1299,19 @@ if (preg_match('/^\/cells\/([^\/]+)\/evidence$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     if (!dbGet("SELECT 1 FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']])) send(403, ['error' => 'Steward access required']);
-    if (!dbGet('SELECT id FROM cells WHERE id = ?', [$cId])) send(404, ['error' => 'Cell not found']);
+    $evCellW = dbGet('SELECT type, blind, delib_type, status FROM cells WHERE id = ?', [$cId]);
+    if (!$evCellW) send(404, ['error' => 'Cell not found']);
+    // Sealed cells take evidence only from entitled hands: the team, the
+    // probe readers, the candidate's own verifiers — never the gallery.
+    if (!empty($evCellW['blind']) && in_array($evCellW['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell', 'aSTF Cell'])) {
+        $ewt = $evCellW['type']; $evWOk = false;
+        if ($ewt === 'vSTF Cell') $evWOk = vstfReader($cId, $user);
+        elseif ($ewt === 'xSTF Cell') $evWOk = jstfProbeReader($cId, $user);
+        elseif ($ewt === 'aSTF Cell' && ($evCellW['delib_type'] ?? '') === 'judicial-audit') $evWOk = ($evCellW['status'] ?? '') === 'Verdict Filed' ? false : jstfTeamMember($cId, $user);
+        elseif ($ewt === 'aSTF Cell') $evWOk = isSteward($user['id'] ?? null);
+        else $evWOk = jstfTeamMember($cId, $user);
+        if (!$evWOk) send(403, ['error' => 'Only the entitled team may attach evidence here']);
+    }
     $body = readBody(); $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $status = in_array($body->status ?? '', ['pending', 'under-review', 'verified']) ? $body->status : 'pending';
     $res = dbRun('INSERT INTO stf_evidence (cell_id, candidate, title, detail, link, status, submitted_by, submitted_at) VALUES (?,?,?,?,?,?,?,?)', [$cId, trim((string)($body->candidate ?? '')) ?: null, $title, trim((string)($body->detail ?? '')) ?: null, trim((string)($body->link ?? '')) ?: null, $status, $user['name'] ?? $user['initials'], date('Y-m-d\TH:i:s.000\Z')]);
@@ -1629,6 +1675,18 @@ function vstfReader($vstfId, $user) {
         if (empty($a['assessorId']) && ($a['assessor'] ?? '') === ($user['name'] ?? $user['initials'])) return true;
     }
     return false;
+}
+// What a vSTF reader may see: assessors get everything; the candidate sees
+// everything except filed assessments until the claim completes (blind both
+// ways — no mid-process lobbying, no performative filing).
+function vstfReaderIsCandidate($vstfId, $user) {
+    if (!$user) return false;
+    $uid = $user['id'] ?? null; if (!$uid) return false;
+    $vc = dbGet('SELECT source, meta FROM cells WHERE id = ?', [$vstfId]);
+    if (!$vc) return false;
+    $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
+    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+    return $cand && ($cand['id'] ?? null) === $uid;
 }
 // Reader check for a blind xSTF probe: the probe team or the commissioning
 // jSTF team. Anyone else sees nothing while the probe is blind.
