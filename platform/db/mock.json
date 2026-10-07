@@ -528,6 +528,144 @@
         "GSS"
       ],
       "bio": "Maritime-law scholar extending coastal-state practice to orbital-slot coordination."
+    },
+    {
+      "id": "nk",
+      "name": "Neema Kibwana",
+      "initials": "NK",
+      "location": "Arusha",
+      "joined": "Oct 2026",
+      "standing": 1050,
+      "competence": 1050,
+      "competenceNote": "Life support · new steward",
+      "interestScore": 5,
+      "activeRoles": 1,
+      "rolesBreakdown": "Mars Habitability steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--purple),#2a1a5a)"
+      },
+      "domains": [
+        {
+          "name": "Life Support",
+          "ws": 1150,
+          "color": "tag-green"
+        },
+        {
+          "name": "Habitat Design",
+          "ws": 950,
+          "color": "tag-blue"
+        }
+      ],
+      "circles": [
+        "Mars Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "Closed-loop life-support engineer designing water-recycling testbeds for transit habitats."
+    },
+    {
+      "id": "ts",
+      "name": "Tendai Moyo",
+      "initials": "TS",
+      "location": "Harare",
+      "joined": "Oct 2026",
+      "standing": 1000,
+      "competence": 1000,
+      "competenceNote": "Planetary science · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Mars Habitability steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--amber),#4a2f00)"
+      },
+      "domains": [
+        {
+          "name": "Planetary Science",
+          "ws": 1100,
+          "color": "tag-amber"
+        },
+        {
+          "name": "Habitat Design",
+          "ws": 900,
+          "color": "tag-blue"
+        }
+      ],
+      "circles": [
+        "Mars Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "Materials scientist testing regolith-based shielding for surface structures."
+    },
+    {
+      "id": "yd",
+      "name": "Yaw Darko",
+      "initials": "YD",
+      "location": "Tamale",
+      "joined": "Oct 2026",
+      "standing": 980,
+      "competence": 980,
+      "competenceNote": "Space legislation · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Policy steward",
+      "avatar": {
+        "gradient": "linear-gradient(135deg,var(--green),#0e3a24)"
+      },
+      "domains": [
+        {
+          "name": "Policy",
+          "ws": 1100,
+          "color": "tag-blue"
+        },
+        {
+          "name": "Space Law",
+          "ws": 950,
+          "color": "tag-purple"
+        }
+      ],
+      "circles": [
+        "Policy Circle"
+      ],
+      "orgs": [
+        "GSS"
+      ],
+      "bio": "Space legislation advocate drafting model licensing language for new spacefaring states."
+    },
+    {
+      "id": "ld",
+      "name": "Lerato Dlamini",
+      "initials": "LD",
+      "location": "Gaborone",
+      "joined": "Oct 2026",
+      "standing": 940,
+      "competence": 940,
+      "competenceNote": "Institutional partnerships · new steward",
+      "interestScore": 4,
+      "activeRoles": 1,
+      "rolesBreakdown": "Policy steward",
+      "avatar": {},
+      "domains": [
+        {
+          "name": "Advocacy",
+          "ws": 1000,
+          "color": "tag-green"
+        },
+        {
+          "name": "Policy",
+          "ws": 900,
+          "color": "tag-blue"
+        }
+      ],
+      "circles": [
+        "Policy Circle"
+      ],
+      "orgs": [
+        "SGAC"
+      ],
+      "bio": "Partnerships lead building AU-member institutional ties for shared ground infrastructure."
     }
   ],
   "circles": [
@@ -928,7 +1066,7 @@
       "id": "mars",
       "name": "Mars Habitability Circle",
       "status": "Suggested",
-      "members": 4,
+      "members": 2,
       "motions": 0,
       "domains": [
         "Mars",
@@ -952,13 +1090,56 @@
       "mandate": {
         "primary": [],
         "secondary": []
+      },
+      "roster": {
+        "active": [
+          {
+            "id": "nk",
+            "name": "Neema Kibwana",
+            "initials": "NK",
+            "color": "linear-gradient(135deg,var(--purple),#2a1a5a)",
+            "ws": 1150,
+            "domains": [
+              "Life Support",
+              "Habitat Design"
+            ],
+            "domainWs": [
+              1150,
+              950
+            ],
+            "joined": "Oct 2026",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Life Support"
+          },
+          {
+            "id": "ts",
+            "name": "Tendai Moyo",
+            "initials": "TS",
+            "color": "linear-gradient(135deg,var(--amber),#4a2f00)",
+            "ws": 1100,
+            "domains": [
+              "Planetary Science",
+              "Habitat Design"
+            ],
+            "domainWs": [
+              1100,
+              900
+            ],
+            "joined": "Oct 2026",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Planetary Science"
+          }
+        ],
+        "former": []
       }
     },
     {
       "id": "policy",
       "name": "Policy & Advocacy Circle",
       "status": "Suggested",
-      "members": 5,
+      "members": 2,
       "motions": 0,
       "domains": [
         "Policy",
@@ -974,6 +1155,49 @@
       "mandate": {
         "primary": [],
         "secondary": []
+      },
+      "roster": {
+        "active": [
+          {
+            "id": "yd",
+            "name": "Yaw Darko",
+            "initials": "YD",
+            "color": "linear-gradient(135deg,var(--green),#0e3a24)",
+            "ws": 1100,
+            "domains": [
+              "Policy",
+              "Space Law"
+            ],
+            "domainWs": [
+              1100,
+              950
+            ],
+            "joined": "Oct 2026",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Policy"
+          },
+          {
+            "id": "ld",
+            "name": "Lerato Dlamini",
+            "initials": "LD",
+            "color": "var(--navy-light)",
+            "ws": 1000,
+            "domains": [
+              "Advocacy",
+              "Policy"
+            ],
+            "domainWs": [
+              1000,
+              900
+            ],
+            "joined": "Oct 2026",
+            "lastActive": "1d ago",
+            "status": "active",
+            "topDomain": "Advocacy"
+          }
+        ],
+        "former": []
       }
     },
     {
