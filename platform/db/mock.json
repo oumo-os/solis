@@ -1065,7 +1065,7 @@
     {
       "id": "mars",
       "name": "Mars Habitability Circle",
-      "status": "Suggested",
+      "status": "Active",
       "members": 2,
       "motions": 0,
       "domains": [
@@ -1138,7 +1138,7 @@
     {
       "id": "policy",
       "name": "Policy & Advocacy Circle",
-      "status": "Suggested",
+      "status": "Active",
       "members": 2,
       "motions": 0,
       "domains": [
