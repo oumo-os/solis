@@ -480,6 +480,8 @@ if ($cleanPath === '/circle-applications' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     if (($user['status'] ?? '') === 'Guest') send(403, ['error' => 'Guest privilege level — read and appeal only']);
     if (jstfActiveSanction($user['id'] ?? null, 'candidacy_freeze')) send(403, ['error' => 'Steward candidacy frozen by jSTF sanction']);
+    $ab = readBody(); $acId = trim((string)(($ab->circle_id ?? $ab->circleId ?? '')));
+    if ($acId) { $ac = dbGet('SELECT status FROM circles WHERE id = ?', [$acId]); if ($ac && ($ac['status'] ?? '') === 'Archived') send(403, ['error' => 'Circle is archived — applications closed']); }
 }
 foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
@@ -597,6 +599,12 @@ foreach ($childDefs as $d) {
                 }
             }
             if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks'])) assertActiveMember($wuser);
+            // Archived circles take no stewards: roster writes stop at archive.
+            // (Departures run through markFormer directly, never this router.)
+            if ($d['child'] === 'circle_roster') {
+                $arc = dbGet('SELECT status FROM circles WHERE id = ?', [$parentId]);
+                if ($arc && ($arc['status'] ?? '') === 'Archived') send(403, ['error' => 'Circle is archived — roster closed']);
+            }
             // Judicial cells are sealed: generic writes to a jSTF cell's
             // children require an open case and team-or-steward standing.
             // (Deliberation, votes, drafts, questions and membership each have
@@ -1145,7 +1153,10 @@ function integrityEnginePoll($cap = 3) {
         $doneA++;
     }
     // Ripple B: vacancies vet their succession pool, then seat.
+    // Archived circles are out of scope on every path: no vetting, no
+    // seating, no vacancies.
     foreach (dbAll('SELECT * FROM circles') as $circle) {
+        if (($circle['status'] ?? '') === 'Archived') continue;
         $cm = pJson($circle['meta'] ?? '{}') ?: []; $vacs = $cm['vacancies'] ?? [];
         if (!$vacs) continue;
         $pool = dbAll("SELECT * FROM circle_applications WHERE circle_id = ? AND status = 'pending' ORDER BY queue_position, applied_date", [$circle['id']]);
@@ -1349,6 +1360,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-pastf$/', $cleanPath, $m)) {
     if (!$cell) send(404, ['error' => 'Not found']);
     $ex = dbGet("SELECT id FROM cells WHERE type = 'p-aSTF Cell' AND commissioned_by = ?", [$cId]); if ($ex) send(409, ['error' => 'p-aSTF already spawned']);
     $body = readBody(); $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $mr = (int)($body->minReviewers ?? 3);
+    if ($cn) { $tgt = dbGet('SELECT status FROM circles WHERE name = ? OR id = ?', [$cn, $cn]); if ($tgt && ($tgt['status'] ?? '') === 'Archived') send(403, ['error' => 'Circle is archived — no reviews']); }
     $pId = 'pastf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $src = ['type' => 'periodic-review', 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'circleName' => $cn, 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [$pId, 'p-aSTF Cell', 'p-aSTF · ' . $cn . ' Health Review', 'Pending Review', 'periodic-review', $mr, $cn, $cId, json_encode($src), json_encode(['status' => 'Pending']), json_encode(['circleName' => $cn, 'minReviewers' => $mr, 'reviews' => []])]);
@@ -1833,6 +1845,8 @@ function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes)
             // The removal is the whole of jSTF's act. Succession is a
             // condition, not a commission: the vacancy is recorded and the
             // integrity engine vets and seats successors on its own poll.
+            // Archived circles record no vacancy — there is no succession.
+            if (($circle['status'] ?? '') === 'Archived') { $notes[] = 'no vacancy recorded (circle archived)'; continue; }
             $cm = pJson($circle['meta'] ?? '{}') ?: [];
             $vac = $cm['vacancies'] ?? [];
             $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => 'jstf-removal'];
@@ -2423,6 +2437,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/disband$/', $cleanPath, $m)) {
     $cId = urldecode($m[1]); if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']])) send(403, ['error' => 'Steward access required']);
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $removed = 0;
     foreach ($rows as $r) { markFormer($r['id'], 'circle-disbandment'); $removed++; }
+    dbRun("UPDATE circle_applications SET status = 'withdrawn' WHERE circle_id = ? AND status = 'pending'", [$cId]);
     dbRun("UPDATE circles SET status = 'Archived' WHERE id = ?", [$cId]); send(200, ['ok' => true, 'reason' => 'circle-disbandment', 'removed' => $removed]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/drift-check$/', $cleanPath, $m)) {

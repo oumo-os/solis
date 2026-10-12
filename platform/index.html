@@ -11361,7 +11361,10 @@ function renderCircleDetail(circleId) {
   setText('cd-desc', circle.description || '');
   setHtml('cd-tags', '<span class="badge b-active">' + escapeHtml(circle.status || '') + '</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px">Founded ' + escapeHtml(circle.founded || '—') + ' · ' + (circle.members || '—') + ' members · ' + (circle.motions != null ? circle.motions : '—') + ' motions</span>');
   var applyBtn = document.getElementById('cd-apply');
-  if (applyBtn) applyBtn.setAttribute('onclick', "openCircleApplyModal('" + (circle.name || '').replace(/'/g, "\\'") + "','" + circle.id + "')");
+  if (applyBtn) {
+    if ((circle.status || '') === 'Archived') { applyBtn.style.display = 'none'; }
+    else { applyBtn.style.display = ''; applyBtn.setAttribute('onclick', "openCircleApplyModal('" + (circle.name || '').replace(/'/g, "\\'") + "','" + circle.id + "')"); }
+  }
 
   var roster = (circle.roster && circle.roster.active) || [];
   var contrib = {};
