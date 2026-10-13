@@ -423,7 +423,7 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `circle_applications` (
         `id` VARCHAR(255) PRIMARY KEY, `circle_id` TEXT, `circle_name` TEXT, `applicant` TEXT,
-        `initials` TEXT, `motivation` TEXT, `status` TEXT, `applied_date` TEXT, `queue_position` INT
+        `initials` TEXT, `user_id` VARCHAR(255) NULL, `motivation` TEXT, `status` TEXT, `applied_date` TEXT, `queue_position` INT
     )",
 
     "CREATE TABLE IF NOT EXISTS `circle_application_domains` (
@@ -1049,10 +1049,11 @@ $circleApps = $mock['circleApplications'] ?? [];
 $appRows = array_map(fn($a) => [
     'id' => $a['id'], 'circle_id' => $a['circleId'] ?? null, 'circle_name' => $a['circleName'] ?? null,
     'applicant' => $a['applicant'] ?? null, 'initials' => $a['initials'] ?? null,
+    'user_id' => $a['userId'] ?? $a['user_id'] ?? null,
     'motivation' => $a['motivation'] ?? null, 'status' => $a['status'] ?? null,
     'applied_date' => $a['appliedDate'] ?? null, 'queue_position' => $a['queuePosition'] ?? null,
 ], $circleApps);
-upsert($db, 'circle_applications', $appRows, ['id','circle_id','circle_name','applicant','initials','motivation','status','applied_date','queue_position']);
+upsert($db, 'circle_applications', $appRows, ['id','circle_id','circle_name','applicant','initials','user_id','motivation','status','applied_date','queue_position']);
 
 // Circle application relevant domains
 $cadRows = [];

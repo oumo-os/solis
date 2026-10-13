@@ -492,10 +492,30 @@ if ($cleanPath === '/circle-applications' && $method === 'POST') {
     if (jstfActiveSanction($user['id'] ?? null, 'candidacy_freeze')) send(403, ['error' => 'Steward candidacy frozen by jSTF sanction']);
     $ab = readBody(); $acId = trim((string)(($ab->circle_id ?? $ab->circleId ?? '')));
     if ($acId) { $ac = dbGet('SELECT status FROM circles WHERE id = ?', [$acId]); if ($ac && ($ac['status'] ?? '') === 'Archived') send(403, ['error' => 'Circle is archived — applications closed']); }
+    // Server-authoritative application: always pending, one per member per
+    // circle, per-circle queue numbering, server timestamp. No duplicates,
+    // no client-set statuses, no double seats via re-application.
+    if (!$acId) send(400, ['error' => 'circle_id required']);
+    if (dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$acId, $user['id']])) send(409, ['error' => 'Already a steward of this circle']);
+    if (dbGet("SELECT id FROM circle_applications WHERE circle_id = ? AND applicant = ? AND status = 'pending'", [$acId, $user['name']])) send(409, ['error' => 'Application already pending']);
+    $motivation = trim((string)($ab->motivation ?? ''));
+    $qn = (int)(dbGet('SELECT COALESCE(MAX(queue_position),0) AS m FROM circle_applications WHERE circle_id = ?', [$acId])['m'] ?? 0) + 1;
+    $appId = 'app-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+    $acName = (dbGet('SELECT name FROM circles WHERE id = ?', [$acId])['name'] ?? '');
+    dbRun('INSERT INTO circle_applications (id, circle_id, circle_name, applicant, initials, user_id, motivation, status, applied_date, queue_position) VALUES (?,?,?,?,?,?,?,?,?,?)', [$appId, $acId, $acName, $user['name'], $user['initials'], $user['id'], $motivation, 'pending', date('Y-m-d'), $qn]);
+    send(201, ['ok' => true, 'id' => $appId, 'queuePosition' => $qn]);
 }
 foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
     if ($cleanPath === $r['path'] || $id !== null) {
+        // Applications move only by hand (own withdraw) or by engine seat
+        // (direct DB). Nobody PATCHes their way into a circle.
+        if ($r['table'] === 'circle_applications' && ($method === 'PATCH' || $method === 'PUT') && $id !== null) {
+            $au = authUser(); if (!$au) send(401, ['error' => 'Unauthorized']); assertActiveMember($au);
+            $arow = dbGet('SELECT * FROM circle_applications WHERE id = ?', [$id]); if (!$arow) send(404, ['error' => 'Not found']);
+            $ap = readBody();
+            if ((string)($ap->status ?? '') !== 'withdrawn' || ($arow['user_id'] ?? '') !== ($au['id'] ?? '')) send(403, ['error' => 'Only your own pending application may be withdrawn']);
+        }
         if ($method === 'GET') {
             // Redacted-public anonymous view: threads/cells/stfs filter per
             // viewer below; every other table requires login.
@@ -1187,7 +1207,12 @@ function integrityEnginePoll($cap = 3) {
             engineSpawnVstf('steward-candidacy', $ap['applicant'] ?? '', $ap['initials'] ?? '', $circle['name'], [], ['reason' => 'succession-vetting', 'vacancyFor' => $circle['id'], 'proposalId' => $ap['id'] ?? null]);
             $doneB++;
         }
-        // Seat: top approved-vetted applicant per open seat.
+        // Seat: top approved-vetted applicant per open seat. Approval must be
+        // for THIS circle (source.vacancyFor); scores tie-break by queue.
+        // Frozen, restricted and already-seated applicants never seat, and
+        // maxMembers caps the roster.
+        $cmeta0 = pJson($circle['meta'] ?? '{}') ?: [];
+        $maxM = (int)($cmeta0['maxMembers'] ?? 0) ?: null;
         $seatedAny = false;
         foreach ($vacs as $vi => $vac) {
             $cands = [];
@@ -1195,21 +1220,30 @@ function integrityEnginePoll($cap = 3) {
                 $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
                 if (!$apu) continue;
                 if (dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$circle['id'], $apu['id']])) continue;
+                $ust = dbGet('SELECT status FROM users WHERE id = ?', [$apu['id']]);
+                if ($ust && in_array($ust['status'] ?? '', ['Restricted', 'Suspended', 'Former', 'Guest'], true)) continue;
+                if (jstfActiveSanction($apu['id'], 'candidacy_freeze')) continue;
                 $ok = null;
                 foreach (dbAll("SELECT source, meta, resolution FROM cells WHERE type = 'vSTF Cell' AND delib_type = 'steward-candidacy' AND status = 'Assessment Filed'") as $vc) {
                     $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: []; $vr = pJson($vc['resolution'] ?? '{}') ?: [];
                     if (empty($vr['approved'])) continue;
+                    if (($vs['vacancyFor'] ?? '') !== '' && ($vs['vacancyFor'] ?? null) !== $circle['id']) continue;
                     $vcand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
                     if ($vcand && $vcand['id'] === $apu['id']) { $ok = $vr; break; }
                 }
                 if ($ok) $cands[] = ['user' => $apu, 'score' => (int)($ok['score'] ?? 0), 'app' => $ap];
             }
             if (!$cands) continue;
-            usort($cands, function($a, $b) { return $b['score'] - $a['score']; });
+            usort($cands, function($a, $b) { if ($b['score'] !== $a['score']) return $b['score'] - $a['score']; return (($a['app']['queue_position'] ?? 0) <=> ($b['app']['queue_position'] ?? 0)) ?: strcmp($a['app']['applied_date'] ?? '', $b['app']['applied_date'] ?? ''); });
             $win = $cands[0]; $wu = $win['user'];
-            dbRun("INSERT INTO circle_roster (circle_id, member_id, name, initials, color, ws, status, joined, last_active, `left`, left_reason, top_domain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [$circle['id'], $wu['id'], $wu['name'], $wu['initials'], 'var(--navy-light)', 0, 'active', date('M Y'), 'just now', null, null, null]);
-            dbRun("INSERT INTO user_circles (user_id, circle, status, since, kind) VALUES (?,?,?,?,?)", [$wu['id'], $circle['name'], 'Active', date('M Y'), 'roster']);
+            $activeN = (int)(dbGet('SELECT COUNT(*) AS n FROM circle_roster WHERE circle_id = ? AND status = ?', [$circle['id'], 'active'])['n'] ?? 0);
+            if ($maxM !== null && $activeN >= $maxM) continue;
+            $topDom = dbGet('SELECT domain, ws FROM user_competence WHERE user_id = ? ORDER BY ws DESC', [$wu['id']]);
+            dbRun("INSERT INTO circle_roster (circle_id, member_id, name, initials, color, ws, status, joined, last_active, `left`, left_reason, top_domain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [$circle['id'], $wu['id'], $wu['name'], $wu['initials'], 'var(--navy-light)', (int)($topDom['ws'] ?? 0), 'active', date('M Y'), 'just now', null, null, $topDom['domain'] ?? null]);
+            if ($topDom) dbRun('INSERT INTO circle_roster_domains (roster_id, domain, ws) VALUES ((SELECT id FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = ? LIMIT 1), ?, ?)', [$circle['id'], $wu['id'], 'active', $topDom['domain'], (int)($topDom['ws'] ?? 0)]);
+            dbRun("INSERT INTO user_circles (user_id, circle, status, since, kind) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE status = VALUES(status), since = VALUES(since), kind = VALUES(kind)", [$wu['id'], $circle['name'], 'Active', date('M Y'), 'roster']);
             dbRun("UPDATE circle_applications SET status = 'accepted' WHERE id = ?", [$win['app']['id']]);
+            dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$circle['id'], $circle['id']]);
             unset($vacs[$vi]); $seatedAny = true;
             dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-seating', $circle['name'], date('Y-m-d'), $wu['name'] . ' seated as steward of ' . $circle['name'] . ' (vetted ' . $win['score'] . '/100, succession)', 'integrity-engine']);
         }
@@ -1863,14 +1897,8 @@ function jstfExecuteSystemAction($caseId, $targetId, $targetName, $act, &$notes)
             // The removal is the whole of jSTF's act. Succession is a
             // condition, not a commission: the vacancy is recorded and the
             // integrity engine vets and seats successors on its own poll.
-            // Archived circles record no vacancy — there is no succession.
-            if (($circle['status'] ?? '') === 'Archived') { $notes[] = 'no vacancy recorded (circle archived)'; continue; }
-            $cm = pJson($circle['meta'] ?? '{}') ?: [];
-            $vac = $cm['vacancies'] ?? [];
-            $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => 'jstf-removal'];
-            $cm['vacancies'] = $vac;
-            dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circle['id']]);
-            $notes[] = 'vacancy recorded in ' . $circle['name'] . ' — succession runs through the integrity engine';
+            if (recordVacancy($circle['id'], 'jstf-removal', $caseId)) $notes[] = 'vacancy recorded in ' . $circle['name'] . ' — succession runs through the integrity engine';
+            else $notes[] = 'no vacancy recorded (circle archived)';
         }
     } elseif (in_array($kind, ['freeze_ws_until', 'candidacy_freeze_until'])) {
         if (!$targetId) { $notes[] = ($kind === 'freeze_ws_until' ? 'Ws freeze' : 'Candidacy freeze') . ' skipped (no member target)'; }
@@ -2421,14 +2449,37 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-vote$/', $cleanPath, $m)) {
 // MEMBERSHIP ROUTES
 // ═════════════════════════════════════════════════════════
 function markFormer($rosterId, $reason) {
+    $row = dbGet('SELECT circle_id, member_id FROM circle_roster WHERE id = ?', [$rosterId]);
     dbRun("UPDATE circle_roster SET status = 'former', `left` = ?, `left_reason` = ? WHERE id = ?", [date('Y-m-d'), $reason, $rosterId]);
+    if ($row) {
+        // user_circles.circle mixes full names (new writes) and legacy short
+        // aliases ('SL Circle'); match both so departures actually detach.
+        $full = dbGet('SELECT name FROM circles WHERE id = ?', [$row['circle_id']])['name'] ?? '';
+        $words = preg_split('/\s+/', str_replace(['&'], ' ', (string)$full));
+        $words = array_values(array_filter($words, function($w) { return strtoupper($w) !== 'CIRCLE'; }));
+        $short = (count($words) >= 2 ? strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1)) : strtoupper(substr($words[0] ?? '', 0, 2))) . ' Circle';
+        dbRun("DELETE FROM user_circles WHERE user_id = ? AND kind = 'roster' AND (circle = ? OR circle = ?)", [$row['member_id'], $full, $short]);
+        dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$row['circle_id'], $row['circle_id']]);
+    }
+}
+// Every non-disband departure opens a succession vacancy (skipped on
+// Archived circles, which take no succession). Disbandment archives.
+function recordVacancy($circleId, $reason, $caseId = null) {
+    $c = dbGet('SELECT status FROM circles WHERE id = ?', [$circleId]);
+    if (!$c || ($c['status'] ?? '') === 'Archived') return false;
+    $cm = pJson(dbGet('SELECT meta FROM circles WHERE id = ?', [$circleId])['meta'] ?? '{}') ?: [];
+    $vac = $cm['vacancies'] ?? [];
+    $vac[] = ['caseId' => $caseId, 'since' => date('Y-m-d'), 'reason' => $reason];
+    $cm['vacancies'] = $vac;
+    dbRun('UPDATE circles SET meta = ? WHERE id = ?', [json_encode($cm), $circleId]);
+    return true;
 }
 if (preg_match('/^\/circles\/([^\/]+)\/resign$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); $row = dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']]);
     if (!$row) send(400, ['error' => 'Not an active member of this circle']);
-    markFormer($row['id'], 'resignation'); send(200, ['ok' => true, 'reason' => 'resignation']);
+    markFormer($row['id'], 'resignation'); recordVacancy($cId, 'resignation'); send(200, ['ok' => true, 'reason' => 'resignation']);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/remove-member$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
@@ -2438,7 +2489,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/remove-member$/', $cleanPath, $m)) {
     if ($tid === $user['id']) send(400, ['error' => 'Cannot remove yourself']);
     $tgt = dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $tid]);
     if (!$tgt) send(404, ['error' => 'Target not an active member']);
-    markFormer($tgt['id'], 'jstf-removal'); send(200, ['ok' => true, 'reason' => 'jstf-removal', 'memberId' => $tid]);
+    markFormer($tgt['id'], 'jstf-removal'); recordVacancy($cId, 'jstf-removal'); send(200, ['ok' => true, 'reason' => 'jstf-removal', 'memberId' => $tid]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/flush$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
@@ -2447,6 +2498,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/flush$/', $cleanPath, $m)) {
     $body = readBody(); $keepId = trim((string)($body->keepMemberId ?? $user['id']));
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $removed = 0;
     foreach ($rows as $r) { if ($r['member_id'] !== $keepId) { markFormer($r['id'], 'jstf-circle-flush'); $removed++; } }
+    if ($removed) recordVacancy($cId, 'jstf-circle-flush');
     send(200, ['ok' => true, 'reason' => 'jstf-circle-flush', 'removed' => $removed]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/disband$/', $cleanPath, $m)) {
@@ -2467,6 +2519,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/drift-check$/', $cleanPath, $m)) {
     if (!$md) send(400, ['error' => 'Circle has no primary mandate domains']);
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $drifted = 0;
     foreach ($rows as $r) { $ws = $r['ws'] ?? 0; if ($ws < $threshold && !in_array($r['top_domain'] ?? '', $md)) { markFormer($r['id'], 'competence-drift'); $drifted++; } }
+    if ($drifted) recordVacancy($cId, 'competence-drift');
     send(200, ['ok' => true, 'reason' => 'competence-drift', 'drifted' => $drifted, 'threshold' => $threshold, 'mandateDomains' => $md]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/check-expiry$/', $cleanPath, $m)) {
@@ -2476,6 +2529,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/check-expiry$/', $cleanPath, $m)) {
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: []; $termMonths = $ss['steward_term_months'] ?? 12;
     $now = time(); $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $expired = 0;
     foreach ($rows as $r) { if (!$r['joined']) continue; $jm = strtotime($r['joined']); if ($now - $jm > $termMonths * 30.44 * 86400) { markFormer($r['id'], 'term-expiry'); $expired++; } }
+    if ($expired) recordVacancy($cId, 'term-expiry');
     send(200, ['ok' => true, 'reason' => 'term-expiry', 'expired' => $expired, 'termMonths' => $termMonths]);
 }
 

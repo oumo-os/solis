@@ -7757,10 +7757,17 @@ function withdrawFromQueue(appId) {
   var apps = MOCK.circleApplications || [];
   var a = apps.find(function(x){return x.id===appId;});
   if (!a) return;
+  var me = (MOCK && MOCK.currentUser) || {};
+  if (a.applicant !== me.name) { toast('You can only withdraw your own application.', 'error'); return; }
   if (!confirm('Withdraw your application to join the circle?')) return;
-  a.status = 'withdrawn';
-  successionCandidates = apps.filter(function(x){ return x.circleId === 'space-law' && x.status === 'pending'; });
-  renderMemberList();
+  var cid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || a.circleId;
+  SolisApi.updateCircleApplication(appId, { status: 'withdrawn' }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Withdraw failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    a.status = 'withdrawn';
+    if (typeof successionCandidates !== 'undefined') successionCandidates = apps.filter(function(x){ return x.circleId === cid && x.status === 'pending'; });
+    renderMemberList();
+    toast('Application withdrawn.', 'success');
+  }).catch(function() { toast('Could not withdraw. Is the server running?', 'error'); });
 }
 
 function renderMemberDetail(id) {
@@ -10547,23 +10554,15 @@ function submitCircleApplication() {
   var motivation = document.getElementById('apply-motivation').value.trim();
   if (!motivation) { toast('Please describe your motivation.','warn'); return; }
   var circle = MOCK.circles.find(function(c) { return c.name === document.getElementById('apply-circle-name').textContent; });
-  var apps = MOCK.circleApplications || [];
-  apps.push({
-    id: 'app-' + Date.now(),
-    circleId: circleId,
-    circleName: document.getElementById('apply-circle-name').textContent,
-    applicant: MOCK.currentUser.name,
-    initials: MOCK.currentUser.initials,
-    motivation: motivation,
-    relevantDomains: circle ? circle.domains : [],
-    status: 'pending',
-    appliedDate: 'Jul 26, 2026',
-    queuePosition: apps.length + 1
-  });
-  MOCK.circleApplications = apps;
-  SolisApi.saveCircleApplication(apps[apps.length - 1]);
-  modal.classList.remove('active');
-  toast('Added to the succession queue! You are #' + apps.length + ' in position.','success');
+  var me = (MOCK && MOCK.currentUser) || {};
+  var dupe = ((MOCK.circleApplications || []).filter(function(a) { return a.circleId === circleId && a.applicant === me.name && a.status === 'pending'; })[0]);
+  if (dupe) { toast('You already have a pending application to this circle.', 'error'); return; }
+  SolisApi.saveCircleApplication({ circleId: circleId, motivation: motivation, relevantDomains: circle ? circle.domains : [] }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) { toast('Application failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+    modal.classList.remove('active');
+    toast('Added to the succession queue! You are #' + (r.queuePosition || '?') + ' in position.', 'success');
+    if (typeof loadApiData === 'function') loadApiData();
+  }).catch(function() { toast('Could not apply. Is the server running?', 'error'); });
 }
 
 // -- xSTF Candidate Invite --

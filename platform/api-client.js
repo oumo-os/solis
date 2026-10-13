@@ -458,6 +458,10 @@ var SolisApi = (function() {
     return req('PATCH', 'stfs/' + stfId + '/candidates/' + candId, patch);
   }
 
+  function updateCircleApplication(appId, patch) {
+    return req('PATCH', 'circle-applications/' + appId, patch);
+  }
+
   function updateThread(threadId, patch) {
     return req('PATCH', 'threads/' + threadId, patch);
   }
@@ -512,6 +516,7 @@ var SolisApi = (function() {
     saveProjectApplication: saveProjectApplication,
     saveGovernanceEntry: saveGovernanceEntry,
     updateStfCandidate: updateStfCandidate,
+    updateCircleApplication: updateCircleApplication,
     updateThread: updateThread,
     addThreadReply: addThreadReply,
     setThreadEndorse: setThreadEndorse,

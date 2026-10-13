@@ -557,7 +557,7 @@
         }
       ],
       "circles": [
-        "Mars Circle"
+        "Mars Habitability Circle"
       ],
       "orgs": [
         "SGAC"
@@ -592,7 +592,7 @@
         }
       ],
       "circles": [
-        "Mars Circle"
+        "Mars Habitability Circle"
       ],
       "orgs": [
         "SGAC"
@@ -627,7 +627,7 @@
         }
       ],
       "circles": [
-        "Policy Circle"
+        "Policy & Advocacy Circle"
       ],
       "orgs": [
         "GSS"
@@ -660,7 +660,7 @@
         }
       ],
       "circles": [
-        "Policy Circle"
+        "Policy & Advocacy Circle"
       ],
       "orgs": [
         "SGAC"
@@ -5077,6 +5077,7 @@
       "circleName": "Space Law Circle",
       "applicant": "Oumo Samuel",
       "initials": "OS",
+      "userId": "os",
       "motivation": "I have strong interest in space law and policy, with 3 years of research experience in African space governance frameworks.",
       "relevantDomains": [
         "Space Law",
@@ -5092,6 +5093,7 @@
       "circleName": "Remote Sensing Circle",
       "applicant": "Osei Kwame",
       "initials": "OK",
+      "userId": "ok",
       "motivation": "My background is in satellite imagery analysis and GIS. I want to contribute to remote sensing governance.",
       "relevantDomains": [
         "Remote Sensing",
