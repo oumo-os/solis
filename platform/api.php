@@ -152,7 +152,8 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     // Integrity engine runs lazily here (no cron): conditions set by jSTF
     // verdicts (unverified claims, recorded vacancies) commission their own
     // vSTFs. Capped and idempotent — new rows appear on the next load.
-    if (!$empty) integrityEnginePoll(3);
+    // Authenticated loads only: anonymous traffic must not commission work.
+    if (!$empty && $currentRow) integrityEnginePoll(3);
     $compByUser = groupBy(dbAll('SELECT * FROM user_competence'), 'user_id');
     $cirByUser = groupBy(dbAll('SELECT * FROM user_circles'), 'user_id');
     $orgByUser = groupBy(dbAll('SELECT * FROM user_orgs'), 'user_id');
@@ -435,6 +436,15 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $payload = ['currentUser' => $currentUser, 'participants' => $participants, 'organisations' => $organisations, 'domains' => $domains, 'domainLayout' => $domainLayout, 'circles' => $circles, 'cells' => $cells, 'stfs' => $stfShape, 'stfCandidates' => $stfCandidates, 'threads' => $threads, 'inbox' => $inbox, 'publications' => $publications, 'news' => $news, 'events' => $events, 'opportunities' => $opportunities, 'projects' => $projects, 'library' => $library, 'exitReasonLabels' => $exitReasonLabels, 'systemSettings' => $systemSettings, 'stats' => $stats, 'registration' => $registration, 'sanctions' => $sanctions, 'integrityRecords' => $integrityRecords, 'governanceEvents' => $governanceEvents, 'circleApplications' => $circleApplications, 'projectApplications' => $projectApplications, 'governanceLedger' => $governanceLedger, 'myEngagements' => $myEngagements];
     $payload['policies'] = $policies;
     if ($empty) { foreach (['participants','organisations','circles','cells','threads','inbox','publications','news','events','opportunities','projects','library','integrityRecords','governanceEvents','circleApplications','projectApplications','governanceLedger','stfCandidates','policies','sanctions','myEngagements'] as $k) $payload[$k] = []; $payload['stfs'] = ['pending' => [], 'active' => [], 'completed' => []]; $payload['domains'] = []; $payload['stats'] = []; }
+    // Redacted-public anonymous view: directory, public cells and counts —
+    // no rosters, applications, deliberation content, teams or votes.
+    if (!$currentRow && !$empty) {
+        foreach ($payload['circles'] as &$ac) { unset($ac['roster']); }
+        unset($ac);
+        $payload['circleApplications'] = []; $payload['projectApplications'] = [];
+        foreach ($payload['cells'] as &$xc) { $xc['messages'] = []; $xc['team'] = []; $xc['votes'] = null; $xc['draftVotes'] = []; $xc['objectives'] = []; }
+        unset($xc);
+    }
     send(200, $payload);
 }
 
@@ -487,6 +497,9 @@ foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
     if ($cleanPath === $r['path'] || $id !== null) {
         if ($method === 'GET') {
+            // Redacted-public anonymous view: threads/cells/stfs filter per
+            // viewer below; every other table requires login.
+            if (!in_array($r['table'], ['threads', 'cells', 'stfs'])) { $tgu = authUser(); if (!$tgu) send(401, ['error' => 'Unauthorized']); }
             if ($r['table'] === 'threads') {
                 $gViewer = authUser(); $gStew = isSteward($gViewer['id'] ?? null);
                 if ($id !== null) { $row = dbGet('SELECT * FROM threads WHERE id = ?', [$id]); if (!$row) send(404, ['error' => 'Not found']); if (!jstfCanSeeThread($gViewer, $row)) send(404, ['error' => 'Not found']); send(200, $row); }
@@ -533,9 +546,9 @@ foreach ($routes as $r) {
             }
             if ($id !== null) { $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); send(200, $row); } send(200, dbAll("SELECT * FROM {$r['table']}"));
         }
-        if ($method === 'POST' && $cleanPath === $r['path']) { if (in_array($r['table'], ['threads','vote_records','cell_votes','circle_proposals'])) { $wu = authUser(); if (!$wu) send(401, ['error' => 'Unauthorized']); assertActiveMember($wu); } $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
-        if ($method === 'PATCH' || $method === 'PUT') { $body = readBody(); $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); updateRow($r['table'], $body, $id); send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id])); }
-        if ($method === 'DELETE') { $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
+        if ($method === 'POST' && $cleanPath === $r['path']) { $wu = authUser(); if (!$wu) send(401, ['error' => 'Unauthorized']); assertActiveMember($wu); $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
+        if ($method === 'PATCH' || $method === 'PUT') { $eu = authUser(); if (!$eu) send(401, ['error' => 'Unauthorized']); assertActiveMember($eu); $body = readBody(); $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); updateRow($r['table'], $body, $id); send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id])); }
+        if ($method === 'DELETE') { $du = authUser(); if (!$du) send(401, ['error' => 'Unauthorized']); assertActiveMember($du); $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
         send(405, ['error' => 'Method not allowed']);
     }
 }
@@ -575,6 +588,10 @@ foreach ($childDefs as $d) {
                 $gCellId = $parentId;
                 if ($d['child'] === 'stf_candidates' && str_starts_with($parentId, 'stf-')) $gCellId = substr($parentId, 4);
                 $gp = dbGet('SELECT type, blind, delib_type, status FROM cells WHERE id = ?', [$gCellId]);
+                $gvr = authUser();
+                // Redacted-public anonymous view matches bootstrap: no teams,
+                // messages, votes, questions or candidacies without login.
+                if (!$gvr) send(404, ['error' => 'Not found']);
                 if ($gp && !empty($gp['blind']) && in_array($gp['type'] ?? '', ['jSTF Cell', 'xSTF Cell', 'vSTF Cell', 'aSTF Cell'])) {
                     $gvr = authUser(); $gt = $gp['type'];
                     if ($gt === 'jSTF Cell') $ok = jstfTeamMember($gCellId, $gvr);
@@ -585,6 +602,7 @@ foreach ($childDefs as $d) {
                     if (!$ok) send(404, ['error' => 'Not found']);
                 }
             }
+            if (str_starts_with($d['child'], 'circle_')) { $cgu = authUser(); if (!$cgu) send(401, ['error' => 'Unauthorized']); }
             send(200, dbAll("SELECT * FROM {$d['child']} WHERE {$d['parentKey']} = ?", [$parentId]));
         }
         if ($method !== 'GET') {
@@ -598,7 +616,7 @@ foreach ($childDefs as $d) {
                     if ($p0 === 'target' || $p0 === 'submitter') $skipAssert = true;
                 }
             }
-            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks'])) assertActiveMember($wuser);
+            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks','circle_roster','circle_domains','circle_activity','cell_domains','cell_circles','draft_resolutions','stf_candidates'])) assertActiveMember($wuser);
             // Archived circles take no stewards: roster writes stop at archive.
             // (Departures run through markFormer directly, never this router.)
             if ($d['child'] === 'circle_roster') {
