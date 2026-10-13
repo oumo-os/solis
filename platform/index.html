@@ -7717,11 +7717,15 @@ function renderMemberList() {
     '</div>';
   }).join('') : '';
 
+  var mmMe = (MOCK && MOCK.currentUser) || {};
+  var mmCid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law';
+  var mmCanRead = (typeof isStewardOfCircle === 'function' && isStewardOfCircle(mmMe.id, mmCid));
   var successHtml = successionCandidates.length ? successionCandidates.map(function(a) {
+    var mot = (mmCanRead || a.applicant === mmMe.name) ? (a.motivation || '').substring(0, 40) + '…' : 'Motivation visible to stewards';
     return '<div class="mm-card" onclick="selectSuccessionCandidate(\'' + a.id + '\')" id="mm-card-' + a.id + '">' +
       '<div class="mm-avatar" style="background:var(--amber-soft);color:var(--amber)">' + a.initials + '</div>' +
       '<div class="mm-info"><div class="mm-name">' + a.applicant + '</div>' +
-      '<div class="mm-meta">Applied ' + a.appliedDate + ' · ' + (a.motivation || '').substring(0, 40) + '…</div></div>' +
+      '<div class="mm-meta">Applied ' + a.appliedDate + ' · ' + mot + '</div></div>' +
       (a.queuePosition ? '<div class="mm-ws">#' + a.queuePosition + '</div>' : '') +
     '</div>';
   }).join('') : '';
@@ -7755,6 +7759,8 @@ function renderSuccessionCandidateDetail(appId) {
   var a = (MOCK.circleApplications || []).filter(function(x){return x.id===appId})[0];
   if (!a) return;
   var isSelf = MOCK.currentUser && a.applicant === MOCK.currentUser.name;
+  var scCid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || a.circleId;
+  var scCan = isSelf || (typeof isStewardOfCircle === 'function' && MOCK.currentUser && isStewardOfCircle(MOCK.currentUser.id, scCid));
   detail.innerHTML =
     '<div>' +
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">' +
@@ -7763,7 +7769,7 @@ function renderSuccessionCandidateDetail(appId) {
         '<div style="font-size:11px;color:var(--text-tertiary)">Applied ' + a.appliedDate + '</div></div>' +
       '</div>' +
       '<div class="mm-section-title">Motivation</div>' +
-      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(a.motivation || '') + '</div>' +
+      '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)">' + esc(scCan ? (a.motivation || '') : 'Visible to circle stewards and the applicant.') + '</div>' +
       (a.notes ? '<div class="mm-section-title">Notes</div><div style="font-size:12px;color:var(--text-tertiary);margin-bottom:12px">' + esc(a.notes) + '</div>' : '') +
       (isSelf ? '<button onclick="withdrawFromQueue(\'' + a.id + '\')" style="background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600">Withdraw</button>' : '') +
     '</div>';
@@ -11543,6 +11549,15 @@ function openCircleCell(cellId) {
   if (backEl) backEl.textContent = '← ' + (_cellBackNav === 'undertakings' ? 'Projects' : 'Cells');
   renderCircleCell(cellId);
 }
+function circleCellReadable(cell) {
+  if (!cell) return false;
+  var me = (MOCK && MOCK.currentUser) || {};
+  if (!me.id) return false;
+  var circle = (typeof findCircleByCell === 'function') ? findCircleByCell(cell) : null;
+  if (!circle) return true;
+  var roster = (circle.roster && circle.roster.active) || [];
+  return roster.some(function(m) { return m.id === me.id; });
+}
 
 function findCircleByCell(cell) {
   var circles = (MOCK && MOCK.circles) || [];
@@ -11559,6 +11574,15 @@ function findCircleByCell(cell) {
 function renderCircleCell(cellId) {
   var cell = cellsById[cellId] || ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'Circle Cell'; })[0];
   if (!cell) return;
+  if (typeof circleCellReadable === 'function' && !circleCellReadable(cell)) {
+    setText('circlecell-title', cell.title || 'Circle Cell');
+    setHtml('circlecell-proposals', '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">Restricted to circle members. Join the circle to read its cell.</div></div>');
+    setHtml('circlecell-messages', '');
+    setHtml('circlecell-members', '');
+    setHtml('circlecell-xstfs', '');
+    setHtml('circlecell-deliverables', '');
+    return;
+  }
   var circle = findCircleByCell(cell);
   var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
   var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };

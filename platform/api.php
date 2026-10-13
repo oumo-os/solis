@@ -223,6 +223,18 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         $circles[] = ['id' => $c['id'], 'name' => $c['name'], 'status' => $c['status'], 'members' => $c['members'], 'motions' => $c['motions'], 'description' => $c['description'], 'founded' => $c['founded'], 'termOverride' => pJson($c['term_override'] ?? null), 'expiryOverride' => pJson($c['expiry_override'] ?? null), 'domains' => array_values(array_map(function($d) { return $d['domain']; }, array_filter($cds, function($d) { return !$d['mandate']; }))), 'mandate' => ['primary' => array_values(array_map(function($d) { return $d['domain']; }, array_filter($cds, function($d) { return $d['mandate'] === 'primary'; }))), 'secondary' => array_values(array_map(function($d) { return $d['domain']; }, array_filter($cds, function($d) { return $d['mandate'] === 'secondary'; })))], 'desiredWs' => array_reduce($cds, function($a, $d) { if ($d['desired_ws'] !== null) $a[$d['domain']] = $d['desired_ws']; return $a; }, []), 'roster' => $roster, 'proposals' => array_map(function($p) { unset($p['circle_id']); return $p; }, $propByCircle[$c['id']] ?? []), 'resolutions' => array_map(function($r) { unset($r['circle_id']); return $r; }, $resByCircle[$c['id']] ?? []), 'activity' => array_map(function($a) { unset($a['circle_id'], $a['id']); return $a; }, $actByCircle[$c['id']] ?? [])];
     }
+    // Circle internals are members-only: outsiders keep the card (identity,
+    // mandate, counts) but lose roster, proposals, resolutions and activity.
+    // Anyone who ever sat (active or former) keeps reading rights.
+    $meCircle = $currentRow['id'] ?? null;
+    if ($meCircle) {
+        foreach ($circles as &$cc) {
+            $mine = false;
+            foreach (array_merge($cc['roster']['active'] ?? [], $cc['roster']['former'] ?? []) as $rm) { if (($rm['id'] ?? null) === $meCircle) { $mine = true; break; } }
+            if (!$mine) { $cc['roster'] = ['active' => [], 'former' => []]; $cc['proposals'] = []; $cc['resolutions'] = []; $cc['activity'] = []; }
+        }
+        unset($cc);
+    }
     $cellDomains = groupBy(dbAll('SELECT * FROM cell_domains'), 'cell_id');
     $cellCircles = groupBy(dbAll('SELECT * FROM cell_circles'), 'cell_id');
     $msgByCell = groupBy(dbAll('SELECT * FROM cell_messages'), 'cell_id');
@@ -239,6 +251,12 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $vsumByCell = groupBy(dbAll('SELECT * FROM cell_vote_summary'), 'cell_id');
     $cells = [];
     $sealedStf = []; $sealedCase = []; $blankCircle = [];
+    $circleIdByName = []; foreach ($circles as $cxm) { $circleIdByName[$cxm['id']] = $cxm['id']; $circleIdByName[$cxm['name']] = $cxm['id']; }
+    $circleIdByPrefix = function($ref) use ($circles) {
+        if ($ref === '' || $ref === null) return null;
+        foreach ($circles as $cxm) { if (str_starts_with($cxm['name'] ?? '', $ref) || str_starts_with($ref, $cxm['name'] ?? '###')) return $cxm['id']; }
+        return null;
+    };
     foreach (dbAll('SELECT * FROM cells') as $c) {
         $meta = pJson($c['meta'] ?? null) ?: [];
         $cell = ['id' => $c['id'], 'type' => $c['type'], 'title' => $c['title'], 'status' => $c['status'], 'delibType' => $c['delib_type'], 'participants' => $c['participants'], 'members' => $c['members'], 'progress' => $c['progress'], 'daysActive' => $c['days_active'], 'lead' => $c['lead'], 'circle' => $c['circle'], 'created' => $c['created'], 'deadline' => $c['deadline'], 'assessors' => $c['assessors'], 'commissionedBy' => $c['commissioned_by'], 'resolutionRef' => $c['resolution_ref'], 'entityType' => $c['entity_type'], 'source' => pJson($c['source'] ?? null), 'resolution' => pJson($c['resolution'] ?? null), 'deliverableSpecs' => pJson($c['deliverable_specs'] ?? null), 'domains' => array_values(array_map(function($d) { return $d['domain']; }, $cellDomains[$c['id']] ?? []))];
@@ -252,6 +270,14 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $cell['objectives'] = array_map(function($o) { return ['id' => $o['obj_id'] ?: 'o' . $o['id'], 'label' => $o['label'], 'status' => $o['status'], 'assessors' => $o['assessors'] !== null ? (int)$o['assessors'] : null, 'deadline' => $o['deadline']]; }, $objByCell[$c['id']] ?? []);
         $cell['draftVotes'] = $draftVotesByCell[$c['id']] ?? [];
         $cell['team'] = array_map(function($t) use ($currentRow) { $meId = $currentRow['id'] ?? null; $meIni = $currentRow['initials'] ?? null; $self = $meId && (!empty($t['user_id']) ? $t['user_id'] === $meId : ($t['initials'] ?? null) === $meIni); return ['name' => $t['name'], 'initials' => $t['initials'], 'role' => $t['role'], 'focus' => $t['focus'], 'self' => (bool)$self]; }, $teamByCell[$c['id']] ?? []);
+        // Circle cells are members-only: resolve the owning circle and strip
+        // deliberation content for anyone without an active seat there.
+        if (($c['type'] ?? '') === 'Circle Cell' && ($currentRow['id'] ?? null)) {
+            $cellCircle = $circleIdByName[$c['circle'] ?? ''] ?? $circleIdByPrefix($c['circle'] ?? '');
+            if ($cellCircle && !dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cellCircle, $currentRow['id']])) {
+                $cell['messages'] = []; $cell['team'] = []; $cell['objectives'] = []; $cell['tasks'] = [];
+            }
+        }
         // Adjudication filings stay sealed permanently, even from fellow
         // assessors: the blind wall outlives the quorum. Everyone sees the
         // count; each assessor sees only whether they themselves filed. The
