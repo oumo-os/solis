@@ -32,19 +32,18 @@ Solis uses a flat, permission-less governance model where **circle membership eq
 
 ### How It Works
 
-1. Any user can apply to join a circle via "Apply to Join"
+1. Any active member can apply to join a circle via "Apply to Join" (one pending application per member per circle; stewards and archived circles excluded)
 2. Applications enter the **succession queue** (visible in Co-Stewards modal)
-3. When a seat opens (member departs), the system evaluates top candidates
-4. A vSTF is spawned to verify the candidate's competence
-5. Top candidate takes the post
+3. When a seat opens (member departs for any reason except disbandment), the system evaluates top candidates
+4. A steward-candidacy vSTF is spawned to verify the candidate (score 60+ carries)
+5. Top approved candidate takes the post
 
 ### Succession Flow
 
 - Candidate applies to the circle (via "Apply to Join") and enters the succession queue
-- When a steward vacancy opens, the system automatically runs a vSTF evaluation
-- vSTF evaluates pending candidates by interest alignment, competence (Ws), and workload
-- Top evaluated candidate automatically takes the steward post (no human approval needed)
-- Candidates can withdraw from the queue at any time
+- When a steward vacancy opens, the integrity engine vets pending applicants without recent vetting and seats the top approved candidate per open seat
+- Vetting is a human-scored steward-candidacy vSTF (avg 60+ approves); frozen, restricted and already-seated applicants never seat; circle capacity caps seating
+- Candidates can withdraw their own application at any time; only the applicant (or engine seating) moves an application — nobody approves their way in by hand
 - The entire process is invisible and automatic — no steward action required
 
 ### Candidate Evaluation
@@ -107,18 +106,17 @@ When a settings change is proposed (e.g. "change steward term to 18 months"), th
    - Old value (struck through, red)
    - Arrow → New value (green, bold)
    - Rationale text (italic)
-3. **Info note** — "If this resolution passes, stewards must manually update these values in System Settings."
+3. **Info note** — "If this resolution passes and aSTF approves, the settings apply automatically and the application is logged to the governance ledger."
 
 ### Key Difference from Standard Resolutions
 
 - The resolution text is **freeform** — it documents the discussion and final agreed changes, which may differ from the original proposal
 - Example: Steward proposes "change steward term to 2 years" → after deliberation, resolution says "change STF quorum to 9" → all mutations documented in the final resolution
-- After resolution passes, stewards **manually apply** the changes in System Settings
-- No automated settings mutation — the resolution text is the source of truth
+- After aSTF approves, the server applies the snapshot automatically (`applySettingsSnapshotServer`) and logs to the governance ledger — no manual step, no reload skipped
 
 ### Resolution Outcomes
 
-- **Approved** → stewards update system settings manually, document changes
+- **Approved** → snapshot applied server-side on aSTF approval, logged to ledger
 - **Failed** → no changes applied, proposal recorded as rejected
 
 ---

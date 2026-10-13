@@ -1264,7 +1264,7 @@
         <!-- Circle Cells (Motions) -->
         <div class="flex items-center justify-between" style="margin-bottom:10px">
           <div class="circle-section-title" style="margin:0;border:none;padding:0">Circle Cells</div>
-          <button class="btn btn-sm" style="font-size:9px">+ New Cell</button>
+          <button class="btn btn-sm" style="font-size:9px" onclick="newCircleCell()">+ New Cell</button>
         </div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:10px">Motions and special business under deliberation</div>
         <div id="cd-cells"></div>
@@ -6215,7 +6215,7 @@ function openRemoveMemberModal(circleId, circleName) {
   if (c && c.roster) members = (c.roster.active || []);
   var opts = members.map(function(m) { return '<option value="' + m.id + '">' + m.name + '</option>'; }).join('');
   openModal('<div class="sec">Remove Member from ' + escapeHtml(circleName) + '</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">jSTF forced removal. The member will be moved to former members with reason "jstf-removal".</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">Judicial removal — requires a live jSTF case against that member. Stewards resign; only the judiciary removes.</div>' +
     '<div class="form-group"><label class="form-label">Member to remove</label><select class="form-input" id="remove-member-select">' + opts + '</select></div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmRemoveMember(\'' + circleId + '\')">Remove Member</button></div>',
     { size: 'sm' });
@@ -6234,7 +6234,7 @@ function confirmRemoveMember(circleId) {
 
 function openFlushModal(circleId, circleName) {
   openModal('<div class="sec">jSTF Full Circle Flush — ' + escapeHtml(circleName) + '</div>' +
-    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">All active members except yourself will be removed from the circle. This is a drastic measure used by the jSTF.</div>' +
+    '<div style="font-size:12px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px">All active members except yourself will be removed from the circle. Requires a live jSTF case against a member of this circle — a drastic judicial measure, not routine stewardship.</div>' +
     '<div class="flex gap-2" style="justify-content:flex-end"><button class="btn btn-sm" onclick="closeModal()">Cancel</button><button class="btn btn-danger btn-sm" onclick="confirmFlush(\'' + circleId + '\')">Flush Circle</button></div>',
     { size: 'sm' });
 }
@@ -6285,7 +6285,8 @@ function renderCircleMembership(circleId) {
   var roster = circle.roster || {};
   var active = roster.active || [];
   var former = roster.former || [];
-  var isSteward = jstfClientIsSteward();
+  var me = (MOCK && MOCK.currentUser) || {};
+  var isSteward = typeof isStewardOfCircle === 'function' ? isStewardOfCircle(me.id, circleId) : jstfClientIsSteward();
   var html = '<div class="sec">Active Stewards (' + active.length + ')</div>';
   active.forEach(function(m) {
     html += '<div class="hrow"><div class="hav" style="background:' + (m.color || 'var(--purple)') + ';width:32px;height:32px">' + (m.initials || '') + '</div>' +
@@ -7672,6 +7673,10 @@ var successionCandidates = [];
 function openMembersModal() {
   var circleId = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law';
   var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] || {};
+  var roster = circle.roster || { active: [], former: [] };
+  membersData = (roster.active || []).concat(roster.former || []);
+  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='candidate';});
+  formerMembers = membersData.filter(function(m){return m.status==='former';});
   successionCandidates = (MOCK.circleApplications || []).filter(function(a){ return a.circleId === circleId && a.status === 'pending'; });
   var mandateText = 'Mandate: ' + (circle.domains || []).join(', ');
   var html = '<div class="mm-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
@@ -7784,7 +7789,7 @@ function withdrawFromQueue(appId) {
 function renderMemberDetail(id) {
   var detail = document.getElementById('mm-detail');
   if (!detail) return;
-  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
+  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===((typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law')})[0] || {};
   var m = membersData.filter(function(d){return d.id===id})[0];
   if (!m) return;
 
@@ -7956,10 +7961,11 @@ function isStewardOfCircle(userId, circleId) {
 }
 
 function isStewardOfAnyCircle() {
-  if (!MOCK || !MOCK.circles) return false;
+  if (!MOCK || !MOCK.circles || !MOCK.currentUser) return false;
+  var meId = MOCK.currentUser.id;
   return MOCK.circles.some(function(c) {
     return c.status === 'Active' && c.roster && c.roster.active &&
-      c.roster.active.some(function(m) { return m.id === MOCK.currentUser.id; });
+      c.roster.active.some(function(m) { return m.id === meId; });
   });
 }
 
@@ -8230,6 +8236,14 @@ function regAddEntry(containerId,type){
 
 
 // Proposal modal
+function newCircleCell() {
+  var me = (MOCK && MOCK.currentUser) || {};
+  var cid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || null;
+  if (!me.id) { toast('Sign in to propose a cell.', 'error'); return; }
+  if (cid && typeof isStewardOfCircle === 'function' && !isStewardOfCircle(me.id, cid)) { toast('Only stewards of this circle may open cells.', 'error'); return; }
+  if (typeof openProposalModal === 'function') openProposalModal();
+  else toast('Proposal flow unavailable.', 'error');
+}
 function openProposalModal(){
   var html='<div class="modal-header">New Proposal</div>'+
     '<div style="margin-bottom:12px"><label class="form-label">Type</label>'+
