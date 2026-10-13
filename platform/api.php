@@ -381,6 +381,19 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         $cells[] = array_filter($cell, function($v) { return $v !== null; });
     }
+    // Motions are derived, never stored: open deliberation + audit cells
+    // touching the circle, matched by id or name either way round.
+    foreach ($circles as &$cc) {
+        $n = 0;
+        foreach ($cells as $xc) {
+            $t = $xc['type'] ?? ''; if ($t !== 'Deliberation Cell' && $t !== 'aSTF Cell') continue;
+            $st = $xc['status'] ?? ''; if (in_array($st, ['crystallised', 'Verdict Filed', 'Approved', 'Rejected'], true)) continue;
+            $xcir = $xc['circle'] ?? '';
+            if ($xcir !== '' && ($xcir === $cc['id'] || $xcir === $cc['name'])) $n++;
+        }
+        $cc['motions'] = $n;
+    }
+    unset($cc);
     $stfShape = ['pending' => [], 'active' => [], 'completed' => []];
     foreach (dbAll('SELECT * FROM stfs') as $s) {
         $obj = ['id' => $s['id'], 'type' => $s['type'], 'purpose' => $s['purpose'], 'circle' => $s['circle'], 'deadline' => $s['deadline'], 'status' => $s['status']];
@@ -503,6 +516,7 @@ if ($cleanPath === '/circle-applications' && $method === 'POST') {
     $appId = 'app-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
     $acName = (dbGet('SELECT name FROM circles WHERE id = ?', [$acId])['name'] ?? '');
     dbRun('INSERT INTO circle_applications (id, circle_id, circle_name, applicant, initials, user_id, motivation, status, applied_date, queue_position) VALUES (?,?,?,?,?,?,?,?,?,?)', [$appId, $acId, $acName, $user['name'], $user['initials'], $user['id'], $motivation, 'pending', date('Y-m-d'), $qn]);
+    logCircleActivity($acId, ($user['name'] ?? 'A member') . ' applied to the succession queue (#' . $qn . ')', 'membership');
     send(201, ['ok' => true, 'id' => $appId, 'queuePosition' => $qn]);
 }
 foreach ($routes as $r) {
@@ -515,6 +529,7 @@ foreach ($routes as $r) {
             $arow = dbGet('SELECT * FROM circle_applications WHERE id = ?', [$id]); if (!$arow) send(404, ['error' => 'Not found']);
             $ap = readBody();
             if ((string)($ap->status ?? '') !== 'withdrawn' || ($arow['user_id'] ?? '') !== ($au['id'] ?? '')) send(403, ['error' => 'Only your own pending application may be withdrawn']);
+            logCircleActivity($arow['circle_id'] ?? '', ($au['name'] ?? 'A member') . ' withdrew from the succession queue', 'membership');
         }
         if ($method === 'GET') {
             // Redacted-public anonymous view: threads/cells/stfs filter per
@@ -566,9 +581,9 @@ foreach ($routes as $r) {
             }
             if ($id !== null) { $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); send(200, $row); } send(200, dbAll("SELECT * FROM {$r['table']}"));
         }
-        if ($method === 'POST' && $cleanPath === $r['path']) { $wu = authUser(); if (!$wu) send(401, ['error' => 'Unauthorized']); assertActiveMember($wu); $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
-        if ($method === 'PATCH' || $method === 'PUT') { $eu = authUser(); if (!$eu) send(401, ['error' => 'Unauthorized']); assertActiveMember($eu); $body = readBody(); $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); updateRow($r['table'], $body, $id); send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id])); }
-        if ($method === 'DELETE') { $du = authUser(); if (!$du) send(401, ['error' => 'Unauthorized']); assertActiveMember($du); $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
+        if ($method === 'POST' && $cleanPath === $r['path']) { $wu = authUser(); if (!$wu) send(401, ['error' => 'Unauthorized']); assertActiveMember($wu); if ($r['table'] === 'circles') { $cb = readBody(); $cid = trim((string)(($cb->id ?? ''))); if ($cid && !dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cid, $wu['id']])) send(403, ['error' => 'Only a steward of that circle may edit it']); } $body = readBody(); if (!isset($body->id)) send(400, ['error' => 'id required']); dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]); $ok = updateRow($r['table'], $body); send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]); }
+        if ($method === 'PATCH' || $method === 'PUT') { $eu = authUser(); if (!$eu) send(401, ['error' => 'Unauthorized']); assertActiveMember($eu); if ($r['table'] === 'circles' && $id !== null && !dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$id, $eu['id']])) send(403, ['error' => 'Only a steward of that circle may edit it']); $body = readBody(); $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]); if (!$row) send(404, ['error' => 'Not found']); updateRow($r['table'], $body, $id); send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id])); }
+        if ($method === 'DELETE') { $du = authUser(); if (!$du) send(401, ['error' => 'Unauthorized']); assertActiveMember($du); if ($r['table'] === 'circles') send(403, ['error' => 'Circles close through disbandment, not deletion']); $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
         send(405, ['error' => 'Method not allowed']);
     }
 }
@@ -1089,6 +1104,7 @@ function applySettingsSnapshotServer($snapshot, $userName) {
             $cmeta = ['maxMembers' => isset($s['maxMembers']) ? (int)$s['maxMembers'] : 15, 'mandate' => $s['mandateDomains'] ?? ['primary' => [], 'secondary' => []], 'termOverride' => $s['stewardTermOverride'] ?? null, 'expiryOverride' => $s['expiryOverride'] ?? null];
             dbRun('INSERT INTO circles (id, name, status, members, motions, description, founded, term_override, expiry_override, meta) VALUES (?,?,?,?,?,?,?,?,?,?)', [$nid, trim((string)($s['name'] ?? 'New Circle')), 'Suggested', 0, 0, trim((string)($s['description'] ?? '')), date('M Y'), isset($s['stewardTermOverride']) ? (string)$s['stewardTermOverride'] : null, isset($s['expiryOverride']) ? (string)$s['expiryOverride'] : null, json_encode($cmeta)]);
             $notes[] = 'circle proposed as Suggested (' . $nid . ')';
+            logCircleActivity($nid, 'Circle proposed — deliberation pending', 'governance');
         } else {
             $sets = []; $vals = [];
             if (isset($s['name']) && $s['name'] !== '') { $sets[] = 'name = ?'; $vals[] = trim((string)$s['name']); }
@@ -1096,7 +1112,7 @@ function applySettingsSnapshotServer($snapshot, $userName) {
             if (isset($s['description'])) { $sets[] = 'description = ?'; $vals[] = trim((string)$s['description']); }
             if (isset($s['stewardTermOverride'])) { $sets[] = 'term_override = ?'; $vals[] = (string)$s['stewardTermOverride']; }
             if (isset($s['expiryOverride'])) { $sets[] = 'expiry_override = ?'; $vals[] = (string)$s['expiryOverride']; }
-            if ($sets) { dbRun('UPDATE circles SET ' . implode(', ', $sets) . ' WHERE id = ?', array_merge($vals, [$tgt])); $notes[] = 'circle settings applied (' . $tgt . ')'; }
+            if ($sets) { dbRun('UPDATE circles SET ' . implode(', ', $sets) . ' WHERE id = ?', array_merge($vals, [$tgt])); $notes[] = 'circle settings applied (' . $tgt . ')'; logCircleActivity($tgt, 'Settings updated by approved resolution', 'governance'); }
         }
     } else return false;
     dbRun('INSERT INTO governance_ledger (id, type, target, settings, applied_by, applied_at, status) VALUES (?,?,?,?,?,?,?)', ['ledger-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), $snapshot['type'], $snapshot['target'] ?? null, json_encode($snapshot['settings'] ?? []), $userName, date('Y-m-d\TH:i:s.000\Z'), 'applied']);
@@ -1293,6 +1309,7 @@ function integrityEnginePoll($cap = 3) {
             dbRun("INSERT INTO user_circles (user_id, circle, status, since, kind) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE status = VALUES(status), since = VALUES(since), kind = VALUES(kind)", [$wu['id'], $circle['name'], 'Active', date('M Y'), 'roster']);
             dbRun("UPDATE circle_applications SET status = 'accepted' WHERE id = ?", [$win['app']['id']]);
             dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$circle['id'], $circle['id']]);
+            logCircleActivity($circle['id'], $wu['name'] . ' seated as steward (vetted ' . $win['score'] . '/100, succession)', 'membership');
             unset($vacs[$vi]); $seatedAny = true;
             dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-eng-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'engine-seating', $circle['name'], date('Y-m-d'), $wu['name'] . ' seated as steward of ' . $circle['name'] . ' (vetted ' . $win['score'] . '/100, succession)', 'integrity-engine']);
         }
@@ -2514,8 +2531,15 @@ function jstfOpenCaseOnCircle($circleId) {
     }
     return null;
 }
+// Circle activity feed: every membership transition and governance act
+// writes here. Previously write-only via manual POSTs — now fed by the
+// paths that actually change circles.
+function logCircleActivity($circleId, $text, $type = 'discussion') {
+    if (!$circleId || $text === '') return;
+    dbRun('INSERT INTO circle_activity (circle_id, text, time, type) VALUES (?,?,?,?)', [$circleId, $text, date('Y-m-d'), $type]);
+}
 function markFormer($rosterId, $reason) {
-    $row = dbGet('SELECT circle_id, member_id FROM circle_roster WHERE id = ?', [$rosterId]);
+    $row = dbGet('SELECT circle_id, member_id, name FROM circle_roster WHERE id = ?', [$rosterId]);
     dbRun("UPDATE circle_roster SET status = 'former', `left` = ?, `left_reason` = ? WHERE id = ?", [date('Y-m-d'), $reason, $rosterId]);
     if ($row) {
         // user_circles.circle mixes full names (new writes) and legacy short
@@ -2526,6 +2550,7 @@ function markFormer($rosterId, $reason) {
         $short = (count($words) >= 2 ? strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1)) : strtoupper(substr($words[0] ?? '', 0, 2))) . ' Circle';
         dbRun("DELETE FROM user_circles WHERE user_id = ? AND kind = 'roster' AND (circle = ? OR circle = ?)", [$row['member_id'], $full, $short]);
         dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$row['circle_id'], $row['circle_id']]);
+        logCircleActivity($row['circle_id'], ($row['name'] ?? $row['member_id']) . ' departed (' . $reason . ')', 'membership');
     }
 }
 // Every non-disband departure opens a succession vacancy (skipped on
@@ -2582,6 +2607,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/disband$/', $cleanPath, $m)) {
     dbRun("UPDATE circles SET status = 'Archived', members = 0, motions = 0, meta = ? WHERE id = ?", [json_encode($dcm), $cId]);
     $dcn = dbGet('SELECT name FROM circles WHERE id = ?', [$cId])['name'] ?? $cId;
     dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-circle-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'circle-archived', (string)$dcn, date('Y-m-d'), '"' . (string)$dcn . '" archived — ' . $removed . ' stewards departed', (string)($user['name'] ?? $user['initials'])]);
+    logCircleActivity($cId, 'Circle archived — ' . $removed . ' stewards departed', 'governance');
     send(200, ['ok' => true, 'reason' => 'circle-disbandment', 'removed' => $removed]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/drift-check$/', $cleanPath, $m)) {

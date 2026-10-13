@@ -8424,21 +8424,27 @@ function submitProposal(){
     var expiry=document.getElementById('propose-circle-expiry').value;
     var intent=document.getElementById('propose-circle-intent').value;
     if(!name){toast('Please enter a circle name.','warn');return;}
-    var cellId='cell-'+Date.now().toString(36);
-    var delibId='cell-'+Date.now().toString(36)+'d';
-    MOCK.cells.push({
-      id:delibId,type:'Deliberation Cell',delibType:'circle-creation',
-      title:'Circle: '+name+' Founding',participants:8,status:'Active',
-      domains:domains?domains.split(',').map(function(s){return s.trim();}):[],
-      source:{type:'circle-proposal',proposer:MOCK.currentUser.name,intent:intent},
-      circleDetails:{name:name,description:desc||'',domains:domains||'',maxMembers:maxMembers?parseInt(maxMembers):15,stewardTerm:term?parseInt(term):null,expiry:expiry?parseInt(expiry):null,foundingIntent:intent||''},
-      participatingCircles:[],resolution:{status:'Draft'},
-      messages:[{author:MOCK.currentUser.initials,text:'Proposed founding of '+name+'. Awaiting deliberation.',time:'Just now',gold:true}]
-    });
-    cellsById[delibId]=MOCK.cells[MOCK.cells.length-1];
-    closeModal();
-     toast('Circle Formation proposal "'+name+'" submitted! Deliberation cell created.','success');
-    SolisApi.saveCell(cellsById[delibId]);
+    var me = (MOCK && MOCK.currentUser) || {};
+    if (!me.id) { toast('Sign in to propose a circle.', 'error'); return; }
+    var snapshot = { type: 'circle', target: 'new', status: 'pending', settings: { name: name, status: 'Suggested', description: desc || '', maxMembers: maxMembers ? parseInt(maxMembers) : 15, mandateDomains: { primary: (domains || '').split(',').map(function(s) { return { name: s.trim(), desiredWs: 1000 }; }).filter(function(d) { return d.name; }), secondary: [] }, foundingIntent: intent || '' } };
+    SolisApi.createCircleProposal({ delibType: 'circle-creation', title: 'Circle: ' + name + ' Founding', snapshot: snapshot, sourceType: 'circle-proposal' }).then(function(r) {
+      if (!r || (r.__status && r.__status >= 400)) { toast('Proposal failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
+      var delibId = r.cellId;
+      MOCK.cells.push({
+        id: delibId, type: 'Deliberation Cell', delibType: 'circle-creation',
+        title: 'Circle: ' + name + ' Founding', participants: 8, status: 'Active',
+        domains: domains ? domains.split(',').map(function(s) { return s.trim(); }) : [],
+        source: { type: 'circle-proposal', proposer: me.name, intent: intent },
+        settingsSnapshot: snapshot,
+        circleDetails: { name: name, description: desc || '', domains: domains || '', maxMembers: maxMembers ? parseInt(maxMembers) : 15, stewardTerm: term ? parseInt(term) : null, expiry: expiry ? parseInt(expiry) : null, foundingIntent: intent || '' },
+        participatingCircles: [], resolution: { status: 'Draft' },
+        messages: [{ author: me.initials, text: 'Proposed founding of ' + name + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+      });
+      cellsById[delibId] = MOCK.cells[MOCK.cells.length - 1];
+      closeModal();
+      toast('Circle Formation proposal "' + name + '" submitted! Deliberation cell created.', 'success');
+      if (typeof loadApiData === 'function') loadApiData();
+    }).catch(function() { toast('Could not reach the server.', 'error'); });
   } else if(type==='org'){
     var name=document.getElementById('propose-org-name').value;
     var acronym=document.getElementById('propose-org-acronym').value;
