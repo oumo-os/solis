@@ -804,6 +804,14 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
     if (!($inRoster['n'] ?? 0)) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $allowed = ['system-settings', 'circle-settings', 'circle-creation']; $delibType = (string)($body->delibType ?? '');
     if (!in_array($delibType, $allowed)) send(400, ['error' => 'delibType required']);
+    $snap = is_object($body->snapshot ?? null) ? (array)$body->snapshot : [];
+    // circle-settings edits an existing circle: the proposer must steward
+    // THAT circle. Founding (circle-creation) stays open to any steward.
+    if ($delibType === 'circle-settings') {
+        $tgt = trim((string)(($snap['target'] ?? '')));
+        if ($tgt === '' || $tgt === 'new') send(400, ['error' => 'circle-settings needs an existing circle target']);
+        if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$tgt, $user['id']])) send(403, ['error' => 'Only a steward of that circle may propose its settings']);
+    }
     $title = trim((string)($body->title ?? '')); if (!$title) send(400, ['error' => 'title required']);
     $mc = (int)(dbGet("SELECT COUNT(*) AS n FROM users WHERE status = 'Active'")['n'] ?? 0) ?: 0;
     $cellId = 'delib-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
@@ -1045,13 +1053,54 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
     if (!empty($src['originCellId'])) {
         $origin = dbGet('SELECT * FROM cells WHERE id = ?', [$src['originCellId']]);
         if ($origin) { $or = pJson($origin['resolution'] ?? '{}') ?: [];
-            if ($verdict === 'approved') { $or['status'] = 'Approved'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
+            if ($verdict === 'approved') { $or['status'] = 'Approved'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); $osnap = pJson($origin['meta'] ?? '{}') ?: []; if (!empty($osnap['settingsSnapshot'])) { $appliedNotes = applySettingsSnapshotServer((array)$osnap['settingsSnapshot'], $user['name'] ?? $user['initials']); if ($appliedNotes) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-snap-' . time(), 'settings-applied', (string)($src['circleName'] ?? ''), date('Y-m-d'), 'Settings snapshot applied on approval: ' . implode('; ', (array)$appliedNotes), 'aSTF assessors']); } }
             elseif ($verdict === 'rejected') { $or['status'] = 'Rejected'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
             else { $or['status'] = 'Revision Requested'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'draft' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
         }
         dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-' . time(), 'astf-verdict', (string)($src['circleName'] ?? ''), date('Y-m-d'), '"' . ($judicial ? $cellId : ($cell['title'] ?? $cellId)) . '" — aSTF verdict: ' . $verdict . ' (rubric ' . $total . '/30)', 'aSTF assessors']);
     }
     send(200, ['ok' => true, 'verdict' => $verdict, 'astfId' => $cellId, 'originCellId' => $src['originCellId'] ?? null, 'rubricTotal' => $total]);
+}
+
+// Server-side settings-snapshot apply: runs on an approved aSTF verdict so
+// reloads and API approvals apply exactly like client approvals. Mirrors
+// the client applySettingsSnapshot for system + circle snapshots.
+function applySettingsSnapshotServer($snapshot, $userName) {
+    if (!is_array($snapshot) || empty($snapshot['type'])) return false;
+    $notes = [];
+    if ($snapshot['type'] === 'system') {
+        $s = isset($snapshot['settings']) && is_array($snapshot['settings']) ? $snapshot['settings'] : [];
+        $stf = isset($s['stf']) && is_array($s['stf']) ? $s['stf'] : [];
+        $map = ['jstf_duration_days' => 'jstfDurationDays', 'jstf_adjudicators' => 'jstfAdjudicators', 'astf_assessors' => 'astfAssessors', 'jstf_pool_mode' => 'jstfPoolMode', 'astf_duration_days' => 'astfDurationDays', 'vstf_duration_days' => 'vstfDurationDays'];
+        $sets = []; $vals = [];
+        foreach ($map as $col => $key) {
+            if (!isset($stf[$key]) || $stf[$key] === null || $stf[$key] === '') continue;
+            if ($key === 'jstfPoolMode' && !in_array($stf[$key], ['stewards', 'competence'])) continue;
+            if ($key === 'jstfDomains') continue;
+            $sets[] = $col . ' = ?'; $vals[] = $stf[$key];
+        }
+        if (isset($stf['jstfDomains']) && is_array($stf['jstfDomains'])) { $sets[] = 'jstf_domains = ?'; $vals[] = json_encode(array_values($stf['jstfDomains'])); }
+        if ($sets) { dbRun('UPDATE system_settings SET ' . implode(', ', $sets) . ' WHERE id = 1', $vals); $notes[] = 'system settings applied (' . count($sets) . ' keys)'; }
+    } elseif ($snapshot['type'] === 'circle') {
+        $s = isset($snapshot['settings']) && is_array($snapshot['settings']) ? $snapshot['settings'] : [];
+        $tgt = trim((string)($snapshot['target'] ?? 'new'));
+        if ($tgt === '' || $tgt === 'new') {
+            $nid = 'circle-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+            $cmeta = ['maxMembers' => isset($s['maxMembers']) ? (int)$s['maxMembers'] : 15, 'mandate' => $s['mandateDomains'] ?? ['primary' => [], 'secondary' => []], 'termOverride' => $s['stewardTermOverride'] ?? null, 'expiryOverride' => $s['expiryOverride'] ?? null];
+            dbRun('INSERT INTO circles (id, name, status, members, motions, description, founded, term_override, expiry_override, meta) VALUES (?,?,?,?,?,?,?,?,?,?)', [$nid, trim((string)($s['name'] ?? 'New Circle')), 'Suggested', 0, 0, trim((string)($s['description'] ?? '')), date('M Y'), isset($s['stewardTermOverride']) ? (string)$s['stewardTermOverride'] : null, isset($s['expiryOverride']) ? (string)$s['expiryOverride'] : null, json_encode($cmeta)]);
+            $notes[] = 'circle proposed as Suggested (' . $nid . ')';
+        } else {
+            $sets = []; $vals = [];
+            if (isset($s['name']) && $s['name'] !== '') { $sets[] = 'name = ?'; $vals[] = trim((string)$s['name']); }
+            if (isset($s['status']) && in_array($s['status'], ['Active', 'Suggested', 'Archived'])) { $sets[] = 'status = ?'; $vals[] = $s['status']; }
+            if (isset($s['description'])) { $sets[] = 'description = ?'; $vals[] = trim((string)$s['description']); }
+            if (isset($s['stewardTermOverride'])) { $sets[] = 'term_override = ?'; $vals[] = (string)$s['stewardTermOverride']; }
+            if (isset($s['expiryOverride'])) { $sets[] = 'expiry_override = ?'; $vals[] = (string)$s['expiryOverride']; }
+            if ($sets) { dbRun('UPDATE circles SET ' . implode(', ', $sets) . ' WHERE id = ?', array_merge($vals, [$tgt])); $notes[] = 'circle settings applied (' . $tgt . ')'; }
+        }
+    } else return false;
+    dbRun('INSERT INTO governance_ledger (id, type, target, settings, applied_by, applied_at, status) VALUES (?,?,?,?,?,?,?)', ['ledger-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), $snapshot['type'], $snapshot['target'] ?? null, json_encode($snapshot['settings'] ?? []), $userName, date('Y-m-d\TH:i:s.000\Z'), 'applied']);
+    return $notes;
 }
 
 // ═════════════════════════════════════════════════════════
@@ -2448,6 +2497,23 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-vote$/', $cleanPath, $m)) {
 // ═════════════════════════════════════════════════════════
 // MEMBERSHIP ROUTES
 // ═════════════════════════════════════════════════════════
+// Open jSTF cases backing judicial circle actions: an Under Investigation
+// case whose target is supplied (remove-member) or sits on the circle
+// (flush). Routine stewardship uses resign; force needs a live case.
+function jstfOpenCaseForMember($memberId) {
+    foreach (dbAll("SELECT id, meta FROM cells WHERE type = 'jSTF Cell' AND status = 'Under Investigation'") as $c) {
+        $m = pJson($c['meta'] ?? '{}') ?: [];
+        if (($m['targetId'] ?? null) === $memberId) return $c['id'];
+    }
+    return null;
+}
+function jstfOpenCaseOnCircle($circleId) {
+    foreach (dbAll("SELECT member_id FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$circleId]) as $r) {
+        $cid = jstfOpenCaseForMember($r['member_id']);
+        if ($cid) return $cid;
+    }
+    return null;
+}
 function markFormer($rosterId, $reason) {
     $row = dbGet('SELECT circle_id, member_id FROM circle_roster WHERE id = ?', [$rosterId]);
     dbRun("UPDATE circle_roster SET status = 'former', `left` = ?, `left_reason` = ? WHERE id = ?", [date('Y-m-d'), $reason, $rosterId]);
@@ -2489,6 +2555,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/remove-member$/', $cleanPath, $m)) {
     if ($tid === $user['id']) send(400, ['error' => 'Cannot remove yourself']);
     $tgt = dbGet("SELECT * FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $tid]);
     if (!$tgt) send(404, ['error' => 'Target not an active member']);
+    if (!jstfOpenCaseForMember($tid)) send(403, ['error' => 'Forced removal needs a live jSTF case against that member — stewards resign, the judiciary removes']);
     markFormer($tgt['id'], 'jstf-removal'); recordVacancy($cId, 'jstf-removal'); send(200, ['ok' => true, 'reason' => 'jstf-removal', 'memberId' => $tid]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/flush$/', $cleanPath, $m)) {
@@ -2496,6 +2563,7 @@ if (preg_match('/^\/circles\/([^\/]+)\/flush$/', $cleanPath, $m)) {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']])) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $keepId = trim((string)($body->keepMemberId ?? $user['id']));
+    if (!jstfOpenCaseOnCircle($cId)) send(403, ['error' => 'Circle flush needs a live jSTF case against a member of this circle']);
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $removed = 0;
     foreach ($rows as $r) { if ($r['member_id'] !== $keepId) { markFormer($r['id'], 'jstf-circle-flush'); $removed++; } }
     if ($removed) recordVacancy($cId, 'jstf-circle-flush');
@@ -2505,18 +2573,29 @@ if (preg_match('/^\/circles\/([^\/]+)\/disband$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']])) send(403, ['error' => 'Steward access required']);
+    $body = readBody();
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $removed = 0;
     foreach ($rows as $r) { markFormer($r['id'], 'circle-disbandment'); $removed++; }
     dbRun("UPDATE circle_applications SET status = 'withdrawn' WHERE circle_id = ? AND status = 'pending'", [$cId]);
-    dbRun("UPDATE circles SET status = 'Archived' WHERE id = ?", [$cId]); send(200, ['ok' => true, 'reason' => 'circle-disbandment', 'removed' => $removed]);
+    $dcm = pJson(dbGet('SELECT meta FROM circles WHERE id = ?', [$cId])['meta'] ?? '{}') ?: [];
+    $dcm['archivedDate'] = date('Y-m-d'); $dcm['archiveReason'] = trim((string)($body->reason ?? 'disbanded by stewards'));
+    dbRun("UPDATE circles SET status = 'Archived', members = 0, motions = 0, meta = ? WHERE id = ?", [json_encode($dcm), $cId]);
+    $dcn = dbGet('SELECT name FROM circles WHERE id = ?', [$cId])['name'] ?? $cId;
+    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-circle-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4), 'circle-archived', (string)$dcn, date('Y-m-d'), '"' . (string)$dcn . '" archived — ' . $removed . ' stewards departed', (string)($user['name'] ?? $user['initials'])]);
+    send(200, ['ok' => true, 'reason' => 'circle-disbandment', 'removed' => $removed]);
 }
 if (preg_match('/^\/circles\/([^\/]+)\/drift-check$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']])) send(403, ['error' => 'Steward access required']);
-    $body = readBody(); $threshold = (int)($body->threshold ?? 50);
+    $body = readBody();
     $md = array_map(function($d) { return $d['domain']; }, dbAll("SELECT domain FROM circle_domains WHERE circle_id = ? AND mandate = 'primary'", [$cId]));
     if (!$md) send(400, ['error' => 'Circle has no primary mandate domains']);
+    // Default bar is the circle's own bar: the lowest primary desired Ws.
+    // An explicit threshold still overrides.
+    $desMin = dbGet("SELECT MIN(desired_ws) AS m FROM circle_domains WHERE circle_id = ? AND mandate = 'primary' AND desired_ws IS NOT NULL", [$cId]);
+    $threshold = isset($body->threshold) ? (int)$body->threshold : (int)($desMin['m'] ?? 0);
+    if ($threshold <= 0) $threshold = 50;
     $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $drifted = 0;
     foreach ($rows as $r) { $ws = $r['ws'] ?? 0; if ($ws < $threshold && !in_array($r['top_domain'] ?? '', $md)) { markFormer($r['id'], 'competence-drift'); $drifted++; } }
     if ($drifted) recordVacancy($cId, 'competence-drift');
@@ -2527,6 +2606,12 @@ if (preg_match('/^\/circles\/([^\/]+)\/check-expiry$/', $cleanPath, $m)) {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $cId = urldecode($m[1]); if (!dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cId, $user['id']])) send(403, ['error' => 'Steward access required']);
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: []; $termMonths = $ss['steward_term_months'] ?? 12;
+    // Per-circle overrides win: expiry override, then term override, then
+    // global. 'Never (no expiry)' disables expiry for the circle.
+    $co = dbGet('SELECT term_override, expiry_override FROM circles WHERE id = ?', [$cId]);
+    $effOv = trim((string)(($co['expiry_override'] ?? '') !== '' && ($co['expiry_override'] ?? '') !== 'Use Global Default' ? $co['expiry_override'] : ($co['term_override'] ?? '')));
+    if (stripos($effOv, 'never') !== false) send(200, ['ok' => true, 'reason' => 'term-expiry', 'expired' => 0, 'termMonths' => null, 'note' => 'expiry disabled by circle override']);
+    if (preg_match('/(\d+)/', $effOv, $mm)) $termMonths = (int)$mm[1];
     $now = time(); $rows = dbAll("SELECT * FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cId]); $expired = 0;
     foreach ($rows as $r) { if (!$r['joined']) continue; $jm = strtotime($r['joined']); if ($now - $jm > $termMonths * 30.44 * 86400) { markFormer($r['id'], 'term-expiry'); $expired++; } }
     if ($expired) recordVacancy($cId, 'term-expiry');

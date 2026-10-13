@@ -1318,7 +1318,7 @@
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" id="cd-enter-cell" onclick="nav('cell-circle')">Enter Circle Cell</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openCircleSettingsModal()">Circle Settings</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openCircleSettingsModal(typeof currentCircleDetailId !== 'undefined' ? currentCircleDetailId : null)">Circle Settings</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="nav('domain-map')">View Domain Map</button>
           </div>
         </div>
@@ -2174,7 +2174,7 @@
           <div class="sec">Circle Configuration</div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle" id="circle-settings-name"></div>
-            <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="circle-settings-status"><option selected>Active</option><option>Inactive</option><option>Probation</option></select></div>
+            <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="circle-settings-status"><option selected>Active</option><option>Suggested</option><option>Archived</option></select></div>
           </div>
           <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2" id="circle-settings-desc">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
           <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15" id="circle-settings-max-members"></div>
@@ -6421,8 +6421,19 @@ function addCircleMandateDomain() {
 }
 
 // ─── Circle Settings Modal ───
-function openCircleSettingsModal() {
-  document.getElementById('circle-settings-modal').classList.add('active');
+function openCircleSettingsModal(circleId) {
+  var modal = document.getElementById('circle-settings-modal');
+  var cid = circleId || ((typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'new');
+  modal.dataset.circleId = cid;
+  var circle = ((MOCK && MOCK.circles) || []).filter(function(c) { return c.id === cid; })[0] || null;
+  var setVal = function(id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; };
+  if (circle && cid !== 'new') {
+    setVal('circle-settings-name', circle.name);
+    setVal('circle-settings-status', circle.status);
+    setVal('circle-settings-desc', circle.description);
+    if (circle.members) setVal('circle-settings-max-members', circle.members);
+  }
+  modal.classList.add('active');
   document.body.classList.add('modal-open');
 }
 
@@ -6622,7 +6633,7 @@ function applySettingsSnapshot(snapshot) {
     if (snapshot.target === 'new') {
       var newCircle = {
         id: 'circle-' + Date.now().toString(36),
-        name: s.name, status: s.status || 'Active',
+        name: s.name, status: 'Suggested',
         description: s.description || '',
         maxMembers: s.maxMembers || 15,
         mandateDomains: s.mandateDomains || { primary: [], secondary: [] },
