@@ -294,7 +294,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
             foreach ($cell['assessments'] as $va) { if (!empty($va['assessorId']) && $meV && $va['assessorId'] === $meV) { $iAssess = true; break; } }
             if (!$iAssess && $meV) {
                 $vsrc = is_array($cell['source'] ?? null) ? $cell['source'] : [];
-                $vcand = vstfResolveCandidate($vsrc['candidateName'] ?? $cell['candidateName'] ?? '', $vsrc['candidateInitials'] ?? $cell['candidateInitials'] ?? '');
+                $vcand = vstfResolveCandidate($vsrc['candidateName'] ?? $cell['candidateName'] ?? '', $vsrc['candidateInitials'] ?? $cell['candidateInitials'] ?? '', $vsrc['candidateId'] ?? $cell['candidateId'] ?? null);
                 $iCand = $vcand && ($vcand['id'] ?? null) === $meV;
             }
             if ($iCand) $cell['assessments'] = [];
@@ -698,6 +698,16 @@ foreach ($childDefs as $d) {
         }
         if ($method === 'POST' && !preg_match($childIdRe, $cleanPath)) {
             $body = readBody();
+            if ($d['child'] === 'vote_records') {
+                // One member one vote on deliberation domains: user_id first,
+                // legacy initials rows swept along; voter identity stamped.
+                $vdom = trim((string)($body->domain ?? ''));
+                if ($vdom === '') send(400, ['error' => 'domain required']);
+                dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$parentId, $vdom, $wuser['id'] ?? null, $wuser['initials'] ?? '?']);
+                $body->user_id = $wuser['id'] ?? null;
+                $body->initials = $wuser['initials'] ?? '?';
+                if (empty($body->name)) $body->name = $wuser['name'] ?? null;
+            }
             if ($d['child'] === 'thread_replies' && empty($body->id)) $body->id = 'reply-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
             if ($d['child'] === 'thread_replies') {
                 $pt = dbGet('SELECT * FROM threads WHERE id = ?', [$parentId]);
@@ -722,16 +732,21 @@ foreach ($childDefs as $d) {
                 }
                 if ($pc && ($pc['type'] ?? '') === 'xSTF Cell') {
                     if (($pc['status'] ?? '') === 'Completed') send(400, ['error' => 'Execution cell is completed']);
-                    $allowed = array_map(function($t) { return $t['initials']; }, dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$parentId]));
+                    // User-id allowlist first; legacy rows without user_id
+                    // fall back to initials so old probes keep working.
+                    $allowedIds = array_map(function($t) { return $t['user_id'] ?? null; }, dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ?', [$parentId]));
+                    $allowedIni = array_map(function($t) { return $t['initials']; }, dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ? AND user_id IS NULL', [$parentId]));
                     $psrc = pJson($pc['source'] ?? '{}') ?: [];
                     if (!empty($psrc['jstfId'])) {
-                        foreach (dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$psrc['jstfId']]) as $jt) $allowed[] = $jt['initials'];
+                        foreach (dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ?', [$psrc['jstfId']]) as $jt) { if (!empty($jt['user_id'])) $allowedIds[] = $jt['user_id']; else $allowedIni[] = $jt['initials']; }
                     }
                     if (!empty($pc['circle'])) {
                         $cc = dbGet('SELECT id FROM circles WHERE id = ? OR LOWER(name) = LOWER(?)', [$pc['circle'], $pc['circle']]);
-                        if ($cc) foreach (dbAll("SELECT initials FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cc['id']]) as $cr) $allowed[] = $cr['initials'];
+                        if ($cc) foreach (dbAll("SELECT member_id FROM circle_roster WHERE circle_id = ? AND status = 'active'", [$cc['id']]) as $cr) $allowedIds[] = $cr['member_id'];
                     }
-                    if (!in_array($wuser['initials'] ?? null, $allowed)) send(403, ['error' => 'Only the probe team or the commissioning body may deliberate here']);
+                    $meOk = ($wuser['id'] ?? null) && in_array($wuser['id'], $allowedIds, true);
+                    if (!$meOk && ($wuser['initials'] ?? null)) $meOk = in_array($wuser['initials'], $allowedIni, true);
+                    if (!$meOk) send(403, ['error' => 'Only the probe team or the commissioning body may deliberate here']);
                 }
             }
             $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) use ($d) { return $c !== $d['parentKey'] && $c !== 'id'; });
@@ -865,16 +880,21 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
 // ═════════════════════════════════════════════════════════
 // VOTE ROUTES
 // ═════════════════════════════════════════════════════════
+// NOTE: the route below is shadowed by the generic child router above
+// (/cells/:id/vote-records matches there first). Deliberation vote
+// upserts live in the generic child POST. Kept for reference; do not
+// revive without removing the childDefs entry.
 if (preg_match('/^\/cells\/([^\/]+)\/vote-records$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $cellId = urldecode($m[1]); $body = readBody();
     if (!$body || empty($body->domain)) send(400, ['error' => 'domain required']);
     $initials = trim((string)($user['initials'] ?? ($body->initials ?? '')));
     $vote = in_array($body->vote ?? '', ['yea', 'nay', 'abstain']) ? $body->vote : 'abstain';
     $ws = max(0, (int)($body->ws ?? 0));
-    dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?', [$cellId, $body->domain, $initials]);
-    dbRun('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote) VALUES (?,?,?,?,?,?)', [$cellId, $body->domain, $body->name ?? null, $initials, $ws, $vote]);
+    // One member one vote: user_id first, legacy initials row swept along.
+    dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$cellId, $body->domain, $user['id'] ?? null, $initials]);
+    dbRun('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote, user_id) VALUES (?,?,?,?,?,?,?)', [$cellId, $body->domain, $body->name ?? null, $initials, $ws, $vote, $user['id'] ?? null]);
     $rows = dbAll("SELECT domain, COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) AS yea, COALESCE(SUM(CASE WHEN vote='nay' THEN ws END),0) AS nay, COALESCE(SUM(CASE WHEN vote='abstain' THEN ws END),0) AS abst FROM vote_records WHERE cell_id = ? GROUP BY domain", [$cellId]);
     $tY = 0; $tN = 0; $tA = 0;
     foreach ($rows as &$r) { $r['yea'] = (int)$r['yea']; $r['nay'] = (int)$r['nay']; $r['abst'] = (int)$r['abst']; $tY += $r['yea']; $tN += $r['nay']; $tA += $r['abst'];
@@ -886,7 +906,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/vote-records$/', $cleanPath, $m)) {
     $ex = dbGet('SELECT cell_id FROM cell_vote_summary WHERE cell_id = ?', [$cellId]);
     if ($ex) dbRun('UPDATE cell_vote_summary SET summary = ? WHERE cell_id = ?', [json_encode($summary), $cellId]);
     else dbRun('INSERT INTO cell_vote_summary (cell_id, summary) VALUES (?,?)', [$cellId, json_encode($summary)]);
-    $record = dbGet('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND initials = ?', [$cellId, $body->domain, $initials]);
+    $record = dbGet('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$cellId, $body->domain, $user['id'] ?? null, $initials]);
     send(200, ['record' => $record, 'domains' => array_map(function($r) { return ['name' => $r['domain'], 'yea' => $r['yea'], 'nay' => $r['nay'], 'abstain' => $r['abst'], 'total' => $r['yea'] + $r['nay']]; }, $rows), 'summary' => $summary]);
 }
 
@@ -1235,7 +1255,8 @@ function sealedRef($id) {
 // for. Idempotent: every action re-checks before writing.
 function engineSpawnVstf($type, $candName, $candIni, $circleName, $domains, $extraSrc = []) {
     $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $src = array_merge(['type' => $type, 'candidateName' => $candName, 'candidateInitials' => $candIni, 'circleName' => $circleName, 'commissionedBy' => 'integrity-engine', 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')], $extraSrc);
+    $candUser = vstfResolveCandidate($candName, $candIni);
+    $src = array_merge(['type' => $type, 'candidateName' => $candName, 'candidateInitials' => $candIni, 'candidateId' => $candUser ? $candUser['id'] : null, 'circleName' => $circleName, 'commissionedBy' => 'integrity-engine', 'commissionedAt' => date('Y-m-d\TH:i:s.000\Z')], $extraSrc);
     $title = ($type === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $candName;
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', $title, 'Pending Assessment', $type, 3, $circleName, 'system', 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $candName, 'candidateInitials' => $candIni, 'domains' => $domains, 'assessments' => []])]);
     dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $type === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $circleName, 'active', 'Pending Assessment', $candName, date('Y-m-d', time() + vstfDurationDays() * 86400)]);
@@ -1245,8 +1266,9 @@ function engineSpawnVstf($type, $candName, $candIni, $circleName, $domains, $ext
 function engineOpenClaim($candId, $candIni, $type) {
     foreach (dbAll("SELECT id, source, meta FROM cells WHERE type = 'vSTF Cell' AND delib_type = ? AND status <> 'Assessment Filed'", [$type]) as $oc) {
         $os = pJson($oc['source'] ?? '{}') ?: []; $om = pJson($oc['meta'] ?? '{}') ?: [];
+        if ($candId && !empty($os['candidateId']) && $os['candidateId'] === $candId) return $oc['id'];
         $on = ($os['candidateName'] ?? $om['candidateName'] ?? ''); $oi = ($os['candidateInitials'] ?? $om['candidateInitials'] ?? '');
-        if ($candId && vstfResolveCandidate($on, $oi) && vstfResolveCandidate($on, $oi)['id'] === $candId) return $oc['id'];
+        if ($candId && vstfResolveCandidate($on, $oi, $os['candidateId'] ?? null) && vstfResolveCandidate($on, $oi, $os['candidateId'] ?? null)['id'] === $candId) return $oc['id'];
         if (!$candId && $candIni && $oi === $candIni) return $oc['id'];
     }
     return null;
@@ -1256,7 +1278,7 @@ function engineRecentVetting($candId, $candIni, $months = 12) {
     foreach (dbAll("SELECT source, meta FROM cells WHERE type = 'vSTF Cell' AND delib_type = 'steward-candidacy' AND status = 'Assessment Filed'") as $vc) {
         $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
         $vd = $vm['completedAt'] ?? $vs['commissionedAt'] ?? null;
-        $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+        $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '', $vs['candidateId'] ?? $vm['candidateId'] ?? null);
         $match = ($cand && $candId && $cand['id'] === $candId) || (!$candId && $candIni && ($vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '') === $candIni);
         if ($match && (!$vd || substr((string)$vd, 0, 10) >= $cut)) return true;
     }
@@ -1291,7 +1313,8 @@ function integrityEnginePoll($cap = 3) {
         $pool = dbAll("SELECT * FROM circle_applications WHERE circle_id = ? AND status = 'pending' ORDER BY queue_position, applied_date", [$circle['id']]);
         foreach ($pool as $ap) {
             if ($doneB >= $capB) break 2;
-            $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
+            $apu = !empty($ap['user_id']) ? dbGet('SELECT * FROM users WHERE id = ?', [$ap['user_id']]) : null;
+            if (!$apu) $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
             $apid = $apu ? $apu['id'] : null;
             if (engineOpenClaim($apid, $ap['initials'] ?? '', 'steward-candidacy')) continue;
             if (engineRecentVetting($apid, $ap['initials'] ?? '')) continue;
@@ -1308,7 +1331,8 @@ function integrityEnginePoll($cap = 3) {
         foreach ($vacs as $vi => $vac) {
             $cands = [];
             foreach ($pool as $ap) {
-                $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
+                $apu = !empty($ap['user_id']) ? dbGet('SELECT * FROM users WHERE id = ?', [$ap['user_id']]) : null;
+                if (!$apu) $apu = vstfResolveCandidate($ap['applicant'] ?? '', $ap['initials'] ?? '');
                 if (!$apu) continue;
                 if (dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$circle['id'], $apu['id']])) continue;
                 $ust = dbGet('SELECT status FROM users WHERE id = ?', [$apu['id']]);
@@ -1319,7 +1343,7 @@ function integrityEnginePoll($cap = 3) {
                     $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: []; $vr = pJson($vc['resolution'] ?? '{}') ?: [];
                     if (empty($vr['approved'])) continue;
                     if (($vs['vacancyFor'] ?? '') !== '' && ($vs['vacancyFor'] ?? null) !== $circle['id']) continue;
-                    $vcand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+                    $vcand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '', $vs['candidateId'] ?? $vm['candidateId'] ?? null);
                     if ($vcand && $vcand['id'] === $apu['id']) { $ok = $vr; break; }
                 }
                 if ($ok) $cands[] = ['user' => $apu, 'score' => (int)($ok['score'] ?? 0), 'app' => $ap];
@@ -1361,8 +1385,10 @@ function integrityEnginePoll($cap = 3) {
     }
     return $doneA + $doneB;
 }
-// Resolve a vSTF candidate to a user (initials first — unique per member).
-function vstfResolveCandidate($name, $initials) {
+// Resolve a vSTF candidate to a user: stored id first, then initials for
+// legacy rows, then name. New spawns always stamp candidateId.
+function vstfResolveCandidate($name, $initials, $candidateId = null) {
+    if ($candidateId) { $u = dbGet('SELECT * FROM users WHERE id = ?', [$candidateId]); if ($u) return $u; }
     if ($initials) { $u = dbGet('SELECT * FROM users WHERE initials = ?', [$initials]); if ($u) return $u; }
     if ($name) { $u = dbGet('SELECT * FROM users WHERE name = ?', [$name]); if ($u) return $u; }
     return null;
@@ -1382,16 +1408,18 @@ if (preg_match('/^\/cells\/([^\/]+)\/spawn-vstf$/', $cleanPath, $m)) {
     foreach (dbAll("SELECT id, status, source FROM cells WHERE type = 'vSTF Cell' AND commissioned_by = ? AND delib_type = ?", [$cId, $vt]) as $exRow) {
         if (($exRow['status'] ?? '') === 'Assessment Filed') continue;
         $exSrc = pJson($exRow['source'] ?? '{}') ?: [];
+        $sameId = $candUser && !empty($exSrc['candidateId']) && $exSrc['candidateId'] === $candUser['id'];
         $sameName = $candName0 !== '' && ($exSrc['candidateName'] ?? '') === $candName0;
         $sameIni = $candIni0 !== '' && ($exSrc['candidateInitials'] ?? '') === $candIni0;
-        if ($sameName || $sameIni || ($candName0 === '' && $candIni0 === '')) send(409, ['error' => 'An open vSTF claim for this candidate already exists', 'vstfId' => $exRow['id']]);
+        if ($sameId || $sameName || $sameIni || ($candName0 === '' && $candIni0 === '')) send(409, ['error' => 'An open vSTF claim for this candidate already exists', 'vstfId' => $exRow['id']]);
     }
     $cn = trim((string)($body->circleName ?? $cell['circle'] ?? '')); $ma = min(7, max(2, (int)($body->minAssessors ?? 3)));
     $vId = 'vstf-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
-    $src = ['type' => $vt, 'candidateName' => trim((string)($body->candidateName ?? '')), 'candidateInitials' => trim((string)($body->candidateInitials ?? '')), 'circleName' => $cn, 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
+    $candUser = vstfResolveCandidate(trim((string)($body->candidateName ?? '')), trim((string)($body->candidateInitials ?? '')));
+    $src = ['type' => $vt, 'candidateName' => trim((string)($body->candidateName ?? '')), 'candidateInitials' => trim((string)($body->candidateInitials ?? '')), 'candidateId' => $candUser ? $candUser['id'] : null, 'circleName' => $cn, 'sourceCellId' => $cId, 'sourceTitle' => $cell['title'] ?? '', 'spawnedBy' => $user['name'] ?? $user['initials'], 'spawnedAt' => date('Y-m-d\TH:i:s.000\Z')];
     $domains = is_array($body->domains ?? null) ? $body->domains : [];
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [$vId, 'vSTF Cell', ($vt === 'steward-candidacy' ? 'vSTF · Steward Candidacy · ' : 'vSTF · Competence · ') . $src['candidateName'], 'Pending Assessment', $vt, $ma, $cn, $cId, 1, json_encode($src), json_encode(['status' => 'Pending', 'score' => null]), json_encode(['candidateName' => $src['candidateName'], 'candidateInitials' => $src['candidateInitials'], 'domains' => $domains, 'assessments' => []])]);
-    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $vt === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $cn, 'active', 'Pending Assessment', $src['candidateName'] ?: $cell['title'] ?? '', date('Y-m-d', time() + 14 * 86400)]);
+    dbRun('INSERT INTO stfs (id, type, purpose, circle, bucket, status, title, deadline) VALUES (?,?,?,?,?,?,?,?)', ['stf-' . $vId, 'vSTF', $vt === 'steward-candidacy' ? 'Steward Candidacy' : 'Competence Claims', $cn, 'active', 'Pending Assessment', $src['candidateName'] ?: $cell['title'] ?? '', date('Y-m-d', time() + vstfDurationDays() * 86400)]);
     send(201, ['ok' => true, 'vstfId' => $vId]);
 }
 if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
@@ -1406,7 +1434,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
     $vt2 = $meta['type'] ?? (pJson($cell['source'] ?? '{}')['type'] ?? 'steward-candidacy');
     // Candidates cannot assess their own claim.
     $srcC0 = pJson($cell['source'] ?? '{}') ?: [];
-    $cand0 = vstfResolveCandidate($srcC0['candidateName'] ?? $meta['candidateName'] ?? '', $srcC0['candidateInitials'] ?? $meta['candidateInitials'] ?? '');
+    $cand0 = vstfResolveCandidate($srcC0['candidateName'] ?? $meta['candidateName'] ?? '', $srcC0['candidateInitials'] ?? $meta['candidateInitials'] ?? '', $srcC0['candidateId'] ?? $meta['candidateId'] ?? null);
     if ($cand0 && $cand0['id'] === $user['id']) send(403, ['error' => 'Candidates cannot assess their own claim']);
     $ass = ['assessor' => $user['name'] ?? $user['initials'], 'assessorId' => $user['id'], 'filedAt' => date('Y-m-d\TH:i:s.000\Z')];
     if ($vt2 === 'steward-candidacy') { $score = min(100, max(0, (int)($body->score ?? 0))); $rat = trim((string)($body->rationale ?? '')); if (!$rat) send(400, ['error' => 'rationale required']); $ass['score'] = $score; $ass['rationale'] = $rat; }
@@ -1416,7 +1444,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/vstf-assessment$/', $cleanPath, $m)) {
         $fs = $vt2 === 'steward-candidacy' ? round(array_reduce($assessments, function($s, $a) { return $s + ($a['score'] ?? 0); }, 0) / count($assessments)) : count($assessments);
         $res = ['status' => 'Complete', 'score' => $fs];
         $srcC = pJson($cell['source'] ?? '{}') ?: [];
-        $cand = vstfResolveCandidate($srcC['candidateName'] ?? $meta['candidateName'] ?? '', $srcC['candidateInitials'] ?? $meta['candidateInitials'] ?? '');
+        $cand = vstfResolveCandidate($srcC['candidateName'] ?? $meta['candidateName'] ?? '', $srcC['candidateInitials'] ?? $meta['candidateInitials'] ?? '', $srcC['candidateId'] ?? $meta['candidateId'] ?? null);
         $candLabel = $cand ? ($cand['name'] ?? $cId) : ($srcC['candidateName'] ?? $cId);
         if ($vt2 === 'steward-candidacy') {
             // Average score of 60+ carries the candidacy (recorded, not seated:
@@ -1637,8 +1665,12 @@ function jstfThreadParty($user, $t) {
     $lj = $t['jstf_cell_id'] ?? $t['jstfCellId'] ?? null;
     if ($lj) {
         $lc = dbGet('SELECT source FROM cells WHERE id = ?', [$lj]);
-        if ($lc) { $ls = pJson($lc['source'] ?? '{}') ?: []; $esc = $ls['escalatedBy'] ?? null; }
-        if (!empty($esc)) { $eu = dbGet('SELECT id FROM users WHERE name = ?', [$esc]); if ($eu && $eu['id'] === $uid) return 'sponsor'; }
+        if ($lc) {
+            $ls = pJson($lc['source'] ?? '{}') ?: [];
+            if (!empty($ls['escalatedById']) && $ls['escalatedById'] === $uid) return 'sponsor';
+            $esc = $ls['escalatedBy'] ?? null;
+            if (empty($ls['escalatedById']) && !empty($esc)) { $eu = dbGet('SELECT id FROM users WHERE name = ?', [$esc]); if ($eu && $eu['id'] === $uid) return 'sponsor'; }
+        }
     }
     if (isSteward($uid)) return 'steward';
     return null;
@@ -1818,13 +1850,15 @@ function jstfSeatAccepted($cId) {
     if (($meta['formation']['state'] ?? '') !== 'inviting') return (int)(dbGet('SELECT COUNT(*) AS n FROM cell_team WHERE cell_id = ?', [$cId])['n'] ?? 0);
     $quorum = max(1, (int)($meta['formation']['quorum'] ?? jstfQuorum()));
     $acc = dbAll("SELECT * FROM stf_candidates WHERE stf_id = ? AND status = 'accepted' ORDER BY invited_date", ['stf-' . $cId]);
-    $seated = dbAll('SELECT initials FROM cell_team WHERE cell_id = ?', [$cId]);
+    $seated = dbAll('SELECT user_id, initials FROM cell_team WHERE cell_id = ?', [$cId]);
+    $seatedIds = array_map(function($t) { return (string)($t['user_id'] ?? ''); }, $seated);
     $seatedIni = array_map(function($t) { return $t['initials']; }, $seated);
     foreach ($acc as $a) {
-        if (count($seatedIni) >= $quorum) break;
-        if (in_array($a['initials'], $seatedIni)) continue;
+        if (count($seatedIds) >= $quorum) break;
+        if (!empty($a['user_id']) && in_array((string)$a['user_id'], $seatedIds, true)) continue;
+        if (empty($a['user_id']) && in_array($a['initials'], $seatedIni)) continue;
         dbRun('INSERT INTO cell_team (cell_id, name, initials, role, focus, user_id) VALUES (?,?,?,?,?,?)', [$cId, $a['name'], $a['initials'], 'jSTF adjudicator', 'Judicial review', $a['user_id'] ?? null]);
-        $seatedIni[] = $a['initials'];
+        $seatedIds[] = (string)($a['user_id'] ?? ''); $seatedIni[] = $a['initials'];
     }
     $n = count($seatedIni);
     if ($n >= $quorum) {
@@ -1855,7 +1889,9 @@ function vstfReader($vstfId, $user) {
     $vc = dbGet('SELECT source, meta FROM cells WHERE id = ?', [$vstfId]);
     if (!$vc) return false;
     $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
-    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+    if (!empty($vs['candidateId']) && $vs['candidateId'] === $uid) return true;
+    if (!empty($vm['candidateId']) && $vm['candidateId'] === $uid) return true;
+    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '', $vs['candidateId'] ?? $vm['candidateId'] ?? null);
     if ($cand && ($cand['id'] ?? null) === $uid) return true;
     foreach (($vm['assessments'] ?? []) as $a) {
         if (!empty($a['assessorId']) && $a['assessorId'] === $uid) return true;
@@ -1872,7 +1908,9 @@ function vstfReaderIsCandidate($vstfId, $user) {
     $vc = dbGet('SELECT source, meta FROM cells WHERE id = ?', [$vstfId]);
     if (!$vc) return false;
     $vs = pJson($vc['source'] ?? '{}') ?: []; $vm = pJson($vc['meta'] ?? '{}') ?: [];
-    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '');
+    if (!empty($vs['candidateId']) && $vs['candidateId'] === $uid) return true;
+    if (!empty($vm['candidateId']) && $vm['candidateId'] === $uid) return true;
+    $cand = vstfResolveCandidate($vs['candidateName'] ?? $vm['candidateName'] ?? '', $vs['candidateInitials'] ?? $vm['candidateInitials'] ?? '', $vs['candidateId'] ?? $vm['candidateId'] ?? null);
     return $cand && ($cand['id'] ?? null) === $uid;
 }
 // Reader check for a blind xSTF probe: the probe team or the commissioning
@@ -2100,7 +2138,7 @@ if (preg_match('/^\/jstf\/escalate$/', $cleanPath)) {
     $poolDomains = jstfPoolDomains();
     $petitioner = $thread['submitter_id'] ?? null;
     $exclude = array_values(array_filter([$targetId, $petitioner]));
-    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => []];
+    $src = ['type' => 'judicial-investigation', 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetId' => $targetId, 'targetName' => $targetName, 'escalatedBy' => $user['name'] ?? $user['initials'], 'escalatedById' => $user['id'] ?? null, 'escalatedAt' => date('Y-m-d\TH:i:s.000\Z'), 'revisionOf' => $revisionOf, 'appealOf' => $appealOf, 'team' => []];
     $meta = ['targetId' => $targetId, 'targetName' => $targetName, 'threadId' => $thrId, 'isAppeal' => $isAppeal, 'targetIsSteward' => $tIs, 'revisionOf' => $src['revisionOf'], 'appealOf' => $src['appealOf'], 'threadRepliesAtEscalation' => (int)($thread['replies'] ?? 1), 'restriction' => ['state' => 'relaxed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => max(2, (int)floor($quorum / 2) + 1), 'severity' => null, 'history' => []], 'verdict' => null, 'formation' => ['state' => 'inviting', 'quorum' => $quorum, 'poolMode' => $poolMode, 'domains' => $poolDomains, 'seated' => 0]];
     $caseDl = date('Y-m-d', time() + jstfDurationDays() * 86400);
     dbRun('INSERT INTO cells (id, type, title, status, delib_type, participants, circle, commissioned_by, blind, source, resolution, meta, deadline) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)', [$jId, 'jSTF Cell', 'jSTF — ' . $targetName, 'Under Investigation', 'judicial-investigation', 0, '', $user['id'], 1, json_encode($src), json_encode(['status' => 'Under Investigation']), json_encode($meta), $caseDl]);
@@ -2127,7 +2165,8 @@ function astfInviteExcludes($aId) {
         $jm = $jsrc ? (pJson((dbGet('SELECT meta FROM cells WHERE id = ?', [$jsrc])['meta'] ?? '{}')) ?: []) : [];
         if (!empty($jm['threadId'])) { $sub = dbGet('SELECT submitter_id FROM threads WHERE id = ?', [$jm['threadId']]); if ($sub && !empty($sub['submitter_id'])) $ex[] = $sub['submitter_id']; }
         $jss = $jsrc ? (pJson((dbGet('SELECT source FROM cells WHERE id = ?', [$jsrc])['source'] ?? '{}')) ?: []) : [];
-        if (!empty($jss['escalatedBy'])) { $sp = dbGet('SELECT id FROM users WHERE name = ?', [$jss['escalatedBy']]); if ($sp) $ex[] = $sp['id']; }
+        if (!empty($jss['escalatedById'])) $ex[] = $jss['escalatedById'];
+        elseif (!empty($jss['escalatedBy'])) { $sp = dbGet('SELECT id FROM users WHERE name = ?', [$jss['escalatedBy']]); if ($sp) $ex[] = $sp['id']; }
     } elseif (!empty($src['submittedBy'])) {
         $pu = dbGet('SELECT id FROM users WHERE name = ?', [$src['submittedBy']]);
         if ($pu) $ex[] = $pu['id'];
@@ -2324,7 +2363,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/questions\/([^\/]+)$/', $cleanPath, $m)) {
     if (jstfEnsureFresh($cId)) send(409, ['error' => 'Deliberation lapsed — composition refreshed, please re-cast under the new team']); $cell = dbGet('SELECT * FROM cells WHERE id = ?', [$cId]);
     if (!$cell) send(404, ['error' => 'Not found']); if ($cell['type'] !== 'jSTF Cell') send(400, ['error' => 'Not a jSTF cell']);
     if (($cell['status'] ?? '') !== 'Under Investigation') send(400, ['error' => 'Case is closed']);
-    if (!dbGet('SELECT 1 FROM cell_team WHERE cell_id = ? AND initials = ?', [$cId, $user['initials']])) send(403, ['error' => 'Only the jSTF team may manage questions']);
+    if (!jstfTeamMember($cId, $user)) send(403, ['error' => 'Only the jSTF team may manage questions']);
     $body = readBody(); $status = trim((string)($body->status ?? ''));
     if ($status !== '' && !in_array($status, ['open', 'met', 'at-risk'])) send(400, ['error' => 'status must be open, met or at-risk']);
     $sets = []; $args = [];
