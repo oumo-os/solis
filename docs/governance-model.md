@@ -26,6 +26,23 @@ Solis uses a flat, permission-less governance model where **circle membership eq
 
 **Note:** There is no `invited` status. Users apply to circles; they are not invited.
 
+## Circle Lifecycle
+
+Circles move `Suggested → Active → Archived`. `Suggested` is a
+proposal stage: the row may exist (from an approved founding
+deliberation) but the circle does not operate — no stewards seat
+until activation. Activation happens through the founding
+deliberation's approval, or by direct steward decision recorded with
+rationale when no founding record exists.
+
+`Archived` is the only inactive state, and it is enforced: no
+applications, no roster writes, no reviews, no succession vetting or
+seating, no vacancies. Removal from an archived circle still executes
+but records no vacancy. Disbandment moves every active steward to
+former, withdraws pending applications, stamps date/reason/counts and
+logs a `circle-archived` event. Apply-to-Join hides on archived
+circles; the server refuses regardless.
+
 ---
 
 ## Succession Queue (Steward Candidacy)
@@ -41,6 +58,7 @@ Solis uses a flat, permission-less governance model where **circle membership eq
 ### Succession Flow
 
 - Candidate applies to the circle (via "Apply to Join") and enters the succession queue
+- Every non-disband departure (resignation, removal, flush, drift, term expiry, jSTF sanction) opens a succession vacancy; disbandment archives instead
 - When a steward vacancy opens, the integrity engine vets pending applicants without recent vetting and seats the top approved candidate per open seat
 - Vetting is a human-scored steward-candidacy vSTF (avg 60+ approves); frozen, restricted and already-seated applicants never seat; circle capacity caps seating
 - Candidates can withdraw their own application at any time; only the applicant (or engine seating) moves an application — nobody approves their way in by hand
@@ -48,10 +66,27 @@ Solis uses a flat, permission-less governance model where **circle membership eq
 
 ### Candidate Evaluation
 
-The system evaluates candidates automatically based on:
-- **Interest alignment** — domains of interest vs circle mandate
-- **Competence** — domain knowledge scores (Ws)
-- **Workload** — current participation in other circles/cells
+Vetting is human, not algorithmic: a steward-candidacy vSTF scored by
+assessors (average 60+ approves). Interest, Ws and workload inform who
+gets invited, but no score auto-seats anyone — approval plus an open
+vacancy does, decided by the engine against the rules above.
+
+### Application Rules
+
+- Self-application only, one pending application per member per
+  circle; active stewards cannot re-apply.
+- Statuses: `pending → accepted` (engine seating) or `pending →
+  withdrawn` (applicant only, enforced server-side). Nobody else moves
+  applications by hand.
+- Queue numbering is per-circle, server-assigned, timestamped at filing.
+
+### Circle Privacy
+
+Circle internals — roster, proposals, resolutions, activity, Circle
+Cell deliberation, succession motivations — are members-only. Cards
+(identity, mandate, counts) stay public. The members modal derives
+from the open circle; motivations show to that circle's stewards and
+the applicant only.
 
 ---
 
