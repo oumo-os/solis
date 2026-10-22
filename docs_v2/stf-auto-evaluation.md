@@ -1,62 +1,85 @@
-# STF Auto-Evaluation System
+# STF Auto-Evaluation
 
-## Overview
+**Status: implementation truth (v2). Supersedes `docs/stf-auto-evaluation.md`.**
 
-STFs (Short-Term Facilitators) are assigned through two distinct mechanisms:
+The original doc described an auto-evaluation pipeline that does not exist.
+This rewrite matches the code. Cross-references: `docs_v2/judicial-loop.md`,
+`docs_v2/governance-model.md`.
 
-1. **xSTF (Execution)**: Created by a circle steward. The steward sees ranked candidates and selects invitees.
-2. **All other STFs (vSTF, aSTF, jSTF, p-aSTF)**: Auto-generated from random samples. No candidate list is visible to anyone.
+## 1. What STFs actually are
 
-## Auto-Generated STFs (vSTF, aSTF, jSTF, p-aSTF)
+There are five STF types. Only one (xSTF) is steward-created; the other
+four are server-commissioned or audit-spawned.
 
-### How Candidates Are Selected
+| Type | Created by | Purpose |
+|------|-----------|---------|
+| **vSTF** | steward (`POST /cells/:id/spawn-vstf`) or integrity engine | Verify one named candidate's competence or steward candidacy |
+| **aSTF** | motion submit (motion-audit) or jSTF verdict (judicial-audit) | Blind audit of a motion or a judicial verdict |
+| **jSTF** | steward escalation (`POST /jstf/escalate`) | Judicial investigation of a member |
+| **xSTF** | steward (`POST /cells/:id/spawn-xstf`, from an approved aSTF) | Execute a verified resolution |
+| **p-aSTF** | steward or integrity engine | Periodic circle health review |
 
-When an STF is triggered (e.g., a motion crystallises → aSTF, a vacancy opens → vSTF), the system:
+## 2. vSTF — the only "verification" STF
 
-1. **Samples** all eligible participants
-2. **Evaluates** each against the STF requirements:
-   - **Interest alignment**: Does the participant have declared interest in the relevant domains?
-   - **Competence fit**: Does the participant have verified competence (Wh) in the relevant domains?
-   - **Workload balance**: Is the participant already assigned to other active STFs?
-3. **Ranks** participants by composite score
-4. **Randomly samples** from the top-ranked pool to form the STF cell
+A vSTF assesses **one named candidate** in **one circle** for **one
+claim type** (`competence-claim` or `steward-candidacy`). It is not a
+random sample and not a cell of peers.
 
-### Why Random Sampling?
+- **Spawn**: `POST /cells/:id/spawn-vstf` requires a steward of any
+  circle. Body: `vstfType`, `candidateName`, `candidateInitials`,
+  `circleName`, `domains[]`, `minAssessors` (clamped 2–7, default 3).
+  The candidate is resolved to a `user_id` at spawn and stamped on
+  `source.candidateId` — identity is id-keyed, not initials-based.
+- **Assessors**: 3 stewards (or `minAssessors`), invited. Candidate
+  cannot self-assess. Frozen/restricted members cannot file.
+- **Completion**: steward-candidacy averages assessor scores (avg ≥ 60
+  approves); competence claims flip the candidate's claimed domains to
+  `verified = 1` only when a majority of assessors evaluated each
+  domain positively. `stfs` row completes on quorum.
+- **Blind**: vSTF cells spawn blind; only candidate + filed assessors
+  see the record; everyone else sees `vSTF — sealed verification`.
+- **Deadlines**: `vstf_duration_days` from settings (default 14),
+  honored at spawn.
+- **Engine commissioning**: the integrity engine auto-commissions a
+  competence-claim vSTF for any active member with unverified claims
+  and no open claim. Commissioned by `system`, not by any steward.
 
-- Prevents the same people from always being assigned
-- Distributes governance workload across the community
-- Reduces gaming of the evaluation system
+## 3. aSTF / jSTF — invitation pools, not samples
 
-### Visibility
+aSTF and jSTF seat assessors/adjudicators by **invitation**, not random
+sampling. The eligible pool is `jstfEligiblePool` (stewards first,
+then everyone by competence score; pool mode `competence` or `stewards`).
+Invitations go to the top half of the qualifying pool, shuffled, at
+`quorum + 2`. The first `quorum` acceptances seat the team and lock
+the invitation.
 
-- **No candidate list is exposed** in the UI
-- **No evaluation scores are shown**
-- **Participants only learn they are assigned** when they receive their STF invitation
-- The assignment appears in their inbox as an STF invitation
+- **jSTF**: target and petitioner excluded from the pool; sponsor
+  eligible but not guaranteed a seat.
+- **aSTF (judicial)**: complete separation — jSTF team, target,
+  petitioner, sponsor all excluded.
+- **aSTF (motion)**: motion proposer excluded.
 
-### Design Rationale
+No workload-balancing term exists. No "max 2 active STFs" cap exists.
+No `stfCandidates` is "hidden" — invitations are visible to invitees.
 
-The auto-evaluation is invisible by design:
-- Prevents participants from optimising for STF selection
-- Maintains the integrity of blind assignment
-- Reduces social pressure and gaming
-- Keeps the focus on competence and interest rather than visibility
+## 4. p-aSTF — assigned reviewers
 
-## xSTF (Execution) — Steward-Created
+p-aSTF cells are spawned by a steward or by the integrity engine
+(overdue circles, one per poll). Reviewers file circle rubric + member
+reviews. Completion is per-circle (`stf-<cell>`), not the first
+pending row. Reviews are keyed on `user_id`.
 
-xSTFs follow a different flow because they require specific task expertise:
+## 5. xSTF — steward-created execution
 
-1. **Steward creates xSTF** from the circle cell with full task specification
-2. **System evaluates** all participants and returns a ranked candidate list
-3. **Steward sees** the ranked list with match scores
-4. **Steward selects invitees** from the list
-5. **Invitations sent silently** to selected candidates
+xSTF is the only STF created directly by a steward. Ranked candidate
+list (client-side, top 8, first 3 pre-checked) with match/interest/
+competence scores. Requires an approved aSTF verdict to spawn. Team
+selected by steward; blind optional.
 
-The steward is the only person who sees the candidate evaluation for their xSTF.
+## 6. What "auto-generated" means (and doesn't)
 
-## Technical Notes
-
-- Evaluation uses the same scoring engine as auto-generated STFs
-- The `stfCandidates` data structure stores xSTF-specific candidate evaluations
-- Auto-generated STFs do not populate `stfCandidates` — they sample and assign directly
-- Workload check prevents over-assignment (max 2 active STFs per participant)
+Nothing is auto-generated from a random sample. The integrity engine
+auto-*commissions* vSTFs in response to conditions (unverified claims,
+vacancies). The commissioning is automatic; the assessment is human.
+No evaluation scores are hidden from the assessed candidate — they see
+their own scores; assessors see all scores; bystanders see sealed.

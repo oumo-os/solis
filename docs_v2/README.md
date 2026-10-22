@@ -13,7 +13,7 @@ filenames as the originals.
 
 1. [judicial-loop.md](judicial-loop.md) — report → verdict → closeout, jSTF/xSTF/aSTF, ripples, blindness matrix, identity doctrine.
 2. [governance-model.md](governance-model.md) — circle membership, succession, applications, lifecycle, settings snapshots, governance events.
-3. [stf-auto-evaluation.md](stf-auto-evaluation.md) — STF types as they actually exist (vSTF verification, aSTF/jSTF invitation pools, p-aSTF review).
+3. [stf-auto-evaluation.md](stf-auto-evaluation.md) — STF types as they actually exist (vSTF verification, aSTF/jSTF invitation pools, p-aSTF review, xSTF execution).
 4. [vote-weight-system.md](vote-weight-system.md) — vote math, mandate multipliers, quorum, `desiredWs`, data shapes.
 5. [organisations.md](organisations.md) — org model, affiliation flow, knowledge domains, vote weight (none).
 6. [modal-design.md](modal-design.md) — modal systems, settings-as-proposals, members modal, circle cell view.
