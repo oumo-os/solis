@@ -72,8 +72,9 @@ settings apply client-side only.
 ## 6. Members modal (`openMembersModal`)
 
 Three sections: Active / Succession Queue / Former. Status values:
-`active`, `former`, `candidate`. Detail panes: domain overlap,
-competence bars, mandate, departure reason, timeline.
+`active`, `former`. (`candidate` is an application status, not a
+roster status.) Detail panes: domain overlap, competence bars,
+mandate, departure reason, timeline.
 
 - Derives from the **open circle** (not hardcoded).
 - Succession queue shows application date, motivation, queue position.
