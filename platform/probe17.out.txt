@@ -1,0 +1,27 @@
+if (($c['type'] ?? '') === 'vSTF Cell') {
+                // Verification is blind: candidate and filed assessors see the
+                // record; everyone else sees that a verification exists.
+                $cell['title'] = 'vSTF — sealed verification ···' . sealedRef($c['id']);
+                unset($cell['candidateName'], $cell['candidateInitials']);
+                $cell['assessments'] = [];
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials']);
+                $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
+            } elseif ($auditClosed) {
+                // A closed judicial audit is precedent, not reading material:
+                // the outcome lives in policies/integrity records; assessor
+                // attribution and case theory stay sealed.
+                $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
+                unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                $cell['verdict'] = null;
+                $cell['assessments'] = [];
+                $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
+            } elseif ($auditOpen) {
+                // An open judicial audit hides the verdict under review and
+                // its target from everyone off the seated team. Assessors see
+                // the full record; invitees see only their own invitation.
+                $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
+                unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                $cell['verdict'] = null;
+                $cell['asse

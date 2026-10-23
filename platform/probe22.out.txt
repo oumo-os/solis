@@ -1,0 +1,7 @@
+if (($c['type'] ?? '') === 'vSTF Cell') {
+                // Verification is blind: candidate and filed assessors see the
+                // record; everyone else sees that a verification exists.
+                $cell['title'] = 'vSTF — sealed verification ···' . sealedRef($c['id']);
+                unset($cell['candidateName'], $cell['candidateInitials']);
+                $cell['assessments'] = [];
+                if (is_array($cell['source'])) unset($cell['source']['candidateName'],
