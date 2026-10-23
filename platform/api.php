@@ -260,7 +260,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     foreach (dbAll('SELECT * FROM cells') as $c) {
         $meta = pJson($c['meta'] ?? null) ?: [];
         $cell = ['id' => $c['id'], 'type' => $c['type'], 'title' => $c['title'], 'status' => $c['status'], 'delibType' => $c['delib_type'], 'participants' => $c['participants'], 'members' => $c['members'], 'progress' => $c['progress'], 'daysActive' => $c['days_active'], 'lead' => $c['lead'], 'circle' => $c['circle'], 'created' => $c['created'], 'deadline' => $c['deadline'], 'assessors' => $c['assessors'], 'commissionedBy' => $c['commissioned_by'], 'resolutionRef' => $c['resolution_ref'], 'entityType' => $c['entity_type'], 'source' => pJson($c['source'] ?? null), 'resolution' => pJson($c['resolution'] ?? null), 'deliverableSpecs' => pJson($c['deliverable_specs'] ?? null), 'domains' => array_values(array_map(function($d) { return $d['domain']; }, $cellDomains[$c['id']] ?? []))];
-        foreach ($meta as $mk => $mv) { if ($mv !== null) $cell[$mk] = $mv; }
+        foreach ($meta as $mk => $mv) { if ($mv !== null && !in_array($mk, ['targetId','targetName','threadId','targetIsSteward','appealOf','revisionOf','isAppeal','verdict','assessments','filings','findings','resolutionDraft','resolution'], true)) $cell[$mk] = $mv; }
         if ($c['blind']) $cell['blind'] = true;
         $ccs = $cellCircles[$c['id']] ?? [];
         $cell['circles'] = array_values(array_filter(array_map(function($cc) { return empty($cc['circle_id']) && empty($cc['votes']) ? ['name' => $cc['name'], 'initials' => $cc['initials'], 'gradient' => $cc['gradient'], 'status' => $cc['status'], 'role' => $cc['role']] : null; }, $ccs)));
@@ -328,6 +328,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         if ($caseSealed) {
             $sealedStf['stf-' . $c['id']] = true; $sealedCase[$c['id']] = true;
+            if (is_array($cell['source'])) { unset($cell['source']['threadId'], $cell['source']['targetId'], $cell['source']['verdict'], $cell['source']['escalatedBy'], $cell['source']['team']); }
+            unset($cell['threadRepliesAtEscalation']);
+            if (is_array($cell['meta'])) { unset($cell['meta']['targetId'], $cell['meta']['targetName'], $cell['meta']['threadId'], $cell['meta']['targetIsSteward'], $cell['meta']['appealOf'], $cell['meta']['revisionOf'], $cell['meta']['isAppeal'], $cell['meta']['verdict'], $cell['meta']['findings'], $cell['meta']['assessments'], $cell['meta']['filings'], $cell['meta']['resolutionDraft']); }
+            unset($cell['threadRepliesAtEscalation']);
             // jSTF and closed-audit rows carry the target in their circle
             // column — that column goes blank with the seal.
             if ($judicialCell || $auditClosed || $auditOpen) $blankCircle['stf-' . $c['id']] = true;
@@ -335,9 +339,9 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 // Verification is blind: candidate and filed assessors see the
                 // record; everyone else sees that a verification exists.
                 $cell['title'] = 'vSTF — sealed verification ···' . sealedRef($c['id']);
-                unset($cell['candidateName'], $cell['candidateInitials']);
-                $cell['assessments'] = [];
-                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials']);
+                unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName'], $cell['threadId'], $cell['targetIsSteward'], $cell['appealOf'], $cell['revisionOf'], $cell['isAppeal'], $cell['verdict']);
+                $cell['assessments'] = []; $cell['messages'] = []; $cell['team'] = []; $cell['tasks'] = []; $cell['objectives'] = []; $cell['draftVotes'] = []; $cell['votes'] = null; $cell['draftResolutions'] = []; $cell['deliverableSpecs'] = null; $cell['restriction'] = ['state' => 'sealed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => 0];
+                if (is_array($cell['source'])) { unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName'], $cell['source']['targetId'], $cell['source']['threadId'], $cell['source']['verdict'], $cell['source']['team']); }
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
             } elseif ($auditClosed) {
                 // A closed judicial audit is precedent, not reading material:
