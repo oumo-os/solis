@@ -2,7 +2,7 @@
 // Mirrors server.mjs routes. All functions return Promises; responses carry
 // __status so callers can branch on HTTP codes.
 var SolisApi = (function() {
-  var BASE = '/api/';
+  var BASE = 'api/';
 
   function getToken() {
     return (typeof localStorage !== 'undefined' && localStorage.getItem('solisToken')) || null;

@@ -1,4 +1,6 @@
-﻿<?php
+<?php
+error_reporting(0);
+ini_set('display_errors', '0');
 // api.php — Solis Commons database prototype server (PHP port of server.mjs)
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -282,7 +284,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         // assessors: the blind wall outlives the quorum. Everyone sees the
         // count; each assessor sees only whether they themselves filed. The
         // decided outcome (never its attribution) ships in the resolution.
-        if (!empty($cell['filings']) && is_array($cell['filings'])) {
+        if (!empty($cell['filings']) && is_array($cell['filings'] ?? null)) {
             $meF = $currentRow['id'] ?? null;
             $filedMe = false; foreach ($cell['filings'] as $fl) { if (!empty($fl['assessorId']) && $meF && $fl['assessorId'] === $meF) { $filedMe = true; break; } }
             $cell['filingsCount'] = count($cell['filings']); $cell['filedMe'] = $filedMe;
@@ -328,9 +330,9 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         }
         if ($caseSealed) {
             $sealedStf['stf-' . $c['id']] = true; $sealedCase[$c['id']] = true;
-            if (is_array($cell['source'])) { unset($cell['source']['threadId'], $cell['source']['targetId'], $cell['source']['verdict'], $cell['source']['escalatedBy'], $cell['source']['team']); }
+            if (is_array($cell['source'] ?? null)) { unset($cell['source']['threadId'], $cell['source']['targetId'], $cell['source']['verdict'], $cell['source']['escalatedBy'], $cell['source']['team']); }
             unset($cell['threadRepliesAtEscalation']);
-            if (is_array($cell['meta'])) { unset($cell['meta']['targetId'], $cell['meta']['targetName'], $cell['meta']['threadId'], $cell['meta']['targetIsSteward'], $cell['meta']['appealOf'], $cell['meta']['revisionOf'], $cell['meta']['isAppeal'], $cell['meta']['verdict'], $cell['meta']['findings'], $cell['meta']['assessments'], $cell['meta']['filings'], $cell['meta']['resolutionDraft']); }
+            if (is_array($cell['meta'] ?? null)) { unset($cell['meta']['targetId'], $cell['meta']['targetName'], $cell['meta']['threadId'], $cell['meta']['targetIsSteward'], $cell['meta']['appealOf'], $cell['meta']['revisionOf'], $cell['meta']['isAppeal'], $cell['meta']['verdict'], $cell['meta']['findings'], $cell['meta']['assessments'], $cell['meta']['filings'], $cell['meta']['resolutionDraft']); }
             unset($cell['threadRepliesAtEscalation']);
             // jSTF and closed-audit rows carry the target in their circle
             // column — that column goes blank with the seal.
@@ -341,7 +343,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 $cell['title'] = 'vSTF — sealed verification ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName'], $cell['threadId'], $cell['targetIsSteward'], $cell['appealOf'], $cell['revisionOf'], $cell['isAppeal'], $cell['verdict']);
                 $cell['assessments'] = []; $cell['messages'] = []; $cell['team'] = []; $cell['tasks'] = []; $cell['objectives'] = []; $cell['draftVotes'] = []; $cell['votes'] = null; $cell['draftResolutions'] = []; $cell['deliverableSpecs'] = null; $cell['restriction'] = ['state' => 'sealed', 'restrictCount' => 0, 'teamSize' => 0, 'majority' => 0];
-                if (is_array($cell['source'])) { unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName'], $cell['source']['targetId'], $cell['source']['threadId'], $cell['source']['verdict'], $cell['source']['team']); }
+                if (is_array($cell['source'] ?? null)) { unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName'], $cell['source']['targetId'], $cell['source']['threadId'], $cell['source']['verdict'], $cell['source']['team']); }
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
             } elseif ($auditClosed) {
                 // A closed judicial audit is precedent, not reading material:
@@ -349,7 +351,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 // attribution and case theory stay sealed.
                 $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
-                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                if (is_array($cell['source'] ?? null)) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
                 $cell['verdict'] = null;
                 $cell['assessments'] = [];
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
@@ -359,7 +361,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
                 // the full record; invitees see only their own invitation.
                 $cell['title'] = 'aSTF — sealed audit ···' . sealedRef($c['id']);
                 unset($cell['candidateName'], $cell['candidateInitials'], $cell['targetId'], $cell['targetName']);
-                if (is_array($cell['source'])) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
+                if (is_array($cell['source'] ?? null)) unset($cell['source']['candidateName'], $cell['source']['candidateInitials'], $cell['source']['targetName']);
                 $cell['verdict'] = null;
                 $cell['assessments'] = [];
                 $cell['resolution'] = $cell['resolution'] ? ['status' => $cell['resolution']['status'] ?? 'Sealed'] : null;
@@ -384,10 +386,10 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
             foreach (($cell['team'] ?? []) as $tv) { $mp = $sealIni($tv['initials'] ?? '', true); $anonTeam[] = ['name' => $mp['lab'], 'initials' => $mp['ini'], 'role' => $tv['role'], 'focus' => $tv['focus'], 'self' => false]; }
             $cell['team'] = $anonTeam;
             $cell['messages'] = array_map(function($m2) use ($sealIni) { $mm = $m2; $mp = $sealIni($m2['initials'] ?? '', false); $mm['author'] = $mp['lab']; $mm['initials'] = $mp['ini']; return $mm; }, $cell['messages']);
-            if (!empty($cell['restriction']['votes']) && is_array($cell['restriction']['votes'])) $cell['restriction']['votes'] = array_map(function($v) use ($sealIni) { $mp = $sealIni($v['initials'] ?? '', false); $v['name'] = $mp['lab']; $v['initials'] = $mp['ini']; return $v; }, $cell['restriction']['votes']);
-            if (!empty($cell['restriction']['history']) && is_array($cell['restriction']['history'])) $cell['restriction']['history'] = array_map(function($h) use ($sealIni) { $mp = $sealIni($h['initials'] ?? $h['votedBy'] ?? '', false); $h['votedBy'] = $mp['lab']; return $h; }, $cell['restriction']['history']);
-            if (is_array($cell['source']) && !empty($cell['source']['team']) && is_array($cell['source']['team'])) $cell['source']['team'] = array_map(function($t2) use ($blindLab) { $t2['name'] = trim($blindLab); $t2['initials'] = 'IN'; return $t2; }, $cell['source']['team']);
-            if (is_array($cell['source'])) { unset($cell['source']['targetName']); $cell['source']['team'] = []; }
+            if (!empty($cell['restriction']['votes']) && is_array($cell['restriction']['votes'] ?? null)) $cell['restriction']['votes'] = array_map(function($v) use ($sealIni) { $mp = $sealIni($v['initials'] ?? '', false); $v['name'] = $mp['lab']; $v['initials'] = $mp['ini']; return $v; }, $cell['restriction']['votes']);
+            if (!empty($cell['restriction']['history']) && is_array($cell['restriction']['history'] ?? null)) $cell['restriction']['history'] = array_map(function($h) use ($sealIni) { $mp = $sealIni($h['initials'] ?? $h['votedBy'] ?? '', false); $h['votedBy'] = $mp['lab']; return $h; }, $cell['restriction']['history']);
+            if (is_array($cell['source'] ?? null) && !empty($cell['source']['team']) && is_array($cell['source']['team'] ?? null)) $cell['source']['team'] = array_map(function($t2) use ($blindLab) { $t2['name'] = trim($blindLab); $t2['initials'] = 'IN'; return $t2; }, $cell['source']['team']);
+            if (is_array($cell['source'] ?? null)) { unset($cell['source']['targetName']); $cell['source']['team'] = []; }
             if (!empty($cell['draftVotes']) && is_array($cell['draftVotes'])) $cell['draftVotes'] = array_map(function($v) use ($sealIni) { $mp = $sealIni($v['initials'] ?? '', false); $v['name'] = $mp['lab']; $v['initials'] = $mp['ini']; return $v; }, $cell['draftVotes']);
             // Identity and theory sealed: target, thread, questions, mandate,
             // draft, findings, verdict record and restriction detail.
