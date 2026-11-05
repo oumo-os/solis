@@ -758,7 +758,7 @@
               1800,
               1240
             ],
-            "joined": "Feb 2025",
+            "joined": "Mar 2026",
             "lastActive": "3h ago",
             "status": "active",
             "topDomain": "Space Law"
@@ -777,7 +777,7 @@
               2000,
               1380
             ],
-            "joined": "Jun 2025",
+            "joined": "Jun 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Propulsion"
@@ -796,7 +796,7 @@
               1400,
               1050
             ],
-            "joined": "Jan 2025",
+            "joined": "Mar 2026",
             "lastActive": "2d ago",
             "status": "active",
             "topDomain": "Publications"
@@ -815,7 +815,7 @@
               1200,
               890
             ],
-            "joined": "May 2025",
+            "joined": "May 2026",
             "lastActive": "4d ago",
             "status": "active",
             "topDomain": "Remote Sensing"
@@ -834,7 +834,7 @@
               1000,
               950
             ],
-            "joined": "Oct 2025",
+            "joined": "Oct 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Space Policy"
@@ -853,7 +853,7 @@
               1100,
               900
             ],
-            "joined": "Oct 2025",
+            "joined": "Oct 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Astrodynamics"
@@ -872,7 +872,7 @@
               900,
               760
             ],
-            "joined": "Apr 2025",
+            "joined": "Apr 2026",
             "lastActive": "6d ago",
             "status": "active",
             "topDomain": "Space Law"
@@ -891,9 +891,9 @@
               800,
               720
             ],
-            "joined": "Jul 2025",
+            "joined": "Jul 2026",
             "lastActive": "2w ago",
-            "status": "candidate",
+            "status": "active",
             "topDomain": "Space Finance"
           },
           {
@@ -910,7 +910,7 @@
               1000,
               850
             ],
-            "joined": "Oct 2025",
+            "joined": "Oct 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Space Law"
@@ -931,7 +931,7 @@
               700,
               500
             ],
-            "joined": "Jan 2025",
+            "joined": "Mar 2026",
             "left": "May 2026",
             "status": "former",
             "topDomain": "Policy",
@@ -951,7 +951,7 @@
               800,
               600
             ],
-            "joined": "Mar 2025",
+            "joined": "Mar 2026",
             "left": "Apr 2026",
             "status": "former",
             "topDomain": "Space Med",
@@ -969,7 +969,7 @@
             "domainWs": [
               600
             ],
-            "joined": "Feb 2026",
+            "joined": "Mar 2026",
             "left": "Jun 2026",
             "status": "former",
             "topDomain": "Space Law",
@@ -982,7 +982,7 @@
       "id": "remote-sensing",
       "name": "Remote Sensing Circle",
       "status": "Active",
-      "members": 8,
+      "members": 2,
       "motions": 1,
       "domains": [
         "Remote Sensing",
@@ -1034,7 +1034,7 @@
               1300,
               1050
             ],
-            "joined": "Oct 2025",
+            "joined": "Jan 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Remote Sensing"
@@ -1053,7 +1053,7 @@
               1150,
               900
             ],
-            "joined": "Oct 2025",
+            "joined": "Jan 2026",
             "lastActive": "1d ago",
             "status": "active",
             "topDomain": "Remote Sensing"
@@ -1204,7 +1204,7 @@
       "id": "freq",
       "name": "Frequency Allocation Circle",
       "status": "Archived",
-      "members": 3,
+      "members": 0,
       "motions": 0,
       "domains": [
         "Telecom"
@@ -1230,8 +1230,8 @@
     "term-expiry": "Term expired",
     "resignation": "Resigned",
     "jstf-removal": "jSTF forced removal",
-    "jstf-flush": "jSTF full circle flush",
-    "circle-dissolved": "Circle disbanded",
+    "jstf-circle-flush": "jSTF full circle flush",
+    "circle-disbandment": "Circle disbanded",
     "competence-drift": "Competence drift"
   },
   "domains": {
