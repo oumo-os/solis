@@ -295,7 +295,8 @@ $TABLES = [
     // ── STFs ──
     "CREATE TABLE IF NOT EXISTS `stfs` (
         `id` VARCHAR(255) PRIMARY KEY, `type` TEXT, `purpose` TEXT, `title` TEXT,
-        `circle` TEXT, `deadline` TEXT, `status` TEXT, `bucket` TEXT
+        `circle` TEXT, `deadline` TEXT, `status` TEXT, `bucket` TEXT,
+        `candidate_id` VARCHAR(255) NULL, `candidate_name` TEXT NULL, `candidate_initials` TEXT NULL
     )",
 
     "CREATE TABLE IF NOT EXISTS `stf_candidates` (
@@ -526,6 +527,16 @@ upsert($db, 'participants', $partRows, ['user_id','location','joined','bio']);
 
 // User competence / circles / orgs (powers bootstrap domains, circles, orgs)
 $compRows = []; $ucRows = []; $uoRows = [];
+// Resolve circle aliases ('SL Circle') to canonical circles.name so
+// user_circles rows match the circles table without name-hack lookups.
+$circleFullName = [];
+foreach (($mock['circles'] ?? []) as $gc) {
+    $full = $gc['name'] ?? $gc['id'];
+    $circleFullName[$full] = $full;
+    $words = preg_split('/\s+/', str_replace('&', ' ', $full));
+    $words = array_values(array_filter(array_map('trim', $words), fn($w) => $w !== '' && strcasecmp($w, 'CIRCLE') !== 0));
+    if (count($words) >= 2) $circleFullName[strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1)) . ' Circle'] = $full;
+}
 foreach ($users as $u) {
     foreach ($u['domains'] ?? [] as $d) {
         if (!is_array($d)) $d = ['name' => $d];
@@ -539,8 +550,9 @@ foreach ($users as $u) {
         ];
     }
     foreach ($u['circles'] ?? [] as $c) {
+        $cname = is_string($c) ? $c : ($c['name'] ?? null);
         $ucRows[] = [
-            'user_id' => $u['id'], 'circle' => is_string($c) ? $c : ($c['name'] ?? null),
+            'user_id' => $u['id'], 'circle' => $circleFullName[$cname] ?? $cname,
             'status' => is_array($c) ? ($c['status'] ?? 'Active') : 'Active',
             'since' => is_array($c) ? ($c['since'] ?? null) : null, 'kind' => 'roster',
         ];
@@ -593,7 +605,9 @@ $circRows = array_map(fn($c) => [
     'description' => $c['description'] ?? null, 'founded' => $c['founded'] ?? null,
     'term_override' => j($c['termOverride'] ?? $c['term_override'] ?? null),
     'expiry_override' => j($c['expiryOverride'] ?? $c['expiry_override'] ?? null),
-    'meta' => j($c['meta'] ?? null),
+    'meta' => j($c['meta'] ?? ((isset($c['archivedDate']) || isset($c['archiveReason']))
+        ? array_filter(['archivedDate' => $c['archivedDate'] ?? null, 'archiveReason' => $c['archiveReason'] ?? null])
+        : null)),
 ], $circles);
 upsert($db, 'circles', $circRows, ['id','name','status','members','motions','description','founded','term_override','expiry_override','meta']);
 
@@ -619,15 +633,21 @@ foreach ($circles as $c) {
             ];
         }
     }
+    // Unique index can't dedupe NULL mandate rows (SQL allows dup NULLs) — replace per circle
+    dbRun('DELETE FROM circle_domains WHERE circle_id = ?', [$c['id']]);
     upsert($db, 'circle_domains', $cdRows, ['circle_id','domain','mandate','desired_ws']);
 }
 
 // Circle roster
 foreach ($circles as $c) {
     if (!empty($c['roster'])) {
-        $roster = is_array($c['roster']) && !isset($c['roster']['active'])
-            ? $c['roster']
-            : array_merge($c['roster']['active'] ?? [], $c['roster']['former'] ?? []);
+        $roster = [];
+        if (is_array($c['roster']) && !isset($c['roster']['active'])) {
+            $roster = $c['roster'];
+        } else {
+            foreach (($c['roster']['active'] ?? []) as $rr) { if (!isset($rr['status'])) $rr['status'] = 'active'; $roster[] = $rr; }
+            foreach (($c['roster']['former'] ?? []) as $rr) { if (!isset($rr['status'])) $rr['status'] = 'former'; $roster[] = $rr; }
+        }
         $rosterRows = array_map(fn($r) => [
             'circle_id' => $c['id'], 'member_id' => $r['member_id'] ?? $r['id'] ?? null,
             'name' => $r['name'] ?? null, 'initials' => $r['initials'] ?? null,
@@ -655,24 +675,31 @@ foreach ($circles as $c) {
         }
         upsert($db, 'circle_roster_domains', $rdRows, ['roster_id','domain','ws']);
     }
-    // Circle proposals / resolutions / activity
-    foreach ($circles as $c) {
-        $propRows = array_map(fn($p) => [
-            'id' => $p['id'], 'circle_id' => $c['id'], 'title' => $p['title'] ?? null,
-            'status' => $p['status'] ?? null, 'date' => $p['date'] ?? null,
-        ], $c['proposals'] ?? []);
-        upsert($db, 'circle_proposals', $propRows, ['id','circle_id','title','status','date']);
-        $resRows = array_map(fn($r) => [
-            'id' => $r['id'], 'circle_id' => $c['id'], 'title' => $r['title'] ?? null,
-            'date' => $r['date'] ?? null, 'type' => $r['type'] ?? null,
-        ], $c['resolutions'] ?? []);
-        upsert($db, 'circle_resolutions', $resRows, ['id','circle_id','title','date','type']);
-        $actRows = array_map(fn($a) => [
-            'circle_id' => $c['id'], 'text' => $a['text'] ?? null,
-            'time' => $a['time'] ?? null, 'type' => $a['type'] ?? null,
-        ], $c['activity'] ?? []);
-        if ($actRows) { dbRun('DELETE FROM circle_activity WHERE circle_id = ?', [$c['id']]); insert($db, 'circle_activity', $actRows, ['circle_id','text','time','type']); }
-    }
+}
+
+// Roster replace orphans the previous run's circle_roster_domains rows — sweep them
+dbRun("DELETE rd FROM circle_roster_domains rd LEFT JOIN circle_roster r ON r.id = rd.roster_id WHERE r.id IS NULL");
+
+// members always reflects the active roster — fixture counts are never trusted
+$db->query("UPDATE circles m SET members = (SELECT COUNT(*) FROM circle_roster r WHERE r.circle_id = m.id AND r.status = 'active')");
+
+// Circle proposals / resolutions / activity
+foreach ($circles as $c) {
+    $propRows = array_map(fn($p) => [
+        'id' => $p['id'], 'circle_id' => $c['id'], 'title' => $p['title'] ?? null,
+        'status' => $p['status'] ?? null, 'date' => $p['date'] ?? null,
+    ], $c['proposals'] ?? []);
+    upsert($db, 'circle_proposals', $propRows, ['id','circle_id','title','status','date']);
+    $resRows = array_map(fn($r) => [
+        'id' => $r['id'], 'circle_id' => $c['id'], 'title' => $r['title'] ?? null,
+        'date' => $r['date'] ?? null, 'type' => $r['type'] ?? null,
+    ], $c['resolutions'] ?? []);
+    upsert($db, 'circle_resolutions', $resRows, ['id','circle_id','title','date','type']);
+    $actRows = array_map(fn($a) => [
+        'circle_id' => $c['id'], 'text' => $a['text'] ?? null,
+        'time' => $a['time'] ?? null, 'type' => $a['type'] ?? null,
+    ], $c['activity'] ?? []);
+    if ($actRows) { dbRun('DELETE FROM circle_activity WHERE circle_id = ?', [$c['id']]); insert($db, 'circle_activity', $actRows, ['circle_id','text','time','type']); }
 }
 
 // Exit reason labels
@@ -826,7 +853,6 @@ $stfRows = array_map(function($s) use ($stfs) {
         'deadline' => $s['deadline'] ?? null, 'status' => $s['status'] ?? null, 'bucket' => $bucket,
     ];
 }, $allStfs);
-upsert($db, 'stfs', $stfRows, ['id','type','purpose','title','circle','deadline','status','bucket']);
 
 // STF candidates (top-level stfCandidates, camelCase keys)
 $scRows = array_map(fn($c) => [
@@ -848,6 +874,26 @@ foreach ($mock['stfCandidates'] ?? [] as $c) {
     }
 }
 upsert($db, 'stf_candidate_domains', $scdRows, ['candidate_id','domain']);
+// Backfill stfs candidate linkage (deterministic: highest match, then id)
+$candByStf = [];
+foreach ($scRows as $c) {
+    $sid = $c['stf_id'];
+    if ($sid === null) continue;
+    $score = $c['match_score'] ?? -1;
+    if (!isset($candByStf[$sid])
+        || $score > ($candByStf[$sid]['match_score'] ?? -1)
+        || ($score === ($candByStf[$sid]['match_score'] ?? -1) && strcmp((string)$c['id'], (string)$candByStf[$sid]['id']) < 0)) {
+        $candByStf[$sid] = $c;
+    }
+}
+foreach ($stfRows as &$sr) {
+    $cc = $candByStf[$sr['id']] ?? null;
+    $sr['candidate_id'] = $cc['id'] ?? null;
+    $sr['candidate_name'] = $cc['name'] ?? null;
+    $sr['candidate_initials'] = $cc['initials'] ?? null;
+}
+unset($sr);
+upsert($db, 'stfs', $stfRows, ['id','type','purpose','title','circle','deadline','status','bucket','candidate_id','candidate_name','candidate_initials']);
 
 // Threads
 $threads = $mock['threads'] ?? [];
@@ -1114,15 +1160,20 @@ if (!empty($mock['domainLayout'])) {
 
 echo "  ✓ Seed complete\n";
 
-// Per-table row counts (spot empty tables instantly)
+// Per-table row counts (spot empty tables instantly) — exact, not InnoDB estimates
 echo "  Table counts:\n";
-$tres = $db->query("SELECT table_name, table_rows FROM information_schema.tables WHERE table_schema = '" . $db->real_escape_string($DB_NAME) . "' ORDER BY table_name");
+$tres = $db->query("SELECT table_name FROM information_schema.tables WHERE table_schema = '" . $db->real_escape_string($DB_NAME) . "' AND table_type = 'BASE TABLE' ORDER BY table_name");
 if ($tres) {
-    while ($tr = $tres->fetch_assoc()) {
-        $flag = ((int)$tr['table_rows'] === 0) ? ' (empty)' : '';
-        echo "    {$tr['table_rows']} {$tr['table_name']}$flag\n";
-    }
+    $tnames = [];
+    while ($tr = $tres->fetch_assoc()) $tnames[] = $tr['table_name'];
     $tres->free();
+    foreach ($tnames as $tn) {
+        $cnt = -1;
+        $cr = $db->query("SELECT COUNT(*) AS c FROM `$tn`");
+        if ($cr) { $cnt = (int)($cr->fetch_assoc()['c'] ?? 0); $cr->free(); }
+        $flag = ($cnt === 0) ? ' (empty)' : '';
+        echo "    $cnt $tn$flag\n";
+    }
 }
 if (!empty($SEED_ERRORS)) {
     echo "  ✗ " . count($SEED_ERRORS) . " seed error(s) — see lines above\n";

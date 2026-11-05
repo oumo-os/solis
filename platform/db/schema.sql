@@ -371,7 +371,10 @@ CREATE TABLE IF NOT EXISTS stfs (
   circle   TEXT,
   deadline TEXT,
   status   TEXT,
-  bucket   TEXT                -- pending|active|completed
+  bucket   TEXT,               -- pending|active|completed
+  candidate_id TEXT,           -- linked stf_candidates.id (primary nominee)
+  candidate_name TEXT,
+  candidate_initials TEXT
 );
 
 CREATE TABLE IF NOT EXISTS stf_candidates (
@@ -383,7 +386,8 @@ CREATE TABLE IF NOT EXISTS stf_candidates (
   interest_score  INTEGER,
   competence_score INTEGER,
   status          TEXT,
-  invited_date    TEXT
+  invited_date    TEXT,
+  user_id         TEXT          -- resolved participants.id (null for anonymous candidates)
 );
 
 CREATE TABLE IF NOT EXISTS stf_candidate_domains (
@@ -615,6 +619,7 @@ CREATE TABLE IF NOT EXISTS circle_applications (
   circle_name      TEXT,
   applicant        TEXT,
   initials         TEXT,
+  user_id          TEXT,
   motivation       TEXT,
   status           TEXT,
   applied_date     TEXT,

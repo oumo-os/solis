@@ -1,6 +1,6 @@
 # Solis Data Model — Database Prototype
 
-Generated from `platform/db/schema.sql` — 57 tables. Seed source: `platform/mock.json` via `platform/db/seed.js`.
+Generated from `platform/db/schema.sql` — 57 tables. Seed source: `platform/mock.json` via `platform/db/seed-mysql.php`.
 
 ## Table of contents
 - [users](#users)
@@ -802,7 +802,7 @@ circle_applications ── circle_application_domains
 | `projectApplications` | project_applications | |
 | `governanceLedger` | governance_ledger | settings JSON |
 
-## Seed data (platform/mock.json → db/seed.js)
+## Seed data (platform/mock.json → db/seed-mysql.php)
 
 8 users, 5 circles, 22 cells, 6 stfs, 8 threads, 6 inbox, 3 publications.
 All users login with `<id>@solis.local` / `solis123` (e.g. `os@solis.local` = Oumo Samuel).
