@@ -310,14 +310,11 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Your Circles</div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">SL</div><div><div style="font-weight:500">Space Law</div><div style="font-size:10px;color:var(--text-tertiary)">8 members · 2 motions</div></div></div>
-          <div class="aside-member"><div class="aside-member-avatar" style="background:var(--teal-soft);color:var(--teal)">RS</div><div><div style="font-weight:500">Remote Sensing</div><div style="font-size:10px;color:var(--text-tertiary)">6 members · 1 motion</div></div></div>
+          <div id="circles-my-circles"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Active Motions</div>
-          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Artemis Accords Ratification</span><span class="badge b-active" style="font-size:8px">Vote</span></div>
-          <div class="aside-row"><span style="font-size:11px;color:var(--text)">LEO Debris Standards</span><span class="badge b-pending" style="font-size:8px">Open</span></div>
-          <div class="aside-row"><span style="font-size:11px;color:var(--text)">Debris Liability Framework</span><span class="badge" style="background:var(--blue-soft);color:var(--blue);font-size:8px">aSTF</span></div>
+          <div id="circles-active-motions"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">How Circles Work</div>
@@ -437,7 +434,7 @@
         <!-- xSTFs -->
         <div class="sec">xSTFs (Execution)</div>
         <div id="circlecell-xstfs"></div>
-        <button class="btn btn-sm" style="margin-bottom:20px" id="circlecell-create-xstf" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
+        <button class="btn btn-sm" style="margin-bottom:20px" id="circlecell-create-xstf" onclick="openXstfCreateModalFromCell()">+ Create xSTF</button>
 
         <!-- Deliverables -->
         <div class="sec">Deliverables</div>
@@ -465,7 +462,7 @@
           <div class="aside-title">Quick Actions</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" onclick="openProposalModal()">+ Submit Proposal</button>
-            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" id="circlecell-create-xstf-2" onclick="openXstfCreateModal('space-law')">+ Create xSTF</button>
+            <button class="btn btn-sm" style="width:100%;justify-content:flex-start" id="circlecell-create-xstf-2" onclick="openXstfCreateModalFromCell()">+ Create xSTF</button>
             <button class="btn btn-sm" style="width:100%;justify-content:flex-start" id="circlecell-view-home" onclick="nav('circle-detail')"><i class="fa-solid fa-arrow-right" style="margin-right:4px"></i>View Circle Home</button>
           </div>
         </div>
@@ -1940,12 +1937,7 @@
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Implementing Circle(s)</div>
-          <div id="res-modal-circles" style="display:flex;flex-wrap:wrap;gap:4px">
-            <span class="impl-circle active" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)"><span style="font-size:10px">&#10003;</span> Space Law Circle</span>
-            <span class="impl-circle active" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--green-soft);color:var(--green);border:1px solid var(--green-border)"><span style="font-size:10px">&#10003;</span> Remote Sensing Circle</span>
-            <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Policy Circle</span>
-            <span class="impl-circle" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)"><span style="font-size:10px;opacity:.3">&#10003;</span> Education Circle</span>
-          </div>
+          <div id="res-modal-circles" style="display:flex;flex-wrap:wrap;gap:4px"></div>
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:9px;color:var(--text-tertiary);margin-bottom:2px;font-weight:600">Supersedes (optional)</div>
@@ -2173,10 +2165,10 @@
         <div class="card" style="margin-bottom:12px">
           <div class="sec">Circle Configuration</div>
           <div class="form-grid">
-            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" value="Space Law Circle" id="circle-settings-name"></div>
+            <div class="form-group"><label class="form-label">Circle Name</label><input class="form-input" placeholder="Circle name" id="circle-settings-name"></div>
             <div class="form-group"><label class="form-label">Status</label><select class="form-input" id="circle-settings-status"><option selected>Active</option><option>Suggested</option><option>Archived</option></select></div>
           </div>
-          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2" id="circle-settings-desc">Stewards space law analysis, liability frameworks, and regulatory compliance across African space agencies.</textarea></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="2" id="circle-settings-desc" placeholder="What does this circle steward?"></textarea></div>
           <div class="form-group"><label class="form-label">Max Members</label><input class="form-input" type="number" value="15" id="circle-settings-max-members"></div>
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Steward Term Override</label>
@@ -2197,16 +2189,11 @@
           <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:12px">Primary domains drive the competence map. Secondary domains are advisory.</div>
           <div style="margin-bottom:12px">
             <div style="font-size:10px;font-weight:600;color:var(--gold);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Primary</div>
-            <div id="circle-primary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
-              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Space Law <input type="number" value="2500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-              <span class="mandate-tag primary" style="background:var(--gold-soft);color:var(--gold);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--gold-border)">Liability <input type="number" value="1800" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--gold-border);border-radius:2px;background:var(--surface);color:var(--gold);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToSecondary(this.parentElement)">↓</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-            </div>
+            <div id="circle-primary-domains" style="display:flex;flex-wrap:wrap;gap:6px"></div>
           </div>
           <div style="margin-bottom:12px">
             <div style="font-size:10px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Secondary</div>
-            <div id="circle-secondary-domains" style="display:flex;flex-wrap:wrap;gap:6px">
-              <span class="mandate-tag secondary" style="background:var(--surface-raised);color:var(--text-secondary);padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border)">Policy <input type="number" value="1500" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid var(--border);border-radius:2px;background:var(--surface);color:var(--text-secondary);text-align:center" title="Desired Ws"><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="moveDomainToPrimary(this.parentElement)">↑</span><span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">×</span></span>
-            </div>
+            <div id="circle-secondary-domains" style="display:flex;flex-wrap:wrap;gap:6px"></div>
           </div>
           <div style="display:flex;gap:4px">
             <input class="form-input" placeholder="Add domain..." style="flex:1;font-size:11px" id="circle-new-domain-input">
@@ -2510,7 +2497,7 @@ var views = {
   'observatory-opportunities': ['Observatory', 'Opportunities'],
   'publication-detail': ['Observatory', 'Publication'],
   circles:          ['Circles'],
-  'circle-detail':  ['Circles', 'Space Law Circle'],
+  'circle-detail':  ['Circles', 'Circle'],
   cells:            ['Cells'],
   'cell-undertaking': ['Cells', 'Project Cell'],
   'cell-circle':    ['Cells', 'Circle Cell'],
@@ -2557,11 +2544,16 @@ function nav(key) {
   var navItems = document.querySelectorAll('.nav-item[data-v="' + navMap[key] + '"]');
   navItems.forEach(function(n) { n.classList.add('active') });
   var path = views[key];
+  if (key === 'circle-detail' && typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) {
+    var _cdCrumb = ((MOCK && MOCK.circles) || []).filter(function(c) { return c.id === currentCircleDetailId; })[0];
+    if (_cdCrumb && _cdCrumb.name) path = ['Circles', _cdCrumb.name];
+  }
   document.getElementById('topbar-path').innerHTML = path.map(function(p, i) {
     return i < path.length - 1
       ? '<span>' + p + '</span><span class="sep">›</span>'
       : '<span style="color:var(--text)">' + p + '</span>';
   }).join('');
+  if (key === 'circles' && typeof renderCirclesAside === 'function') renderCirclesAside();
   document.querySelector('.content').scrollTop = 0;
   if (window.location.hash !== '#' + key) {
     window.location.hash = key;
@@ -3050,14 +3042,16 @@ function generateResolution() {
 
     // Gather deliberation messages from the cell
     var discussion = gatherDeliberation();
+    var _resCell = (typeof currentDelibCellId !== 'undefined' && currentDelibCellId) ? (cellsById[currentDelibCellId] || null) : null;
+    var _resImpl = ((_resCell && _resCell.participatingCircles) || []).map(function(p) { return p && p.name; }).filter(Boolean);
 
     var res = {
       id: 1,
       title: 'Debris Liability Framework — Proportional Model',
       text: 'MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms',
       action: 'Policy',
-      implementingCircles: ['Space Law Circle', 'Remote Sensing Circle'],
-      domainShares: { 'Space Law': 0.38, 'Liability': 0.35, 'Remote Sensing': 0.27 },
+      implementingCircles: _resImpl,
+      domainShares: deriveDomainShares({ implementingCircles: _resImpl }),
       votesNullified: false,
       aiDraftMeta: {
         draftCount: 1,
@@ -3204,6 +3198,19 @@ function openResolutionModal(idx) {
     });
     supSel.innerHTML = supOpts.join('');
     if (!res.supersedes) supSel.value = '';
+  }
+
+  // Implementing circles chips — rendered from the resolution + live circle list
+  var implChipEl = document.getElementById('res-modal-circles');
+  if (implChipEl) {
+    var implNames = (res.implementingCircles || []);
+    var allCircles = (MOCK && MOCK.circles) || [];
+    implChipEl.innerHTML = allCircles.length ? allCircles.map(function(c) {
+      var on = implNames.indexOf(c.name) > -1;
+      return '<span class="impl-circle' + (on ? ' active' : '') + '" onclick="toggleImplementingCircle(this)" style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;background:' +
+        (on ? 'var(--green-soft);color:var(--green);border:1px solid var(--green-border)' : 'var(--surface-raised);color:var(--text-tertiary);border:1px solid var(--border)') +
+        '"><span style="font-size:10px' + (on ? '' : ';opacity:.3') + '">&#10003;</span> ' + escapeHtml(c.name || '') + '</span>';
+    }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No circles yet.</div>';
   }
 
   // Redraft button in header
@@ -6263,7 +6270,7 @@ function confirmDisband(circleId) {
 }
 
 function confirmDriftCheck(circleId) {
-  SolisApi.driftCheck(circleId, { threshold: 50 }).then(function(r) {
+  SolisApi.driftCheck(circleId, {}).then(function(r) {
     if (!r || (r.__status && r.__status >= 400)) { toast('Drift check failed: ' + ((r && r.error) || 'server error'), 'error'); return; }
     toast('Drift check complete — ' + (r.drifted || 0) + ' members moved for competence drift.', 'success');
     setTimeout(function() { window.location.reload(); }, 900);
@@ -6422,18 +6429,45 @@ function addCircleMandateDomain() {
 }
 
 // ─── Circle Settings Modal ───
+function circleMandateTagHtml(name, tier, desiredWs) {
+  var isP = tier === 'primary';
+  var ws = (desiredWs && desiredWs[name] != null) ? desiredWs[name] : '';
+  var border = isP ? 'var(--gold-border)' : 'var(--border)';
+  var color = isP ? 'var(--gold)' : 'var(--text-secondary)';
+  var bg = isP ? 'var(--gold-soft)' : 'var(--surface-raised)';
+  return '<span class="mandate-tag ' + tier + '" style="background:' + bg + ';color:' + color + ';padding:5px 12px;border-radius:999px;font-size:11px;display:inline-flex;align-items:center;gap:8px;border:1px solid ' + border + '">' +
+    escapeHtml(name) +
+    ' <input type="number"' + (ws !== '' ? ' value="' + escapeHtml(String(ws)) + '"' : '') + ' placeholder="1000" style="width:48px;font-size:10px;padding:2px 4px;border:1px solid ' + border + ';border-radius:2px;background:var(--surface);color:' + color + ';text-align:center" title="Desired Ws">' +
+    '<span style="cursor:pointer;opacity:.4;font-size:13px" onclick="' + (isP ? 'moveDomainToSecondary(this.parentElement)' : 'moveDomainToPrimary(this.parentElement)') + '">' + (isP ? '\u2193' : '\u2191') + '</span>' +
+    '<span style="cursor:pointer;opacity:.4;font-size:13px" onclick="this.parentElement.remove()">\u00d7</span></span>';
+}
+
 function openCircleSettingsModal(circleId) {
   var modal = document.getElementById('circle-settings-modal');
   var cid = circleId || ((typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'new');
   modal.dataset.circleId = cid;
   var circle = ((MOCK && MOCK.circles) || []).filter(function(c) { return c.id === cid; })[0] || null;
   var setVal = function(id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; };
+  var setTxt = function(id, v) { var el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
   if (circle && cid !== 'new') {
     setVal('circle-settings-name', circle.name);
     setVal('circle-settings-status', circle.status);
-    setVal('circle-settings-desc', circle.description);
-    if (circle.members) setVal('circle-settings-max-members', circle.members);
+    setTxt('circle-settings-desc', circle.description);
+    setVal('circle-settings-max-members', circle.maxMembers != null ? circle.maxMembers : 15);
+  } else {
+    setTxt('circle-settings-name', '');
+    setTxt('circle-settings-desc', '');
+    setVal('circle-settings-status', 'Active');
+    setVal('circle-settings-max-members', 15);
   }
+  var mand = (circle && circle.mandate) || {};
+  var dws = (circle && circle.desiredWs) || {};
+  var primEl = document.getElementById('circle-primary-domains');
+  var secEl = document.getElementById('circle-secondary-domains');
+  if (primEl) primEl.innerHTML = (mand.primary || []).map(function(n) { return circleMandateTagHtml(n, 'primary', dws); }).join('');
+  if (secEl) secEl.innerHTML = (mand.secondary || []).map(function(n) { return circleMandateTagHtml(n, 'secondary', dws); }).join('');
+  var ndInp = document.getElementById('circle-new-domain-input');
+  if (ndInp) ndInp.value = '';
   modal.classList.add('active');
   document.body.classList.add('modal-open');
 }
@@ -7455,6 +7489,54 @@ function renderCommonsAside() {
   }
 }
 
+function renderCirclesAside() {
+  var mineEl = document.getElementById('circles-my-circles');
+  if (mineEl) {
+    var me = (MOCK && MOCK.currentUser) || {};
+    var myCircles = ((MOCK && MOCK.circles) || []).filter(function(c) {
+      var act = (c.roster && c.roster.active) || [];
+      return me.id && act.some(function(m) { return m.id === me.id; });
+    });
+    mineEl.innerHTML = myCircles.length ? myCircles.map(function(c) {
+      var ini = (c.name || '?').split(/\s+/).map(function(w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+      return '<div class="aside-member" style="cursor:pointer" onclick="openCircleDetail(\'' + escapeHtml(c.id || '') + '\')">' +
+        '<div class="aside-member-avatar" style="background:var(--purple-soft);color:var(--purple)">' + escapeHtml(ini) + '</div>' +
+        '<div><div style="font-weight:500">' + escapeHtml(c.name || '') + '</div>' +
+        '<div style="font-size:10px;color:var(--text-tertiary)">' + (c.members || 0) + ' members · ' + (c.motions || 0) + ' motions</div></div></div>';
+    }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">Not in any circle yet.</div>';
+  }
+  var motEl = document.getElementById('circles-active-motions');
+  if (motEl) {
+    var motions = ((MOCK && MOCK.cells) || []).filter(function(c) {
+      return (c.type === 'Deliberation Cell' || c.type === 'aSTF Cell') && c.status === 'Active';
+    }).slice(0, 4);
+    motEl.innerHTML = motions.length ? motions.map(function(c) {
+      var isAstf = c.type === 'aSTF Cell';
+      var resStatus = c.resolution && c.resolution.status;
+      var label = isAstf ? 'aSTF' : ((resStatus === 'Ready' || resStatus === 'In Vote' || resStatus === 'Voting') ? 'Vote' : 'Open');
+      var badgeCls = isAstf ? 'badge' : (label === 'Vote' ? 'badge b-active' : 'badge b-pending');
+      var badgeStyle = isAstf ? 'background:var(--blue-soft);color:var(--blue);font-size:8px' : 'font-size:8px';
+      return '<div class="aside-row"><span style="font-size:11px;color:var(--text)">' + escapeHtml(c.title || '') + '</span>' +
+        '<span class="' + badgeCls + '" style="' + badgeStyle + '">' + label + '</span></div>';
+    }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No active motions.</div>';
+  }
+}
+
+function deriveDomainShares(r) {
+  var impl = (r && r.implementingCircles) || [];
+  var domains = [];
+  impl.forEach(function(name) {
+    var c = ((MOCK && MOCK.circles) || []).filter(function(x) { return x.name === name; })[0];
+    ((c && c.mandate && c.mandate.primary) || []).forEach(function(d) { if (d && domains.indexOf(d) === -1) domains.push(d); });
+  });
+  if (!domains.length) return {};
+  var share = Math.floor((100 / domains.length)) / 100;
+  var out = {};
+  domains.forEach(function(d) { out[d] = share; });
+  out[domains[0]] = Math.round((out[domains[0]] + (1 - (share * domains.length))) * 100) / 100;
+  return out;
+}
+
 function renderYourCells() {
   var u = (MOCK && MOCK.currentUser) ? MOCK.currentUser : null;
   var cells = (MOCK && MOCK.cells) || [];
@@ -7671,8 +7753,9 @@ var formerMembers = [];
 var successionCandidates = [];
 
 function openMembersModal() {
-  var circleId = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law';
-  var circle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] || {};
+  var circleId = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || null;
+  var circle = circleId ? (MOCK && MOCK.circles || []).filter(function(c){return c.id===circleId})[0] : null;
+  if (!circle) { toast('Open a circle to view its members.', 'warn'); return; }
   var roster = circle.roster || { active: [], former: [] };
   membersData = (roster.active || []).concat(roster.former || []);
   activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='candidate';});
@@ -7718,7 +7801,7 @@ function renderMemberList() {
   }).join('') : '';
 
   var mmMe = (MOCK && MOCK.currentUser) || {};
-  var mmCid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law';
+  var mmCid = (typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || null;
   var mmCanRead = (typeof isStewardOfCircle === 'function' && isStewardOfCircle(mmMe.id, mmCid));
   var successHtml = successionCandidates.length ? successionCandidates.map(function(a) {
     var mot = (mmCanRead || a.applicant === mmMe.name) ? (a.motivation || '').substring(0, 40) + '…' : 'Motivation visible to stewards';
@@ -7795,7 +7878,7 @@ function withdrawFromQueue(appId) {
 function renderMemberDetail(id) {
   var detail = document.getElementById('mm-detail');
   if (!detail) return;
-  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===((typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || 'space-law')})[0] || {};
+  var rosterCircle = (MOCK && MOCK.circles || []).filter(function(c){return c.id===((typeof currentCircleDetailId !== 'undefined' && currentCircleDetailId) || null)})[0] || {};
   var m = membersData.filter(function(d){return d.id===id})[0];
   if (!m) return;
 
@@ -7920,7 +8003,7 @@ function submitSystemProposal() {
         source: { type: 'settings-proposal', proposer: MOCK.currentUser.name },
         settingsSnapshot: snapshot,
         settingsChanges: [],
-        participatingCircles: [{ name: 'Space Law Circle', role: 'Lead', votes: 5, id: 'space-law' }],
+        participatingCircles: [],
         resolution: { status: 'Draft' },
         messages: [{ author: MOCK.currentUser.initials, text: 'Proposed system settings change for ' + target + '. Awaiting deliberation.', time: 'Just now', gold: true }]
       });
@@ -7990,17 +8073,15 @@ function initApp() {
   if (!MOCK.participants) MOCK.participants = [];
 
   // ─── Derive all view-state from MOCK ───
-  var spaceLawCircle = (MOCK.circles || []).filter(function(c){return c.id==='space-law'})[0] || {};
-  var roster = spaceLawCircle.roster || { active: [], former: [] };
-  membersData = roster.active.concat(roster.former);
+  membersData = [];
   reasonLabels = MOCK.exitReasonLabels || {};
-  activeMembers = membersData.filter(function(m){return m.status==='active'||m.status==='candidate'});
-  formerMembers = membersData.filter(function(m){return m.status==='former'});
+  activeMembers = [];
+  formerMembers = [];
 
   var delibCell = (MOCK.cells || []).filter(function(c){return c.id==='cell-21'})[0] || {};
   delibResolutions = (delibCell.draftResolutions || []).map(function(r){ return r; });
   delibResolutions.forEach(function(r) {
-    if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
+    if (!r.domainShares) r.domainShares = deriveDomainShares(r);
     if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
   });
   updateResolutionSlot();
@@ -8046,6 +8127,7 @@ function initApp() {
   renderStfSummary();
   renderPastfMembers();
   renderCommonsAside();
+  renderCirclesAside();
   renderYourCells();
   renderJstfPanel();
   renderJstfIntake();
@@ -10402,6 +10484,15 @@ function filterInbox(filter, btn) {
 // -- xSTF Creation --
 var _xstfCreateCircleId = null;
 
+function openXstfCreateModalFromCell() {
+  var cell = (typeof currentCircleCellId !== 'undefined' && currentCircleCellId)
+    ? (cellsById[currentCircleCellId] || ((MOCK && MOCK.cells) || []).filter(function(c) { return c.id === currentCircleCellId; })[0] || null)
+    : null;
+  var circle = (typeof findCircleByCell === 'function') ? findCircleByCell(cell) : null;
+  if (circle && circle.id) { openXstfCreateModal(circle.id); return; }
+  toast('Open a circle cell to create an xSTF.', 'warn');
+}
+
 function openXstfCreateModal(circleId) {
   _xstfCreateCircleId = circleId;
   var circle = MOCK.circles.find(function(c) { return c.name.toLowerCase().replace(/\s+/g, '-') === circleId || c.id === circleId; });
@@ -10612,7 +10703,7 @@ function openXstfInviteModal(candidateId) {
   body.innerHTML = '<div style="margin-bottom:16px">'
     + '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px">You have been selected to join an xSTF execution team based on your domain match and competence profile.</div>'
     + '<div style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:8px">' + esc(stf.title || 'ITU Coordination Guide') + '</div>'
-    + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px">' + esc(stf.purpose || 'Execution') + ' · Commissioned by ' + esc(stf.circle || 'Space Law Circle') + '</div>'
+    + '<div style="font-size:11px;color:var(--text-tertiary);margin-bottom:16px">' + esc(stf.purpose || 'Execution') + ' · Commissioned by ' + esc(stf.circle || '—') + '</div>'
     + '<div style="margin-bottom:12px"><span style="font-size:11px;color:var(--text-tertiary)">Match Score: </span><span style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--green)">' + cand.matchScore + '%</span></div>'
     + '<div style="font-size:11px;color:var(--text-secondary);line-height:1.6">'
     + '<div class="flex justify-between" style="padding:3px 0"><span>Interest alignment</span><span style="color:var(--text)">' + cand.interestScore + '%</span></div>'
@@ -11800,7 +11891,7 @@ function renderDelibCell(cellId) {
   if (dbInfo) dbInfo.innerHTML = 'Quorum: ' + (cell.participants ? Math.ceil(cell.participants / 2) : 0) + '/' + (cell.participants || 0) + ' · Status: ' + status;
   delibResolutions = (cell.draftResolutions || []).map(function (r) { return r; });
   delibResolutions.forEach(function (r) {
-    if (!r.domainShares) r.domainShares = { 'Space Law': 0.33, 'Liability': 0.33, 'Remote Sensing': 0.34 };
+    if (!r.domainShares) r.domainShares = deriveDomainShares(r);
     if (!r.aiDraftMeta) r.aiDraftMeta = { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null, confirmations: [], confirmQuorum: Math.ceil(delibParticipants.length / 3) };
   });
   if (delibSelectedRes >= delibResolutions.length) delibSelectedRes = 0;
