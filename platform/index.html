@@ -260,17 +260,12 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Trending Domains</div>
-          <div class="aside-tags">
-            <span class="tag tag-purple" style="font-size:9px">Space Law</span>
-            <span class="tag tag-green" style="font-size:9px">Remote Sensing</span>
-            <span class="tag tag-amber" style="font-size:9px">Mars</span>
-            <span class="tag tag-blue" style="font-size:9px">Policy</span>
-          </div>
+          <div class="aside-tags" id="obs-trending"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Stats</div>
           <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val">200+</div><div class="aside-stat-lbl">Resources</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val" id="obs-stats-resources">0</div><div class="aside-stat-lbl">Resources</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val" id="obs-stats-publications">0</div><div class="aside-stat-lbl">Publications</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val" id="obs-stats-events">0</div><div class="aside-stat-lbl">Events</div></div>
           </div>
@@ -563,26 +558,18 @@
         <div id="stf-integrity-stf-vstf-steward"></div>
         <div class="sec">Candidate Profile</div>
         <div class="card" style="margin-bottom:16px">
-          <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff">SD</div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)">Ssempa D.</div><div style="font-size:11px;color:var(--text-tertiary)" id="vstf-stew-meta">Kampala · Joined Mar 2026</div></div></div>
+          <div class="flex items-center gap-3 mb-3"><div id="stf-cand-ini-vstf-steward" class="avatar avatar-md" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff"></div><div><div id="stf-cand-name-vstf-steward" style="font-size:14px;font-weight:500;color:var(--text)"></div><div style="font-size:11px;color:var(--text-tertiary)" id="vstf-stew-meta"></div></div></div>
           <div class="text-label mb-1">Auto-Match: Ws vs Circle Requirement</div>
           <table class="tbl" style="margin-bottom:12px" id="vstf-stew-matchtbl">
             <tr><th>Domain</th><th>Circle Req.</th><th>Candidate Ws</th><th>Match</th></tr>
             <tbody id="vstf-stew-match">
-            <tr><td>Space Law &amp; Policy</td><td class="m">≥ 800</td><td class="m">900</td><td style="color:var(--green)">✓ Pass</td></tr>
-            <tr><td>Telecommunications</td><td class="m">≥ 800</td><td class="m">320</td><td style="color:var(--red)">✗ Gap</td></tr>
-            <tr><td>Debris Tracking</td><td class="m">≥ 600</td><td class="m">760</td><td style="color:var(--green)">✓ Pass</td></tr>
-            <tr><td>Regulatory Compliance</td><td class="m">≥ 600</td><td class="m">640</td><td style="color:var(--green)">✓ Pass</td></tr>
             </tbody>
           </table>
           <div class="text-label mb-1">Affiliations</div>
-          <div class="flex gap-2" id="vstf-stew-affil"><span class="tag tag-purple" style="font-size:9px">Uganda Astronomical Society — Member</span><span class="tag tag-purple" style="font-size:9px">SGAC — Affiliate</span></div>
+          <div class="flex gap-2" id="vstf-stew-affil"></div>
         </div>
         <div class="sec">Evidence Package</div>
-        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-stew-evidence">
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — Policy Brief Publication</div><div class="ev-meta">Submitted Jul 11 · PDF · 340KB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Ssempa D. — UAS Membership Letter</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
-        </div>
+        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-stew-evidence"></div>
         <div class="sec">Your Approval Verdict</div>
         <div class="card" style="margin-bottom:16px">
           <div class="text-label mb-2">Disapprove ← → Approve</div>
@@ -606,18 +593,11 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Mandate</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-mandate">
-            <div class="mb-2"><strong style="color:var(--text)">Knowledge domains:</strong></div>
-            <div class="flex gap-1 mb-2"><span class="tag tag-purple" style="font-size:8px">Space Law &amp; Policy</span><span class="tag tag-purple" style="font-size:8px">Telecommunications</span></div>
-            <div class="mb-2"><strong style="color:var(--text)">Experiential domains:</strong></div>
-            <div class="flex gap-1 mb-2"><span class="tag tag-green" style="font-size:8px">Debris Tracking</span><span class="tag tag-green" style="font-size:8px">Regulatory Compliance</span></div>
-            <div class="mb-2"><strong style="color:var(--text)">Affiliations:</strong></div>
-            <div class="flex gap-1"><span class="tag tag-amber" style="font-size:8px">Uganda Astronomical Society</span><span class="tag tag-amber" style="font-size:8px">SGAC</span></div>
-          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-mandate"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Auto-Match Summary</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-summary">3 of 4 domains pass. Telecommunications has a significant gap (320 vs 800 required). Assess whether this gap is disqualifying or can be addressed through mentorship.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-stew-summary"></div>
         </div>
       </div>
     </div>
@@ -632,55 +612,16 @@
         <div class="blind-wall"><i class="fa-solid fa-lock"></i> &nbsp; BLIND PARALLEL — EACH ASSESSOR SEES SAME EVIDENCE, NO CROSS-ASSESSOR COMMUNICATION &nbsp; 🔒</div>
         <div id="stf-integrity-stf-vstf-competence"></div>
         <div class="sec">Evidence Package</div>
-        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-comp-evidence">
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Space Law Certificate (Makerere)</div><div class="ev-meta">Submitted Jul 10 · PDF · 2.1MB</div></div><div class="ev-status"><span class="badge b-active">Verified</span></div></div>
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — ITU Workshop Attendance</div><div class="ev-meta">Submitted Jul 11 · PDF · 840KB</div></div><div class="ev-status"><span class="badge b-review">Under review</span></div></div>
-          <div class="evidence-item"><div class="ev-icon"><i class="fa-solid fa-file-pdf"></i></div><div style="flex:1"><div class="ev-name">Akello J. — Published Policy Brief (2025)</div><div class="ev-meta">Submitted Jul 12 · PDF · 120KB</div></div><div class="ev-status"><span class="badge b-pending">Check pending</span></div></div>
-        </div>
+        <div class="evidence-shelf" style="margin-bottom:16px" id="vstf-comp-evidence"></div>
         <div class="sec">Wh Assessment Table</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">Investigate, evaluate, and assess whether claims are acceptable. Adjust where necessary. Leave non-evaluated claims unmarked with reason.</div>
         <table class="tbl" style="margin-bottom:16px" id="vstf-comp-table">
           <tr><th>Domain</th><th>Claimed Wh</th><th>Adjusted Wh</th><th>Evaluated</th><th>Reason (if unmarked)</th></tr>
           <tbody id="vstf-comp-rows">
-          <tr>
-            <td>Space Law &amp; Policy</td>
-            <td class="m">1,800</td>
-            <td><input type="number" value="1600" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
-            <td><input type="checkbox" checked></td>
-            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
-          </tr>
-          <tr>
-            <td>Remote Sensing</td>
-            <td class="m">1,200</td>
-            <td><input type="number" value="1200" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
-            <td><input type="checkbox" checked></td>
-            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
-          </tr>
-          <tr>
-            <td>Policy &amp; Advocacy</td>
-            <td class="m">640</td>
-            <td><input type="number" value="640" class="form-input" style="width:80px;padding:3px 6px;font-family:var(--mono);font-size:11px"></td>
-            <td><input type="checkbox" checked></td>
-            <td style="font-size:10px;color:var(--text-tertiary)">—</td>
-          </tr>
-          <tr>
-            <td>Telecommunications</td>
-            <td class="m">400</td>
-            <td style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">—</td>
-            <td><input type="checkbox"></td>
-            <td style="font-size:10px;color:var(--red)">Insufficient evidence</td>
-          </tr>
-          <tr>
-            <td>Physics</td>
-            <td class="m">300</td>
-            <td style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary)">—</td>
-            <td><input type="checkbox"></td>
-            <td style="font-size:10px;color:var(--text-tertiary)">Unable to evaluate — outside expertise</td>
-          </tr>
           </tbody>
         </table>
         <div class="sec">Evaluation Comments</div>
-        <textarea id="vstf-comp-comment" placeholder="Overall assessment of Akello J.'s competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
+        <textarea id="vstf-comp-comment" placeholder="Overall assessment of the candidate's competence claims..." class="form-input" style="height:80px;resize:none;margin-bottom:16px"></textarea>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Your evaluation will be collectively aggregated against other evaluators to derive final competence weights. Unmarked claims are recorded with reason.</div>
         <div class="flex gap-2"><button class="btn btn-primary" onclick="fileVstfCompetenceAssessment()">File Assessment</button><button class="btn" onclick="saveViewDraft('view-stf-vstf-competence')">Save Draft</button></div>
       </div>
@@ -691,8 +632,8 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Candidate Profile</div>
-          <div class="flex items-center gap-3 mb-2" id="vstf-comp-prof"><div class="avatar avatar-md">AJ</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">Akello J.</div><div style="font-size:10px;color:var(--text-tertiary)">Nairobi · Joined Jan 2026</div></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-comp-sum">Current total Ws: 2,840. Claims to add 5 domains. 3 have evidence, 2 are unsupported.</div>
+          <div class="flex items-center gap-3 mb-2" id="vstf-comp-prof"></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="vstf-comp-sum"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Evaluation Rules</div>
@@ -717,11 +658,11 @@
           <div class="flex gap-3" style="align-items:flex-start">
             <div style="width:40px;height:40px;border-radius:50%;background:var(--border-subtle);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text-tertiary);flex-shrink:0">?</div>
             <div style="flex:1">
-              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px" id="jstf-case-title">Anonymous member report — Credential misrepresentation</div>
-              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px" id="jstf-case-desc">A member reported that Daniel J. appeared to misrepresent space law credentials during steward candidacy evaluation. The report was posted anonymously to the Commons, visible to stewards. Any steward could sponsor it — Akello J. took responsibility for sponsoring this claim.</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px" id="jstf-case-title"></div>
+              <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:8px" id="jstf-case-desc"></div>
               <div class="flex gap-2" style="align-items:center;flex-wrap:wrap">
-                <span class="tag tag-red" style="font-size:8px" id="jstf-case-tag">Anonymous</span>
-                <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)" id="jstf-case-meta">Reported Jul 10 · Sponsored Jul 12</span>
+                <span class="tag tag-red" style="font-size:8px" id="jstf-case-tag"></span>
+                <span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary)" id="jstf-case-meta"></span>
                 <span id="jstf-case-xref" style="display:inline-flex;flex-wrap:wrap"></span>
               </div>
               <div id="jstf-thread" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle)"></div>
@@ -781,39 +722,39 @@
           <div class="flex gap-3 mb-3" id="jstf-restrict-box" style="align-items:center;padding:8px 10px;background:var(--amber-soft);border:1px solid var(--amber-border);border-radius:var(--radius)">
             <span style="font-size:14px;color:var(--amber)"><i class="fa-solid fa-triangle-exclamation"></i></span>
             <div style="flex:1">
-              <div style="font-size:12px;font-weight:500;color:var(--amber)" id="jstf-restrict-title">Steward privileges suspended</div>
-              <div style="font-size:11px;color:var(--text-tertiary)" id="jstf-restrict-body">The reported member cannot participate in Circle deliberations or vote on motions during this investigation.</div>
+              <div style="font-size:12px;font-weight:500;color:var(--amber)" id="jstf-restrict-title"></div>
+              <div style="font-size:11px;color:var(--text-tertiary)" id="jstf-restrict-body"></div>
             </div>
           </div>
           <div id="jstf-restrict-votes" style="margin-bottom:8px"></div>
-          <div style="font-size:11px;color:var(--text-tertiary);font-style:italic" id="jstf-restrict-note">Restriction is temporary and proportionate. Applied as a system-bound action by the Integrity Engine.</div>
+          <div style="font-size:11px;color:var(--text-tertiary);font-style:italic" id="jstf-restrict-note"></div>
         </details>
         <details class="aside-card" open>
           <summary class="aside-title">Case File</summary>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin-bottom:6px">Target</div>
           <div class="accused-row" style="flex-wrap:wrap;gap:6px">
-            <div class="hav" id="jstf-accused-ini" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px">DJ</div>
-            <div style="flex:1;min-width:120px"><div style="font-size:13px;color:var(--text);font-weight:500" id="jstf-accused-name">Daniel Jørgensen</div><div style="font-size:11px;color:var(--text-tertiary)" id="jstf-accused-sub">Former Space Law Circle member · Under Review status</div></div>
-            <span class="badge b-judicial" id="jstf-accused-badge">Under investigation</span>
+            <div class="hav" id="jstf-accused-ini" style="background:linear-gradient(135deg,var(--red),#5a1010);width:36px;height:36px"></div>
+            <div style="flex:1;min-width:120px"><div style="font-size:13px;color:var(--text);font-weight:500" id="jstf-accused-name"></div><div style="font-size:11px;color:var(--text-tertiary)" id="jstf-accused-sub"></div></div>
+            <span class="badge b-judicial" id="jstf-accused-badge"></span>
             <span id="jstf-accused-xref" style="display:inline-flex;flex-wrap:wrap"></span>
           </div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:8px" id="jstf-aside-desc">Status: Under Review. Accused of credential misrepresentation and integrity violations.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:8px" id="jstf-aside-desc"></div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">Trigger</div>
           <div class="court-record">
-            <div class="court-charge" id="jstf-court-charge">Trigger: Integrity Engine anomaly flag</div>
-            <div class="court-text" id="jstf-court-text">Flag raised on Jul 10: statistical correlation detected between auditor assignment pattern and credential verification outcomes. Secondary flag: claimed W<sub>h</sub> credentials in Space Law domain appear inconsistent with demonstrated participation quality. Judicial Circle commissioned this investigation on Jul 12.</div>
+            <div class="court-charge" id="jstf-court-charge"></div>
+            <div class="court-text" id="jstf-court-text"></div>
           </div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">Officers</div>
           <div class="flex gap-3" style="align-items:center">
-            <div class="avatar avatar-md" id="jstf-sponsor-ini" style="background:linear-gradient(135deg,var(--purple),#3a1860)">AJ</div>
+            <div class="avatar avatar-md" id="jstf-sponsor-ini" style="background:linear-gradient(135deg,var(--purple),#3a1860)"></div>
             <div style="flex:1">
-              <div style="font-size:13px;font-weight:500;color:var(--text)" id="jstf-sponsor-name">Akello Jane</div>
-              <div style="font-size:11px;color:var(--text-tertiary)" id="jstf-sponsor-sub">Space Law steward · Sponsored this investigation</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text)" id="jstf-sponsor-name"></div>
+              <div style="font-size:11px;color:var(--text-tertiary)" id="jstf-sponsor-sub"></div>
               <div id="jstf-sponsor-xref" style="margin-top:4px"></div>
             </div>
             <span class="badge b-active">Sponsor</span>
           </div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:8px" id="jstf-sponsor-desc">As sponsor, the sponsoring steward takes responsibility for the claim. The investigation team now has authority to examine the evidence. The anonymous reporter's identity is permanently sealed.</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-top:8px" id="jstf-sponsor-desc"></div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">jSTF adjudicators</div>
           <div id="jstf-team"></div>
         </details>
@@ -840,12 +781,7 @@
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:2px">Eyes = investigators assigned · due = report deadline (defaults to case deadline).</div>
           </div>
           <div style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary);margin:12px 0 6px">Evidence</div>
-          <div id="jstf-evidence" style="font-size:11px;color:var(--text-secondary);line-height:1.8">
-            <div class="flex justify-between"><span>Assignment logs</span><span style="color:var(--green)">✓ Collected</span></div>
-            <div class="flex justify-between"><span>Credential records</span><span style="color:var(--green)">✓ Collected</span></div>
-            <div class="flex justify-between"><span>Verification outcomes</span><span style="color:var(--green)">✓ Collected</span></div>
-            <div class="flex justify-between"><span>External contacts</span><span style="color:var(--amber)">△ In progress</span></div>
-          </div>
+          <div id="jstf-evidence" style="font-size:11px;color:var(--text-secondary);line-height:1.8"></div>
         </details>
         <details class="aside-card">
           <summary class="aside-title">Motion &amp; Resolution</summary>
@@ -994,8 +930,8 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Circle Profile</div>
-          <div class="flex items-center gap-3 mb-2"><div class="hav" id="pastf-circle-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px">SL</div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="pastf-circle-name">Space Law Circle</div><div style="font-size:10px;color:var(--text-tertiary)" id="pastf-circle-sub">Founded Mar 2026 · 8 members</div></div></div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="pastf-circle-mandate">Mandate: Space Law &amp; Policy, Telecommunications, Debris Tracking, Regulatory Compliance</div>
+          <div class="flex items-center gap-3 mb-2"><div class="hav" id="pastf-circle-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);width:28px;height:28px;font-size:10px"></div><div><div style="font-size:12px;font-weight:500;color:var(--text)" id="pastf-circle-name"></div><div style="font-size:10px;color:var(--text-tertiary)" id="pastf-circle-sub"></div></div></div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5" id="pastf-circle-mandate"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 1 — Circle Rubric</div>
@@ -1003,10 +939,7 @@
         </div>
         <div class="aside-card">
           <div class="aside-title">Layer 2 — Member Scores</div>
-          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8" id="pastf-member-scores">
-            <div class="flex justify-between mb-2"><span><strong>Akello J.</strong></span><span style="color:var(--text)">29/35</span></div>
-            <div class="flex justify-between"><span><strong>Ssempa D.</strong></span><span style="color:var(--amber)">17/35</span></div>
-          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.8" id="pastf-member-scores"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Reviewer Pool</div>
@@ -1081,7 +1014,7 @@
           <div class="aside-stat">
             <div class="aside-stat-item"><div class="aside-stat-val" id="orgs-stat-count">0</div><div class="aside-stat-lbl">Organisations</div></div>
             <div class="aside-stat-item"><div class="aside-stat-val" id="orgs-stat-domains">0</div><div class="aside-stat-lbl">Affiliate Domains</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Knowledge Areas</div></div>
+            <div class="aside-stat-item"><div class="aside-stat-val" id="orgs-stat-areas">0</div><div class="aside-stat-lbl">Knowledge Areas</div></div>
           </div>
         </div>
         <div class="aside-card">
@@ -1462,11 +1395,7 @@
           </div>
           <div class="aside-card">
             <div class="aside-title">By Circle</div>
-            <div id="gov-by-circle">
-              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Space Law</span><span class="aside-value">3</span></div>
-              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Remote Sensing</span><span class="aside-value">1</span></div>
-              <div class="aside-row"><span style="font-size:12px;color:var(--text)">Policy</span><span class="aside-value">2</span></div>
-            </div>
+            <div id="gov-by-circle"></div>
           </div>
         </div>
       </div>
@@ -4380,6 +4309,7 @@ function renderVstfSteward() {
   ((ctx.person && ctx.person.orgs) || []).forEach(function(o) { affils.push(o + ' — Member'); });
   ((ctx.person && ctx.person.circles) || []).forEach(function(c) { affils.push(c); });
   if (affils.length) setHtml('vstf-stew-affil', affils.map(function(a) { return '<span class="tag tag-purple" style="font-size:9px">' + escapeHtml(a) + '</span>'; }).join(''));
+  else setHtml('vstf-stew-affil', '');
   loadVstfEvidence('vstf-stew-evidence', ctx.cell.id, ctx.name);
   var mandate = (ctx.circle && ctx.circle.mandate) || {};
   var primary = mandate.primary || [];
@@ -4406,6 +4336,9 @@ function renderVstfSteward() {
     }).join(''));
     var gaps = domains.filter(function(d) { return desired[d] != null && wsByDomain[d] != null && wsByDomain[d] < desired[d]; });
     setText('vstf-stew-summary', pass + ' of ' + domains.length + ' domains pass.' + (gaps.length ? ' ' + gaps[0] + ' shows a gap (' + fmt(wsByDomain[gaps[0]]) + ' vs ' + fmt(desired[gaps[0]]) + ' required). Assess whether this gap is disqualifying or can be addressed through mentorship.' : ''));
+  } else {
+    setHtml('vstf-stew-match', '');
+    setText('vstf-stew-summary', 'No mandate domains to compare.');
   }
   var tag = function(list, cls) {
     return (list || []).map(function(d) { return '<span class="tag ' + cls + '" style="font-size:8px">' + escapeHtml(d) + '</span>'; }).join('');
@@ -4429,7 +4362,7 @@ function renderVstfSteward() {
       '<div class="flex gap-1 mb-2">' + (tag(p.ex.concat(s.ex), 'tag-green') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>' +
       '<div class="mb-2"><strong style="color:var(--text)">Affiliations:</strong></div>' +
       '<div class="flex gap-1">' + (tag(affils, 'tag-amber') || '<span style="font-size:10px;color:var(--text-tertiary)">—</span>') + '</div>');
-  }
+  } else setHtml('vstf-stew-mandate', '');
   wireVstfStewardGauge();
 }
 
@@ -4450,7 +4383,7 @@ function renderVstfCompetence() {
       return '<tr><td>' + escapeHtml(d) + '</td><td class="m">' + fmt(claimed) + '</td><td>' + num(claimed, 3000) + '</td>' +
         '<td><input type="checkbox"></td><td style="font-size:10px;color:var(--text-tertiary)"></td></tr>';
     }).join(''));
-  }
+  } else setHtml('vstf-comp-rows', '');
   loadVstfEvidence('vstf-comp-evidence', ctx.cell.id, ctx.name);
   var short = ctx.name ? ctx.name.split(/\s+/)[0] + ' ' + (ctx.name.split(/\s+/)[1] ? ctx.name.split(/\s+/)[1].charAt(0) + '.' : '') : 'candidate';
   var comment = document.getElementById('vstf-comp-comment');
@@ -4565,6 +4498,11 @@ function renderPastfMembers() {
     setText('pastf-circle-sub', 'Founded ' + (circle.founded || '—') + ' · ' + (circle.members || roster.length) + ' members');
     var mandate = ((circle.mandate && circle.mandate.primary) || []).concat((circle.mandate && circle.mandate.secondary) || []);
     setText('pastf-circle-mandate', mandate.length ? 'Mandate: ' + mandate.join(', ') : '');
+  } else {
+    setText('pastf-circle-icon', '');
+    setText('pastf-circle-name', '');
+    setText('pastf-circle-sub', '');
+    setText('pastf-circle-mandate', '');
   }
   setHtml('pastf-member-scores', roster.length ? roster.map(function(m) {
     return '<div class="flex justify-between" style="margin-bottom:2px"><span><strong>' + escapeHtml(m.initials || m.name || '') + '</strong></span><span style="color:var(--text-tertiary)">—</span></div>';
@@ -5728,7 +5666,7 @@ function renderJstfCase() {
   if (thread && thread.replies != null) metaBits.push(thread.replies + ' posts');
   if (!thread) metaBits.push('Report sealed');
   if (src.escalatedAt) metaBits.push('Sponsored ' + String(src.escalatedAt).slice(0, 10));
-  if (metaBits.length) setText('jstf-case-meta', metaBits.join(' · '));
+  setText('jstf-case-meta', metaBits.join(' · ') || '—');
   if (thread) setText('jstf-case-desc', thread.body);
   else setText('jstf-case-desc', sealed ? 'Sealed case. Only the seated investigation team can view the report, the evidence and the deliberation.' : 'Report details are sealed. Only the investigation team can read the case thread. The anonymous reporter\'s identity is permanently protected.');
   var sponsor = jstfParticipant(cell.commissionedBy);
@@ -6730,6 +6668,13 @@ function renderOrganisations() {
   var domainKeys = {};
   orgs.forEach(function(o) { (o.knowledgeDomains || []).forEach(function(k) { domainKeys[k] = true; }); });
   set('orgs-stat-domains', Object.keys(domainKeys).length);
+  var areaSet = {};
+  Object.keys(domainKeys).forEach(function(k) {
+    var dm = (MOCK && MOCK.domains && MOCK.domains[k]) || null;
+    var root = dm && dm.taxonomy ? dm.taxonomy.split(' > ')[0] : '';
+    if (root) areaSet[root] = true;
+  });
+  set('orgs-stat-areas', Object.keys(areaSet).length);
   var locEl = document.getElementById('orgs-by-location');
   if (locEl) {
     var locCounts = {};
@@ -7408,8 +7353,16 @@ function updateNavBadges() {
   }
 }
 
-function renderCommonsAside() {
+function trendingTagsHtml(max) {
   var tagColors = ['tag-purple', 'tag-green', 'tag-amber', 'tag-blue'];
+  var counts = {};
+  ((MOCK && MOCK.threads) || []).forEach(function(t) { counts[t.domain] = (counts[t.domain] || 0) + 1; });
+  return Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, max || 4).map(function(d, i) {
+    return '<span class="tag ' + tagColors[i % tagColors.length] + '" style="font-size:9px">' + escapeHtml(d) + '</span>';
+  }).join('');
+}
+
+function renderCommonsAside() {
   var circlesEl = document.getElementById('commons-circles');
   if (circlesEl) {
     var myCircles = (MOCK && MOCK.currentUser && MOCK.currentUser.circles) || [];
@@ -7419,12 +7372,7 @@ function renderCommonsAside() {
   }
   var trendingEl = document.getElementById('commons-trending');
   if (trendingEl) {
-    var counts = {};
-    ((MOCK && MOCK.threads) || []).forEach(function(t) { counts[t.domain] = (counts[t.domain] || 0) + 1; });
-    var top = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 4);
-    trendingEl.innerHTML = top.length ? top.map(function(d, i) {
-      return '<span class="tag ' + tagColors[i % tagColors.length] + '" style="font-size:9px">' + escapeHtml(d) + '</span>';
-    }).join('') : '<span style="font-size:11px;color:var(--text-tertiary)">No discussion activity yet.</span>';
+    trendingEl.innerHTML = trendingTagsHtml(4) || '<span style="font-size:11px;color:var(--text-tertiary)">No discussion activity yet.</span>';
   }
   var threads = (MOCK && MOCK.threads) || [];
   var replies = 0, likes = 0;
@@ -7619,6 +7567,9 @@ function renderObservatoryCounts() {
   set('obs-published-total', pubs);
   set('obs-stats-publications', pubs);
   set('obs-stats-events', events.length);
+  set('obs-stats-resources', ((MOCK && MOCK.library) || []).length);
+  var trendEl = document.getElementById('obs-trending');
+  if (trendEl) trendEl.innerHTML = trendingTagsHtml(4) || '<span style="font-size:11px;color:var(--text-tertiary)">No discussion activity yet.</span>';
   var recentPubs = document.getElementById('obs-recent-pubs');
   if (recentPubs) {
     var pubRows = ((MOCK && MOCK.publications) || []).slice(0, 3).map(function(p) {
@@ -7656,6 +7607,8 @@ function renderObservatoryHomePubs() {
 function paintLibraryCards(items) {
   var el = document.getElementById('obs-library-list');
   var countEl = document.getElementById('obs-library-count');
+  var resStat = document.getElementById('obs-stats-resources');
+  if (resStat) resStat.textContent = items.length;
   if (!el) return;
   if (!items.length) {
     el.innerHTML = '<div style="font-size:11px;color:var(--text-tertiary)">No library items yet — stewards can add some via Publish.</div>';
