@@ -525,18 +525,11 @@ $partRows = array_map(fn($u) => [
 ], $users);
 upsert($db, 'participants', $partRows, ['user_id','location','joined','bio']);
 
-// User competence / circles / orgs (powers bootstrap domains, circles, orgs)
-$compRows = []; $ucRows = []; $uoRows = [];
-// Resolve circle aliases ('SL Circle') to canonical circles.name so
-// user_circles rows match the circles table without name-hack lookups.
-$circleFullName = [];
-foreach (($mock['circles'] ?? []) as $gc) {
-    $full = $gc['name'] ?? $gc['id'];
-    $circleFullName[$full] = $full;
-    $words = preg_split('/\s+/', str_replace('&', ' ', $full));
-    $words = array_values(array_filter(array_map('trim', $words), fn($w) => $w !== '' && strcasecmp($w, 'CIRCLE') !== 0));
-    if (count($words) >= 2) $circleFullName[strtoupper(substr($words[0], 0, 1) . substr($words[1], 0, 1)) . ' Circle'] = $full;
-}
+// User competence / orgs (powers bootstrap domains, orgs)
+// user_circles is rebuilt from circle_roster after the roster seed below —
+// the roster is the membership source of truth, not the fixture's
+// per-user circle lists (which carried memberships no roster backs).
+$compRows = []; $uoRows = [];
 foreach ($users as $u) {
     foreach ($u['domains'] ?? [] as $d) {
         if (!is_array($d)) $d = ['name' => $d];
@@ -549,20 +542,11 @@ foreach ($users as $u) {
             'evidence' => $d['evidence'] ?? null, 'verified' => ($d['verified'] ?? false) ? 1 : 0,
         ];
     }
-    foreach ($u['circles'] ?? [] as $c) {
-        $cname = is_string($c) ? $c : ($c['name'] ?? null);
-        $ucRows[] = [
-            'user_id' => $u['id'], 'circle' => $circleFullName[$cname] ?? $cname,
-            'status' => is_array($c) ? ($c['status'] ?? 'Active') : 'Active',
-            'since' => is_array($c) ? ($c['since'] ?? null) : null, 'kind' => 'roster',
-        ];
-    }
     foreach ($u['orgs'] ?? [] as $o) {
         $uoRows[] = ['user_id' => $u['id'], 'org_acronym' => is_string($o) ? $o : ($o['acronym'] ?? null)];
     }
 }
 upsert($db, 'user_competence', $compRows, ['user_id','domain','ws','wh','interest','bar_ws','bar_wh','members','color','kind','evidence','verified']);
-upsert($db, 'user_circles', $ucRows, ['user_id','circle','status','since','kind']);
 upsert($db, 'user_orgs', $uoRows, ['user_id','org_acronym']);
 
 // Domains
@@ -682,6 +666,23 @@ dbRun("DELETE rd FROM circle_roster_domains rd LEFT JOIN circle_roster r ON r.id
 
 // members always reflects the active roster — fixture counts are never trusted
 $db->query("UPDATE circles m SET members = (SELECT COUNT(*) FROM circle_roster r WHERE r.circle_id = m.id AND r.status = 'active')");
+
+// user_circles mirrors circle_roster (active + candidates only; former
+// members are removed from it when they leave). Full rebuild so stale
+// fixture rows — memberships no roster backs, wrong statuses — cannot
+// survive a reseed. Circle names come from circles.name directly.
+dbRun("DELETE FROM user_circles WHERE kind = 'roster'");
+$ucRows = [];
+foreach (dbAll("SELECT r.member_id, r.status, r.joined, c.name AS cname FROM circle_roster r JOIN circles c ON c.id = r.circle_id WHERE r.status IN ('active','candidate')") as $r) {
+    $ucRows[] = [
+        'user_id' => $r['member_id'],
+        'circle' => $r['cname'],
+        'status' => $r['status'] === 'candidate' ? 'Candidate' : 'Active',
+        'since' => $r['joined'],
+        'kind' => 'roster',
+    ];
+}
+if ($ucRows) insert($db, 'user_circles', $ucRows, ['user_id','circle','status','since','kind']);
 
 // Circle proposals / resolutions / activity
 foreach ($circles as $c) {
