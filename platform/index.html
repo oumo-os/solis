@@ -191,17 +191,11 @@
       <div class="layout-aside">
         <div class="aside-card">
           <div class="aside-title">Your Projects</div>
-          <div class="aside-stat">
-            <div class="aside-stat-item"><div class="aside-stat-val">3</div><div class="aside-stat-lbl">Active</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">1</div><div class="aside-stat-lbl">Lead</div></div>
-            <div class="aside-stat-item"><div class="aside-stat-val">2</div><div class="aside-stat-lbl">Contributor</div></div>
-          </div>
+          <div class="aside-stat" id="undertakings-stats"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Recent Activity</div>
-          <div class="aside-row"><span class="aside-label">East Africa Mapping</span><span style="font-size:11px;color:var(--green)">80% Kenya</span></div>
-          <div class="aside-row"><span class="aside-label">Debris Liability</span><span style="font-size:11px;color:var(--gold)">Draft v2</span></div>
-          <div class="aside-row"><span class="aside-label">Swahili Terms</span><span style="font-size:11px;color:var(--teal)">75% done</span></div>
+          <div id="undertakings-activity"></div>
         </div>
         <div class="aside-card">
           <div class="aside-title">Suggested Projects</div>
@@ -2516,6 +2510,7 @@ function nav(key) {
       : '<span style="color:var(--text)">' + p + '</span>';
   }).join('');
   if (key === 'circles' && typeof renderCirclesAside === 'function') renderCirclesAside();
+  if (key === 'undertakings' && typeof renderUndertakingsAside === 'function') renderUndertakingsAside();
   document.querySelector('.content').scrollTop = 0;
   if (window.location.hash !== '#' + key) {
     window.location.hash = key;
@@ -7484,6 +7479,28 @@ function renderCirclesAside() {
   }
 }
 
+function renderUndertakingsAside() {
+  var projects = (MOCK && MOCK.projects) || [];
+  var statsEl = document.getElementById('undertakings-stats');
+  if (statsEl) {
+    var lead = 0, contrib = 0;
+    projects.forEach(function(p) {
+      if (p.role === 'Lead') lead++;
+      else if (p.role === 'Contributor') contrib++;
+    });
+    var item = function(v, l) { return '<div class="aside-stat-item"><div class="aside-stat-val">' + v + '</div><div class="aside-stat-lbl">' + l + '</div></div>'; };
+    statsEl.innerHTML = item(projects.length, 'Active') + item(lead, 'Lead') + item(contrib, 'Contributor');
+  }
+  var actEl = document.getElementById('undertakings-activity');
+  if (actEl) {
+    actEl.innerHTML = projects.length ? projects.slice(0, 5).map(function(p) {
+      var pr = p.progress || 0;
+      var color = pr >= 75 ? 'var(--green)' : pr >= 50 ? 'var(--teal)' : 'var(--gold)';
+      return '<div class="aside-row"><span class="aside-label">' + escapeHtml(p.title || 'Untitled') + '</span><span style="font-size:11px;color:' + color + '">' + pr + '% done</span></div>';
+    }).join('') : '<div style="font-size:11px;color:var(--text-tertiary)">No projects yet.</div>';
+  }
+}
+
 function deriveDomainShares(r) {
   var impl = (r && r.implementingCircles) || [];
   var domains = [];
@@ -8073,6 +8090,7 @@ function initApp() {
   if (circlesGrid) circlesGrid.innerHTML = renderCircleCards();
   var projectsBody = document.getElementById('projects-body');
   if (projectsBody) projectsBody.innerHTML = renderProjectRows();
+  renderUndertakingsAside();
   var cellsGrid = document.getElementById('cells-grid');
   if (cellsGrid) cellsGrid.innerHTML = renderCellCards();
   syncDirectProposalButton();
