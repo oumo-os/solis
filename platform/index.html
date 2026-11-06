@@ -1828,58 +1828,20 @@
     </div>
     <div class="reg-modal-body">
       <div class="hero" style="margin-bottom:16px">
-        <div class="hero-icon" id="pd-avatar" style="background:var(--teal-soft);border:1px solid var(--teal-border);color:var(--teal);font-size:18px">OK</div>
+        <div class="hero-icon" id="pd-avatar" style="background:var(--teal-soft);border:1px solid var(--teal-border);color:var(--teal);font-size:18px">—</div>
         <div style="flex:1">
-          <div style="font-size:12px;color:var(--text-secondary)" id="pd-bio">Space law researcher focused on African space policy frameworks. Contributing to the East Africa Space Sector Mapping project.</div>
-          <div class="hero-tags"><span class="badge b-active">Active</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px" id="pd-meta">Kampala, Uganda · Joined Mar 2025</span></div>
+          <div style="font-size:12px;color:var(--text-secondary)" id="pd-bio"></div>
+          <div class="hero-tags"><span class="badge b-active" id="pd-status">—</span><span style="font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-left:4px" id="pd-meta">—</span></div>
         </div>
       </div>
       <div class="sec">Cross-references</div>
       <div id="pd-xref" style="margin-bottom:12px"></div>
-      <div class="g2">
-        <div>
-          <div class="sec">Competences (Wh)</div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--gold)">2,400</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:80%;background:var(--gold)"></div></div>
-          </div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--gold)">1,200</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:40%;background:var(--gold)"></div></div>
-          </div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Remote Sensing</span><span style="font-family:var(--mono);color:var(--gold)">800</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:27%;background:var(--gold)"></div></div>
-          </div>
-        </div>
-        <div>
-          <div class="sec">Interests</div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Space Law & Policy</span><span style="font-family:var(--mono);color:var(--teal)">2,600</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:87%;background:var(--teal)"></div></div>
-          </div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Philosophy & Ethics</span><span style="font-family:var(--mono);color:var(--teal)">1,800</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:60%;background:var(--teal)"></div></div>
-          </div>
-          <div class="card">
-            <div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">Science Communication</span><span style="font-family:var(--mono);color:var(--teal)">1,500</span></div>
-            <div class="bar-trk"><div class="bar-fill" style="width:50%;background:var(--teal)"></div></div>
-          </div>
-        </div>
-      </div>
+      <div class="sec">Competences (Ws)</div>
+      <div id="pd-competences" style="margin-bottom:16px"></div>
       <div class="sec">Roles & Affiliations</div>
-      <div class="flex gap-2" style="flex-wrap:wrap;margin-bottom:16px">
-        <span class="badge b-active">Member · UAS</span>
-        <span class="badge b-active">Contributor · East Africa Mapping</span>
-        <span class="badge b-pending">vSTF Assessor</span>
-      </div>
+      <div class="flex gap-2" style="flex-wrap:wrap;margin-bottom:16px" id="pd-roles"></div>
       <div class="sec">Recent Activity</div>
-      <div class="card">
-        <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Submitted assessment for Space Law motion<div class="ai-when">2h ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>Added "Outer Space Treaty analysis" to profile<div class="ai-when">1d ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Joined the Space Law Circle<div class="ai-when">3d ago</div></div>
-      </div>
+      <div class="card" id="pd-activity"></div>
     </div>
   </div>
 </div>
@@ -8190,16 +8152,65 @@ var regStepLabels={1:'About You',2:'Your Background',3:'Your Domains'};
 var regIsEdit=false;
 
 function openParticipantModal(name,bio,location,joined,avatar){
-  document.getElementById('pd-name').textContent=name||'Okello Robert';
-  document.getElementById('pd-bio').textContent=bio||'Space law researcher focused on African space policy frameworks.';
-  document.getElementById('pd-meta').textContent=(location||'Kampala, Uganda')+' · Joined '+(joined||'Mar 2025');
-  if(avatar) document.getElementById('pd-avatar').textContent=avatar;
+  var ps = (MOCK && MOCK.participants) || [];
+  var p = null;
+  for (var i = 0; i < ps.length; i++) if (ps[i].name === name) { p = ps[i]; break; }
+  document.getElementById('pd-name').textContent = name || 'Participant';
+  document.getElementById('pd-bio').textContent = bio || 'No bio provided.';
+  var metaBits = [];
+  if (location) metaBits.push(location);
+  if (joined) metaBits.push('Joined ' + joined);
+  document.getElementById('pd-meta').textContent = metaBits.join(' · ') || '—';
+  document.getElementById('pd-avatar').textContent = avatar || (name ? name.split(/\s+/).map(function(w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() : '?');
+  var stEl = document.getElementById('pd-status');
+  if (stEl) {
+    var st = (p && p.status) || '';
+    stEl.textContent = st || '—';
+    stEl.className = 'badge ' + (!st || st === 'Active' ? 'b-active' : 'b-judicial');
+  }
+  var compEl = document.getElementById('pd-competences');
+  if (compEl) {
+    var doms = ((p && p.domains) || []).slice().sort(function(a, b) { return (b.ws || 0) - (a.ws || 0); });
+    var maxWs = 0;
+    doms.forEach(function(d) { if ((d.ws || 0) > maxWs) maxWs = d.ws || 0; });
+    compEl.innerHTML = doms.length ? doms.map(function(d) {
+      var pct = maxWs ? Math.max(2, Math.round((d.ws || 0) / maxWs * 100)) : 0;
+      return '<div class="card"><div class="flex justify-between" style="font-size:12px;margin-bottom:4px"><span style="color:var(--text)">' + escapeHtml(d.name || '') + '</span><span style="font-family:var(--mono);color:var(--gold)">' + Number(d.ws || 0).toLocaleString('en-US') + (d.verified ? ' ✓' : '') + '</span></div><div class="bar-trk"><div class="bar-fill" style="width:' + pct + '%;background:var(--gold)"></div></div></div>';
+    }).join('') : '<div class="card" style="font-size:12px;color:var(--text-tertiary)">No competences recorded.</div>';
+  }
+  var rolesEl = document.getElementById('pd-roles');
+  if (rolesEl) {
+    var roleBadges = [];
+    if (p && p.steward) roleBadges.push('<span class="badge b-active">Steward</span>');
+    ((p && p.circles) || []).forEach(function(c) {
+      var nm = typeof c === 'string' ? c : (c && c.name) || '';
+      if (nm) roleBadges.push('<span class="badge b-active">Member · ' + escapeHtml(nm) + '</span>');
+    });
+    ((p && p.orgs) || []).forEach(function(o) {
+      if (o) roleBadges.push('<span class="badge b-pending">Member · ' + escapeHtml(o) + '</span>');
+    });
+    rolesEl.innerHTML = roleBadges.join('') || '<span style="font-size:11px;color:var(--text-tertiary)">No roles or affiliations recorded.</span>';
+  }
+  var actEl = document.getElementById('pd-activity');
+  if (actEl) {
+    var evts = (MOCK && MOCK.governanceEvents) || [];
+    var byName = [], mentioned = [];
+    evts.forEach(function(e) {
+      if (!e || !p || !p.name) return;
+      if (e.participant === p.name) byName.push(e);
+      else if ((e.text || '').indexOf(p.name) !== -1) mentioned.push(e);
+    });
+    var rows = byName.concat(mentioned).sort(function(a, b) {
+      return (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0);
+    }).slice(0, 5);
+    var dotColors = ['var(--gold)', 'var(--teal)', 'var(--purple)'];
+    actEl.innerHTML = rows.length ? rows.map(function(e, i) {
+      return '<div class="activity-item"><div class="ai-dot" style="background:' + dotColors[i % dotColors.length] + '"></div>' + escapeHtml(e.text || '') + '<div class="ai-when">' + escapeHtml(e.date || '') + '</div></div>';
+    }).join('') : '<div style="font-size:11px;color:var(--text-tertiary);padding:4px 0">No recent activity.</div>';
+  }
   var xrEl = document.getElementById('pd-xref');
   if (xrEl) {
     var chips = '';
-    var p = null;
-    var ps = (MOCK && MOCK.participants) || [];
-    for (var i = 0; i < ps.length; i++) if (ps[i].name === name) { p = ps[i]; break; }
     if (p) {
       var cs = (MOCK && MOCK.cells) || [];
       cs.forEach(function(c) {
