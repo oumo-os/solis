@@ -11663,7 +11663,7 @@ function findCircleByCell(cell) {
 }
 
 function renderCircleCell(cellId) {
-  var cell = cellsById[cellId] || ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'Circle Cell'; })[0];
+  var cell = cellsById[cellId];
   if (!cell) return;
   if (typeof circleCellReadable === 'function' && !circleCellReadable(cell)) {
     setText('circlecell-title', cell.title || 'Circle Cell');
@@ -11694,9 +11694,14 @@ function renderCircleCell(cellId) {
   }).join('') : '<div class="card" style="text-align:center;padding:16px;margin-bottom:8px"><div style="font-size:12px;color:var(--text-tertiary)">No proposals yet.</div></div>';
   setHtml('circlecell-proposals', propHtml);
 
+  var circleShort = ((circle && circle.name) || '').replace(/ Circle$/, '');
+  var belongsToCircle = function(other) {
+    if (!circle || !other) return false;
+    return other === circle.name || other === circleShort || circle.name.indexOf(other) === 0;
+  };
   var stfs = ((MOCK && MOCK.stfs && MOCK.stfs.active) || []).concat((MOCK && MOCK.stfs.pending) || []);
-  var xstfs = stfs.filter(function(s) { return s.type === 'xSTF'; });
-  var xstfCells = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'xSTF Cell'; });
+  var xstfs = stfs.filter(function(s) { return s.type === 'xSTF' && belongsToCircle(s.circle); });
+  var xstfCells = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.type === 'xSTF Cell' && (belongsToCircle(c.circle) || belongsToCircle(c.commissionedBy)); });
   var xstfHtml;
   if (!xstfs.length && !xstfCells.length) {
     xstfHtml = '<div class="card" style="text-align:center;padding:16px;margin-bottom:8px"><div style="font-size:12px;color:var(--text-tertiary)">No active xSTFs.</div></div>';

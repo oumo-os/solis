@@ -197,7 +197,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         $selfComp = array_values(array_filter($compByUser[$cuid] ?? [], function($c) { return $c['kind'] === 'self'; }));
         $compSrc = $selfComp ?: array_values(array_filter($compByUser[$cuid] ?? [], function($c) { return $c['kind'] === 'roster'; }));
         foreach ($compSrc as $c) $currentUser['domains'][$c['domain']] = ['ws' => $c['ws'] ?? null, 'wh' => $c['wh'] ?? null, 'interest' => $c['interest'] ?? null, 'barWs' => $c['bar_ws'] ?? null, 'barWh' => $c['bar_wh'] ?? null, 'members' => $c['members'] ?? null, 'evidence' => $c['evidence'] ?? null, 'verified' => (bool)($c['verified'] ?? false)];
-        if (empty($currentUser['circles'])) foreach (($cirByUser[$cuid] ?? []) as $c) { if ($c['kind'] === 'roster') $currentUser['circles'][] = ['name' => $c['circle'], 'status' => 'Active', 'since' => $c['since']]; }
+        if (empty($currentUser['circles'])) foreach (($cirByUser[$cuid] ?? []) as $c) { if ($c['kind'] === 'roster') $currentUser['circles'][] = ['name' => $c['circle'], 'status' => $c['status'] ?? null, 'since' => $c['since']]; }
     }
     $kdByOrg = groupBy(dbAll('SELECT * FROM org_knowledge_domains'), 'org_id');
     $organisations = [];
@@ -725,6 +725,15 @@ foreach ($childDefs as $d) {
             if ($d['parentKey'] === 'circle_id') {
                 $arc = dbGet('SELECT status FROM circles WHERE id = ?', [$parentId]);
                 if ($arc && ($arc['status'] ?? '') === 'Archived') send(403, ['error' => 'Circle is archived — no further writes']);
+            }
+            // Roster writes are steward-gated for THIS circle: the assert
+            // above only proves membership somewhere. No client path writes
+            // the roster through this router (seat/leave/resign run through
+            // their own endpoints); this is the backstop. Archived stays
+            // first so an archived circle still reports "archived".
+            if ($d['child'] === 'circle_roster'
+                && !dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$parentId, $wuser['id']])) {
+                send(403, ['error' => 'Only a steward of that circle may modify its roster']);
             }
             // Judicial cells are sealed: generic writes to a jSTF cell's
             // children require an open case and team-or-steward standing.
