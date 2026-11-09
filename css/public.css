@@ -101,6 +101,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .tag-event{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border)}
 .tag-project{background:var(--amber-soft);color:var(--amber);border:1px solid var(--amber-border)}
 .tag-pub{background:var(--purple-soft);color:var(--purple);border:1px solid var(--purple-border)}
+.tag-news{background:var(--blue-soft);color:var(--blue);border:1px solid var(--blue-border)}
 
 /* ── Section Headers ── */
 .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}

@@ -62,32 +62,34 @@
 
   <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
+  <script src="shared/live.js"></script>
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     var so=document.getElementById('stew-orbit'); if(so) so.innerHTML=SolMark(400);
 
-    var stewards = [
-      {domain:'Commons & Knowledge',name:'Akello J.',since:'Mar 2026',note:'Maintains the Observatory and domain taxonomy'},
-      {domain:'Events & Coordination',name:'Mwenda T.',since:'Jan 2026',note:'Coordinates public events and gatherings'},
-      {domain:'Publications',name:'Namugga C.',since:'Apr 2026',note:'Oversees essays, reports, and featured writing'},
-      {domain:'Participation',name:'Okello R.',since:'Feb 2026',note:'Welcomes new participants, maintains directory'},
-      {domain:'Policy & Advocacy',name:'Ssempa D.',since:'Jun 2026',note:'Represents Commons in policy discussions'},
-      {domain:'AfricaSpace Summit 2026',name:'Nakabugo B.',since:'Jun 2026',until:'Sep 2026',note:'Commons delegate to AfricaSpace Summit 2026'}
-    ];
-    document.getElementById('stewards-list').innerHTML = stewards.map(function(s) {
-      return '<div class="card" style="display:grid;grid-template-columns:200px 1fr auto;gap:var(--space-4);align-items:center">' +
-        '<div>' +
-          '<div class="text-xs mb-1" style="font-weight:600;color:'+(s.until?'var(--blue)':'var(--gold)')+'">'+s.domain+'</div>' +
-          '<div class="text-xs" style="color:var(--text-tertiary)">Since '+s.since+(s.until?' → '+s.until:'')+'</div>' +
-        '</div>' +
-        '<div>' +
-          '<div class="text-sm mb-1" style="font-weight:500">'+s.name+'</div>' +
-          '<div class="text-xs" style="color:var(--text-secondary)">'+s.note+'</div>' +
-        '</div>' +
-        '<span class="tag '+(s.until?'tag-blue':'tag-green')+'">'+(s.until?'Mandate':'Active')+'</span>' +
-      '</div>';
-    }).join('');
+    SolisLive.load().then(function (d) {
+      var esc = SolisLive.esc;
+      var list = d ? d.participants.filter(function (p) { return p.steward; }) : [];
+      document.getElementById('stewards-list').innerHTML = list.length
+        ? list.map(function (p) {
+            var dom = (p.domains && p.domains[0] && p.domains[0].name) || (p.circles && p.circles[0]) || 'Commons';
+            var note = p.bio || (p.location ? 'Based in ' + p.location : 'Participant in the Solarian Commons');
+            var active = p.status === 'Active';
+            return '<div class="card" style="display:grid;grid-template-columns:200px 1fr auto;gap:var(--space-4);align-items:center">' +
+              '<div>' +
+                '<div class="text-xs mb-1" style="font-weight:600;color:'+(active ? 'var(--gold)' : 'var(--blue)')+'">'+esc(dom)+'</div>' +
+                '<div class="text-xs" style="color:var(--text-tertiary)">Since '+esc(p.joined)+'</div>' +
+              '</div>' +
+              '<div>' +
+                '<div class="text-sm mb-1" style="font-weight:500">'+esc(p.name)+'</div>' +
+                '<div class="text-xs" style="color:var(--text-secondary)">'+esc(note)+'</div>' +
+              '</div>' +
+              '<span class="tag '+(active ? 'tag-green' : 'tag-blue')+'">'+esc(p.status || 'Active')+'</span>' +
+            '</div>';
+          }).join('')
+        : SolisLive.empty('No active stewards yet.');
+    });
   </script>
 </body>
 </html>

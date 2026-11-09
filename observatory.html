@@ -64,42 +64,49 @@
 
   <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
+  <script src="shared/live.js"></script>
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     var oo=document.getElementById('obs-orbit'); if(oo) oo.innerHTML=SolMark(400);
 
-    var observatory = [
-      {cat:'News',desc:'Curated space sector coverage, filtered for signal',count:'Updated daily'},
-      {cat:'Calendar',desc:'Global launches, milestones, and Commons events',count:'38 upcoming'},
-      {cat:'Opportunities',desc:'Scholarships, fellowships, competitions, open calls',count:'12 open'},
-      {cat:'Library',desc:'Books, courses, podcasts, career guides, and tools',count:'200+ resources'},
-      {cat:'Publications',desc:'Essays, reports, and analysis from Commons participants',count:'14 pieces'}
-    ];
-    document.getElementById('observatory-cards').innerHTML = observatory.map(function(c) {
-      return '<div class="card card-interactive">' +
-        '<div style="width:24px;height:2px;background:var(--gold);border-radius:1px;margin-bottom:var(--space-4)"></div>' +
-        '<div class="text-xs mb-2" style="font-weight:600;color:var(--gold)">'+c.cat+'</div>' +
-        '<p class="text-sm mb-3" style="font-weight:500">'+c.desc+'</p>' +
-        '<p class="text-xs" style="color:var(--text-tertiary)">'+c.count+'</p>' +
-      '</div>';
-    }).join('');
+    SolisLive.load().then(function (d) {
+      var esc = SolisLive.esc;
+      var evs = (d && d.events) || [];
+      var opps = (d && d.opportunities) || [];
+      var lib = (d && d.library) || [];
+      var news = (d && d.news) || [];
+      var pubs = (d && d.publications) || [];
 
-    var pubs = [
-      {title:'Why East Africa Needs a Space Economy Strategy',author:'Okello M.',date:'Jul 9, 2026',type:'Essay'},
-      {title:'Understanding the Outer Space Treaty — A Plain Language Guide',author:'Ssempa D.',date:'Jun 22, 2026',type:'Guide'},
-      {title:'AfricaSpace 2026 — What the Summit Means for East Africa',author:'Nakabugo B.',date:'Jun 15, 2026',type:'Report'}
-    ];
-    document.getElementById('publications').innerHTML = pubs.map(function(p) {
-      return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)">' +
-        '<div>' +
-          '<span class="tag tag-pub" style="margin-right:var(--space-2)">'+p.type+'</span>' +
-          '<span class="text-sm" style="font-weight:500">'+p.title+'</span>' +
-          '<div class="text-xs mt-1" style="color:var(--text-tertiary)">'+p.author+' · '+p.date+'</div>' +
-        '</div>' +
-        '<button class="btn btn-secondary btn-sm">Read →</button>' +
-      '</div>';
-    }).join('');
+      var observatory = [
+        {cat:'News',desc:'Curated space sector coverage, filtered for signal',count: news.length + ' items'},
+        {cat:'Calendar',desc:'Global launches, milestones, and Commons events',count: evs.length + ' upcoming'},
+        {cat:'Opportunities',desc:'Scholarships, fellowships, competitions, open calls',count: opps.length + ' open'},
+        {cat:'Library',desc:'Books, courses, podcasts, career guides, and tools',count: lib.length + ' resources'},
+        {cat:'Publications',desc:'Essays, reports, and analysis from Commons participants',count: pubs.length + ' pieces'}
+      ];
+      document.getElementById('observatory-cards').innerHTML = observatory.map(function(c) {
+        return '<div class="card card-interactive">' +
+          '<div style="width:24px;height:2px;background:var(--gold);border-radius:1px;margin-bottom:var(--space-4)"></div>' +
+          '<div class="text-xs mb-2" style="font-weight:600;color:var(--gold)">'+esc(c.cat)+'</div>' +
+          '<p class="text-sm mb-3" style="font-weight:500">'+esc(c.desc)+'</p>' +
+          '<p class="text-xs" style="color:var(--text-tertiary)">'+esc(c.count)+'</p>' +
+        '</div>';
+      }).join('');
+
+      document.getElementById('publications').innerHTML = pubs.length
+        ? pubs.map(function(p) {
+            return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-4)">' +
+              '<div>' +
+                '<span class="tag tag-pub" style="margin-right:var(--space-2)">'+esc(p.type)+'</span>' +
+                '<span class="text-sm" style="font-weight:500">'+esc(p.title)+'</span>' +
+                '<div class="text-xs mt-1" style="color:var(--text-tertiary)">'+esc((p.authors || []).join(', ') || 'Commons participants')+' · '+esc(p.date)+'</div>' +
+              '</div>' +
+              '<button class="btn btn-secondary btn-sm">Read →</button>' +
+            '</div>';
+          }).join('')
+        : SolisLive.empty('No publications yet.');
+    });
   </script>
 </body>
 </html>

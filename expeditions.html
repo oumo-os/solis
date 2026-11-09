@@ -43,7 +43,7 @@
   <div class="container">
     <div class="layout-2col" style="padding:var(--space-6) 0 var(--space-8)">
       <div style="min-width:0">
-        <div class="section-head"><span class="label">Active expeditions</span><span class="text-label" style="font-size:8px">4 running</span></div>
+        <div class="section-head"><span class="label">Active expeditions</span><span class="text-label" style="font-size:8px" id="exp-count">…</span></div>
         <div id="exp-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)"></div>
         <div class="card" style="margin-top:var(--space-4);background:var(--surface-raised);display:flex;gap:var(--space-4);align-items:center">
           <div style="flex:1">
@@ -84,20 +84,25 @@
 
   <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
+  <script src="shared/live.js"></script>
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     document.getElementById('exp-orbit').innerHTML = SolMark(400);
     document.getElementById('exp-mini').innerHTML = SolMark(140,true);
-    var exps=[
-      {title:"Uganda Space Sector Map",lead:"Okello R.",progress:60,members:4,domains:"Policy · Remote Sensing",status:"Active"},
-      {title:"Space Debris Liability Framework",lead:"You",progress:30,members:3,domains:"Space Law",status:"Active"},
-      {title:"Swahili Space Terminology",lead:"Kimani A.",progress:75,members:5,domains:"Education · Culture",status:"Active"},
-      {title:"Ground Station Cost-Share",lead:"Mwenda T.",progress:12,members:2,domains:"Engineering",status:"Forming"}
-    ];
-    document.getElementById('exp-grid').innerHTML = exps.map(function(e){
-      return '<div class="card card-interactive"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="tag tag-project">'+e.status+'</span><span class="text-xs" style="color:var(--text-tertiary)">'+e.members+' members</span></div><div class="text-sm" style="font-weight:600;margin-bottom:4px">'+e.title+'</div><div class="text-xs" style="color:var(--text-tertiary);margin-bottom:6px">'+e.domains+' · Lead '+e.lead+'</div><div style="height:3px;background:var(--border-subtle);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+e.progress+'%;background:var(--gold)"></div></div><div class="text-xs" style="color:var(--text-tertiary);margin-top:4px">'+e.progress+'% complete</div></div>';
-    }).join('');
+
+    SolisLive.load().then(function (d) {
+      var esc = SolisLive.esc;
+      var exps = (d && d.projects) || [];
+      var cnt = document.getElementById('exp-count');
+      if (cnt) cnt.textContent = exps.length + ' running';
+      document.getElementById('exp-grid').innerHTML = exps.length
+        ? exps.map(function (e) {
+            var prog = Number(e.progress) || 0;
+            return '<div class="card card-interactive"><div class="text-sm" style="font-weight:600;margin-bottom:4px">' + esc(e.title) + '</div><div class="text-xs" style="color:var(--text-tertiary);margin-bottom:6px">' + esc((e.domains || []).join(' · ')) + ' · Lead ' + esc(e.lead) + '</div><div style="height:3px;background:var(--border-subtle);border-radius:2px;overflow:hidden"><div style="height:100%;width:' + prog + '%;background:var(--gold)"></div></div><div class="text-xs" style="color:var(--text-tertiary);margin-top:4px">' + prog + '% complete</div></div>';
+          }).join('')
+        : SolisLive.empty('No active expeditions yet.');
+    });
   </script>
 </body>
 </html>

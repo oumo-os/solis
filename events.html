@@ -43,7 +43,7 @@
   <div class="container">
     <div class="layout-2col" style="padding:var(--space-6) 0 var(--space-8)">
       <div style="min-width:0">
-        <div class="section-head"><span class="label">Upcoming</span><span class="text-label" style="font-size:8px">38 events</span></div>
+        <div class="section-head"><span class="label">Upcoming</span><span class="text-label" style="font-size:8px" id="events-count">…</span></div>
         <div id="events-list" style="display:flex;flex-direction:column;gap:var(--space-3)"></div>
         <div style="margin-top:var(--space-5);padding:var(--space-4);background:var(--surface-raised);border:1px solid var(--border);border-radius:var(--radius);display:flex;gap:var(--space-3);align-items:center">
           <span class="tag tag-blue">Archive</span>
@@ -79,24 +79,31 @@
 
   <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
+  <script src="shared/live.js"></script>
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     document.getElementById('ev-orbit').innerHTML = SolMark(400);
     document.getElementById('ev-mini').innerHTML = SolMark(140,true);
-    var events=[
-      {date:"18 Jul 2026",title:"Space Policy 101 — Open Discussion Session",loc:"Kampala · Commons",type:"Discussion"},
-      {date:"22–24 Aug 2026",title:"AfricaSpace Summit 2026",loc:"Cape Town",type:"Summit"},
-      {date:"04 Sep 2026",title:"Launch: ISRO PSLV-C62 / EOS-09",loc:"Satish Dhawan",type:"Launch"},
-      {date:"15 Oct 2026",title:"IAC 2026 — Brisbane",loc:"Brisbane",type:"Congress"},
-      {date:"02 Nov 2026",title:"Anniversary: 26 years continuous presence",loc:"Orbit",type:"Milestone"}
-    ];
-    document.getElementById('events-list').innerHTML = events.map(function(e){
-      return '<div class="card" style="display:grid;grid-template-columns:110px 1fr auto;gap:var(--space-3);align-items:center"><div><div class="text-xs" style="font-weight:600;color:var(--gold)">'+e.date+'</div><div class="text-xs" style="color:var(--text-tertiary)">'+e.type+'</div></div><div><div class="text-sm" style="font-weight:600">'+e.title+'</div><div class="text-xs" style="color:var(--text-tertiary)">'+e.loc+'</div></div><span class="tag tag-event">Open</span></div>';
-    }).join('');
-    document.getElementById('month-mini').innerHTML = events.slice(0,3).map(function(e){
-      return '<div style="display:flex;justify-content:space-between;align-items:center"><span class="text-xs" style="color:var(--text-secondary)">'+e.title.slice(0,28)+'…</span><span class="text-xs" style="color:var(--gold)">'+e.date.split(" ")[0]+'</span></div>';
-    }).join('');
+
+    SolisLive.load().then(function (d) {
+      var esc = SolisLive.esc;
+      var events = (d && d.events) || [];
+      var cnt = document.getElementById('events-count');
+      if (cnt) cnt.textContent = events.length + ' event' + (events.length === 1 ? '' : 's');
+      document.getElementById('events-list').innerHTML = events.length
+        ? events.map(function (e) {
+            return '<div class="card" style="display:grid;grid-template-columns:110px 1fr auto;gap:var(--space-3);align-items:center"><div><div class="text-xs" style="font-weight:600;color:var(--gold)">' + esc(e.date) + '</div></div><div><div class="text-sm" style="font-weight:600">' + esc(e.title) + '</div><div class="text-xs" style="color:var(--text-tertiary)">' + esc(e.location) + '</div></div><span class="tag tag-event">Open</span></div>';
+          }).join('')
+        : SolisLive.empty('No upcoming events yet.');
+      var mini = events.slice(0, 3);
+      document.getElementById('month-mini').innerHTML = mini.length
+        ? mini.map(function (e) {
+            var t = String(e.title);
+            return '<div style="display:flex;justify-content:space-between;align-items:center"><span class="text-xs" style="color:var(--text-secondary)">' + esc(t.length > 28 ? t.slice(0, 28) + '…' : t) + '</span><span class="text-xs" style="color:var(--gold)">' + esc(String(e.date).split(' ')[0]) + '</span></div>';
+          }).join('')
+        : '<div class="text-xs" style="color:var(--text-tertiary)">Nothing scheduled.</div>';
+    });
   </script>
 </body>
 </html>

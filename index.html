@@ -111,59 +111,72 @@
 
   <script src="shared/colors.js"></script>
   <script src="shared/solmark.js"></script>
+  <script src="shared/live.js"></script>
   <script>
     document.getElementById('brand').innerHTML = SolMark(22) + '<span class="name">Solis</span><span class="sub">/ Solarian Commons</span>';
     document.getElementById('footer-mark').innerHTML = SolMark(16);
     document.getElementById('hero-orbit').innerHTML = SolMark(460); // light bg = dark lines (false)
     document.getElementById('cta-orbit').innerHTML = SolMark(380,true);
 
-    var stats = [["12","Open opportunities"],["38","Upcoming events"],["5","Active stewards"],["4","Active expeditions"],["6","Affiliated organisations"]];
-    document.getElementById('stats').innerHTML = stats.map(function(s,i) {
-      return '<div class="stat-row-mini' + (i===stats.length-1?'':'') + '"><span class="lbl">'+s[1]+'</span><span class="val">'+s[0]+'</span></div>';
-    }).join('');
+    SolisLive.load().then(function (d) {
+      var esc = SolisLive.esc;
+      var evs = (d && d.events) || [];
+      var opps = (d && d.opportunities) || [];
+      var projects = (d && d.projects) || [];
+      var orgs = (d && d.organisations) || [];
+      var news = (d && d.news) || [];
+      var stewards = d ? d.participants.filter(function (p) { return p.steward; }).length : 0;
 
-    var sectorNews = [
-      {tag:'tag-launch',label:'Launch',title:"ISRO's PSLV-C60 successfully deploys SpaDeX docking demonstration in LEO",source:'Space News',time:'2 hr ago'},
-      {tag:'tag-policy',label:'Policy',title:'African Union Space Agency framework advances at Addis Ababa summit',source:'SpaceAfrica',time:'Yesterday'},
-      {tag:'tag-industry',label:'Industry',title:'Rocket Lab expands Neutron manufacturing capacity for constellation operators',source:'NASASpaceFlight',time:'2 days ago'}
-    ];
-    document.getElementById('sector-news').innerHTML = sectorNews.map(function(n) {
-      return '<div class="card card-interactive">' +
-        '<div class="flex items-center gap-2 mb-3">' +
-          '<span class="tag '+n.tag+'">'+n.label+'</span>' +
-          '<span class="text-xs" style="color:var(--text-tertiary)">'+n.source+' · '+n.time+'</span>' +
-        '</div>' +
-        '<p class="text-sm" style="font-weight:500">'+n.title+'</p>' +
-      '</div>';
-    }).join('');
+      var stats = [
+        [String(opps.length), 'Open opportunities'],
+        [String(evs.length), 'Upcoming events'],
+        [String(stewards), 'Active stewards'],
+        [String(projects.length), 'Active expeditions'],
+        [String(orgs.length), 'Affiliated organisations']
+      ];
+      document.getElementById('stats').innerHTML = stats.map(function (s, i) {
+        return '<div class="stat-row-mini' + (i === stats.length - 1 ? '' : '') + '"><span class="lbl">'+s[1]+'</span><span class="val">'+s[0]+'</span></div>';
+      }).join('');
 
-    var commonsActivity = [
-      {tag:'tag-event',label:'Event',title:'Space Policy 101 — Open Discussion Session',note:'Fri Jul 18 · Steward: Policy & Advocacy'},
-      {tag:'tag-project',label:'Expedition',title:'Uganda Space Sector Map — Collaborative Initiative',note:'Open for contributors · 4 participants active'},
-      {tag:'tag-pub',label:'Publication',title:'Why East Africa Needs a Space Economy Strategy',note:'Essay by Okello M. · Jul 9, 2026'}
-    ];
-    document.getElementById('commons-activity').innerHTML = commonsActivity.map(function(a) {
-      return '<div class="card">' +
-        '<div class="mb-2"><span class="tag '+a.tag+'">'+a.label+'</span></div>' +
-        '<p class="text-sm mb-1" style="font-weight:500">'+a.title+'</p>' +
-        '<p class="text-xs" style="color:var(--text-tertiary)">'+a.note+'</p>' +
-      '</div>';
-    }).join('');
+      document.getElementById('sector-news').innerHTML = news.length
+        ? news.slice(0, 4).map(function (n) {
+            return '<div class="card card-interactive">' +
+              '<div class="flex items-center gap-2 mb-3">' +
+                '<span class="tag tag-news">News</span>' +
+                '<span class="text-xs" style="color:var(--text-tertiary)">' + esc(n.source) + ' · ' + esc(n.time) + '</span>' +
+              '</div>' +
+              '<p class="text-sm" style="font-weight:500">' + esc(n.title) + '</p>' +
+            '</div>';
+          }).join('')
+        : SolisLive.empty('No sector news yet.');
 
-    var opportunities = [
-      {type:'Fellowship',org:'SGAC',title:'Space Generation Congress 2026',deadline:'Aug 1',location:'Milan'},
-      {type:'Scholarship',org:'AfricaSpace',title:'Young Professional Award',deadline:'Aug 15',location:'Remote'},
-      {type:'Competition',org:'ESA',title:'Moon Camp Challenge — Open Category',deadline:'Sep 30',location:'Remote'},
-      {type:'Call',org:'IAC 2026',title:'Abstract Submissions Now Open',deadline:'Oct 1',location:'Brisbane'}
-    ];
-    document.getElementById('opportunities').innerHTML = opportunities.map(function(o) {
-      return '<div class="card card-interactive opp-card">' +
-        '<div class="text-label mb-2" style="color:var(--gold)">'+o.type+'</div>' +
-        '<p class="text-xs mb-3" style="font-weight:500;min-height:34px">'+o.title+'</p>' +
-        '<div class="text-xs" style="color:var(--text-tertiary)">'+o.org+' · '+o.location+'</div>' +
-        '<div class="text-xs" style="color:var(--text-tertiary)">Due '+o.deadline+'</div>' +
-      '</div>';
-    }).join('');
-  </script>
+      var activity = [];
+      if (evs[0]) activity.push({ tag: 'tag-event', label: 'Event', title: evs[0].title, note: evs[0].date + ' · ' + evs[0].location });
+      if (projects[0]) activity.push({ tag: 'tag-project', label: 'Expedition', title: projects[0].title, note: 'Lead ' + projects[0].lead + ' · ' + projects[0].progress + '% complete' });
+      if (d && d.publications && d.publications[0]) {
+        var pb = d.publications[0];
+        activity.push({ tag: 'tag-pub', label: 'Publication', title: pb.title, note: ((pb.authors || []).join(', ') || 'Commons participants') + ' · ' + pb.date });
+      }
+      document.getElementById('commons-activity').innerHTML = activity.length
+        ? activity.map(function (a) {
+            return '<div class="card">' +
+              '<div class="mb-2"><span class="tag '+a.tag+'">'+a.label+'</span></div>' +
+              '<p class="text-sm mb-1" style="font-weight:500">' + esc(a.title) + '</p>' +
+              '<p class="text-xs" style="color:var(--text-tertiary)">' + esc(a.note) + '</p>' +
+            '</div>';
+          }).join('')
+        : SolisLive.empty('No recent Commons activity.');
+
+      document.getElementById('opportunities').innerHTML = opps.length
+        ? opps.map(function (o) {
+            return '<div class="card card-interactive opp-card">' +
+              '<div class="text-label mb-2" style="color:var(--gold)">' + esc(o.type) + '</div>' +
+              '<p class="text-xs mb-3" style="font-weight:500;min-height:34px">' + esc(o.title) + '</p>' +
+              '<div class="text-xs" style="color:var(--text-tertiary)">Due ' + esc(o.deadline) + '</div>' +
+            '</div>';
+          }).join('')
+        : SolisLive.empty('No open opportunities right now.');
+    });
+    </script>
 </body>
 </html>
