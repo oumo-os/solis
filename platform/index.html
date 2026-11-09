@@ -2831,21 +2831,36 @@ function generateResolution() {
       '<div style="font-size:9px;color:var(--text-tertiary)">AI is analysing proposal and deliberation</div>' +
     '</div>';
 
-  // Simulate AI generation (would be API call in production)
+  // Deterministic drafter: derives the motion, points and action from the
+  // cell's own record (title, objectives, messages, delib_type).
   setTimeout(function() {
     var now = new Date();
     var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
-    // Gather deliberation messages from the cell
-    var discussion = gatherDeliberation();
     var _resCell = (typeof currentDelibCellId !== 'undefined' && currentDelibCellId) ? (cellsById[currentDelibCellId] || null) : null;
+    var discussion = gatherDeliberation();
     var _resImpl = ((_resCell && _resCell.participatingCircles) || []).map(function(p) { return p && p.name; }).filter(Boolean);
+
+    var _motion = String((_resCell && _resCell.title) || '').replace(/\s+/g, ' ').trim() || 'Deliberation motion';
+    var _points = ((_resCell && _resCell.objectives) || [])
+      .map(function(o) { return String((o && o.label) || '').trim(); })
+      .filter(Boolean);
+    if (!_points.length) _points = discussion.map(function(d) { return d.author + ': ' + d.text; });
+    if (!_points.length) _points = ['Record the agreed position on: ' + _motion];
+    var _text = 'MOTION: ' + _motion + '\n\n'
+      + _points.map(function(p, i) {
+          return (i + 1) + '. ' + (p.length > 240 ? p.slice(0, 240) + '…' : p);
+        }).join('\n')
+      + '\n\nDrafted from the deliberation record — ' + discussion.length + ' message' + (discussion.length === 1 ? '' : 's')
+      + ', ' + ((_resCell && _resCell.participants) || 0) + ' participants.';
+
+    var _action = /settings/.test((_resCell && _resCell.delib_type) || '') ? 'Policy' : 'Resolution';
 
     var res = {
       id: 1,
-      title: 'Debris Liability Framework — Proportional Model',
-      text: 'MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris\n\n1. Operators must file manoeuvre intent with telemetry data before execution\n2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)\n3. Intent filing creates auditable record for post-incident assessment\n4. Framework applies to all orbital operators within Commons jurisdiction\n5. Enforcement through existing policy resolution mechanisms',
-      action: 'Policy',
+      title: _motion,
+      text: _text,
+      action: _action,
       implementingCircles: _resImpl,
       domainShares: deriveDomainShares({ implementingCircles: _resImpl }),
       votesNullified: false,
@@ -2857,7 +2872,7 @@ function generateResolution() {
         confirmations: [],
         confirmQuorum: Math.ceil(delibParticipants.length / 3)
       },
-      versions: [{ title: 'Debris Liability Framework — Proportional Model', text: 'Initial AI draft', action: 'Policy', author: 'AI Drafter', ts: ts }]
+      versions: [{ title: _motion, text: 'Initial draft', action: _action, author: 'AI Drafter', ts: ts }]
     };
 
     delibResolutions = [res];
@@ -2867,14 +2882,10 @@ function generateResolution() {
 }
 
 function gatherDeliberation() {
-  // In production, this would read from the deliberation messages DOM or API
-  // For now, return the hardcoded discussion from the cell
-  return [
-    { author: 'Akello Jane', text: 'The core issue is that current liability frameworks assume clear fault attribution...' },
-    { author: 'Osei Kwame', text: 'What about the precedent from maritime law? The COLREGS framework...' },
-    { author: 'Mwenda Thomas', text: 'From a remote sensing perspective — tracking manoeuvre intent requires telemetry...' },
-    { author: 'Namugga Claire', text: "I'd support a graduated liability model: good-faith manoeuvres..." }
-  ];
+  var cell = (typeof currentDelibCellId !== 'undefined' && currentDelibCellId && typeof cellsById !== 'undefined') ? (cellsById[currentDelibCellId] || null) : null;
+  return ((cell && cell.messages) || []).map(function(m) {
+    return { author: m.author || 'Participant', text: m.text || '' };
+  });
 }
 
 function canRedraft(res) {
@@ -3338,11 +3349,12 @@ function fileAstfVerdict(cellId, verdict, rubric, rationale, flags) {
   }).catch(function() { toast('Could not file verdict. Is the server running?', 'error'); });
 }
 
-// Static aSTF view (hardcoded demo content) files against the newest open
-// aSTF cell, reusing the live fileAstfVerdict path (persist + snapshot apply).
+// aSTF motion view (astf-motion-root, rendered by renderAstfMotion from live
+// cell data) binds against an open aSTF cell, reusing the live fileAstfVerdict
+// path (persist + snapshot apply).
 // aSTF motion record: prefers an open judicial-audit cell (the aSTF side of
 // a jSTF disciplinary verdict) and cross-links back to the originating case;
-// otherwise binds the static card to the newest open deliberation aSTF cell
+// otherwise binds the view to the newest open deliberation aSTF cell
 // (title, status, submitted draft text).
 // Assessor formation card (shared by both audit views): vacancy with
 // accept/decline for invitees, filings progress once seated. Assessor
