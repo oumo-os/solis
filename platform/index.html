@@ -18,11 +18,11 @@
     <div class="logo">
       <a href="index.html" class="logo-mark" id="brand"></a>
     </div>
-    <div class="member-card" id="member-card" onclick="nav('personal')">
-      <div class="member-avatar" id="member-avatar">OS</div>
-      <div class="member-name" id="member-name">Oumo Samuel</div>
-      <div class="member-meta" id="member-meta">Ws 847 · Kampala</div>
-    </div>
+      <div class="member-card" id="member-card" onclick="nav('personal')">
+        <div class="member-avatar" id="member-avatar"></div>
+        <div class="member-name" id="member-name"></div>
+        <div class="member-meta" id="member-meta"></div>
+      </div>
     <div id="empty-view-toggle" style="display:none;margin:0 8px 8px;font-size:10px;color:var(--text-tertiary);cursor:pointer;text-align:center" title="Explore how the platform renders with no data (read-only)"></div>
     <div id="auth-sidebar-section" style="display:none;margin:0 8px 8px">
       <div class="nav-item" style="margin-bottom:4px" onclick="showLogin()"><span class="nav-icon"><i class="fa-solid fa-right-to-bracket"></i></span> Login</div>
@@ -31,7 +31,7 @@
     <div class="nav-section" id="nav-personal-section">
       <div class="nav-label">Personal</div>
       <div class="nav-item" data-v="personal" onclick="nav('personal')"><span class="nav-icon"><i class="fa-solid fa-user"></i></span> Personal</div>
-      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Inbox <span class="nav-badge" id="inbox-badge">3</span></div>
+      <div class="nav-item" data-v="inbox" onclick="nav('inbox')"><span class="nav-icon"><i class="fa-solid fa-inbox"></i></span> Inbox <span class="nav-badge" id="inbox-badge" style="display:none"></span></div>
       <div class="nav-item" data-v="registration" onclick="openRegModal(true)"><span class="nav-icon"><i class="fa-solid fa-pen-to-square"></i></span> Edit Profile</div>
       <div class="nav-item" onclick="doLogout()"><span class="nav-icon"><i class="fa-solid fa-sign-out-alt"></i></span> Logout</div>
     </div>
@@ -50,7 +50,7 @@
     </div>
     <div class="nav-section" id="nav-oversight-section">
       <div class="nav-label">Oversight</div>
-      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge" id="stf-badge">1</span></div>
+      <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge" id="stf-badge" style="display:none"></span></div>
       <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Participants</div>
       <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon"><i class="fa-solid fa-building"></i></span> Organisations</div>
       <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> Profile</div>
@@ -405,7 +405,7 @@
   <div class="view" id="view-cell-circle">
     <div class="back" id="circlecell-back" onclick="nav('cells')">← Cells</div>
     <div class="hero">
-      <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px" id="circlecell-hero-icon">SL</div>
+      <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px" id="circlecell-hero-icon"></div>
       <div style="flex:1">
         <div class="hero-title" id="circlecell-title">Circle Cell</div>
         <div class="hero-desc">Private to circle members · Proposals, xSTFs, and deliverables originate here.</div>
@@ -1040,74 +1040,6 @@
   <div class="view" id="view-profile">
     <div class="page-title">Profile</div>
     <div class="page-sub">Your competence declarations and standing</div>
-    <div class="profile-header">
-      <div class="avatar avatar-gold avatar-xl">OS</div>
-      <div class="profile-info">
-        <h1>Oumo Samuel</h1>
-        <div class="meta">Kampala, Uganda · Participant since Jul 2026 · Active</div>
-        <div class="flex gap-1"><span class="tag tag-purple">Space Law</span> <span class="tag tag-amber">Mars Habitability</span> <span class="tag tag-green">Remote Sensing</span> <span class="tag tag-blue">Policy</span></div>
-      </div>
-      <div class="profile-standing">
-        <div class="val">847</div>
-        <div class="lbl">Ws</div>
-        <div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:28%"></div></div>
-      </div>
-    </div>
-    <div class="profile-bio">Space law researcher with focus on planetary protection frameworks. Interested in how governance structures adapt to deep space exploration. Active contributor to commons-based policy development. <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>
-    <div class="g2" style="margin-bottom:20px">
-      <div class="card">
-        <div class="sec flex justify-between items-center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
-        <table class="tbl">
-          <tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>
-          <tr><td class="s">Space Law</td><td class="m">#1</td><td class="m">1,800</td><td class="m">1,200</td><td><span class="badge b-active">Verified</span></td></tr>
-          <tr><td class="s">Remote Sensing</td><td class="m">#2</td><td class="m">1,200</td><td class="m">800</td><td><span class="badge b-active">Verified</span></td></tr>
-          <tr><td class="s">Policy</td><td class="m">#3</td><td class="m">640</td><td class="m">—</td><td><span class="badge b-pending">Pending</span></td></tr>
-          <tr><td class="s">Mars Habitability</td><td class="m">#4</td><td class="m">600</td><td class="m">—</td><td><span class="badge b-pending">Pending</span></td></tr>
-        </table>
-      </div>
-      <div class="card">
-        <div class="sec flex justify-between items-center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Your declared interests, ordered by priority. Drag to reorder.</div>
-        <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">1</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Space Law</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:100%"></div></div></div>
-        <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">2</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Remote Sensing</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:90%"></div></div></div>
-        <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">3</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Policy</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:70%"></div></div></div>
-        <div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">4</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">Mars Habitability</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:50%"></div></div></div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">#1 = 10 pts, #4 = 4 pts. Interest drift tracked against activity.</div>
-      </div>
-    </div>
-    <div class="g2">
-      <div class="card">
-        <div class="sec">Domain Metrics</div>
-        <div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Interest</span><span><span class="lgd-dot" style="background:var(--green);width:6px;height:6px"></span>Drift</span></div>
-        <div class="bar-row-multi">
-          <div class="bar-lbl"><span>Space Law</span><span class="v">Ws 1800 · Wh 1200 · 24 members</span></div>
-          <div class="bar-dual"><div class="bar-trk"><div class="bar-fill" style="width:72%"></div><div class="drift-marker" style="left:68%"></div></div><div class="bar-trk-interest"><div class="bar-fill-interest" style="width:100%"></div></div></div>
-        </div>
-        <div class="bar-row-multi">
-          <div class="bar-lbl"><span>Remote Sensing</span><span class="v">Ws 1200 · Wh 800 · 18 members</span></div>
-          <div class="bar-dual"><div class="bar-trk"><div class="bar-fill" style="width:58%"></div><div class="drift-marker" style="left:55%"></div></div><div class="bar-trk-interest"><div class="bar-fill-interest" style="width:90%"></div></div></div>
-        </div>
-        <div class="bar-row-multi">
-          <div class="bar-lbl"><span>Policy</span><span class="v">Ws 640 · Wh — · 11 members</span></div>
-          <div class="bar-dual"><div class="bar-trk"><div class="bar-fill" style="width:20%;background:var(--gold)"></div><div class="drift-marker" style="left:18%"></div></div><div class="bar-trk-interest"><div class="bar-fill-interest" style="width:70%"></div></div></div>
-        </div>
-        <div class="bar-row-multi">
-          <div class="bar-lbl"><span>Mars Habitability</span><span class="v">Ws 600 · Wh — · 9 members</span></div>
-          <div class="bar-dual"><div class="bar-trk"><div class="bar-fill" style="width:16%;background:var(--gold)"></div><div class="drift-marker" style="left:12%"></div></div><div class="bar-trk-interest"><div class="bar-fill-interest" style="width:50%"></div></div></div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="sec">Tracked Activity</div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>Endorsed competence declaration for <strong>Space Law</strong><div class="ai-when">2h ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--teal)"></div>Joined <strong>Policy Analysis</strong> undertaking<div class="ai-when">1d ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--gold)"></div>Updated interest ranking: <strong>Policy</strong> moved to #3<div class="ai-when">3d ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--purple)"></div>Participated in Circle deliberation<div class="ai-when">5d ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--blue)"></div>Submitted verification request for <strong>Remote Sensing</strong><div class="ai-when">1w ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--green)"></div>Competence verified by 3 peers in <strong>Space Law</strong><div class="ai-when">2w ago</div></div>
-        <div class="activity-item"><div class="ai-dot" style="background:var(--amber)"></div>Interest drift detected: <strong>Mars Habitability</strong> declining<div class="ai-when">2w ago</div></div>
-        <div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Activity influences Ws drift. Interest drift = gap between declared interest and actual engagement.</div>
-      </div>
-    </div>
   </div>
 
   <!-- ═══ REGISTRATION ═══ -->
@@ -1170,7 +1102,7 @@
   <div class="view" id="view-circle-detail">
     <div class="back" onclick="nav('circles')">← Circles</div>
     <div class="hero">
-      <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px" id="cd-ini">SL</div>
+        <div class="hero-icon" style="background:linear-gradient(135deg,var(--purple),#3a1860);color:#fff;font-size:18px" id="cd-ini"></div>
       <div style="flex:1">
         <div class="hero-title" id="cd-name">Circle</div>
         <div class="hero-desc" id="cd-desc"></div>
@@ -1332,7 +1264,7 @@
     <div class="flex justify-between items-center" style="margin-bottom:12px">
       <div>
         <div class="page-title">Domain Map</div>
-        <div class="page-sub" id="dm-sub">Membership constellation across 16 knowledge + 3 affiliate domains</div>
+        <div class="page-sub" id="dm-sub"></div>
       </div>
       <div class="dm-controls">
         <div class="dm-toggles" id="dm-toggles">
@@ -1800,13 +1732,7 @@
       <div class="card" style="margin-bottom:10px">
         <div class="sec">Resolution Text</div>
         <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">This text will be sent to aSTF for blind adjudication. Every edit nullifies existing votes.</div>
-        <textarea class="msg-input" rows="20" id="res-modal-text" style="font-size:12px;font-family:inherit;line-height:1.5">MOTION: Establish proportional liability framework for manoeuvre-induced orbital debris
-
-1. Operators must file manoeuvre intent with telemetry data before execution
-2. Liability classification: good-faith (reduced), negligent (standard), intentional (enhanced)
-3. Intent filing creates auditable record for post-incident assessment
-4. Framework applies to all orbital operators within Commons jurisdiction
-5. Enforcement through existing policy resolution mechanisms</textarea>
+        <textarea class="msg-input" rows="20" id="res-modal-text" style="font-size:12px;font-family:inherit;line-height:1.5"></textarea>
       </div>
       <!-- Drafting metadata — compact row -->
       <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
@@ -1855,12 +1781,12 @@
       <!-- Quorum summary — compact single line -->
       <div id="vote-quorum-bar" style="display:flex;gap:6px 12px;padding:6px 10px;background:var(--surface-raised);border:1px solid var(--border-subtle);border-radius:var(--radius);font-family:var(--mono);font-size:10px;color:var(--text-tertiary);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
         <span><span style="color:var(--gold);font-weight:600" id="vs-qrm-count">0</span>/<span id="vs-qrm-total">0</span> voted</span>
-        <span>QRM <span style="font-weight:600" id="vs-qrm-req">6</span></span>
-        <span id="vs-qrm-status" style="color:var(--red)">not met</span>
+        <span>QRM <span style="font-weight:600" id="vs-qrm-req"></span></span>
+        <span id="vs-qrm-status"></span>
         <span>&middot;</span>
         <span><span id="vs-pass-label">Yea</span> <span style="font-weight:600" id="vs-pass-ratio">0%</span></span>
         <span>&gt;50%</span>
-        <span id="vs-pass-status" style="color:var(--text-tertiary)">pending</span>
+        <span id="vs-pass-status" style="color:var(--text-tertiary)"></span>
       </div>
       <!-- Breakdown toggle -->
       <div style="margin-bottom:12px">
@@ -1889,23 +1815,23 @@
               </thead>
               <tbody>
                 <tr>
-                  <td>Deliberating members</td><td id="vs-members-cell" style="font-family:var(--mono);font-weight:600">8</td>
-                  <td>Quorum required (2/3)</td><td style="font-family:var(--mono);font-weight:600" id="vs-qrm-req-cell">6</td>
+                  <td>Deliberating members</td><td id="vs-members-cell" style="font-family:var(--mono);font-weight:600"></td>
+                  <td>Quorum required (2/3)</td><td style="font-family:var(--mono);font-weight:600" id="vs-qrm-req-cell"></td>
                 </tr>
                 <tr>
-                  <td>Voted (Yea + Nay)</td><td style="font-family:var(--mono);font-weight:600" id="vs-voted-count-cell">4</td>
-                  <td>Not voted</td><td style="font-family:var(--mono)" id="vs-abs-count-cell">1</td>
+                  <td>Voted (Yea + Nay)</td><td style="font-family:var(--mono);font-weight:600" id="vs-voted-count-cell"></td>
+                  <td>Not voted</td><td style="font-family:var(--mono)" id="vs-abs-count-cell"></td>
                 </tr>
                 <tr>
-                  <td>Quorum status</td><td id="vs-quorum-status-cell" style="color:var(--red);font-weight:600">Not met</td>
-                  <td id="vs-yn-label">Effective Yea+Nay</td><td style="font-family:var(--mono)" id="vs-eff-yn-cell">1,964</td>
+                  <td>Quorum status</td><td id="vs-quorum-status-cell" style="color:var(--red);font-weight:600"></td>
+                  <td id="vs-yn-label">Effective Yea+Nay</td><td style="font-family:var(--mono)" id="vs-eff-yn-cell"></td>
                 </tr>
                 <tr>
-                  <td>Pass threshold</td><td style="font-family:var(--mono)">&gt;50% (&gt;<span id="vs-threshold-cell">982</span>)</td>
-                  <td id="vs-yea-label-cell">Effective Yea</td><td style="font-family:var(--mono);color:var(--green);font-weight:600" id="vs-eff-yea-cell">1,653</td>
+                  <td>Pass threshold</td><td style="font-family:var(--mono)">&gt;50% (&gt;<span id="vs-threshold-cell"></span>)</td>
+                  <td id="vs-yea-label-cell">Effective Yea</td><td style="font-family:var(--mono);color:var(--green);font-weight:600" id="vs-eff-yea-cell"></td>
                 </tr>
                 <tr>
-                  <td>Result</td><td id="vs-result-cell" colspan="3" style="color:var(--text-tertiary);font-style:italic">Pending — quorum not yet met</td>
+                  <td>Result</td><td id="vs-result-cell" colspan="3" style="color:var(--text-tertiary);font-style:italic"></td>
                 </tr>
               </tbody>
             </table>
@@ -2118,7 +2044,7 @@
           </div>
           <div class="form-group"><label class="form-label">Short Name</label><input class="form-input" id="org-settings-shortname" value="Uganda Astro"></div>
           <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="org-settings-location" value="Kampala, Uganda"></div>
-          <div class="form-group"><label class="form-label">Summary</label><textarea class="form-input" rows="2" id="org-settings-summary">Amateur and professional astronomy society promoting stargazing and space science education across East Africa.</textarea></div>
+          <div class="form-group"><label class="form-label">Summary</label><textarea class="form-input" rows="2" id="org-settings-summary"></textarea></div>
           <div class="form-group"><label class="form-label">Website</label><input class="form-input" id="org-settings-website" placeholder="https://..."></div>
         </div>
       </div>
