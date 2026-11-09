@@ -119,7 +119,7 @@
           <button class="feed-filter active" data-filter="all" onclick="filterCommonsFeed('all',this)">All</button>
         </div>
         <div class="post-compose">
-          <div class="post-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px">OS</div>
+          <div class="post-avatar" id="compose-avatar" style="background:var(--gold);width:36px;height:36px;font-size:12px"></div>
           <div style="flex:1">
             <div class="compose-type-selector" id="compose-type-selector">
               <button class="compose-type-btn active" data-type="discussion" onclick="selectContentType(this,'discussion')"><span class="compose-type-icon"><i class="fa-solid fa-comment"></i></span><span class="compose-type-label">Discussion</span></button>
@@ -12208,6 +12208,8 @@ function renderAuthSidebar() {
       card.style.display = 'none';
     }
   }
+  var composeAv = document.getElementById('compose-avatar');
+  if (composeAv) composeAv.textContent = isAuth ? (MOCK.currentUser.initials || (MOCK.currentUser.name || '').substring(0, 2).toUpperCase()) : '—';
   var emptyToggle = document.getElementById('empty-view-toggle');
   if (emptyToggle) emptyToggle.style.display = isAuth ? '' : 'none';
   if (emptyToggle) {
