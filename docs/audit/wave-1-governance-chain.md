@@ -9,7 +9,11 @@ starts from a pristine restore of the seed.
 
 ---
 
-## M1 — Deliberation lifecycle · 36/38 · ⚠️ broken on implementing circles
+## M1 — Deliberation lifecycle · 38/38 · ✅ works
+
+> **Fixed after the audit (F2).** The audit originally scored 36/38: the
+> implementing-circle link returned 500 because of an invalid SQL idiom. After the fix the
+> module passes 38/38.
 
 **Covered:** direct proposals, thread-raised proposals, system proposals (settings /
 circle-settings), deliberation messages, objectives, draft resolution create/read/edit,
@@ -20,9 +24,9 @@ thread back-linking and double-raise protection (409), system-proposal snapshot 
 circle-settings target gating, message and objective persistence, draft CRUD, version
 append, and the submit → aSTF-cell + STF-row + assessor-invitation hand-off.
 
-### F2 (Blocker) — implementing-circle links always fail with 500
+### F2 (Blocker) — implementing-circle links always fail with 500 — **FIXED**
 
-`POST /cells/:id/draft-resolutions/:did/implementing-circles` returns **500**.
+`POST /cells/:id/draft-resolutions/:did/implementing-circles` returned **500**.
 
 Cause — `platform/api.php:836`:
 
@@ -48,7 +52,7 @@ POST /cells/<delib>/draft-resolutions/<row>/implementing-circles  {"circle_name"
 → 500 (no body; error_reporting is off)
 ```
 
-**Fix**
+**Fix (applied)**
 
 ```php
 ON DUPLICATE KEY UPDATE circle_name = VALUES(circle_name)
@@ -64,7 +68,11 @@ ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)
 
 ---
 
-## M2 — Voting & crystallisation · 10/23 · ❌ broken
+## M2 — Voting & crystallisation · 23/23 · ✅ works
+
+> **Fixed after the audit (F1).** The audit originally scored 10/23: votes were stored but
+> never counted, so the vote panel showed zeros and every deliberation crystallised as
+> "passed". After the fix the module passes 23/23.
 
 **Covered:** casting yea/nay/abstain, one-member-one-vote replacement, voter identity
 stamping, restriction of sanctioned members, aggregate tables, bootstrap read-back, the
@@ -75,7 +83,7 @@ previous vote rather than adding one, a sanctioned (`Restricted`) member cannot 
 (403), and the vote panel renderer itself is correct — a control run with vote data
 injected renders the right percentages.
 
-### F1 (Blocker) — votes are stored but never counted
+### F1 (Blocker) — votes were stored but never counted — **FIXED**
 
 The live route that records a vote (`platform/api.php:750-761`, the generic child router)
 writes **`vote_records` only**. The code that maintains the aggregate tables
@@ -113,8 +121,8 @@ Three consequences, all reproduced:
 3. **The governance record is wrong.** The crystallisation event reads
    `… resolution passed (yea 0 Ws / nay 0 Ws)`.
 
-**Fix** — recompute the aggregates on every vote, inside the live route, and return the
-same shape the client already expects:
+**Fix (applied)** — recompute the aggregates on every vote, inside the live route, and
+return the shape the client already expects:
 
 ```php
 // after inserting the vote_records row
@@ -124,7 +132,13 @@ $rows = dbAll("SELECT domain, COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) 
 send(200, ['record' => $record, 'domains' => $rows, 'summary' => $summary]);
 ```
 
-The dead block at `api.php:938-962` can then be deleted.
+The now-redundant shadowed block at `api.php:938-962` was deleted in the same change, so
+there is now exactly one place that maintains the aggregates.
+
+**Re-verification:** M2 passes 23/23 — the panel renders the cast percentages, the
+bootstrap carries `cell.votes` for the cell, crystallisation resolves to `failed` when nay
+outweighs yea, the draft is marked `failed`, and the governance event records
+`yea 100 Ws / nay 1100 Ws`.
 
 ---
 

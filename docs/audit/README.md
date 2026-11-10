@@ -40,29 +40,32 @@ without touching development data.
 | # | Module | Checks | Result | Verdict |
 |---|---|---|---|---|
 | M0 | Harness isolation | 11 | 11 pass | ✅ harness trustworthy |
-| M1 | Deliberation lifecycle | 38 | 36 pass / 2 fail | ⚠️ broken on implementing circles |
-| M2 | Voting & crystallisation | 23 | 10 pass / 13 fail | ❌ **broken** |
+| M1 | Deliberation lifecycle | 38 | 38 pass | ✅ works *(after F2 fix)* |
+| M2 | Voting & crystallisation | 23 | 23 pass | ✅ works *(after F1 fix)* |
 | M3 | aSTF adjudication | 26 | 26 pass | ✅ works |
 | M4 | jSTF judicial investigation | 50 | 50 pass | ✅ works |
 | M5 | xSTF execution | 16 | 16 pass | ✅ works |
 | M6 | vSTF verification | 20 | 20 pass | ✅ works |
 | M7 | p-aSTF health review | 14 | 14 pass | ✅ works |
 
-**Wave 1 (governance chain) — 4 of 7 modules fully green.** The two STF-family modules
-that write governance outcomes (aSTF, jSTF) work end to end, including parallel sealed
-filings, quorum handling, snapshot application and the judicial-audit hand-off.
+**Wave 1 (governance chain) — all 8 modules green (198/198 checks).** The two STF-family
+modules that write governance outcomes (aSTF, jSTF) work end to end, including parallel
+sealed filings, quorum handling, snapshot application and the judicial-audit hand-off.
+
+The two blockers found during the audit (F1, F2) were fixed and re-verified: the full
+wave-1 suite now passes 198/198.
 
 ## Finding index
 
-| ID | Severity | Module | Summary |
-|---|---|---|---|
-| **F1** | **Blocker** | M2 | Vote aggregates are never written — votes are stored but never counted, and crystallisation always resolves "passed" |
-| **F2** | **Blocker** | M1 / M9 | `ON DUPLICATE KEY UPDATE 1=1` is invalid SQL on MariaDB — implementing-circle links and thread endorse/bookmark always return 500 |
-| **F3** | Major — needs decision | cross-cutting | The "steward" gate is "active member of *any* circle", not membership of the circle that owns the cell |
-| **F4** | Minor | API contract | `GET` on a child-item id (`/cells/:id/messages/:mid`) answers 405; only collection GETs are supported |
-| **F5** | Minor | API contract | `GET /bootstrap` mutates data — it runs the integrity engine, which can create cells, seat stewards and accept applications |
-| **F6** | Minor | hygiene | Dead code: the shadowed vote route (`api.php:938-962`) and the static `POST /competence/verify-wh` 410 endpoint |
-| **F7** | Info | M4 | A restricted steward target is frozen (`Suspended`) rather than `Restricted` — by design, verified consistent |
+| ID | Severity | Module | Status | Summary |
+|---|---|---|---|---|
+| **F1** | **Blocker** | M2 | ✅ **fixed** | Vote aggregates were never written — votes were stored but never counted, and crystallisation always resolved "passed" |
+| **F2** | **Blocker** | M1 / M9 | ✅ **fixed** | `ON DUPLICATE KEY UPDATE 1=1` is invalid SQL on MariaDB — implementing-circle links and thread endorse/bookmark always returned 500 |
+| **F3** | Major — needs decision | cross-cutting | ⏳ open | The "steward" gate is "active member of *any* circle", not membership of the circle that owns the cell |
+| **F4** | Minor | API contract | ⏳ open | `GET` on a child-item id (`/cells/:id/messages/:mid`) answers 405; only collection GETs are supported |
+| **F5** | Minor | API contract | ⏳ open | `GET /bootstrap` mutates data — it runs the integrity engine, which can create cells, seat stewards and accept applications |
+| **F6** | Minor | hygiene | ✅ **fixed** (partly) | The shadowed vote route (`api.php:938-962`) was removed with the F1 fix; the static `POST /competence/verify-wh` 410 endpoint still stands |
+| **F7** | Info | M4 | ⏳ open (by design) | A restricted steward target is frozen (`Suspended`) rather than `Restricted` — verified consistent |
 
 ## Wave 1 — Governance chain (detail)
 

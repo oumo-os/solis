@@ -807,6 +807,28 @@ foreach ($childDefs as $d) {
             $vals = array_merge([$parentId], array_map(function($e) { return bindVal($e[1]); }, $entries));
             dbRun("INSERT INTO {$d['child']} (" . implode(',', $keys) . ") VALUES (" . implode(',', array_fill(0, count($keys), '?')) . ")", $vals);
             if ($d['child'] === 'cell_team') dbRun('UPDATE cells SET participants = (SELECT COUNT(*) FROM cell_team WHERE cell_id = ?) WHERE id = ? AND type = ?', [$parentId, $parentId, 'jSTF Cell']);
+            if ($d['child'] === 'vote_records') {
+                // Vote aggregates are the only source the vote panel and the
+                // crystallisation decision read. Recompute them here — the
+                // standalone vote route this logic came from is shadowed by the
+                // generic child router and never runs.
+                $vrows = dbAll("SELECT domain, COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) AS yea, COALESCE(SUM(CASE WHEN vote='nay' THEN ws END),0) AS nay, COALESCE(SUM(CASE WHEN vote='abstain' THEN ws END),0) AS abst FROM vote_records WHERE cell_id = ? GROUP BY domain", [$parentId]);
+                $tY = 0; $tN = 0; $tA = 0;
+                foreach ($vrows as &$vr) {
+                    $vr['yea'] = (int)$vr['yea']; $vr['nay'] = (int)$vr['nay']; $vr['abst'] = (int)$vr['abst'];
+                    $tY += $vr['yea']; $tN += $vr['nay']; $tA += $vr['abst'];
+                    $vex = dbGet('SELECT cell_id FROM cell_votes WHERE cell_id = ? AND domain = ?', [$parentId, $vr['domain']]);
+                    if ($vex) dbRun('UPDATE cell_votes SET yea = ?, nay = ?, total = ? WHERE cell_id = ? AND domain = ?', [$vr['yea'], $vr['nay'], $vr['yea'] + $vr['nay'], $parentId, $vr['domain']]);
+                    else dbRun('INSERT INTO cell_votes (cell_id, domain, yea, nay, total) VALUES (?,?,?,?,?)', [$parentId, $vr['domain'], $vr['yea'], $vr['nay'], $vr['yea'] + $vr['nay']]);
+                }
+                unset($vr);
+                $vsummary = ['yea' => $tY, 'nay' => $tN, 'abstain' => $tA];
+                $vex2 = dbGet('SELECT cell_id FROM cell_vote_summary WHERE cell_id = ?', [$parentId]);
+                if ($vex2) dbRun('UPDATE cell_vote_summary SET summary = ? WHERE cell_id = ?', [json_encode($vsummary), $parentId]);
+                else dbRun('INSERT INTO cell_vote_summary (cell_id, summary) VALUES (?,?)', [$parentId, json_encode($vsummary)]);
+                $vrecord = dbGet('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$parentId, $vdom, $wuser['id'] ?? null, $wuser['initials'] ?? '?']);
+                send(200, ['record' => $vrecord, 'domains' => array_map(function($r) { return ['name' => $r['domain'], 'yea' => $r['yea'], 'nay' => $r['nay'], 'abstain' => $r['abst'], 'total' => $r['yea'] + $r['nay']]; }, $vrows), 'summary' => $vsummary]);
+            }
             send(201, dbGet("SELECT * FROM {$d['child']} WHERE {$d['parentKey']} = ? ORDER BY id DESC LIMIT 1", [$parentId]));
         }
         if (preg_match($childIdRe, $cleanPath, $cm)) {
@@ -833,7 +855,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/(versions|impl
         $vals = array_map(function($k) use ($body, $draftId) { return $k === 'draft_id' ? strval($draftId) : bindVal($body->$k); }, $keys);
         dbRun("INSERT INTO resolution_versions (" . implode(',', $keys) . ") VALUES (" . implode(',', array_fill(0, count($keys), '?')) . ")", $vals);
     } else {
-        dbRun('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1', [strval($draftId), strval($body->circle_name ?? '')]);
+        dbRun('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON DUPLICATE KEY UPDATE circle_name = VALUES(circle_name)', [strval($draftId), strval($body->circle_name ?? '')]);
     }
     send(201, ['ok' => true]);
 }
@@ -847,7 +869,7 @@ if (preg_match('/^\/threads\/([^\/]+)\/(endorsement|bookmark)$/', $cleanPath, $m
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     if (!dbGet('SELECT id FROM threads WHERE id = ?', [$threadId])) send(404, ['error' => 'Not found']);
     $table = $kind === 'endorsement' ? 'thread_endorsements' : 'thread_bookmarks';
-    if ($method === 'POST') dbRun("INSERT INTO $table (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1", [$user['id'], $threadId]);
+    if ($method === 'POST') dbRun("INSERT INTO $table (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)", [$user['id'], $threadId]);
     else dbRun("DELETE FROM $table WHERE user_id = ? AND thread_id = ?", [$user['id'], $threadId]);
     $resp = ['ok' => true, 'threadId' => $threadId];
     if ($kind === 'endorsement') { $nRow = dbGet('SELECT COUNT(*) AS n FROM thread_endorsements WHERE thread_id = ?', [$threadId]); $n = (int)($nRow['n'] ?? 0); dbRun('UPDATE threads SET endorsements = ? WHERE id = ?', [$n, $threadId]); $resp['endorsed'] = ($method === 'POST'); $resp['endorsements'] = $n; }
@@ -930,36 +952,6 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
 
 // ═════════════════════════════════════════════════════════
 // VOTE ROUTES
-// ═════════════════════════════════════════════════════════
-// NOTE: the route below is shadowed by the generic child router above
-// (/cells/:id/vote-records matches there first). Deliberation vote
-// upserts live in the generic child POST. Kept for reference; do not
-// revive without removing the childDefs entry.
-if (preg_match('/^\/cells\/([^\/]+)\/vote-records$/', $cleanPath, $m)) {
-    if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
-    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
-    $cellId = urldecode($m[1]); $body = readBody();
-    if (!$body || empty($body->domain)) send(400, ['error' => 'domain required']);
-    $initials = trim((string)($user['initials'] ?? ($body->initials ?? '')));
-    $vote = in_array($body->vote ?? '', ['yea', 'nay', 'abstain']) ? $body->vote : 'abstain';
-    $ws = max(0, (int)($body->ws ?? 0));
-    // One member one vote: user_id first, legacy initials row swept along.
-    dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$cellId, $body->domain, $user['id'] ?? null, $initials]);
-    dbRun('INSERT INTO vote_records (cell_id, domain, name, initials, ws, vote, user_id) VALUES (?,?,?,?,?,?,?)', [$cellId, $body->domain, $body->name ?? null, $initials, $ws, $vote, $user['id'] ?? null]);
-    $rows = dbAll("SELECT domain, COALESCE(SUM(CASE WHEN vote='yea' THEN ws END),0) AS yea, COALESCE(SUM(CASE WHEN vote='nay' THEN ws END),0) AS nay, COALESCE(SUM(CASE WHEN vote='abstain' THEN ws END),0) AS abst FROM vote_records WHERE cell_id = ? GROUP BY domain", [$cellId]);
-    $tY = 0; $tN = 0; $tA = 0;
-    foreach ($rows as &$r) { $r['yea'] = (int)$r['yea']; $r['nay'] = (int)$r['nay']; $r['abst'] = (int)$r['abst']; $tY += $r['yea']; $tN += $r['nay']; $tA += $r['abst'];
-        $ex = dbGet('SELECT cell_id, domain FROM cell_votes WHERE cell_id = ? AND domain = ?', [$cellId, $r['domain']]);
-        if ($ex) dbRun('UPDATE cell_votes SET yea = ?, nay = ?, total = ? WHERE cell_id = ? AND domain = ?', [$r['yea'], $r['nay'], $r['yea'] + $r['nay'], $cellId, $r['domain']]);
-        else dbRun('INSERT INTO cell_votes (cell_id, domain, yea, nay, total) VALUES (?,?,?,?,?)', [$cellId, $r['domain'], $r['yea'], $r['nay'], $r['yea'] + $r['nay']]);
-    } unset($r);
-    $summary = ['yea' => $tY, 'nay' => $tN, 'abstain' => $tA];
-    $ex = dbGet('SELECT cell_id FROM cell_vote_summary WHERE cell_id = ?', [$cellId]);
-    if ($ex) dbRun('UPDATE cell_vote_summary SET summary = ? WHERE cell_id = ?', [json_encode($summary), $cellId]);
-    else dbRun('INSERT INTO cell_vote_summary (cell_id, summary) VALUES (?,?)', [$cellId, json_encode($summary)]);
-    $record = dbGet('SELECT * FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$cellId, $body->domain, $user['id'] ?? null, $initials]);
-    send(200, ['record' => $record, 'domains' => array_map(function($r) { return ['name' => $r['domain'], 'yea' => $r['yea'], 'nay' => $r['nay'], 'abstain' => $r['abst'], 'total' => $r['yea'] + $r['nay']]; }, $rows), 'summary' => $summary]);
-}
 
 // ═════════════════════════════════════════════════════════
 // GOVERNANCE ROUTES (submit + debate close)
