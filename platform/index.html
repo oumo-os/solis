@@ -372,7 +372,9 @@
           <div style="padding:16px;color:var(--text-tertiary);font-size:12px">Loading…</div>
         </div>
         <div class="divider" style="margin:var(--space-3) 0"></div>
-        <textarea class="msg-input" rows="2" placeholder="Add to the cell..."></textarea>
+        <div id="projcell-participation-note"></div>
+        <textarea class="msg-input" rows="2" id="projcell-msg-input" placeholder="Add to the cell..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postCellMessage(currentProjectCellId,'projcell-msg-input',projcellAfterPost);}"></textarea>
+        <div class="flex justify-end mt-2"><button class="btn btn-sm btn-primary" onclick="postCellMessage(currentProjectCellId,'projcell-msg-input',projcellAfterPost)">Post</button></div>
       </div>
       <div class="layout-aside" id="projcell-aside">
         <div class="aside-card">
@@ -434,8 +436,10 @@
         <div class="card">
           <div style="display:flex;flex-direction:column;gap:12px" id="circlecell-messages"></div>
           <div class="divider" style="margin:var(--space-3) 0"></div>
-          <textarea class="msg-input" rows="2" placeholder="Message to circle cell..."></textarea>
-          <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded. Restricted to circle members.</div>
+          <div id="circlecell-participation-note"></div>
+          <textarea class="msg-input" rows="2" id="circlecell-msg-input" placeholder="Message to circle cell..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postCellMessage(currentCircleCellId,'circlecell-msg-input',circlecellAfterPost);}"></textarea>
+          <div class="flex justify-end mt-2"><button class="btn btn-sm btn-primary" onclick="postCellMessage(currentCircleCellId,'circlecell-msg-input',circlecellAfterPost)">Post</button></div>
+          <div class="text-xs mt-4" style="color:var(--text-tertiary)">All messages are recorded. Open to every steward; what is spoken here is separated by the cell's domains.</div>
         </div>
       </div>
       <div class="layout-aside">
@@ -2359,6 +2363,7 @@ function nav(key) {
 
 var _cellBackNav = 'cells';
 var currentCircleCellId = null;
+var currentProjectCellId = null;
 function openProjectCell(cellId) {
   _cellBackNav = navMap[currentNav] || 'cells';
   nav('cell-undertaking');
@@ -10960,6 +10965,76 @@ function publishDeliverablesToCommons(cellId) {
   nav('commons');
 }
 
+// ─── Participation follows domains ───────────────────────────────────────
+// Steward actions are open to every steward. Speaking and voting in a cell
+// are separated by topic: a member takes part where they hold standing, and
+// the server keeps the weight (see api.php memberStanding).
+function myStandingDomains() {
+  var me = (MOCK && MOCK.currentUser) || {};
+  var part = null;
+  ((MOCK && MOCK.participants) || []).forEach(function(p) { if (p.id === me.id) part = p; });
+  var out = {};
+  ((part && part.domains) || []).forEach(function(d) {
+    if (!d || !d.name) return;
+    var ws = Number(d.ws) || 0, wh = Number(d.wh) || 0;
+    if (ws > 0 || wh > 0) out[d.name] = ws > 0 ? ws : wh;
+  });
+  return out;
+}
+
+// Can the signed-in member take part in this cell? The topics are the cell's
+// own domains; standing in any one of them is enough to speak, which is the
+// same rule the server enforces.
+function participationGate(cell) {
+  var topics = (cell && cell.domains) || [];
+  if (!topics.length) return { open: true, topics: [], missing: [], mine: myStandingDomains() };
+  var mine = myStandingDomains();
+  var missing = topics.filter(function(t) { return !(t in mine); });
+  return { open: missing.length < topics.length, topics: topics, missing: missing, mine: mine };
+}
+
+function participationNote(gate) {
+  if (!gate || gate.open || !gate.topics.length) return '';
+  return '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0;line-height:1.5">' +
+    '<strong>Participation follows your domains.</strong> This cell is about ' + esc(gate.topics.join(', ')) + ' — ' +
+    'you hold no standing in ' + esc(gate.missing.join(', ')) + ', so you read here but do not speak here.</div>';
+}
+
+// Post into a cell's message thread. The server owns eligibility and the
+// weight of every message.
+function postCellMessage(cellId, inputId, after) {
+  var ta = document.getElementById(inputId);
+  if (!ta || !cellId) return;
+  var text = (ta.value || '').trim();
+  if (!text) { toast('Write a message first.', 'error'); return; }
+  var me = (MOCK && MOCK.currentUser) || {};
+  SolisApi.addCellMessage(cellId, { author: me.name || 'Member', initials: me.initials || '?', text: text, time: 'just now' }).then(function(r) {
+    if (!r || (r.__status && r.__status >= 400)) {
+      toast('Could not post: ' + ((r && r.error) || ('HTTP ' + (r && r.__status))), 'error');
+      return;
+    }
+    var cell = cellsById[cellId];
+    if (cell) {
+      cell.messages = cell.messages || [];
+      cell.messages.push({ author: me.name || 'Member', initials: me.initials || '?', text: text, time: 'just now' });
+    }
+    ta.value = '';
+    if (typeof after === 'function') after(cellId);
+  }).catch(function() { toast('Could not post. Is the server running?', 'error'); });
+}
+
+function delibAfterPost() {
+  var cell = (typeof currentDelibCellId !== 'undefined' && currentDelibCellId) ? cellsById[currentDelibCellId] : null;
+  var disc = document.getElementById('delib-discussion');
+  if (cell && disc) renderDelibDiscussion(cell, disc);
+}
+function projcellAfterPost(cellId) {
+  renderMessages(cellId, 'projcell-messages');
+}
+function circlecellAfterPost() {
+  if (typeof currentCircleCellId !== 'undefined' && currentCircleCellId) renderCircleCell(currentCircleCellId);
+}
+
 function renderMessages(cellId, containerId) {
   var cell = cellsById[cellId];
   var el = document.getElementById(containerId);
@@ -11248,6 +11323,7 @@ function renderStfIntegrity(key, stf) {
 function renderProjectCell(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
+  currentProjectCellId = cellId;
   var title = document.getElementById('projcell-title');
   var desc = document.getElementById('projcell-desc');
   var tags = document.getElementById('projcell-tags');
@@ -11262,6 +11338,12 @@ function renderProjectCell(cellId) {
   renderDeliverables(cellId, 'projcell-deliverables');
   renderTeam(cellId, 'projcell-team');
   renderMessages(cellId, 'projcell-messages');
+  // Participation follows domains: speak only where you hold standing.
+  var pg = participationGate(cell);
+  var pnote = document.getElementById('projcell-participation-note');
+  var pinput = document.getElementById('projcell-msg-input');
+  if (pnote) pnote.innerHTML = pg.open ? '' : participationNote(pg);
+  if (pinput) { pinput.style.display = pg.open ? '' : 'none'; var pbtn = pinput.parentElement && pinput.parentElement.querySelector('.btn-primary'); if (pbtn) pbtn.style.display = pg.open ? '' : 'none'; }
   renderProjectSettings(cellId);
 }
 
@@ -11569,6 +11651,7 @@ function findCircleByCell(cell) {
 function renderCircleCell(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
+  currentCircleCellId = cellId;
   if (typeof circleCellReadable === 'function' && !circleCellReadable(cell)) {
     setText('circlecell-title', cell.title || 'Circle Cell');
     setHtml('circlecell-proposals', '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">Restricted to circle members. Join the circle to read its cell.</div></div>');
@@ -11641,6 +11724,12 @@ function renderCircleCell(cellId) {
     return '<div style="display:flex;gap:10px"><div class="avatar avatar-md" style="background:' + (m.color || 'var(--purple)') + '">' + escapeHtml((m.initials || '?').slice(0, 2)) + '</div><div style="flex:1;min-width:0"><div class="flex items-center gap-2 mb-1"><span class="text-sm" style="font-weight:600">' + escapeHtml(m.author || '') + '</span><span class="text-xs" style="color:var(--text-tertiary)">' + escapeHtml(m.time || '') + '</span></div><p class="text-sm">' + escapeHtml(m.text || '') + '</p></div></div>';
   }).join('') : '<div style="font-size:12px;color:var(--text-tertiary);text-align:center;padding:8px">No messages yet.</div>';
   setHtml('circlecell-messages', msgHtml);
+  // Participation follows domains: speak only where you hold standing.
+  var cg = participationGate(cell);
+  var cnote = document.getElementById('circlecell-participation-note');
+  var cinput = document.getElementById('circlecell-msg-input');
+  if (cnote) cnote.innerHTML = cg.open ? '' : participationNote(cg);
+  if (cinput) { cinput.style.display = cg.open ? '' : 'none'; var cbtn = cinput.parentElement && cinput.parentElement.querySelector('.btn-primary'); if (cbtn) cbtn.style.display = cg.open ? '' : 'none'; }
 
   if (circle) {
     setHtml('circlecell-profile',
@@ -12035,7 +12124,13 @@ function renderDelibDiscussion(cell, container) {
   });
   html += '</div>';
   html += '<div class="divider" style="margin:var(--space-3) 0"></div>';
-  html += '<textarea class="msg-input" rows="2" placeholder="Add to the deliberation..."></textarea>';
+  var gate = participationGate(cell);
+  if (gate.open) {
+    html += '<textarea class="msg-input" id="delib-msg-input" rows="2" placeholder="Add to the deliberation..." onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();postCellMessage(currentDelibCellId,\'delib-msg-input\',delibAfterPost);}"></textarea>';
+    html += '<div class="flex justify-end mt-2"><button class="btn btn-sm btn-primary" onclick="postCellMessage(currentDelibCellId,\'delib-msg-input\',delibAfterPost)">Post</button></div>';
+  } else {
+    html += participationNote(gate);
+  }
   container.innerHTML = html;
 }
 

@@ -270,7 +270,11 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     };
     foreach (dbAll('SELECT * FROM cells') as $c) {
         $meta = pJson($c['meta'] ?? null) ?: [];
-        $cell = ['id' => $c['id'], 'type' => $c['type'], 'title' => $c['title'], 'status' => $c['status'], 'delibType' => $c['delib_type'], 'participants' => $c['participants'], 'members' => $c['members'], 'progress' => $c['progress'], 'daysActive' => $c['days_active'], 'lead' => $c['lead'], 'circle' => $c['circle'], 'created' => $c['created'], 'deadline' => $c['deadline'], 'assessors' => $c['assessors'], 'commissionedBy' => $c['commissioned_by'], 'resolutionRef' => $c['resolution_ref'], 'entityType' => $c['entity_type'], 'source' => pJson($c['source'] ?? null), 'resolution' => pJson($c['resolution'] ?? null), 'deliverableSpecs' => pJson($c['deliverable_specs'] ?? null), 'domains' => array_values(array_map(function($d) { return $d['domain']; }, $cellDomains[$c['id']] ?? []))];
+        $cell = ['id' => $c['id'], 'type' => $c['type'], 'title' => $c['title'], 'status' => $c['status'], 'delibType' => $c['delib_type'], 'participants' => $c['participants'], 'members' => $c['members'], 'progress' => $c['progress'], 'daysActive' => $c['days_active'], 'lead' => $c['lead'], 'circle' => $c['circle'], 'created' => $c['created'], 'deadline' => $c['deadline'], 'assessors' => $c['assessors'], 'commissionedBy' => $c['commissioned_by'], 'resolutionRef' => $c['resolution_ref'], 'entityType' => $c['entity_type'], 'source' => pJson($c['source'] ?? null), 'resolution' => pJson($c['resolution'] ?? null), 'deliverableSpecs' => pJson($c['deliverable_specs'] ?? null), 'domains' => array_values(array_unique(array_filter(array_merge(
+            array_map(function($d) { return $d['domain']; }, $cellDomains[$c['id']] ?? []),
+            // A proposal's own topic counts as its participation domain.
+            array_map(function($s) { return (string)($s['domain'] ?? ''); }, array_values(array_filter([pJson($c['source'] ?? null) ?: []], 'is_array')))
+        ))))];
         foreach ($meta as $mk => $mv) { if ($mv !== null && !in_array($mk, ['targetId','targetName','threadId','targetIsSteward','appealOf','revisionOf','isAppeal','verdict','assessments','filings','findings','resolutionDraft','resolution'], true)) $cell[$mk] = $mv; }
         if ($c['blind']) $cell['blind'] = true;
         $ccs = $cellCircles[$c['id']] ?? [];
@@ -596,6 +600,30 @@ function deriveStats() {
     ];
 }
 
+// Participation follows domains. Steward actions are open to every steward
+// (see resourceWriteGuard), but speaking and voting in a deliberation are
+// separated by topic: a member takes part where they hold standing, and
+// their weight is their own recorded standing — never a client-supplied one.
+function participationDomains($cellId, $cell = null) {
+    $doms = array_values(array_map(function($d) { return $d['domain']; }, dbAll('SELECT domain FROM cell_domains WHERE cell_id = ?', [$cellId])));
+    if (!$doms) {
+        $src = pJson(($cell['source'] ?? '') ?: '{}') ?: [];
+        if (!empty($src['domain'])) $doms[] = (string)$src['domain'];
+    }
+    return array_values(array_unique(array_filter(array_map('trim', $doms))));
+}
+
+// A member's standing in one domain: their weighted standing, or their hard
+// claim when they carry no weighted one.
+function memberStanding($userId, $domain) {
+    $row = dbGet('SELECT ws, wh FROM user_competence WHERE user_id = ? AND domain = ? LIMIT 1', [$userId, $domain]);
+    if (!$row) return null;
+    $ws = (int)($row['ws'] ?? 0);
+    $wh = (int)($row['wh'] ?? 0);
+    if ($ws <= 0 && $wh <= 0) return null;
+    return max($ws, $wh);
+}
+
 // ─── Per-table write authority ────────────────────────────────────────────
 // The generic resource router serves many tables. These rules keep the
 // protected ones — people, judicial records, the governance log, the
@@ -871,6 +899,11 @@ foreach ($childDefs as $d) {
                 // legacy initials rows swept along; voter identity stamped.
                 $vdom = trim((string)($body->domain ?? ''));
                 if ($vdom === '') send(400, ['error' => 'domain required']);
+                // Participation follows domains: a member votes only where
+                // they hold standing, and their weight is their own.
+                $stand = memberStanding($wuser['id'], $vdom);
+                if ($stand === null) send(403, ['error' => 'You hold no standing in ' . $vdom . ' — participation follows your domains']);
+                $body->ws = $stand;
                 dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$parentId, $vdom, $wuser['id'] ?? null, $wuser['initials'] ?? '?']);
                 $body->user_id = $wuser['id'] ?? null;
                 $body->initials = $wuser['initials'] ?? '?';
@@ -915,6 +948,17 @@ foreach ($childDefs as $d) {
                     $meOk = ($wuser['id'] ?? null) && in_array($wuser['id'], $allowedIds, true);
                     if (!$meOk && ($wuser['initials'] ?? null)) $meOk = in_array($wuser['initials'], $allowedIni, true);
                     if (!$meOk) send(403, ['error' => 'Only the probe team or the commissioning body may deliberate here']);
+                }
+                // Participation follows domains: in a deliberation, circle or
+                // project cell, only members who hold standing in one of its
+                // topics may speak.
+                if ($pc && in_array(($pc['type'] ?? ''), ['Deliberation Cell', 'Circle Cell', 'Project Cell'], true)) {
+                    $pdom = participationDomains($parentId, $pc);
+                    if ($pdom) {
+                        $ph = implode(',', array_fill(0, count($pdom), '?'));
+                        $hasStanding = dbGet("SELECT 1 FROM user_competence WHERE user_id = ? AND domain IN ($ph) AND (ws > 0 OR wh > 0) LIMIT 1", array_merge([$wuser['id']], $pdom));
+                        if (!$hasStanding) send(403, ['error' => 'You hold no standing in this deliberation — participation follows your domains (' . implode(', ', $pdom) . ')']);
+                    }
                 }
             }
             $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) use ($d) { return $c !== $d['parentKey'] && $c !== 'id'; });
