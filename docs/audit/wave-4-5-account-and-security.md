@@ -129,6 +129,15 @@ revoking an enacted policy.
 
 ---
 
+## Fixes applied (verified — modules now 21/21, 19/19, 23/23, 17/17)
+
+| Finding | Change |
+|---|---|
+| **F14** | Registration ids stay unique: a taken name slug gets a numeric suffix instead of colliding on the primary key, so a second member with the same name registers cleanly (201). |
+| **F15** | The three anonymous write paths are closed: resolution versions and implementing-circle links require an authenticated, active member; `PATCH /system-settings` requires a steward. The platform's judicial durations, adjudicator counts and pool mode can no longer be changed by an anonymous client. |
+| **F16** | The generic CRUD carries per-table write authority (`resourceWriteGuard()`): policies, exit-reason labels, STF rows and the domain registry are steward-written; integrity records and governance events are engine-written and refuse HTTP writes; the governance ledger is steward-written; inbox items can only be updated by their owner; project applications and thread counters are server-owned. |
+| **F17** | `GET /stats` and the bootstrap `stats` key are now derived from the live tables (`deriveStats()`); the seeded snapshot with "200+ resources" and "38 events" is no longer published. |
+
 ## Additional observation
 
 ### F17 (Minor) — the fabricated `stats` snapshot is still published

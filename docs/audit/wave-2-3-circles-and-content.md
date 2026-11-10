@@ -183,6 +183,17 @@ roster should be derived or steward-only.
 
 ---
 
+## Fixes applied (verified — module now 37/37)
+
+| Finding | Change |
+|---|---|
+| **F8** | The founder is seated automatically: `POST /circles` and an approved circle-creation snapshot both add the proposer to `circle_roster` (active) and recompute the member count (`seatCircleSteward()` in `api.php`). The circle is therefore staffable, manageable and disbandable from the first moment. |
+| **F9** | `circle.members` is recomputed from the live roster on every roster insert, update and delete — the count a circle card shows now always equals the roster. |
+| **F10** | `POST /observatory/publications` now calls `assertActiveMember()`, and `circle_application_domains` joins the guarded child list — a suspended member can no longer submit for approval. |
+| **F11** | Project applications are server-authoritative (`status = 'pending'`, `applied_date` = today) and the SPA's hardcoded `Jul 26, 2026` date is gone. |
+| **F12** | `users` writes are self-service only: a member may edit their own row and only `name`, `location`, `bio`, `essay`; `status`, `initials` and standing are no longer client-writable (so a jSTF sanction cannot be lifted by another member); creating a member goes through registration; members are never deleted. |
+| **F13** | `organisations.member_count` is no longer client-writable, and every published count is derived from the real affiliation rows (`user_orgs`) — the fictional "20000 members" figure is gone. |
+
 ## Cross-cutting notes
 
 - **F3 (Major — needs decision)** applies here too: the pending-publication queue, the

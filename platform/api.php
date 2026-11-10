@@ -122,6 +122,11 @@ if ($method === 'POST' && $cleanPath === '/auth/register') {
     if (strlen((string)$password) < 6) send(400, ['error' => 'Password must be at least 6 characters']);
     if (dbGet('SELECT id FROM users WHERE lower(email) = ?', [strtolower((string)$email)])) send(409, ['error' => 'Email already registered']);
     $id = preg_replace('/^-+|-+$/', '', preg_replace('/[^a-z0-9]+/', '-', strtolower((string)$name))) ?: 'user-' . time();
+    // Two members can share a name: the id must stay unique.
+    if (dbGet('SELECT id FROM users WHERE id = ?', [$id])) {
+        $base = $id; $n = 2;
+        while (dbGet('SELECT id FROM users WHERE id = ?', [$id])) { $id = $base . '-' . $n; $n++; }
+    }
     $words = preg_split('/\s+/', trim((string)$name)); $initials = '';
     foreach ($words as $w) $initials .= $w[0] ?? '';
     $initials = strtoupper(substr($initials, 0, 2));
@@ -200,9 +205,12 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
         if (empty($currentUser['circles'])) foreach (($cirByUser[$cuid] ?? []) as $c) { if ($c['kind'] === 'roster') $currentUser['circles'][] = ['name' => $c['circle'], 'status' => $c['status'] ?? null, 'since' => $c['since']]; }
     }
     $kdByOrg = groupBy(dbAll('SELECT * FROM org_knowledge_domains'), 'org_id');
+    // Organisation membership is counted from the real affiliation rows;
+    // the stored member_count was a fixture figure and is never trusted.
+    $orgMembers = groupBy(dbAll('SELECT user_id, org_acronym FROM user_orgs'), 'org_acronym');
     $organisations = [];
     foreach (dbAll('SELECT * FROM organisations') as $o) {
-        $organisations[] = ['id' => $o['id'], 'name' => $o['name'], 'acronym' => $o['acronym'], 'shortname' => $o['shortname'], 'location' => $o['location'], 'summary' => $o['summary'], 'status' => $o['status'], 'founded' => $o['founded'], 'foundingCell' => $o['founding_cell'], 'memberCount' => $o['member_count'], 'website' => $o['website'], 'logo' => $o['logo'], 'knowledgeDomains' => array_values(array_map(function($d) { return $d['domain']; }, $kdByOrg[$o['id']] ?? []))];
+        $organisations[] = ['id' => $o['id'], 'name' => $o['name'], 'acronym' => $o['acronym'], 'shortname' => $o['shortname'], 'location' => $o['location'], 'summary' => $o['summary'], 'status' => $o['status'], 'founded' => $o['founded'], 'foundingCell' => $o['founding_cell'], 'memberCount' => count($orgMembers[$o['acronym']] ?? []), 'website' => $o['website'], 'logo' => $o['logo'], 'knowledgeDomains' => array_values(array_map(function($d) { return $d['domain']; }, $kdByOrg[$o['id']] ?? []))];
     }
     $domains = [];
     foreach (dbAll('SELECT * FROM domains') as $d) $domains[$d['id']] = ['label' => $d['label'], 'short' => $d['short'], 'color' => $d['color'], 'hasCircle' => (bool)$d['has_circle'], 'type' => $d['type'], 'taxonomy' => $d['taxonomy']];
@@ -465,8 +473,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: [];
     $jstfDomainsRaw = $ss['jstf_domains'] ?? '[]'; $jstfDomains = pJson(is_string($jstfDomainsRaw) ? $jstfDomainsRaw : json_encode($jstfDomainsRaw)) ?: []; if (!is_array($jstfDomains)) $jstfDomains = [];
     $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'astfAssessors' => (int)($ss['astf_assessors'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
-    $sr = dbGet('SELECT stats FROM stats WHERE id = 1');
-    $stats = $sr ? pJson($sr['stats']) ?: [] : [];
+$stats = deriveStats();
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
     $registration = ['domains' => array_map(function($r) { return ['name' => $r['name'], 'type' => $r['type']]; }, $regRows), 'eloMap' => $regMeta ? pJson($regMeta['elo_map']) ?: [] : [], 'knowledgeLevels' => $regMeta ? pJson($regMeta['knowledge_levels']) ?: [] : [], 'experientialLevels' => $regMeta ? pJson($regMeta['experiential_levels']) ?: [] : [], 'defaultInterests' => $regMeta ? pJson($regMeta['default_interests']) ?: [] : []];
     $integrityRecords = dbAll('SELECT * FROM integrity_records');
@@ -552,6 +559,104 @@ if ($cleanPath === '/circle-applications' && $method === 'POST') {
     logCircleActivity($acId, ($user['name'] ?? 'A member') . ' applied to the succession queue (#' . $qn . ')', 'membership');
     send(201, ['ok' => true, 'id' => $appId, 'queuePosition' => $qn]);
 }
+// Platform statistics are derived from the live tables. The seeded stats
+// snapshot carried invented figures ("200+ resources", "38 events") and was
+// published to anyone who asked for /stats.
+function deriveStats() {
+    $threads = dbAll('SELECT replies, endorsements FROM threads');
+    $replies = 0; $endorsed = 0;
+    foreach ($threads as $t) { $replies += (int)($t['replies'] ?? 0); $endorsed += (int)($t['endorsements'] ?? 0); }
+    $projects = dbAll('SELECT role FROM projects');
+    $projRole = ['active' => count($projects), 'lead' => 0, 'contributor' => 0];
+    foreach ($projects as $p) {
+        $role = strtolower((string)($p['role'] ?? ''));
+        if ($role === 'lead') $projRole['lead']++;
+        elseif ($role === 'contributor') $projRole['contributor']++;
+    }
+    $cells = dbAll('SELECT status FROM cells');
+    $cellActive = 0; foreach ($cells as $c) { if (($c['status'] ?? '') === 'Active') $cellActive++; }
+    $stfBuckets = ['pending' => 0, 'active' => 0, 'completed' => 0];
+    foreach (dbAll('SELECT bucket FROM stfs') as $s) {
+        $b = strtolower((string)($s['bucket'] ?? ''));
+        if (isset($stfBuckets[$b])) $stfBuckets[$b]++;
+    }
+    $stewards = (int)(dbGet("SELECT COUNT(DISTINCT member_id) AS n FROM circle_roster WHERE status = 'active'")['n'] ?? 0);
+    $circles = (int)(dbGet("SELECT COUNT(DISTINCT circle_id) AS n FROM circle_roster WHERE status = 'active'")['n'] ?? 0);
+    return [
+        'discussions' => ['threads' => count($threads), 'replies' => $replies, 'endorsed' => $endorsed],
+        'projects' => $projRole,
+        'observatory' => [
+            'resources' => (int)(dbGet('SELECT COUNT(*) AS n FROM library_items')['n'] ?? 0),
+            'publications' => (int)(dbGet("SELECT COUNT(*) AS n FROM publications WHERE status = 'approved'")['n'] ?? 0),
+            'events' => (int)(dbGet('SELECT COUNT(*) AS n FROM events')['n'] ?? 0),
+        ],
+        'cells' => ['active' => $cellActive, 'total' => count($cells)],
+        'stfs' => $stfBuckets,
+        'participants' => ['total' => (int)(dbGet('SELECT COUNT(*) AS n FROM users')['n'] ?? 0), 'stewards' => $stewards, 'circles' => $circles],
+    ];
+}
+
+// ─── Per-table write authority ────────────────────────────────────────────
+// The generic resource router serves many tables. These rules keep the
+// protected ones — people, judicial records, the governance log, the
+// platform's own settings — from being writable by any member, and keep
+// derived fields out of client hands.
+function resourceWriteGuard($table, $method, $id, $user, $body = null) {
+    $steward = isSteward($user['id']);
+    if ($table === 'users') {
+        if ($method === 'POST') send(403, ['error' => 'Members are created through registration, not this route']);
+        if ($method === 'DELETE') send(403, ['error' => 'Members are never deleted — set the member to Former']);
+        if ($id !== null && (string)$id !== (string)$user['id']) send(403, ['error' => 'You may only edit your own member record']);
+        $allowed = ['name', 'location', 'bio', 'essay'];
+        $bad = array_values(array_diff(array_keys((array)$body), $allowed));
+        if ($bad) send(403, ['error' => 'These fields are not self-editable: ' . implode(', ', $bad)]);
+        return;
+    }
+    if (in_array($table, ['policies', 'exit_reason_labels', 'stfs', 'domains'], true) && !$steward)
+        send(403, ['error' => 'Steward access required']);
+    if (in_array($table, ['integrity_records', 'governance_events'], true))
+        send(403, ['error' => 'This record is written by the governance engine']);
+    if ($table === 'governance_ledger' && !$steward)
+        send(403, ['error' => 'Steward access required']);
+    if ($table === 'inbox') {
+        if ($method !== 'PATCH' && $method !== 'PUT') send(403, ['error' => 'Inbox items are delivered by the platform']);
+        if ($id !== null) {
+            $own = dbGet('SELECT * FROM inbox WHERE id = ?', [$id]);
+            if ($own && isset($own['user_id']) && (string)$own['user_id'] !== (string)$user['id'])
+                send(403, ['error' => 'Not your inbox item']);
+        }
+    }
+    if ($table === 'organisations' && $body !== null && is_object($body)) {
+        // Member counts are derived from user_orgs, never client-set.
+        unset($body->member_count);
+    }
+    if ($table === 'project_applications' && $body !== null && is_object($body)) {
+        // Server-authoritative: always pending, stamped with today's date.
+        $body->status = 'pending';
+        $body->applied_date = date('Y-m-d');
+    }
+    if ($table === 'threads' && $body !== null && is_object($body)) {
+        // Engagement counters are maintained by their own routes.
+        foreach (['endorsements', 'replies', 'likes', 'shares', 'pinned'] as $c) unset($body->$c);
+    }
+}
+
+// Seat a member on a circle: the first steward of a new circle, or a
+// founder named by an approved founding resolution.
+function seatCircleSteward($circleId, $userId, $reason = 'circle-founded') {
+    if (!$circleId || !$userId) return 0;
+    if (dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$circleId, $userId])) return 0;
+    $u = dbGet('SELECT * FROM users WHERE id = ?', [$userId]);
+    if (!$u) return 0;
+    $top = dbGet('SELECT domain, ws FROM user_competence WHERE user_id = ? ORDER BY ws DESC LIMIT 1', [$userId]);
+    dbRun("INSERT INTO circle_roster (circle_id, member_id, name, initials, color, ws, status, joined, last_active, `left`, left_reason, top_domain) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+        [$circleId, $userId, $u['name'], $u['initials'], 'var(--navy-light)', (int)($top['ws'] ?? 0), 'active', date('M Y'), 'just now', null, null, $top['domain'] ?? null]);
+    dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$circleId, $circleId]);
+    dbRun("INSERT INTO user_circles (user_id, circle, status, since, kind) VALUES (?,?,?,?,?) ON DUPLICATE KEY UPDATE status = VALUES(status), since = VALUES(since), kind = VALUES(kind)", [$userId, $u['name'], 'Active', date('M Y'), 'roster']);
+    logCircleActivity($circleId, $u['name'] . ' joined as founding steward', 'membership');
+    return 1;
+}
+
 foreach ($routes as $r) {
     $id = parseId($cleanPath, $r['path']);
     if ($cleanPath === $r['path'] || $id !== null) {
@@ -625,9 +730,20 @@ foreach ($routes as $r) {
                 if ($cex && !dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cid, $wu['id']])) send(403, ['error' => 'Only a steward of that circle may edit it']);
                 if ($cex) $body = normalizeCircleSave($body, $cex);
             }
+            resourceWriteGuard($r['table'], 'POST', null, $wu, $body);
             if (!isset($body->id)) send(400, ['error' => 'id required']);
             dbRun("INSERT INTO {$r['table']} (id) VALUES (?) ON DUPLICATE KEY UPDATE id=id", [strval($body->id)]);
             $ok = updateRow($r['table'], $body);
+            // A new circle is staffed by its founder: without a steward the
+            // circle could never be joined, managed or disbanded.
+            if ($ok && $r['table'] === 'circles') {
+                $seated = seatCircleSteward(strval($body->id), $wu['id']);
+                if ($seated) {
+                    logCircleActivity(strval($body->id), 'Circle founded — founding steward seated', 'governance');
+                    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)',
+                        ['evt-circle-' . preg_replace('/[^A-Za-z0-9_-]/', '_', strval($body->id)), 'circle-created', (string)($body->name ?? ''), date('Y-m-d'), 'Circle founded with ' . $seated . ' founding steward', (string)($wu['name'] ?? $wu['initials'])]);
+                }
+            }
             send($ok ? 201 : 409, ['ok' => (bool)$ok, 'id' => $body->id]);
         }
         if ($method === 'PATCH' || $method === 'PUT') {
@@ -637,10 +753,11 @@ foreach ($routes as $r) {
             $row = dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]);
             if (!$row) send(404, ['error' => 'Not found']);
             if ($r['table'] === 'circles') $body = normalizeCircleSave($body, $row);
+            resourceWriteGuard($r['table'], 'PATCH', $id, $eu, $body);
             updateRow($r['table'], $body, $id);
             send(200, dbGet("SELECT * FROM {$r['table']} WHERE id = ?", [$id]));
         }
-        if ($method === 'DELETE') { $du = authUser(); if (!$du) send(401, ['error' => 'Unauthorized']); assertActiveMember($du); if ($r['table'] === 'circles') send(403, ['error' => 'Circles close through disbandment, not deletion']); $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
+        if ($method === 'DELETE') { $du = authUser(); if (!$du) send(401, ['error' => 'Unauthorized']); assertActiveMember($du); if ($r['table'] === 'circles') send(403, ['error' => 'Circles close through disbandment, not deletion']); resourceWriteGuard($r['table'], 'DELETE', $id, $du); $out = dbRun("DELETE FROM {$r['table']} WHERE id = ?", [$id]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
         send(405, ['error' => 'Method not allowed']);
     }
 }
@@ -717,7 +834,7 @@ foreach ($childDefs as $d) {
                     if ($p0 === 'target' || $p0 === 'submitter') $skipAssert = true;
                 }
             }
-            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks','circle_roster','circle_domains','circle_activity','cell_domains','cell_circles','draft_resolutions','stf_candidates'])) assertActiveMember($wuser);
+            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks','circle_roster','circle_domains','circle_activity','cell_domains','cell_circles','draft_resolutions','stf_candidates','circle_application_domains'])) assertActiveMember($wuser);
             // Archived circles take no writes at all: every circle child
             // (roster, domains, proposals, resolutions, activity) stops at
             // archive. (Departures and the archive sweep run through
@@ -807,6 +924,9 @@ foreach ($childDefs as $d) {
             $vals = array_merge([$parentId], array_map(function($e) { return bindVal($e[1]); }, $entries));
             dbRun("INSERT INTO {$d['child']} (" . implode(',', $keys) . ") VALUES (" . implode(',', array_fill(0, count($keys), '?')) . ")", $vals);
             if ($d['child'] === 'cell_team') dbRun('UPDATE cells SET participants = (SELECT COUNT(*) FROM cell_team WHERE cell_id = ?) WHERE id = ? AND type = ?', [$parentId, $parentId, 'jSTF Cell']);
+            // The circle's member count is derived from its live roster, never
+            // written by hand (the seeder follows the same rule).
+            if ($d['child'] === 'circle_roster') dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$parentId, $parentId]);
             if ($d['child'] === 'vote_records') {
                 // Vote aggregates are the only source the vote panel and the
                 // crystallisation decision read. Recompute them here — the
@@ -833,8 +953,8 @@ foreach ($childDefs as $d) {
         }
         if (preg_match($childIdRe, $cleanPath, $cm)) {
             $childId = urldecode($cm[2]);
-            if ($method === 'PATCH' || $method === 'PUT') { $body = readBody(); $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) { return $c !== 'id'; }); $entries = []; foreach ((array)$body as $k => $v) { if (in_array($k, $cols)) $entries[] = [$k, $v]; } if (!$entries) send(200, dbGet("SELECT * FROM {$d['child']} WHERE id = ?", [$childId])); $sets = array_map(function($e) { return $e[0] . ' = ?'; }, $entries); dbRun("UPDATE {$d['child']} SET " . implode(', ', $sets) . " WHERE id = ?", array_merge(array_map(function($e) { return bindVal($e[1]); }, $entries), [$childId])); send(200, dbGet("SELECT * FROM {$d['child']} WHERE id = ?", [$childId])); }
-            if ($method === 'DELETE') { $out = dbRun("DELETE FROM {$d['child']} WHERE id = ?", [$childId]); if ($d['child'] === 'cell_team') dbRun('UPDATE cells SET participants = (SELECT COUNT(*) FROM cell_team WHERE cell_id = ?) WHERE id = ? AND type = ?', [$parentId, $parentId, 'jSTF Cell']); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
+            if ($method === 'PATCH' || $method === 'PUT') { $body = readBody(); $cols = array_filter(array_map(function($c) { return $c['Field']; }, dbAll("SHOW COLUMNS FROM `{$d['child']}`")), function($c) { return $c !== 'id'; }); $entries = []; foreach ((array)$body as $k => $v) { if (in_array($k, $cols)) $entries[] = [$k, $v]; } if (!$entries) send(200, dbGet("SELECT * FROM {$d['child']} WHERE id = ?", [$childId])); $sets = array_map(function($e) { return $e[0] . ' = ?'; }, $entries); dbRun("UPDATE {$d['child']} SET " . implode(', ', $sets) . " WHERE id = ?", array_merge(array_map(function($e) { return bindVal($e[1]); }, $entries), [$childId])); if ($d['child'] === 'circle_roster') { $rc = dbGet('SELECT circle_id FROM circle_roster WHERE id = ?', [$childId]); if ($rc) dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$rc['circle_id'], $rc['circle_id']]); } send(200, dbGet("SELECT * FROM {$d['child']} WHERE id = ?", [$childId])); }
+            if ($method === 'DELETE') { $out = dbRun("DELETE FROM {$d['child']} WHERE id = ?", [$childId]); if ($d['child'] === 'cell_team') dbRun('UPDATE cells SET participants = (SELECT COUNT(*) FROM cell_team WHERE cell_id = ?) WHERE id = ? AND type = ?', [$parentId, $parentId, 'jSTF Cell']); if ($d['child'] === 'circle_roster') dbRun("UPDATE circles SET members = (SELECT COUNT(*) FROM circle_roster WHERE circle_id = ? AND status = 'active') WHERE id = ?", [$parentId, $parentId]); send($out->affectedRows ? 200 : 404, ['ok' => $out->affectedRows > 0]); }
             send(405, ['error' => 'Method not allowed']);
         }
         send(405, ['error' => 'Method not allowed']);
@@ -846,6 +966,9 @@ foreach ($childDefs as $d) {
 // ═════════════════════════════════════════════════════════
 if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/(versions|implementing-circles)$/', $cleanPath, $m)) {
     if ($method !== 'POST') send(405, ['error' => 'Method not allowed']);
+    // Resolution versions and implementing-circle links are governance
+    // records: only an authenticated, active member may write them.
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
     $cellId = urldecode($m[1]); $draftId = urldecode($m[2]); $kind = $m[3]; $body = readBody();
     $draft = dbGet('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?', [strval($draftId), $cellId]);
     if (!$draft) send(404, ['error' => 'Not found']);
@@ -1157,7 +1280,7 @@ if (preg_match('/^\/cells\/([^\/]+)\/astf-verdict$/', $cleanPath, $m)) {
     if (!empty($src['originCellId'])) {
         $origin = dbGet('SELECT * FROM cells WHERE id = ?', [$src['originCellId']]);
         if ($origin) { $or = pJson($origin['resolution'] ?? '{}') ?: [];
-            if ($verdict === 'approved') { $or['status'] = 'Approved'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); $osnap = pJson($origin['meta'] ?? '{}') ?: []; if (!empty($osnap['settingsSnapshot'])) { $appliedNotes = applySettingsSnapshotServer((array)$osnap['settingsSnapshot'], $user['name'] ?? $user['initials']); if ($appliedNotes) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-snap-' . time(), 'settings-applied', (string)($src['circleName'] ?? ''), date('Y-m-d'), 'Settings snapshot applied on approval: ' . implode('; ', (array)$appliedNotes), 'aSTF assessors']); } }
+            if ($verdict === 'approved') { $or['status'] = 'Approved'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'passed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); $osnap = pJson($origin['meta'] ?? '{}') ?: []; if (!empty($osnap['settingsSnapshot'])) { $founderId = null; $osrc = pJson($origin['source'] ?? '{}') ?: []; if (!empty($osrc['submitter'])) $founderId = $osrc['submitter']; $appliedNotes = applySettingsSnapshotServer((array)$osnap['settingsSnapshot'], $user['name'] ?? $user['initials'], $founderId); if ($appliedNotes) dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)', ['evt-astf-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId) . '-snap-' . time(), 'settings-applied', (string)($src['circleName'] ?? ''), date('Y-m-d'), 'Settings snapshot applied on approval: ' . implode('; ', (array)$appliedNotes), 'aSTF assessors']); } }
             elseif ($verdict === 'rejected') { $or['status'] = 'Rejected'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'failed' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
             else { $or['status'] = 'Revision Requested'; dbRun('UPDATE cells SET resolution = ? WHERE id = ?', [json_encode($or), $src['originCellId']]); dbRun("UPDATE draft_resolutions SET status = 'draft' WHERE cell_id = ? AND status = 'submitted'", [$src['originCellId']]); }
         }
@@ -1223,7 +1346,7 @@ function archiveCircleServer($cId, $reason, $actorName) {
     return $removed;
 }
 // the client applySettingsSnapshot for system + circle snapshots.
-function applySettingsSnapshotServer($snapshot, $userName) {
+function applySettingsSnapshotServer($snapshot, $userName, $founderId = null) {
     if (!is_array($snapshot) || empty($snapshot['type'])) return false;
     $notes = [];
     if ($snapshot['type'] === 'system') {
@@ -1249,6 +1372,17 @@ function applySettingsSnapshotServer($snapshot, $userName) {
             syncCircleMandateDomains($nid, $s['mandateDomains'] ?? []);
             $notes[] = 'circle proposed as Suggested (' . $nid . ')';
             logCircleActivity($nid, 'Circle proposed — deliberation pending', 'governance');
+            // The proposer is the founding steward: without a steward the new
+            // circle could never be joined, managed or disbanded.
+            if ($founderId) {
+                $seated = seatCircleSteward($nid, $founderId, 'circle-founded');
+                if ($seated) {
+                    $notes[] = 'founding steward seated (' . $nid . ')';
+                    logCircleActivity($nid, 'Founding resolution approved — founding steward seated', 'governance');
+                    dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)',
+                        ['evt-circle-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $nid), 'circle-created', trim((string)($s['name'] ?? '')), date('Y-m-d'), 'Circle founded with 1 founding steward', (string)$userName]);
+                }
+            }
         } else {
             $cur = dbGet('SELECT status, meta FROM circles WHERE id = ?', [$tgt]) ?: ['status' => null, 'meta' => null];
             $sets = []; $vals = [];
@@ -2937,6 +3071,8 @@ if ($cleanPath === '/observatory/publications/pending' && $method === 'GET') {
 if ($cleanPath === '/observatory/publications' && $method === 'GET') { send(200, ['ok' => true, 'publications' => dbAll("SELECT * FROM publications WHERE status = 'approved' ORDER BY date DESC")]); }
 if ($cleanPath === '/observatory/publications' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
+    // A suspended or guest member may not submit for approval.
+    assertActiveMember($user);
     $body = readBody(); $title = trim((string)($body->title ?? '')); $abstract = trim((string)($body->abstract ?? ''));
     if (!$title || !$abstract) send(400, ['error' => 'title and abstract required']);
     $res = dbRun('INSERT INTO publications (title, journal, date, type, abstract, tags, domain, status, author, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)', [$title, trim((string)($body->journal ?? '')), date('Y-m-d'), trim((string)($body->type ?? 'essay')), $abstract, json_encode(is_array($body->tags ?? null) ? $body->tags : []), trim((string)($body->domain ?? '')), 'pending', $user['name'] ?? $user['initials'], date('Y-m-d\TH:i:s.000\Z')]);
@@ -2948,9 +3084,11 @@ if ($cleanPath === '/public/organisations' && $method === 'GET') {
     $kd = groupBy(dbAll('SELECT * FROM org_knowledge_domains'), 'org_id');
     $labels = [];
     foreach (dbAll('SELECT id, label FROM domains') as $d) $labels[$d['id']] = $d['label'];
-    $orgs = array_map(function($o) use ($kd, $labels) {
+    // Member counts come from the affiliation rows, never from a stored figure.
+    $memberCounts = groupBy(dbAll('SELECT user_id, org_acronym FROM user_orgs'), 'org_acronym');
+    $orgs = array_map(function($o) use ($kd, $labels, $memberCounts) {
         return [
-            'id' => $o['id'], 'name' => $o['name'], 'memberCount' => $o['member_count'],
+            'id' => $o['id'], 'name' => $o['name'], 'memberCount' => count($memberCounts[$o['acronym']] ?? []),
             'location' => $o['location'], 'summary' => $o['summary'], 'status' => $o['status'],
             'knowledgeDomains' => array_values(array_map(function($d) use ($labels) { return $labels[$d['domain']] ?? $d['domain']; }, $kd[$o['id']] ?? [])),
         ];
@@ -2971,6 +3109,9 @@ if ($cleanPath === '/observatory/organisations' && $method === 'POST') {
 // ═════════════════════════════════════════════════════════
 if ($cleanPath === '/system-settings' && $method === 'GET') { send(200, dbGet('SELECT * FROM system_settings WHERE id = 1') ?: []); }
 if ($cleanPath === '/system-settings' && ($method === 'PATCH' || $method === 'PUT')) {
+    // Platform settings steer the judicial engines: stewards only.
+    $suser = authUser(); if (!$suser) send(401, ['error' => 'Unauthorized']);
+    if (!isSteward($suser['id'])) send(403, ['error' => 'Steward access required']);
     $body = readBody(); $cols = array_map(function($c) { return $c['Field']; }, dbAll('SHOW COLUMNS FROM system_settings'));
     $entries = []; foreach ((array)$body as $k => $v) { if (in_array($k, $cols) && $k !== 'id') $entries[] = [$k, $v]; }
     if (!$entries) send(200, dbGet('SELECT * FROM system_settings WHERE id = 1'));
@@ -2978,7 +3119,7 @@ if ($cleanPath === '/system-settings' && ($method === 'PATCH' || $method === 'PU
     dbRun('UPDATE system_settings SET ' . implode(', ', $sets) . ' WHERE id = 1', array_map(function($e) { return $e[1]; }, $entries));
     send(200, dbGet('SELECT * FROM system_settings WHERE id = 1'));
 }
-if ($cleanPath === '/stats' && $method === 'GET') { $r = dbGet('SELECT stats FROM stats WHERE id = 1'); send(200, $r ? pJson($r['stats']) ?: [] : []); }
+if ($cleanPath === '/stats' && $method === 'GET') { send(200, deriveStats()); }
 if ($cleanPath === '/registration' && $method === 'GET') {
     $reg = dbAll('SELECT * FROM registration_domains'); $meta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
     send(200, ['domains' => $reg, 'eloMap' => $meta ? pJson($meta['elo_map']) ?: [] : [], 'knowledgeLevels' => $meta ? pJson($meta['knowledge_levels']) ?: [] : [], 'experientialLevels' => $meta ? pJson($meta['experiential_levels']) ?: [] : [], 'defaultInterests' => $meta ? pJson($meta['default_interests']) ?: [] : []]);

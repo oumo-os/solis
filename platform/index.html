@@ -10665,7 +10665,7 @@ function submitProjectApplication() {
     initials: MOCK.currentUser.initials,
     motivation: motivation,
     status: 'pending',
-    appliedDate: 'Jul 26, 2026',
+    appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     proposedRole: role
   };
   MOCK.projectApplications.push(projectApp);
