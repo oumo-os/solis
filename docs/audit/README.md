@@ -47,6 +47,11 @@ without touching development data.
 | M5 | xSTF execution | 16 | 16 pass | ✅ works |
 | M6 | vSTF verification | 20 | 20 pass | ✅ works |
 | M7 | p-aSTF health review | 14 | 14 pass | ✅ works |
+| M8 | Circles & membership | 36 | 33 pass / 3 fail | ⚠️ new circles cannot be staffed; member count drifts |
+| M9 | Threads & engagement | 25 | 25 pass | ✅ works |
+| M10 | Publications & Observatory | 24 | 23 pass / 1 fail | ⚠️ suspended members can submit publications |
+| M11 | Projects & undertakings | 13 | 12 pass / 1 fail | ⚠️ client-authoritative applications, faked date |
+| M12 | Participants & organisations | 15 | 12 pass / 3 fail | ❌ any member can rewrite any record |
 
 **Wave 1 (governance chain) — all 8 modules green (198/198 checks).** The two STF-family
 modules that write governance outcomes (aSTF, jSTF) work end to end, including parallel
@@ -55,19 +60,28 @@ sealed filings, quorum handling, snapshot application and the judicial-audit han
 The two blockers found during the audit (F1, F2) were fixed and re-verified: the full
 wave-1 suite now passes 198/198.
 
+**Waves 2–3 (circles & content) — 5 modules, 113 checks, 108 pass.** Five further findings,
+including two blockers (F8, F12) in circle staffing and user-record authorization.
+
 ## Finding index
 
 | ID | Severity | Module | Status | Summary |
 |---|---|---|---|---|
 | **F1** | **Blocker** | M2 | ✅ **fixed** | Vote aggregates were never written — votes were stored but never counted, and crystallisation always resolved "passed" |
 | **F2** | **Blocker** | M1 / M9 | ✅ **fixed** | `ON DUPLICATE KEY UPDATE 1=1` is invalid SQL on MariaDB — implementing-circle links and thread endorse/bookmark always returned 500 |
+| **F8** | **Blocker** | M8 | ⏳ open | A newly created circle can never be staffed — nobody can join its roster and the succession engine skips it |
+| **F12** | **Blocker** | M12 | ⏳ open | Any active member can rewrite any member's record — including lifting a live jSTF sanction via `users.status` |
 | **F3** | Major — needs decision | cross-cutting | ⏳ open | The "steward" gate is "active member of *any* circle", not membership of the circle that owns the cell |
+| **F9** | Major | M8 | ⏳ open | `circle.members` is not recomputed when a member is added — the count shown on every circle card drifts from the roster |
+| **F10** | Major | M10 | ⏳ open | Publication submission skips `assertActiveMember` — a suspended member can still submit for approval |
 | **F4** | Minor | API contract | ⏳ open | `GET` on a child-item id (`/cells/:id/messages/:mid`) answers 405; only collection GETs are supported |
 | **F5** | Minor | API contract | ⏳ open | `GET /bootstrap` mutates data — it runs the integrity engine, which can create cells, seat stewards and accept applications |
 | **F6** | Minor | hygiene | ✅ **fixed** (partly) | The shadowed vote route (`api.php:938-962`) was removed with the F1 fix; the static `POST /competence/verify-wh` 410 endpoint still stands |
+| **F11** | Minor | M11 | ⏳ open | Project applications are client-authoritative and the SPA hardcodes the date `Jul 26, 2026` |
+| **F13** | Minor | M12 | ⏳ open | Organisation member counts are client-writable (`member_count`) and are published on the public cards |
 | **F7** | Info | M4 | ⏳ open (by design) | A restricted steward target is frozen (`Suspended`) rather than `Restricted` — verified consistent |
 
-## Wave 1 — Governance chain (detail)
+## Waves
 
-See [`wave-1-governance-chain.md`](wave-1-governance-chain.md) for the per-module
-check listings, reproduction steps and the recommended fixes for F1–F7.
+- Wave 1 — governance chain: [`wave-1-governance-chain.md`](wave-1-governance-chain.md)
+- Waves 2–3 — circles & content: [`wave-2-3-circles-and-content.md`](wave-2-3-circles-and-content.md)
