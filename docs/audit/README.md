@@ -52,6 +52,10 @@ without touching development data.
 | M10 | Publications & Observatory | 24 | 23 pass / 1 fail | ⚠️ suspended members can submit publications |
 | M11 | Projects & undertakings | 13 | 12 pass / 1 fail | ⚠️ client-authoritative applications, faked date |
 | M12 | Participants & organisations | 15 | 12 pass / 3 fail | ❌ any member can rewrite any record |
+| M13 | Auth, session & registration | 21 | 20 pass / 1 fail | ⚠️ same-name registration 500s |
+| M14 | Competence, profile & governance records | 19 | 17 pass / 2 fail | ⚠️ settings + policy writes ungated |
+| M15 | Whole-application boot & render | 23 | 23 pass | ✅ the SPA boots and renders live data |
+| M16 | Authorization matrix | 17 | 9 pass / 8 fail | ❌ three anonymous write paths, ungated CRUD |
 
 **Wave 1 (governance chain) — all 8 modules green (198/198 checks).** The two STF-family
 modules that write governance outcomes (aSTF, jSTF) work end to end, including parallel
@@ -60,8 +64,10 @@ sealed filings, quorum handling, snapshot application and the judicial-audit han
 The two blockers found during the audit (F1, F2) were fixed and re-verified: the full
 wave-1 suite now passes 198/198.
 
-**Waves 2–3 (circles & content) — 5 modules, 113 checks, 108 pass.** Five further findings,
-including two blockers (F8, F12) in circle staffing and user-record authorization.
+**Waves 2–5 — 17 modules, 391 checks.** Fourteen further findings, including four
+blockers: a new circle can never be staffed (F8), any member can rewrite another member's
+record (F12), three endpoints accept **unauthenticated writes** (F15) and the generic CRUD
+lets any member edit governance records (F16).
 
 ## Finding index
 
@@ -71,6 +77,8 @@ including two blockers (F8, F12) in circle staffing and user-record authorizatio
 | **F2** | **Blocker** | M1 / M9 | ✅ **fixed** | `ON DUPLICATE KEY UPDATE 1=1` is invalid SQL on MariaDB — implementing-circle links and thread endorse/bookmark always returned 500 |
 | **F8** | **Blocker** | M8 | ⏳ open | A newly created circle can never be staffed — nobody can join its roster and the succession engine skips it |
 | **F12** | **Blocker** | M12 | ⏳ open | Any active member can rewrite any member's record — including lifting a live jSTF sanction via `users.status` |
+| **F15** | **Blocker** | M14 / M16 | ⏳ open | Three endpoints accept unauthenticated writes: resolution versions, implementing circles, system settings |
+| **F16** | **Blocker** | M14 / M16 | ⏳ open | The generic CRUD has no ownership or role gate — any member can rewrite policies, delete users, create users |
 | **F3** | Major — needs decision | cross-cutting | ⏳ open | The "steward" gate is "active member of *any* circle", not membership of the circle that owns the cell |
 | **F9** | Major | M8 | ⏳ open | `circle.members` is not recomputed when a member is added — the count shown on every circle card drifts from the roster |
 | **F10** | Major | M10 | ⏳ open | Publication submission skips `assertActiveMember` — a suspended member can still submit for approval |
@@ -79,9 +87,12 @@ including two blockers (F8, F12) in circle staffing and user-record authorizatio
 | **F6** | Minor | hygiene | ✅ **fixed** (partly) | The shadowed vote route (`api.php:938-962`) was removed with the F1 fix; the static `POST /competence/verify-wh` 410 endpoint still stands |
 | **F11** | Minor | M11 | ⏳ open | Project applications are client-authoritative and the SPA hardcodes the date `Jul 26, 2026` |
 | **F13** | Minor | M12 | ⏳ open | Organisation member counts are client-writable (`member_count`) and are published on the public cards |
+| **F14** | Minor | M13 | ⏳ open | Registering a second member with the same name returns 500 (id slug collision) |
+| **F17** | Minor | M14 | ⏳ open | The seeded `stats` fixture ("200+ resources", "38 events") is still published although nothing consumes it |
 | **F7** | Info | M4 | ⏳ open (by design) | A restricted steward target is frozen (`Suspended`) rather than `Restricted` — verified consistent |
 
 ## Waves
 
 - Wave 1 — governance chain: [`wave-1-governance-chain.md`](wave-1-governance-chain.md)
 - Waves 2–3 — circles & content: [`wave-2-3-circles-and-content.md`](wave-2-3-circles-and-content.md)
+- Waves 4–5 — account, boot & security: [`wave-4-5-account-and-security.md`](wave-4-5-account-and-security.md)
