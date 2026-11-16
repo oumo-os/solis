@@ -14,4 +14,5 @@ putenv('SOLIS_DB_USER=root');
 putenv('SOLIS_DB_PASS=');
 putenv('SOLIS_DB_HOST=localhost');
 putenv('SOLIS_DB_PORT=3306');
-require __DIR__ . '/../../solis/platform/api.php';
+// <htdocs>/solis-audit/api.php  ->  <htdocs>/solis/platform/api.php (the repo)
+require __DIR__ . '/../solis/platform/api.php';
