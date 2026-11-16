@@ -116,3 +116,7 @@ appears anywhere in the rendered DOM.
 - Waves 2–3 — circles & content: [`wave-2-3-circles-and-content.md`](wave-2-3-circles-and-content.md)
 - Waves 4–5 — account, boot & security: [`wave-4-5-account-and-security.md`](wave-4-5-account-and-security.md)
 - Wave 6 — the participation model: [`wave-6-participation.md`](wave-6-participation.md)
+
+The suites that produced these results are in [`suite/`](suite/) — see
+[`suite/README.md`](suite/README.md) for how to recreate the isolated audit
+environment and re-run them.
