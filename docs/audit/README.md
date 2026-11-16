@@ -55,15 +55,14 @@ without touching development data.
 | M13 | Auth, session & registration | 21 | 21 pass | ✅ works |
 | M14 | Competence, profile & governance records | 19 | 19 pass | ✅ works |
 | M15 | Whole-application boot & render | 23 | 23 pass | ✅ the SPA boots and renders live data |
-| M16 | Authorization matrix | 17 | 17 pass | ✅ writes are gated |
+| M16 | Authorization matrix | 22 | 22 pass | ✅ writes are gated |
 | M17 | Participation & domain separation | 15 | 15 pass | ✅ topics decide who takes part |
 
-**All 18 modules green — 409/409 checks pass.**
+**All 18 modules green — 414/414 checks pass.**
 
-The audit found 19 findings; 16 were fixed and re-verified (F1, F2, F8–F19). Three remain
-open by decision: F3 (the "steward" gate is "active member of any circle" — kept as the
-intended model, with participation separated by domains), F4 (child-item GETs answer 405)
-and F5 (`GET /bootstrap` runs the integrity engine, so a read can write).
+The audit found 19 findings; **all 19 are now fixed and re-verified** (F1–F19). F3 is not a
+defect but a confirmation: the "steward" gate is "active member of *any* circle", as intended,
+with participation separated by domains.
 
 ## The governance model (as confirmed by the platform owner)
 
@@ -100,8 +99,8 @@ appears anywhere in the rendered DOM.
 | **F3** | Major — needs decision | cross-cutting | ✅ confirmed as the model | The "steward" gate is "active member of *any* circle" — confirmed intended; participation is separated by domains instead (see wave 6) |
 | **F9** | Major | M8 | ✅ **fixed** | `circle.members` was not recomputed when a member was added — the count on every circle card drifted from the roster |
 | **F10** | Major | M10 | ✅ **fixed** | Publication submission skipped `assertActiveMember` — a suspended member could still submit for approval |
-| **F4** | Minor | API contract | ⏳ open | `GET` on a child-item id (`/cells/:id/messages/:mid`) answers 405; only collection GETs are supported |
-| **F5** | Minor | API contract | ⏳ open | `GET /bootstrap` mutates data — it runs the integrity engine, which can create cells, seat stewards and accept applications |
+| **F4** | Minor | API contract | ✅ **fixed** | `GET` on a child-item id (`/cells/:id/messages/:mid`) answered 405 — a single child row can now be read on its own, with the same visibility as its collection |
+| **F5** | Minor | API contract | ✅ **fixed** | `GET /bootstrap` ran the integrity engine, so a read could write — the engine now runs on its own endpoint (`POST /engine/poll`), asked for by the application |
 | **F6** | Minor | hygiene | ✅ **fixed** | The shadowed vote route was removed with the F1 fix; the static `POST /competence/verify-wh` 410 endpoint now answers 410 by design |
 | **F11** | Minor | M11 | ✅ **fixed** | Project applications were client-authoritative and the SPA hardcoded the date `Jul 26, 2026` |
 | **F13** | Minor | M12 | ✅ **fixed** | Organisation member counts were client-writable and were published on the public cards — now derived from the affiliation rows |

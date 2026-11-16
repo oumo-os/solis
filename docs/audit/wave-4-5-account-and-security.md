@@ -137,6 +137,8 @@ revoking an enacted policy.
 | **F15** | The three anonymous write paths are closed: resolution versions and implementing-circle links require an authenticated, active member; `PATCH /system-settings` requires a steward. The platform's judicial durations, adjudicator counts and pool mode can no longer be changed by an anonymous client. |
 | **F16** | The generic CRUD carries per-table write authority (`resourceWriteGuard()`): policies, exit-reason labels, STF rows and the domain registry are steward-written; integrity records and governance events are engine-written and refuse HTTP writes; the governance ledger is steward-written; inbox items can only be updated by their owner; project applications and thread counters are server-owned. |
 | **F17** | `GET /stats` and the bootstrap `stats` key are now derived from the live tables (`deriveStats()`); the seeded snapshot with "200+ resources" and "38 events" is no longer published. |
+| **F4** | A child row can now be read on its own (`GET /circles/:id/roster/:rowId`), with exactly the visibility of the collection it belongs to — circle internals stay redacted for outsiders and sealed cases stay sealed for non-team readers. |
+| **F5** | `GET /bootstrap` is now a pure read. The integrity engine (which commissions verifications, seats vetted successors and accepts applications) moved to an explicit `POST /engine/poll`, which the application calls after each load — capped and idempotent as before, but no longer a side effect of fetching the page. |
 
 ## Additional observation
 

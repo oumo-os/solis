@@ -12595,6 +12595,14 @@ function loadApiData() {
     if (data.cells) {
       data.cells.forEach(function(c) { cellsById[c.id] = c; });
     }
+    // The integrity engine commissions verifications and seats successors.
+    // It is not part of the read: the application asks for it explicitly and
+    // reloads if it acted.
+    if (typeof SolisApi !== 'undefined' && SolisApi.enginePoll) {
+      SolisApi.enginePoll().then(function(r) {
+        if (r && r.acted) loadApiData();
+      }).catch(function() { /* the platform works without the engine */ });
+    }
   })
   .catch(function(e) {
     console.error('loadApiData failed:', e);

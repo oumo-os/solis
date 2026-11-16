@@ -36,6 +36,12 @@ var SolisApi = (function() {
     return req('GET', 'bootstrap' + (empty ? '?empty=1' : ''));
   }
 
+  // The integrity engine acts on the platform (commissions verifications,
+  // seats successors). It is an explicit call, never a side effect of a read.
+  function enginePoll(cap) {
+    return req('POST', 'engine/poll' + (cap ? '?cap=' + cap : ''));
+  }
+
   // ─── cells ───
   var CELL_COLUMNS = ['id', 'type', 'title', 'status', 'delib_type', 'participants', 'members',
     'progress', 'days_active', 'lead', 'circle', 'created', 'deadline', 'blind', 'assessors',
@@ -503,6 +509,7 @@ var SolisApi = (function() {
     authRegister: authRegister,
     authLogout: authLogout,
     bootstrap: bootstrap,
+    enginePoll: enginePoll,
     saveCell: saveCell,
     addTask: addTask,
     updateTask: updateTask,

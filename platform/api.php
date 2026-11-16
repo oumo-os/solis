@@ -149,6 +149,19 @@ if ($method === 'GET' && $cleanPath === '/auth/me') {
 // ═════════════════════════════════════════════════════════
 // BOOTSTRAP ENDPOINT
 // ═════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════
+// INTEGRITY ENGINE (explicit, never a side effect of a read)
+// ═════════════════════════════════════════════════════════
+// Conditions set by jSTF verdicts (unverified claims, recorded vacancies)
+// commission their own vSTFs. The engine is idempotent and capped; it runs
+// when the application asks for it, not inside GET /bootstrap.
+if ($cleanPath === '/engine/poll' && $method === 'POST') {
+    $euser = authUser(); if (!$euser) send(401, ['error' => 'Unauthorized']);
+    assertActiveMember($euser);
+    $cap = isset($_GET['cap']) ? max(1, min(10, (int)$_GET['cap'])) : 3;
+    $did = integrityEnginePoll($cap);
+    send(200, ['ok' => true, 'acted' => $did]);
+}
 if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $empty = isset($_GET['empty']) && $_GET['empty'] === '1';
     $users = dbAll('SELECT * FROM users');
@@ -156,11 +169,9 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     if (preg_match('/^Bearer\s+(.+)$/i', $h, $m)) $tok = $m[1];
     $currentRow = $tok ? dbGet('SELECT u.* FROM auth_tokens t JOIN users u ON u.id = t.user_id WHERE t.token = ? AND t.expires_at > ?', [$tok, date('Y-m-d\TH:i:s.000\Z')]) : null;
     $isSteward = isSteward($currentRow['id'] ?? null);
-    // Integrity engine runs lazily here (no cron): conditions set by jSTF
-    // verdicts (unverified claims, recorded vacancies) commission their own
-    // vSTFs. Capped and idempotent — new rows appear on the next load.
-    // Authenticated loads only: anonymous traffic must not commission work.
-    if (!$empty && $currentRow) integrityEnginePoll(3);
+    // The integrity engine is not a read: it commissions vSTFs, seats vetted
+    // successors and accepts applications. It runs on its own endpoint
+    // (POST /engine/poll) so a bootstrap load never writes.
     $compByUser = groupBy(dbAll('SELECT * FROM user_competence'), 'user_id');
     $cirByUser = groupBy(dbAll('SELECT * FROM user_circles'), 'user_id');
     $orgByUser = groupBy(dbAll('SELECT * FROM user_orgs'), 'user_id');
@@ -820,7 +831,7 @@ foreach ($childDefs as $d) {
     if (preg_match($re, $cleanPath, $m) || preg_match($childIdRe, $cleanPath, $cm)) {
         $parentId = urldecode($cm ? $cm[1] : $m[1]);
         if ($method === 'GET' && $d['child'] === 'thread_replies') { $tvRow = dbGet('SELECT * FROM threads WHERE id = ?', [$parentId]); if ($tvRow && ($tvRow['visibility'] ?: 'public') === 'stewards-only') { $rvUser = authUser(); if (!jstfCanSeeThread($rvUser, $tvRow)) send(404, ['error' => 'Not found']); } }
-        if ($method === 'GET' && !preg_match($childIdRe, $cleanPath)) {
+        if ($method === 'GET') {
             if (in_array($d['child'], ['cell_team','cell_messages','vote_records','cell_votes','draft_resolutions','cell_objectives','cell_tasks','stf_candidates'])) {
                 $gCellId = $parentId;
                 if ($d['child'] === 'stf_candidates' && str_starts_with($parentId, 'stf-')) $gCellId = substr($parentId, 4);
@@ -849,7 +860,17 @@ foreach ($childDefs as $d) {
                     send(200, []);
                 }
             }
-            send(200, dbAll("SELECT * FROM {$d['child']} WHERE {$d['parentKey']} = ?", [$parentId]));
+            $rows = dbAll("SELECT * FROM {$d['child']} WHERE {$d['parentKey']} = ?", [$parentId]);
+            if (preg_match($childIdRe, $cleanPath, $cm2)) {
+                // A single child row, with exactly the visibility of the
+                // collection it belongs to: read it from the same result set.
+                $oneId = urldecode($cm2[2]);
+                $one = null;
+                foreach ($rows as $rw) { if (isset($rw['id']) && (string)$rw['id'] === $oneId) { $one = $rw; break; } }
+                if (!$one) send(404, ['error' => 'Not found']);
+                send(200, $one);
+            }
+            send(200, $rows);
         }
         if ($method !== 'GET') {
             $wuser = authUser(); if (!$wuser) send(401, ['error' => 'Unauthorized']);
