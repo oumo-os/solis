@@ -1119,7 +1119,7 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
     $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']);
     $inRoster = dbGet("SELECT COUNT(*) AS n FROM circle_roster WHERE member_id = ? AND status = 'active'", [$user['id']]);
     if (!($inRoster['n'] ?? 0)) send(403, ['error' => 'Steward access required']);
-    $body = readBody(); $allowed = ['system-settings', 'circle-settings', 'circle-creation']; $delibType = (string)($body->delibType ?? '');
+    $body = readBody(); $allowed = ['system-settings', 'circle-settings', 'circle-creation', 'org-creation', 'org-settings']; $delibType = (string)($body->delibType ?? '');
     if (!in_array($delibType, $allowed)) send(400, ['error' => 'delibType required']);
     $snap = is_object($body->snapshot ?? null) ? (array)$body->snapshot : [];
     // circle-settings edits an existing circle: the proposer must steward
@@ -1466,6 +1466,45 @@ function applySettingsSnapshotServer($snapshot, $userName, $founderId = null) {
             if (($s['status'] ?? '') === 'Archived' && ($cur['status'] ?? '') !== 'Archived') {
                 $removed = archiveCircleServer($tgt, (string)($s['archiveReason'] ?? $s['reason'] ?? 'archived by approved resolution'), $userName);
                 $notes[] = 'circle archived (' . $tgt . ', ' . $removed . ' stewards departed)';
+            }
+        }
+    } elseif ($snapshot['type'] === 'org') {
+        $s = isset($snapshot['settings']) && is_array($snapshot['settings']) ? $snapshot['settings'] : [];
+        $tgt = trim((string)($snapshot['target'] ?? 'new'));
+        $orgCols = ['name' => 'name', 'acronym' => 'acronym', 'shortname' => 'shortname', 'location' => 'location', 'summary' => 'summary', 'website' => 'website'];
+        if ($tgt === '' || $tgt === 'new') {
+            $oid = 'org-' . base_convert(time(), 10, 36) . '-' . substr(bin2hex(random_bytes(2)), 0, 4);
+            $cols = []; $args = [];
+            foreach ($orgCols as $sk => $col) {
+                if (isset($s[$sk]) && $s[$sk] !== '') { $cols[] = $col; $args[] = trim((string)$s[$sk]); }
+            }
+            $cols[] = 'id'; $args[] = $oid;
+            $cols[] = 'status'; $args[] = 'Active';
+            $cols[] = 'founded'; $args[] = date('M Y');
+            dbRun('INSERT INTO organisations (' . implode(', ', $cols) . ') VALUES (' . implode(', ', array_fill(0, count($cols), '?')) . ')', $args);
+            foreach ((is_array($s['domains'] ?? null) ? $s['domains'] : []) as $kd) {
+                $kdName = is_array($kd) ? (string)($kd['name'] ?? '') : (string)$kd;
+                if ($kdName === '') continue;
+                dbRun('INSERT INTO org_knowledge_domains (org_id, domain) VALUES (?,?)', [$oid, $kdName]);
+            }
+            $notes[] = 'organisation founded (' . $oid . ')';
+        } else {
+            $cur = dbGet('SELECT id FROM organisations WHERE id = ?', [$tgt]);
+            if ($cur) {
+                $sets = []; $args = [];
+                foreach ($orgCols as $sk => $col) {
+                    if (isset($s[$sk]) && $s[$sk] !== '') { $sets[] = "$col = ?"; $args[] = trim((string)$s[$sk]); }
+                }
+                if ($sets) { $args[] = $tgt; dbRun('UPDATE organisations SET ' . implode(', ', $sets) . ' WHERE id = ?', $args); }
+                if (isset($s['domains']) && is_array($s['domains'])) {
+                    dbRun('DELETE FROM org_knowledge_domains WHERE org_id = ?', [$tgt]);
+                    foreach ($s['domains'] as $kd) {
+                        $kdName = is_array($kd) ? (string)($kd['name'] ?? '') : (string)$kd;
+                        if ($kdName === '') continue;
+                        dbRun('INSERT INTO org_knowledge_domains (org_id, domain) VALUES (?,?)', [$tgt, $kdName]);
+                    }
+                }
+                $notes[] = 'organisation updated (' . $tgt . ')';
             }
         }
     } else return false;

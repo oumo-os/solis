@@ -6440,29 +6440,38 @@ function submitOrgSettingsProposal() {
     domains: domains
   };
   var snapshot = { type: 'org', target: orgId, status: 'pending', settings: settings };
-  var cellId = 'cell-' + Date.now().toString(36);
-  MOCK.cells.push({
-    id: cellId, type: 'Deliberation Cell', delibType: 'org-settings',
-    title: 'Org: ' + settings.name + (settings.acronym ? ' [' + settings.acronym + ']' : '') + ' Settings Change',
-    participants: 6, status: 'Active',
-    domains: domains,
-    source: { type: 'org-proposal', proposer: MOCK.currentUser.name },
-    settingsSnapshot: snapshot,
-    participatingCircles: [], resolution: { status: 'Draft' },
-    messages: [{ author: MOCK.currentUser.initials, text: 'Proposed settings change for ' + settings.name + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+  var isNew = !orgId || orgId === 'new';
+  var delibType = isNew ? 'org-creation' : 'org-settings';
+  var title = 'Org: ' + settings.name + (settings.acronym ? ' [' + settings.acronym + ']' : '') + (isNew ? ' Affiliation' : ' Settings Change');
+  // The proposal is raised through the API so the snapshot travels with it and
+  // the server can apply it when the resolution is approved.
+  SolisApi.createCircleProposal({ delibType: delibType, title: title, snapshot: snapshot, sourceType: 'org-proposal' }).then(function (r) {
+    if (!r || !r.cellId) { toast('Could not raise the proposal.', 'error'); return; }
+    var cellId = r.cellId;
+    MOCK.cells.push({
+      id: cellId, type: 'Deliberation Cell', delibType: delibType,
+      title: title,
+      participants: 6, status: 'Active',
+      domains: domains,
+      source: { type: 'org-proposal', proposer: MOCK.currentUser.name },
+      settingsSnapshot: snapshot,
+      participatingCircles: [], resolution: { status: 'Draft' },
+      messages: [{ author: MOCK.currentUser.initials, text: 'Proposed ' + (isNew ? 'founding of ' : 'settings change for ') + settings.name + '. Awaiting deliberation.', time: 'Just now', gold: true }]
+    });
+    cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
+    closeOrgSettingsModal();
+    nav('cell-delib');
+    renderDelibCell(cellId);
+    toast('Organisation settings proposal created. Deliberation cell opened.', 'success');
   });
-  cellsById[cellId] = MOCK.cells[MOCK.cells.length - 1];
-  closeOrgSettingsModal();
-  nav('cell-delib');
-  renderDelibCell(cellId);
-  toast('Organisation settings proposal created. Deliberation cell opened.', 'success');
-  SolisApi.saveCell(cellsById[cellId]);
 }
 
 function applySettingsSnapshot(snapshot) {
   if (!snapshot || !snapshot.type) return false;
-  var now = new Date();
-  var ts = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  // The server owns the apply: it creates or updates the circle, organisation
+  // or settings, and writes the governance ledger entry when the resolution
+  // is approved. The browser echoes locally where it is cheap and re-reads
+  // the record from the API — a second write here would apply it twice.
   if (snapshot.type === 'system') {
     var s = snapshot.settings || {};
     if (!MOCK.systemSettings) MOCK.systemSettings = {};
@@ -6472,32 +6481,13 @@ function applySettingsSnapshot(snapshot) {
         Object.keys(s[sec]).forEach(function(k) { MOCK.systemSettings[sec][k] = s[sec][k]; });
       }
     });
-    // Durations take real effect server-side: persist the STF ones so the
-    // enforcement paths read them from system_settings.
-    if (s.stf && typeof SolisApi !== 'undefined' && SolisApi.saveSystemSettings) {
-      var persist = {};
-      if (s.stf.jstfDurationDays != null) persist.jstf_duration_days = s.stf.jstfDurationDays;
-      if (s.stf.jstfAdjudicators != null) persist.jstf_adjudicators = s.stf.jstfAdjudicators;
-      if (s.stf.astfAssessors != null) persist.astf_assessors = s.stf.astfAssessors;
-      if (s.stf.jstfPoolMode != null) persist.jstf_pool_mode = s.stf.jstfPoolMode;
-      if (s.stf.jstfDomains != null) persist.jstf_domains = JSON.stringify(s.stf.jstfDomains);
-      if (s.stf.astfDurationDays != null) persist.astf_duration_days = s.stf.astfDurationDays;
-      if (s.stf.vstfDurationDays != null) persist.vstf_duration_days = s.stf.vstfDurationDays;
-      if (Object.keys(persist).length) SolisApi.saveSystemSettings(persist);
-    }
+    if (typeof loadApiData === 'function') loadApiData();
   } else if (snapshot.type === 'circle') {
     var s = snapshot.settings || {};
     if (snapshot.target === 'new') {
-      var newCircle = {
-        id: 'circle-' + Date.now().toString(36),
-        name: s.name, status: 'Suggested',
-        description: s.description || '',
-        maxMembers: s.maxMembers || 15,
-        mandateDomains: s.mandateDomains || { primary: [], secondary: [] },
-        roster: { active: [], former: [] }
-      };
-      MOCK.circles.push(newCircle);
-      SolisApi.saveCircle(newCircle);
+      // The server creates the circle, seats the founding steward and writes
+      // the governance ledger entry; the browser re-reads it.
+      if (typeof loadApiData === 'function') loadApiData();
     } else {
       var circle = MOCK.circles.find(function(c) { return c.id === snapshot.target; });
       if (circle) {
@@ -6507,31 +6497,13 @@ function applySettingsSnapshot(snapshot) {
         if (s.maxMembers) circle.maxMembers = s.maxMembers;
         if (s.mandateDomains) circle.mandateDomains = s.mandateDomains;
       }
+      if (typeof loadApiData === 'function') loadApiData();
     }
   } else if (snapshot.type === 'org') {
-    var s = snapshot.settings || {};
-    var org = MOCK.orgs ? MOCK.orgs.find(function(o) { return o.id === snapshot.target; }) : null;
-    if (org) {
-      if (s.name) org.name = s.name;
-      if (s.acronym) org.acronym = s.acronym;
-      if (s.summary) org.summary = s.summary;
-      if (s.location) org.location = s.location;
-      if (s.website) org.website = s.website;
-      if (s.domains) org.knowledgeDomains = s.domains;
-    }
+    // The server creates or updates the organisation and its knowledge
+    // domains; the browser re-reads instead of mutating a local copy.
+    if (typeof loadApiData === 'function') loadApiData();
   }
-  if (!MOCK.governanceLedger) MOCK.governanceLedger = [];
-  var ledgerEntry = {
-    id: 'ledger-' + Date.now().toString(36),
-    type: snapshot.type,
-    target: snapshot.target,
-    settings: snapshot.settings,
-    appliedBy: MOCK.currentUser.name,
-    appliedAt: ts,
-    status: 'applied'
-  };
-  MOCK.governanceLedger.push(ledgerEntry);
-  SolisApi.saveGovernanceEntry(ledgerEntry);
   snapshot.status = 'approved';
   return true;
 }

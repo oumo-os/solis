@@ -1,7 +1,8 @@
 // S4 — Circles & organisations: workflow probes
 // Founding flows (circle + organisation), the double-apply, the succession
 // chain (apply → vacancy → vetting → seat), and settings persistence.
-import { AUDIT, DB_AUDIT, req, login, sql, sqlRows, count, Report } from './lib.mjs';
+import { AUDIT, DB_AUDIT, req, login, sql, sqlRows, count, Report, REPO, extractFn } from './lib.mjs';
+import { readFileSync } from 'fs';
 
 const r = new Report('s04-circles-organisations');
 
@@ -63,32 +64,35 @@ async function main() {
   const mandate = sqlRows(DB_AUDIT, `SELECT domain,mandate,desired_ws FROM circle_domains WHERE circle_id='${newCircle[0] && newCircle[0].id}';`);
   r.check('the mandate domains are stored on the circle', mandate.length === 1 && mandate[0].mandate === 'primary', mandate);
 
-  // ── 2. the client echo (the double apply) ─────────────────────────────
-  // applySettingsSnapshot() in the SPA also POSTs the circle after approval.
-  const echo = await req(AUDIT, 'POST', '/circles', sd, {
-    id: 'circle-' + Date.now().toString(36), name: 'Audit S4 Circle', status: 'Suggested',
-    description: 'founded by the S4 probe', members: 0
-  });
-  const circlesAfterEcho = count(DB_AUDIT, 'circles');
-  r.check('the client echo does not create a second circle', circlesAfterEcho === circlesAfter,
-    { circlesAfter, circlesAfterEcho, echoStatus: echo.status });
+  // ── 2. the browser must not apply the snapshot itself ─────────────────
+  // (the server is the single writer: it creates the circle, seats the
+  // founder and writes the ledger entry)
+  const spa = readFileSync(REPO + '/platform/index.html', 'utf8');
+  const applyFn = extractFn(spa, 'applySettingsSnapshot');
+  r.check('the browser does not create the circle itself', !/saveCircle\(/.test(applyFn), 'saveCircle still called');
+  r.check('the browser does not write a governance ledger row', !/saveGovernanceEntry\(/.test(applyFn), 'saveGovernanceEntry still called');
+  r.check('the browser does not write the system settings', !/saveSystemSettings\(/.test(applyFn), 'saveSystemSettings still called');
   const dupes = sqlRows(DB_AUDIT, "SELECT id,status,members FROM circles WHERE name='Audit S4 Circle';");
   r.check('exactly one circle carries the founded name', dupes.length === 1, dupes);
   const dupLedger = count(DB_AUDIT, 'governance_ledger');
-  r.check('the duplicate (if any) carries no ledger entry', dupLedger === ledgerAfter, { dupLedger, ledgerAfter });
+  r.check('the founding writes exactly one ledger entry', dupLedger === ledgerAfter, { dupLedger, ledgerAfter });
 
   // ── 3. organisation founding ─────────────────────────────────────────
   const orgsBefore = count(DB_AUDIT, 'organisations');
   const orgSnapshot = {
     type: 'org', target: 'new', status: 'pending',
-    settings: { name: 'Audit S4 Organisation', acronym: 'AS4', location: 'Kampala', summary: 'probe', website: '', domains: ['Remote Sensing'] }
+    settings: { name: 'Audit S4 Organisation', acronym: 'AS4', shortname: 'Audit S4', location: 'Kampala', summary: 'probe', website: '', domains: ['remote-sensing'] }
   };
   await approveSnapshot(sd, 'Org: Audit S4 Organisation Affiliation', orgSnapshot, 'org-creation');
   const orgsAfter = count(DB_AUDIT, 'organisations');
   r.check('an approved organisation founding creates the organisation',
     orgsAfter === orgsBefore + 1, { orgsBefore, orgsAfter });
-  const orgRow = sqlRows(DB_AUDIT, "SELECT id,name,acronym FROM organisations WHERE name='Audit S4 Organisation';");
+  const orgRow = sqlRows(DB_AUDIT, "SELECT id,name,acronym,location,status FROM organisations WHERE name='Audit S4 Organisation';");
   r.check('the organisation row is stored', orgRow.length === 1, orgRow);
+  const orgKd = orgRow.length ? sqlRows(DB_AUDIT, `SELECT domain FROM org_knowledge_domains WHERE org_id='${orgRow[0].id}';`) : [];
+  r.check('the organisation carries its knowledge domain', orgKd.length === 1 && orgKd[0].domain === 'remote-sensing', orgKd);
+  const orgLedger = count(DB_AUDIT, 'governance_ledger', "type='org'");
+  r.check('the organisation founding is written to the governance ledger', orgLedger >= 1, { orgLedger });
 
   // ── 4. organisation settings change (existing org) ────────────────────
   const gssBefore = sqlRows(DB_AUDIT, "SELECT summary FROM organisations WHERE id='gss';")[0];

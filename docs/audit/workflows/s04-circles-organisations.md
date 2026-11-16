@@ -84,13 +84,13 @@ Same root cause as F-B: the browser mutates `MOCK.orgs` in memory; the server ig
 **Fix** — covered by the F-B change (server-side `'org'` apply). The browser stops
 mutating organisation objects locally.
 
-## Sequence for the fixes
+## Fixes applied (re-probed: 32/32)
 
-1. `api.php` — allow `delibType: 'org-creation'` in `POST /proposals/system`; add the
-   `'org'` branch to `applySettingsSnapshotServer` (create/update + knowledge domains +
-   ledger entry).
-2. `index.html` — `submitOrgSettingsProposal` raises the proposal server-side like the
-   circle path; `applySettingsSnapshot` stops writing (`saveCircle`,
-   `saveSystemSettings`) and re-reads from the server instead.
-3. Re-probe: `s04-circles-organisations.mjs` → 28/28, then the full suite
-   (M0–M17) for regressions.
+| Finding | Change |
+|---|---|
+| **F-A** | The server is now the single writer. `applySettingsSnapshot()` (the browser) no longer calls `saveCircle`, `saveGovernanceEntry` or `saveSystemSettings`; it echoes locally where cheap and re-reads the record with `loadApiData()`. One founding now produces exactly one circle, with its mandate, its seated founder and one governance-ledger entry. |
+| **F-B** | Organisation founding runs on the server: `POST /proposals/system` accepts `delibType: 'org-creation'`, `applySettingsSnapshotServer` gained an `'org'` branch (creates the organisation with its knowledge domains, or updates an existing one) and writes the ledger entry. The browser raises the proposal through the API (`submitOrgSettingsProposal`) instead of pushing a cell into memory. |
+| **F-C** | Same change as F-B — organisation settings changes are applied server-side and survive a reload. |
+
+Re-verification: `s04-circles-organisations.mjs` → **32/32**, and the full suite
+(M0–M17, 391 checks) passes with no regressions.
