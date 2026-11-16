@@ -305,7 +305,7 @@ async function draftChildRoutes(req, res, reqUrl, method) {
     const keys = ['draft_id', ...cols.filter(k => k !== 'draft_id' && body[k] !== undefined)];
     await dbRun(`INSERT INTO resolution_versions (${keys.join(',')}) VALUES (${keys.map(() => '?').join(',')})`, [...keys.map(k => (k === 'draft_id' ? String(draftId) : bindVal(body[k])))]);
   } else {
-    await dbRun('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1', [String(draftId), String(body.circle_name ?? '')]);
+    await dbRun('INSERT INTO resolution_implementing_circles (draft_id, circle_name) VALUES (?,?) ON DUPLICATE KEY UPDATE circle_name = VALUES(circle_name)', [String(draftId), String(body.circle_name ?? '')]);
   }
   return send(res, 201, { ok: true });
 }
@@ -326,7 +326,7 @@ async function engagementRoutes(req, res, reqUrl, method) {
   }
   const table = kind === 'endorsement' ? 'thread_endorsements' : 'thread_bookmarks';
   if (method === 'POST') {
-    await dbRun(`INSERT INTO ${table} (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE 1=1`, [user.id, threadId]);
+    await dbRun(`INSERT INTO ${table} (user_id, thread_id) VALUES (?,?) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id)`, [user.id, threadId]);
   } else {
     await dbRun(`DELETE FROM ${table} WHERE user_id = ? AND thread_id = ?`, [user.id, threadId]);
   }
