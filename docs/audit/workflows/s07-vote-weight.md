@@ -7,7 +7,7 @@ Workflow review of the vote weighting and the crystallisation decision, against
 Probes: `docs/audit/suite/s07-vote-weight.mjs` (12 checks, isolated database + a booted
 copy of the SPA).
 
-## Verdict: the arithmetic matches the design; the decision does not
+## Verdict: FIXED � panel and server read the same effective weights and the same quorum
 
 **12/12 checks pass.** Every documented rule is implemented as written — in the browser.
 The gap is that the *server* decides the outcome by a different, simpler rule.
@@ -56,20 +56,20 @@ The probe puts both on one pair of votes in `cell-21` (domains Liability / Remot
 The same votes, read by the two halves of the platform, point in opposite directions.
 Which one governs is not a matter of preference — it decides resolutions.
 
-## Fix direction
+## Fixes applied (re-probed: 15/15)
 
-One rule, computed once, on the server:
+**F-E** — `debate/close` now computes the quorum from `cell_circles.votes` (falling back to
+the cell's participant count) and the distinct voters in `vote_records`. Below two thirds
+the outcome is `pending`: the cell and the draft are left untouched and a
+`cell-crystallisation-deferred` governance event records the counts.
 
-- compute the effective weight where the vote is recorded (the server already knows the
-  voter's standing, the domain share and the voter's circle mandate) and store **that** in
-  `vote_records` — so the aggregates, the panel and the crystallisation all read the same
-  numbers;
-- enforce the quorum in `debate/close`: below quorum the outcome is *pending*, not a
-  verdict;
-- persist the domain shares with the draft (`draft_resolutions` has no shares column
-  today, so every load re-derives them from the equal-share fallback — the drafter's
-  shares do not survive a reload) and keep the mandate lookup in one place.
+**F-F** — the effective weight (`Ws × domain share × mandate multiplier`) is now computed
+once, in `api.php`'s `effectiveVoteWeight()`, and stored in `vote_records.ws`. The domain
+shares are persisted on the draft (`draft_resolutions.domain_shares`, JSON) so the panel
+and the server read the same map; where no shares exist both fall back to an equal split
+across the cell's declared domains. The panel no longer re-applies a share or multiplier
+to the already-effective weight, and neither does the threshold table.
 
-The doc's §3 already notes that shares "are **not persisted** … re-derived on every load
-from the hardcoded fallback" — that is why the shares can differ between the moment a
-resolution is drafted and the moment it is judged.
+The two votes in this card now read **450 yea / 100 nay** on both sides (82% yea), and the
+resolution is `pending` until the quorum is met.
+

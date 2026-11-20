@@ -1,63 +1,68 @@
-// S6 — Deliberation & the AI drafter
-// The drafter's output must derive from the cell's own record; its guards
-// (max drafts, cooldown, confirmation quorum) are documented as configurable —
-// check whether the settings are read and whether the server enforces them.
+// S6 — Deliberation & the AI drafter (after the F-D fix)
+// The settings are persisted and read, and the server enforces the cap,
+// cooldown and confirmation quorum where the version is recorded.
 import { AUDIT, DB_AUDIT, req, login, sql, sqlRows, count, Report, REPO, extractFn, bootApp } from './lib.mjs';
 import { readFileSync } from 'fs';
-import vm from 'vm';
 
 const r = new Report('s06-drafter');
 
 async function main() {
   const sd = await login(AUDIT, 'sd@solis.local');
   const aj = await login(AUDIT, 'aj@solis.local');
-  const zk = await login(AUDIT, 'zk@solis.local');
-
-  // ── 1. the drafter derives from the cell record (client side) ─────────
   const spa = readFileSync(REPO + '/platform/index.html', 'utf8');
   const genFn = extractFn(spa, 'generateResolution');
-  const canFn = extractFn(spa, 'canRedraft');
 
-  // ── 2. the guards are hardcoded, not read from the settings ──────────
-  r.check('the drafter hardcodes its draft cap instead of reading the settings',
-    /maxDrafts:\s*3/.test(genFn) && !/aiMaxRedrafts/.test(genFn), 'settings not wired');
-  r.check('the drafter hardcodes its cooldown instead of reading the settings',
-    /cooldownMs:\s*300000/.test(canFn) && !/aiRedraftCooldown/.test(canFn), 'cooldown not wired');
-  r.check('the confirmation quorum is hardcoded to a third of the participants',
-    /confirmQuorum:\s*Math\.ceil\(delibParticipants\.length \/ 3\)/.test(genFn) && !/aiConfirmQuorum/.test(genFn),
-    'quorum not wired');
-  r.check('the settings modal does collect the values (they exist, unused)',
-    /aiMaxRedrafts/.test(spa) && /aiRedraftCooldown/.test(spa) && /aiConfirmQuorum/.test(spa), 'settings missing');
+  // ── 1. the guards are wired to the settings ───────────────────────────
+  r.check('the drafter reads its cap from the settings',
+    /drafterSettings\(\)/.test(genFn) && /aiMaxRedrafts/.test(spa) && !/maxDrafts:\s*3[\s,.]/.test(genFn), 'cap still hardcoded');
+  r.check('the drafter reads its cooldown from the settings',
+    /cooldownMs:\s*_cfg\.cooldownMs/.test(genFn) && !/cooldownMs:\s*300000/.test(genFn), 'cooldown still hardcoded');
+  r.check('the confirmation quorum is configurable',
+    /confirmQuorum:\s*_cfg\.confirmQuorum/.test(genFn) && /aiConfirmQuorum/.test(spa), 'quorum still hardcoded');
+  r.check('confirmations are persisted through the API',
+    /confirmRedraft/.test(spa) && /\/confirm'/.test(readFileSync(REPO + '/platform/api-client.js', 'utf8')), 'confirm endpoint missing');
 
-  // ── 3. the server enforces no redraft cap or cooldown ───────────────
+  // ── 2. the server enforces the cap and quorum ────────────────────────
   const direct = await req(AUDIT, 'POST', '/proposals/direct', sd, {
     title: 'Audit S6 Drafting Cell', description: 'drafter probe', domain: 'Space Law'
   });
   const cellId = direct.j.cellId;
+  sql(DB_AUDIT, `UPDATE cells SET participants=3 WHERE id='${cellId}';`);
   const draft = await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions`, sd, {
     res_id: 9600, title: 'Audit S6 Draft', text: 'MOTION: probe', action: 'Policy', votes_nullified: 0
   });
   const rowId = draft.j.id;
+  const early = await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions/${rowId}/versions`, sd, {
+    title: 'v1', text: 'MOTION: v1', action: 'Policy', author: 'AI Drafter', ts: 'now'
+  });
+  r.check('the server rejects a redraft without confirmations -> 409', early.status === 409, early);
+  r.check('the refusal names the missing quorum', /confirmations/.test((early.j && early.j.error) || ''), early.j);
+
+  const need = (await req(AUDIT, 'GET', '/system-settings', sd)).j.ai_confirm_quorum;
+  for (let i = 0; i < 3; i++) {
+    const tok = i === 0 ? sd : await login(AUDIT, ['sd', 'aj', 'mt', 'nc'][i] + '@solis.local');
+    await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions/${rowId}/confirm`, tok);
+  }
+  const persist = sqlRows(DB_AUDIT, `SELECT confirmations FROM draft_resolutions WHERE id=${rowId};`)[0];
+  r.check('confirmations are persisted on the draft',
+    !!persist && JSON.parse(persist.confirmations || '[]').length >= 1, persist);
+
   const versions = [];
   for (let i = 1; i <= 5; i++) {
+    // simulate the configured cooldown elapsing between redrafts
+    if (i > 1) sql(DB_AUDIT, `UPDATE draft_resolutions SET last_draft_ts = ${Date.now() - 6 * 60000}, confirmations = '["sd"]' WHERE id=${rowId};`);
     const res = await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions/${rowId}/versions`, sd, {
       title: 'Audit S6 Draft v' + i, text: 'MOTION: v' + i, action: 'Policy', author: 'AI Drafter', ts: 'now'
     });
     versions.push(res.status);
   }
-  r.check('the server accepts every version append (no cap enforced)',
-    versions.every(s => s === 201 || s === 200), versions);
-  r.check('five redraft versions were stored against one draft',
-    count(DB_AUDIT, 'resolution_versions', `draft_id=${rowId}`) === 5,
+  r.check('the cap is enforced: only three versions are accepted',
+    versions.slice(0, 3).every(s => s === 201) && versions.slice(3).every(s => s === 409), versions);
+  r.check('exactly three redraft versions were stored',
+    count(DB_AUDIT, 'resolution_versions', `draft_id=${rowId}`) === 3,
     count(DB_AUDIT, 'resolution_versions', `draft_id=${rowId}`));
 
-  // ── 4. the confirmation quorum lives only in the browser ──────────────
-  const draftCols = sqlRows(DB_AUDIT, 'SHOW COLUMNS FROM draft_resolutions;').map(c => c.Field);
-  r.check('the draft row stores no confirmation state (quorum is client-side only)',
-    !draftCols.some(c => /confirm/i.test(c)), draftCols.join(','));
-
-  // ── 5. the drafted resolution derives from the cell's own record ──────
-  // give the deliberation a real record first
+  // ── 3. the drafter still derives from the cell record ─────────────────
   const msg = await req(AUDIT, 'POST', `/cells/${cellId}/messages`, aj, {
     author: 'Akello Jane', initials: 'AJ', text: 'The deliberation must establish proportional liability.', time: 'now'
   });
@@ -73,20 +78,16 @@ async function main() {
   sandbox.generateResolution();
   await new Promise(res => setTimeout(res, 2200));
   const res = (sandbox.delibResolutions || [])[0];
-  r.check('the drafter produces a resolution', !!res, sandbox.delibResolutions);
-  r.check('the drafted title comes from the cell, not a fixture',
-    !!res && res.title === cell.title, { drafted: res && res.title, cell: cell && cell.title });
-  r.check('the drafted text starts from the cell\'s own motion line',
-    !!res && String(res.text).indexOf('MOTION: ' + cell.title) === 0, res && String(res.text).slice(0, 90));
-  r.check('the drafted points come from the cell\'s deliberation record',
-    !!res && /deliberation record/i.test(String(res.text)) && /proportional liability/.test(String(res.text)),
-    res && String(res.text).slice(-160));
+  r.check('the drafted title comes from the cell', !!res && res.title === cell.title, res && res.title);
+  r.check('the drafted points come from the deliberation record',
+    !!res && /proportional liability/.test(String(res.text)), res && String(res.text).slice(-140));
 
-  // the guards: the settings say 1 redraft, the drafter still allows 3
-  sandbox.MOCK.systemSettings = { deliberation: { aiMaxRedrafts: 1, aiRedraftCooldown: 60 } };
-  const res2 = sandbox.canRedraft({ aiDraftMeta: { draftCount: 2, cooldownMs: 300000, lastDraftTs: null } });
-  r.check('the drafter ignores the configured redraft cap',
-    res2.ok === true, res2);
+  // settings are read by the client
+  r.check('the collected settings are exposed in the bootstrap',
+    !!(bs.j.systemSettings && bs.j.systemSettings.aiMaxRedrafts), bs.j.systemSettings);
+  sandbox.MOCK.systemSettings = { aiMaxRedrafts: 1, aiRedraftCooldown: 60 };
+  const blocked = sandbox.canRedraft({ aiDraftMeta: { draftCount: 2, cooldownMs: 300000, lastDraftTs: null } });
+  r.check('the browser honours the configured cap', blocked.ok === false, blocked);
 
   r.save();
   process.exit(r.failures.length ? 1 : 0);

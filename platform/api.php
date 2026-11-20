@@ -429,7 +429,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     }
         $cell['draftResolutions'] = [];
         foreach (($draftByCell[$c['id']] ?? []) as $d) {
-            $cell['draftResolutions'][] = ['id' => $d['res_id'] ?? $d['id'], 'rowId' => $d['id'], 'status' => $d['status'] ?: 'draft', 'title' => $d['title'], 'text' => $d['text'], 'action' => $d['action'], 'votesNullified' => (bool)$d['votes_nullified'], 'supersedes' => $d['supersedes'] ?? null, 'versions' => array_map(function($v) { return ['title' => $v['title'], 'text' => $v['text'], 'action' => $v['action'], 'author' => $v['author'], 'ts' => $v['ts']]; }, $verByDraft[$d['id']] ?? []), 'implementingCircles' => array_map(function($i) { return $i['circle_name']; }, $impByDraft[$d['id']] ?? [])];
+            $cell['draftResolutions'][] = ['id' => $d['res_id'] ?? $d['id'], 'rowId' => $d['id'], 'status' => $d['status'] ?: 'draft', 'title' => $d['title'], 'text' => $d['text'], 'action' => $d['action'], 'votesNullified' => (bool)$d['votes_nullified'], 'supersedes' => $d['supersedes'] ?? null, 'domainShares' => pJson($d['domain_shares'] ?? null) ?: [], 'versions' => array_map(function($v) { return ['title' => $v['title'], 'text' => $v['text'], 'action' => $v['action'], 'author' => $v['author'], 'ts' => $v['ts']]; }, $verByDraft[$d['id']] ?? []), 'implementingCircles' => array_map(function($i) { return $i['circle_name']; }, $impByDraft[$d['id']] ?? [])];
         }
         $vs = $voteByCell[$c['id']] ?? [];
         if ($vs || isset($vsumByCell[$c['id']])) {
@@ -487,7 +487,7 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $exitReasonLabels = []; foreach (dbAll('SELECT * FROM exit_reason_labels') as $r) $exitReasonLabels[$r['key']] = $r['label'];
     $ss = dbGet('SELECT * FROM system_settings WHERE id = 1') ?: [];
     $jstfDomainsRaw = $ss['jstf_domains'] ?? '[]'; $jstfDomains = pJson(is_string($jstfDomainsRaw) ? $jstfDomainsRaw : json_encode($jstfDomainsRaw)) ?: []; if (!is_array($jstfDomains)) $jstfDomains = [];
-    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'astfAssessors' => (int)($ss['astf_assessors'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence'];
+    $systemSettings = ['stewardTermMonths' => $ss['steward_term_months'] ?? null, 'maxConsecutiveTerms' => $ss['max_consecutive_terms'] ?? null, 'cooloffMonths' => $ss['cooloff_months'] ?? null, 'pAstfCycleMonths' => $ss['p_astf_cycle_months'] ?? null, 'autoExpireCircles' => (bool)($ss['auto_expire_circles'] ?? false), 'defaultCircleExpiryMonths' => $ss['default_circle_expiry_months'] ?? null, 'jstfDurationDays' => $ss['jstf_duration_days'] ?? 30, 'astfDurationDays' => $ss['astf_duration_days'] ?? 10, 'vstfDurationDays' => $ss['vstf_duration_days'] ?? 14, 'jstfDomains' => array_values($jstfDomains), 'jstfAdjudicators' => (int)($ss['jstf_adjudicators'] ?? 3) ?: 3, 'astfAssessors' => (int)($ss['astf_assessors'] ?? 3) ?: 3, 'jstfPoolMode' => in_array($ss['jstf_pool_mode'] ?? '', ['stewards', 'competence']) ? $ss['jstf_pool_mode'] : 'competence', 'aiMaxRedrafts' => (int)($ss['ai_max_redrafts'] ?? 3) ?: 3, 'aiRedraftCooldown' => (int)($ss['ai_redraft_cooldown'] ?? 5) ?: 5, 'aiConfirmQuorum' => $ss['ai_confirm_quorum'] ?? '1/3 participants', 'voteNullifyOnEdit' => (bool)($ss['vote_nullify_on_edit'] ?? true)];
 $stats = deriveStats();
     $regRows = dbAll('SELECT * FROM registration_domains'); $regMeta = dbGet('SELECT * FROM registration_meta WHERE id = 1');
     $registration = ['domains' => array_map(function($r) { return ['name' => $r['name'], 'type' => $r['type']]; }, $regRows), 'eloMap' => $regMeta ? pJson($regMeta['elo_map']) ?: [] : [], 'knowledgeLevels' => $regMeta ? pJson($regMeta['knowledge_levels']) ?: [] : [], 'experientialLevels' => $regMeta ? pJson($regMeta['experiential_levels']) ?: [] : [], 'defaultInterests' => $regMeta ? pJson($regMeta['default_interests']) ?: [] : []];
@@ -626,6 +626,9 @@ function participationDomains($cellId, $cell = null) {
 
 // A member's standing in one domain: their weighted standing, or their hard
 // claim when they carry no weighted one.
+// One canonical vote weight. The platform's rule is
+//   effective = Ws x domain share x mandate multiplier
+// and the crystallisation decision must read the same number the panel shows.
 function memberStanding($userId, $domain) {
     $row = dbGet('SELECT ws, wh FROM user_competence WHERE user_id = ? AND domain = ? LIMIT 1', [$userId, $domain]);
     if (!$row) return null;
@@ -633,6 +636,48 @@ function memberStanding($userId, $domain) {
     $wh = (int)($row['wh'] ?? 0);
     if ($ws <= 0 && $wh <= 0) return null;
     return max($ws, $wh);
+}
+
+// The single canonical vote weight: Ws x domain share x mandate multiplier.
+// The panel used to compute this from bootstrap data while the aggregates
+// stored raw Ws — the same votes could read as "failed" on one side and 82%
+// yea on the other. It is computed here, once, and stored in vote_records.ws.
+function effectiveVoteWeight($userId, $domain, $cellId, $ws) {
+    $weight = (float)$ws;
+
+    // Domain share: the shares stored on the resolution draft (set by the
+    // drafter and persisted) win. Otherwise split evenly across the cell's
+    // declared domains — deterministic, never dependent on vote order.
+    $shareMap = [];
+    $drafts = dbAll("SELECT domain_shares FROM draft_resolutions WHERE cell_id = ?", [$cellId]);
+    foreach ($drafts as $d) {
+        $decoded = pJson($d['domain_shares'] ?? null) ?: [];
+        foreach ($decoded as $dk => $dv) { $shareMap[(string)$dk] = (float)$dv; }
+    }
+    if (!isset($shareMap[$domain])) {
+        $declared = dbGet('SELECT COUNT(*) AS n FROM cell_domains WHERE cell_id = ?', [$cellId]);
+        $n = (int)($declared['n'] ?? 0);
+        if ($n > 0) $shareMap[$domain] = 1 / $n;
+        else $shareMap[$domain] = 1;
+    }
+    $weight *= $shareMap[$domain];
+
+    // Mandate multiplier: the first participating circle the voter sits in,
+    // primary mandate 1.5, secondary 1.0, otherwise 0.25.
+    $mult = 0.25;
+    foreach (dbAll('SELECT circle_id FROM cell_circles WHERE cell_id = ? ORDER BY id', [$cellId]) as $pc) {
+        $cid = $pc['circle_id'];
+        $active = dbGet("SELECT 1 FROM circle_roster WHERE circle_id = ? AND member_id = ? AND status = 'active'", [$cid, $userId]);
+        if (!$active) continue;
+        // The seed carries legacy circle_domains rows with a NULL mandate;
+        // only the primary/secondary rows are the real mandate.
+        $mandate = dbGet("SELECT mandate FROM circle_domains WHERE circle_id = ? AND domain = ? AND mandate IN ('primary','secondary') ORDER BY FIELD(mandate,'primary','secondary') LIMIT 1", [$cid, $domain]);
+        if ($mandate) {
+            $mult = (($mandate['mandate'] ?? '') === 'primary') ? 1.5 : (($mandate['mandate'] ?? '') === 'secondary' ? 1.0 : 0.25);
+        }
+        break;
+    }
+    return round($weight * $mult, 4);
 }
 
 // ─── Per-table write authority ────────────────────────────────────────────
@@ -924,7 +969,10 @@ foreach ($childDefs as $d) {
                 // they hold standing, and their weight is their own.
                 $stand = memberStanding($wuser['id'], $vdom);
                 if ($stand === null) send(403, ['error' => 'You hold no standing in ' . $vdom . ' — participation follows your domains']);
-                $body->ws = $stand;
+                // Store the effective weight (Ws x share x mandate multiplier):
+                // the aggregates, the crystallisation and the panel all read
+                // this one canonical number.
+                $body->ws = effectiveVoteWeight($wuser['id'], $vdom, $parentId, $stand);
                 dbRun('DELETE FROM vote_records WHERE cell_id = ? AND domain = ? AND (user_id = ? OR (user_id IS NULL AND initials = ?))', [$parentId, $vdom, $wuser['id'] ?? null, $wuser['initials'] ?? '?']);
                 $body->user_id = $wuser['id'] ?? null;
                 $body->initials = $wuser['initials'] ?? '?';
@@ -1037,8 +1085,31 @@ if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/(versions|impl
     $cellId = urldecode($m[1]); $draftId = urldecode($m[2]); $kind = $m[3]; $body = readBody();
     $draft = dbGet('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?', [strval($draftId), $cellId]);
     if (!$draft) send(404, ['error' => 'Not found']);
-    if ($kind === 'versions') {
-        $cols = ['draft_id', 'title', 'text', 'action', 'author', 'ts'];
+     if ($kind === 'versions') {
+        // The redraft guards used to live in the browser only; the settings
+        // modal collected numbers the drafter never read. Enforce them here,
+        // where the version is actually recorded.
+        $ss = dbGet('SELECT ai_max_redrafts, ai_redraft_cooldown, ai_confirm_quorum FROM system_settings WHERE id = 1') ?: [];
+        $max = max(1, (int)($ss['ai_max_redrafts'] ?? 3));
+        $cooldownMin = max(0, (int)($ss['ai_redraft_cooldown'] ?? 5));
+        $done = (int)($draft['draft_count'] ?? 0);
+        if ($done >= $max) send(409, ['error' => 'Max redrafts (' . $max . ') reached']);
+        $lastTs = (int)($draft['last_draft_ts'] ?? 0);
+        if ($lastTs) {
+            $elapsedMin = (time() * 1000 - $lastTs) / 60000;
+            if ($elapsedMin < $cooldownMin) send(409, ['error' => 'Cooldown ' . ceil($cooldownMin - $elapsedMin) . 'm']);
+        }
+        $confirms = pJson($draft['confirmations'] ?? null) ?: [];
+        $quorumMode = (string)($ss['ai_confirm_quorum'] ?? '');
+        $cellRow = dbGet('SELECT participants FROM cells WHERE id = ?', [$cellId]);
+        $participants = (int)($cellRow['participants'] ?? 4) ?: 4;
+        if ($quorumMode === 'majority') $need = (int)floor($participants / 2) + 1;
+        elseif (preg_match('/(\d+)/', $quorumMode, $qm)) $need = max(1, min($participants, (int)$qm[1]));
+        else $need = max(1, (int)ceil($participants / 3));
+        if (count($confirms) < $need) send(409, ['error' => 'Redraft needs ' . count($confirms) . '/' . $need . ' confirmations']);
+        dbRun('UPDATE draft_resolutions SET draft_count = ?, last_draft_ts = ?, confirmations = NULL WHERE id = ?',
+            [$done + 1, time() * 1000, $draft['id']]);
+     $cols = ['draft_id', 'title', 'text', 'action', 'author', 'ts'];
         $keys = ['draft_id']; foreach ($cols as $c) { if ($c !== 'draft_id' && isset($body->$c)) $keys[] = $c; }
         $vals = array_map(function($k) use ($body, $draftId) { return $k === 'draft_id' ? strval($draftId) : bindVal($body->$k); }, $keys);
         dbRun("INSERT INTO resolution_versions (" . implode(',', $keys) . ") VALUES (" . implode(',', array_fill(0, count($keys), '?')) . ")", $vals);
@@ -1141,6 +1212,26 @@ if ($cleanPath === '/proposals/system' && $method === 'POST') {
 // ═════════════════════════════════════════════════════════
 // VOTE ROUTES
 
+// Redraft confirmations are governance acts: persist them on the draft so
+// the quorum survives a reload and the version route can enforce it.
+if (preg_match('/^\/cells\/([^\/]+)\/draft-resolutions\/([^\/]+)\/confirm$/', $cleanPath, $m) && $method === 'POST') {
+    $user = authUser(); if (!$user) send(401, ['error' => 'Unauthorized']); assertActiveMember($user);
+    $cellId = urldecode($m[1]); $draftId = urldecode($m[2]);
+    $draft = dbGet('SELECT * FROM draft_resolutions WHERE id = ? AND cell_id = ?', [strval($draftId), $cellId]);
+    if (!$draft) send(404, ['error' => 'Not found']);
+    $confirms = pJson($draft['confirmations'] ?? null) ?: [];
+    if (!in_array($user['id'], $confirms, true)) $confirms[] = $user['id'];
+    dbRun('UPDATE draft_resolutions SET confirmations = ? WHERE id = ?', [json_encode($confirms), $draft['id']]);
+    $ss = dbGet('SELECT ai_confirm_quorum FROM system_settings WHERE id = 1') ?: [];
+    $cellRow = dbGet('SELECT participants FROM cells WHERE id = ?', [$cellId]);
+    $participants = (int)($cellRow['participants'] ?? 4) ?: 4;
+    $mode = (string)($ss['ai_confirm_quorum'] ?? '');
+    if ($mode === 'majority') $need = (int)floor($participants / 2) + 1;
+    elseif (preg_match('/(\d+)/', $mode, $qm)) $need = max(1, min($participants, (int)$qm[1]));
+    else $need = max(1, (int)ceil($participants / 3));
+    send(200, ['ok' => true, 'confirmations' => count($confirms), 'required' => $need]);
+}
+
 // ═════════════════════════════════════════════════════════
 // GOVERNANCE ROUTES (submit + debate close)
 // ═════════════════════════════════════════════════════════
@@ -1174,8 +1265,25 @@ if (preg_match('/^\/cells\/([^\/]+)\/debate\/close$/', $cleanPath, $m) && $metho
     if (!$cell) send(404, ['error' => 'Not found']);
     $sr = dbGet('SELECT summary FROM cell_vote_summary WHERE cell_id = ?', [$cellId]);
     $s = $sr ? pJson($sr['summary']) : []; $yea = (int)($s['yea'] ?? 0); $nay = (int)($s['nay'] ?? 0);
-    $outcome = $nay > $yea ? 'failed' : 'passed';
+    // Quorum: two thirds of the participating members must have voted. This
+    // is the same rule the vote panel applies (participating circles' votes
+    // first, then the cell's participant count). Below it the result is
+    // pending — never a passed or failed resolution.
+    $tmRow = dbGet('SELECT SUM(votes) AS n FROM cell_circles WHERE cell_id = ?', [$cellId]);
+    $totalMembers = (int)($tmRow['n'] ?? 0);
+    if ($totalMembers <= 0) $totalMembers = (int)($cell['participants'] ?? 0) ?: 8;
+    $quorumReq = (int)ceil($totalMembers * 2 / 3);
+    $voterRow = dbGet('SELECT COUNT(DISTINCT user_id) AS n FROM vote_records WHERE cell_id = ?', [$cellId]);
+    $voters = (int)($voterRow['n'] ?? 0);
     $evtStem = 'evt-crystal-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $cellId);
+    if ($voters < $quorumReq) {
+        dbRun('INSERT INTO governance_events (id, type, circle, date, text, participant) VALUES (?,?,?,?,?,?)',
+            [$evtStem . '-pending-' . time(), 'cell-crystallisation-deferred', (string)($cell['circle'] ?? ''), date('Y-m-d'),
+             '"' . ($cell['title'] ?? $cellId) . '" — quorum not met (' . $voters . '/' . $quorumReq . '), resolution pending', (string)($body->participant ?? '')]);
+        send(200, ['ok' => true, 'status' => $cell['status'], 'outcome' => 'pending',
+                   'yea' => $yea, 'nay' => $nay, 'voters' => $voters, 'quorum' => $quorumReq]);
+    }
+    $outcome = $nay > $yea ? 'failed' : 'passed';
     if ($cell['status'] === 'crystallised') { $ex = dbGet('SELECT id FROM governance_events WHERE id LIKE ?', [$evtStem . '%']); if ($ex) send(200, ['ok' => true, 'status' => 'crystallised', 'already' => true, 'outcome' => $outcome, 'yea' => $yea, 'nay' => $nay]); }
     $r = pJson($cell['resolution'] ?? '{}') ?: []; if (($r['status'] ?? '') === 'Draft' || ($r['status'] ?? '') === 'Submitted') $r['status'] = 'Crystallised'; $r['outcome'] = $outcome;
     dbRun("UPDATE cells SET status = 'crystallised', resolution = ? WHERE id = ?", [json_encode($r), $cellId]);
@@ -1426,6 +1534,16 @@ function applySettingsSnapshotServer($snapshot, $userName, $founderId = null) {
             $sets[] = $col . ' = ?'; $vals[] = $stf[$key];
         }
         if (isset($stf['jstfDomains']) && is_array($stf['jstfDomains'])) { $sets[] = 'jstf_domains = ?'; $vals[] = json_encode(array_values($stf['jstfDomains'])); }
+        // Deliberation settings are collected in the settings modal and must
+        // take effect when the resolution is approved.
+        $delib = isset($s['deliberation']) && is_array($s['deliberation']) ? $s['deliberation'] : [];
+        foreach (['aiMaxRedrafts' => ['ai_max_redrafts', 'int'], 'aiRedraftCooldown' => ['ai_redraft_cooldown', 'int'],
+                  'aiConfirmQuorum' => ['ai_confirm_quorum', 'str'], 'voteNullifyOnEdit' => ['vote_nullify_on_edit', 'bool']] as $dkey => $dcol) {
+            if (!array_key_exists($dkey, $delib) || $delib[$dkey] === '' || $delib[$dkey] === null) continue;
+            $dv = $delib[$dkey];
+            $sets[] = $dcol[0] . ' = ?';
+            $vals[] = $dcol[1] === 'int' ? (int)$dv : ($dcol[1] === 'bool' ? ($dv ? 1 : 0) : (string)$dv);
+        }
         if ($sets) { dbRun('UPDATE system_settings SET ' . implode(', ', $sets) . ' WHERE id = 1', $vals); $notes[] = 'system settings applied (' . count($sets) . ' keys)'; }
     } elseif ($snapshot['type'] === 'circle') {
         $s = isset($snapshot['settings']) && is_array($snapshot['settings']) ? $snapshot['settings'] : [];

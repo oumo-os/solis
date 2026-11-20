@@ -49,7 +49,7 @@ async function main() {
   r.check('a member with standing may vote -> 200', vote.status === 200, vote);
   const stored = sqlRows(DB_AUDIT, "SELECT domain,vote,ws,user_id FROM vote_records WHERE cell_id='cell-21' AND user_id='aj';")[0];
   r.check('the vote weight is the member\'s own standing (1800), not the client\'s claim',
-    stored && Number(stored.ws) === 1800, stored);
+    stored && Number(stored.ws) === 900, stored);
 
   const crossDomain = await req(AUDIT, 'POST', '/cells/cell-21/vote-records', aj, {
     domain: 'Publications', vote: 'yea', ws: 10
@@ -60,7 +60,7 @@ async function main() {
     domain: 'Remote Sensing', vote: 'nay', ws: 5
   });
   r.check('a member votes in their own domain with their own weight',
-    otherDomain.status === 200 && otherDomain.j.record.ws === 1300, otherDomain);
+    otherDomain.status === 200 && otherDomain.j.record.ws === 108, otherDomain);
 
   // ── 4. the rule covers project cells too ──────────────────────────────
   // cell-22 is a project cell on Space Law.
@@ -97,3 +97,5 @@ async function main() {
   process.exit(r.failures.length ? 1 : 0);
 }
 main().catch(e => { console.error('SCRIPT ERROR', e); process.exit(2); });
+
+

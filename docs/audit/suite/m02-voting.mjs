@@ -49,6 +49,9 @@ async function main() {
     title: 'Audit M2 Voting Cell', description: 'vote probe', domain: 'Space Law'
   });
   const cellId = direct.j.cellId;
+  // This cell has no participating circles, so the quorum falls back to its
+  // participant count. Keep the scenario quorate: four voters of three.
+  sql(DB_AUDIT, `UPDATE cells SET participants=3 WHERE id='${cellId}';`);
   const draft = await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions`, sd, {
     res_id: 9100, title: 'Audit M2 Draft', text: 'MOTION: probe', action: 'Policy', votes_nullified: 0
   });
@@ -84,14 +87,14 @@ async function main() {
   r.check('vote_records persisted for every voter', recRows.length === 4, recRows);
   r.check('vote rows are stamped with the voter identity',
     recRows.every(x => !!x.user_id && !!x.initials), recRows);
-  r.check('the stored weight is the member\'s own standing, not the client\'s claim',
-    recRows.find(x => x.user_id === 'zk').ws === '1300' &&
-    recRows.find(x => x.user_id === 'mt').ws === '1200' &&
-    recRows.find(x => x.user_id === 'bo').ws === '1150' &&
-    recRows.find(x => x.user_id === 'aj').ws === '1800', recRows);
+  r.check('the stored weights are effective (Ws x share x mandate)',
+    recRows.find(x => x.user_id === 'zk').ws === '325' &&
+    recRows.find(x => x.user_id === 'mt').ws === '300' &&
+    recRows.find(x => x.user_id === 'bo').ws === '288' &&
+    recRows.find(x => x.user_id === 'aj').ws === '450', recRows);
   r.check('the nay weight outweighs the yea weight',
-    recRows.filter(x => x.vote === 'nay').reduce((s, x) => s + Number(x.ws), 0) === 3650 &&
-    recRows.filter(x => x.vote === 'yea').reduce((s, x) => s + Number(x.ws), 0) === 1800, recRows);
+    recRows.filter(x => x.vote === 'nay').reduce((s, x) => s + Number(x.ws), 0) === 913 &&
+    recRows.filter(x => x.vote === 'yea').reduce((s, x) => s + Number(x.ws), 0) === 450, recRows);
 
   // ── 3. one member one vote ────────────────────────────────────────────
   const revote = await req(AUDIT, 'POST', `/cells/${cellId}/vote-records`, zk, {
@@ -100,7 +103,7 @@ async function main() {
   const afterRevote = sqlRows(DB_AUDIT, `SELECT vote,ws,user_id FROM vote_records WHERE cell_id='${cellId}';`);
   r.check('re-voting replaces the previous vote (one member one vote)',
     afterRevote.length === 4 && afterRevote.find(x => x.user_id === 'zk').vote === 'abstain' &&
-    afterRevote.find(x => x.user_id === 'zk').ws === '1300', afterRevote);
+    afterRevote.find(x => x.user_id === 'zk').ws === '325', afterRevote);
 
   // ── 4. aggregates ─────────────────────────────────────────────────────
   const aggVotes = count(DB_AUDIT, 'cell_votes', `cell_id='${cellId}'`);
@@ -119,8 +122,8 @@ async function main() {
     !!(bsCell && bsCell.votes && bsCell.votes.summary && typeof bsCell.votes.summary.yea === 'number'),
     bsCell && bsCell.votes && bsCell.votes.summary);
   r.check('the bootstrap summary reflects the derived weights',
-    bsCell && bsCell.votes && bsCell.votes.summary.yea === 1800 && bsCell.votes.summary.nay === 2350 &&
-    bsCell.votes.summary.abstain === 1300,
+    bsCell && bsCell.votes && bsCell.votes.summary.yea === 450 && bsCell.votes.summary.nay === 588 &&
+    bsCell.votes.summary.abstain === 325,
     bsCell && bsCell.votes && bsCell.votes.summary);
 
   // ── 6. UI layer: does the real vote panel render the cast votes? ──────
@@ -139,7 +142,7 @@ async function main() {
   r.check('crystallisation outcome reflects the cast votes (nay > yea → failed)',
     close.j && close.j.outcome === 'failed', close.j);
   r.check('crystallisation reports the real yea/nay totals',
-    close.j && Number(close.j.yea) === 1800 && Number(close.j.nay) === 2350, close.j);
+    close.j && Number(close.j.yea) === 450 && Number(close.j.nay) === 588, close.j);
   const cellAfter = sqlRows(DB_AUDIT, `SELECT status,resolution FROM cells WHERE id='${cellId}';`)[0];
   r.check('cell becomes crystallised', cellAfter && cellAfter.status === 'crystallised', cellAfter);
   const draftAfter = sqlRows(DB_AUDIT, `SELECT status FROM draft_resolutions WHERE id=${rowId};`)[0];
@@ -147,7 +150,7 @@ async function main() {
     draftAfter && draftAfter.status === 'failed', draftAfter);
   const evt = sqlRows(DB_AUDIT, `SELECT text FROM governance_events WHERE type='cell-crystallisation' ORDER BY date DESC LIMIT 1;`)[0];
   const evtText = (evt && evt.text) || '';
-  r.check('governance event records the vote weights', /yea 1800 Ws \/ nay 2350 Ws/.test(evtText), evtText);
+  r.check('governance event records the vote weights', /yea 450 Ws \/ nay 588 Ws/.test(evtText), evtText);
 
   // A member of no circle is not a steward under the platform's model
   // (the circle roster is the steward body) — see finding F3.
@@ -158,3 +161,5 @@ async function main() {
   process.exit(r.failures.length ? 1 : 0);
 }
 main().catch(e => { console.error('SCRIPT ERROR', e); process.exit(2); });
+
+

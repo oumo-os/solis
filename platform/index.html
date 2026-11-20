@@ -2532,7 +2532,10 @@ function updateVoteSummary() {
       vMap[vr.initials] = vr.vote === 'nay' ? -ws : ws;
     });
     var share = baseShares[vd.name];
-    if (share === undefined || share === null) share = voteDomains.length ? 1 / voteDomains.length : 0;
+    if (share === undefined || share === null) {
+      var declared = (cell && cell.domains) || [];
+      share = declared.length ? 1 / declared.length : 1;
+    }
     domainVotes.push({ name: vd.name, share: share, voters: vMap });
   }
 
@@ -2550,12 +2553,11 @@ function updateVoteSummary() {
   // Effective yea/nay (weighted by domain share × mandate multiplier)
   var effYea = 0, effNay = 0;
   var rawYea = 0, rawNay = 0;
+  // The stored weight is already effective — no multiplier here.
   domainVotes.forEach(function(d) {
     Object.keys(d.voters).forEach(function(v) {
-      var voterId = v.toLowerCase();
-      var mult = getMandateMultiplier(voterId, d.name, participatingCircles);
-      if (d.voters[v] > 0) { effYea += d.voters[v] * d.share * mult; rawYea += d.voters[v]; }
-      else { effNay += Math.abs(d.voters[v]) * d.share * mult; rawNay += Math.abs(d.voters[v]); }
+      if (d.voters[v] > 0) { effYea += d.voters[v]; rawYea += d.voters[v]; }
+      else { effNay += Math.abs(d.voters[v]); rawNay += Math.abs(d.voters[v]); }
     });
   });
   var totalWeight = effYea + effNay + absTotal;
@@ -2661,16 +2663,15 @@ function updateVoteSummary() {
     return { tag: t, color: tagColors[t] || 'tag-purple' };
   }
 
-  // Compute per-voter totals (simple + effective)
+  // Per-voter totals. The stored weight is already effective — do not apply
+  // the share or the multiplier a second time.
   var voterSimple = {}; var voterEffective = {};
   voters.forEach(function(v) { voterSimple[v] = 0; voterEffective[v] = 0; });
   domainVotes.forEach(function(d) {
     Object.keys(d.voters).forEach(function(v) {
-      var voterId = v.toLowerCase();
-      var mult = getMandateMultiplier(voterId, d.name, participatingCircles);
-      var ws = d.voters[v];
-      voterSimple[v] += Math.abs(ws);
-      voterEffective[v] += Math.abs(ws) * d.share * mult;
+      var absVal = Math.abs(d.voters[v]);
+      voterSimple[v] += absVal;
+      voterEffective[v] += absVal;
     });
   });
 
@@ -2861,6 +2862,7 @@ function generateResolution() {
 
     var _action = /settings/.test((_resCell && _resCell.delib_type) || '') ? 'Policy' : 'Resolution';
 
+    var _cfg = drafterSettings();
     var res = {
       id: 1,
       title: _motion,
@@ -2871,11 +2873,11 @@ function generateResolution() {
       votesNullified: false,
       aiDraftMeta: {
         draftCount: 1,
-        maxDrafts: 3,
-        cooldownMs: 300000,
+        maxDrafts: _cfg.maxDrafts,
+        cooldownMs: _cfg.cooldownMs,
         lastDraftTs: now.getTime(),
         confirmations: [],
-        confirmQuorum: Math.ceil(delibParticipants.length / 3)
+        confirmQuorum: _cfg.confirmQuorum
       },
       versions: [{ title: _motion, text: 'Initial draft', action: _action, author: 'AI Drafter', ts: ts }]
     };
@@ -2893,17 +2895,38 @@ function gatherDeliberation() {
   });
 }
 
+function drafterSettings() {
+  var root = (MOCK && MOCK.systemSettings) || {};
+  var d = root.deliberation || {};
+  return {
+    maxDrafts: Number(d.aiMaxRedrafts || root.aiMaxRedrafts) || 3,
+    cooldownMs: (Number(d.aiRedraftCooldown || root.aiRedraftCooldown) || 5) * 60000,
+    confirmQuorum: d.aiConfirmQuorum || root.aiConfirmQuorum || '1/3 participants'
+  };
+}
+
 function canRedraft(res) {
-  var meta = res.aiDraftMeta || { draftCount: 0, maxDrafts: 3, cooldownMs: 300000, lastDraftTs: null };
-  if (meta.draftCount >= meta.maxDrafts) return { ok: false, reason: 'Max redrafts (3) reached' };
+  var cfg = drafterSettings();
+  var meta = res.aiDraftMeta || { draftCount: 0, lastDraftTs: null };
+  if (meta.draftCount >= cfg.maxDrafts) return { ok: false, reason: 'Max redrafts (' + cfg.maxDrafts + ') reached' };
   if (meta.lastDraftTs) {
     var elapsed = Date.now() - meta.lastDraftTs;
-    if (elapsed < meta.cooldownMs) {
-      var mins = Math.ceil((meta.cooldownMs - elapsed) / 60000);
+    if (elapsed < cfg.cooldownMs) {
+      var mins = Math.ceil((cfg.cooldownMs - elapsed) / 60000);
       return { ok: false, reason: 'Cooldown ' + mins + 'm' };
     }
   }
   return { ok: true };
+}
+
+function confirmQuorumNeeded(res) {
+  var mode = String((res && res.aiDraftMeta && res.aiDraftMeta.confirmQuorum) || '');
+  var n = Math.max(1, delibParticipants.length || 4);
+  if (mode === 'majority') return Math.floor(n / 2) + 1;
+  var m = mode.match(/(\d+)\s*\/\s*(\d+)/);
+  if (m) return Math.max(1, Math.round(n * Number(m[1]) / Number(m[2])));
+  var one = mode.match(/(\d+)/);
+  return one ? Math.max(1, Math.min(n, Number(one[1]))) : Math.max(1, Math.ceil(n / 3));
 }
 
 function requestRedraft() {
@@ -2922,10 +2945,13 @@ function requestRedraft() {
   }
 
   meta.confirmations.push(userId);
-  var needed = meta.confirmQuorum;
+  var needed = confirmQuorumNeeded(res);
   var got = meta.confirmations.length;
 
   if (got < needed) {
+    if (typeof SolisApi !== 'undefined' && SolisApi.confirmRedraft && currentDelibCellId) {
+      SolisApi.confirmRedraft(currentDelibCellId, res.id);
+    }
     updateResolutionSlot();
     var badge = document.getElementById('res-redraft-badge');
     if (badge) { badge.textContent = got + '/' + needed; }
@@ -3038,7 +3064,7 @@ function openResolutionModal(idx) {
     redraftBtn.style.pointerEvents = '';
     redraftCount.textContent = (meta.maxDrafts - meta.draftCount) + ' remaining';
     var confCount = meta.confirmations.length;
-    var confNeeded = meta.confirmQuorum;
+    var confNeeded = confirmQuorumNeeded(res);
     redraftBadge.textContent = confCount + '/' + confNeeded;
     redraftBadge.style.background = confCount >= confNeeded ? 'var(--green-soft)' : 'var(--surface)';
     redraftBadge.style.color = confCount >= confNeeded ? 'var(--green)' : 'var(--text-tertiary)';

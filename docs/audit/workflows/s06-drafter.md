@@ -7,7 +7,7 @@ Workflow review of the deliberation cell's drafting flow, against
 Probes: `docs/audit/suite/s06-drafter.mjs` (13 checks, isolated database + a booted
 copy of the SPA).
 
-## Verdict: works; the guards are documented gaps that the server does not enforce
+## Verdict: FIXED � the guards are configured, persisted and enforced
 
 **13/13 checks pass.** The drafting itself behaves as the design describes.
 
@@ -55,19 +55,15 @@ browser's `aiDraftMeta`; `draft_resolutions` stores no confirmation state (the t
 no such column), so a redraft quorum cannot be checked by the server, and a quorum in
 progress is lost on reload.
 
-**Fix direction** — make the server the authority, the way the rest of the governance
-chain now works:
+## Fixes applied (re-probed: 14/14)
 
-- persist the drafter's state (draft count, last draft timestamp, confirmations) with the
-  draft — the resolutions table already carries `votes_nullified`; the same row can carry
-  the draft counter and the confirmations;
-- enforce the cap, the cooldown and the quorum in the version-append route, reading the
-  values from `system_settings.deliberation` (the settings the platform already collects);
-- have the browser read those settings instead of the literals.
-
-The three settings already exist in `system_settings` (`astf/jstf` durations are stored
-there today), so this is a matter of storing and enforcing them rather than inventing a
-new concept.
+The settings now persist on `system_settings` (new `ai_max_redrafts`, `ai_redraft_cooldown`,
+`ai_confirm_quorum`, `vote_nullify_on_edit` columns) and are applied when a settings
+snapshot is approved. The draft row carries `draft_count`, `last_draft_ts` and
+`confirmations` (JSON). `POST /cells/:id/draft-resolutions/:did/confirm` records a
+confirmation; the version-append route enforces the cap, the cooldown and the confirmation
+quorum from the stored settings. The browser reads the same settings through the bootstrap
+and no longer hardcodes the numbers. Re-probed 14/14, with M01/M02/M17 green.
 
 ## Notes
 
@@ -77,3 +73,4 @@ new concept.
   is, but it is not an AI.
 - Vote nullification on save and on redraft behaves as documented: the draft carries
   `votesNullified`, and the panel reflects it.
+

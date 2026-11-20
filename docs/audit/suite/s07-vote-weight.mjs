@@ -44,7 +44,11 @@ async function main() {
 
   const summary = sqlRows(DB_AUDIT, "SELECT summary FROM cell_vote_summary WHERE cell_id='cell-21';")[0];
   const sum = JSON.parse(summary.summary || '{}');
-  r.check('the server stores the raw sums', sum.yea === 900 && sum.nay === 1200, sum);
+  r.check('the server stores the effective sums (450 yea / 100 nay)', sum.yea === 450 && sum.nay === 100, sum);
+  const rows = sqlRows(DB_AUDIT, "SELECT user_id,ws FROM vote_records WHERE cell_id='cell-21';");
+  r.check('each stored weight is Ws x share x mandate multiplier',
+    rows.find(x => x.user_id === 'sd') && Number(rows.find(x => x.user_id === 'sd').ws) === 450 &&
+    rows.find(x => x.user_id === 'mt') && Number(rows.find(x => x.user_id === 'mt').ws) === 100, rows);
 
   // the panel's own arithmetic on the same votes
   const bs = await req(AUDIT, 'GET', '/bootstrap', sd);
@@ -68,12 +72,18 @@ async function main() {
   r.check('the quorum it applies is two thirds of the participating members',
     box('vs-qrm-req') !== undefined && Number(box('vs-qrm-req')) === 6, box('vs-qrm-req'));
 
-  // the server decides anyway
+  // ── 6. the server honours the same quorum ──────────────────────────────
   const close = await req(AUDIT, 'POST', '/cells/cell-21/debate/close', sd);
-  r.check('the server still crystallises the resolution', close.status === 200, close);
-  r.check('the server\'s outcome differs from the panel\'s reading',
-    close.j && close.j.outcome === 'failed' && box('vs-pass-status') === 'pending',
-    { server: close.j, panel: box['vs-pass-status'] && box['vs-pass-status'].textContent });
+  r.check('the server refuses to crystallise below quorum', close.status === 200, close);
+  r.check('the outcome is pending, matching the panel',
+    close.j && close.j.outcome === 'pending' && close.j.voters === 2 && close.j.quorum === 6,
+    { server: close.j, panel: box('vs-pass-status') });
+  const untouched = sqlRows(DB_AUDIT, "SELECT status,resolution FROM cells WHERE id='cell-21';")[0];
+  r.check('a pending result leaves the cell and draft unchanged',
+    untouched && untouched.status !== 'crystallised', untouched);
+  const deferred = sqlRows(DB_AUDIT, "SELECT text FROM governance_events WHERE type='cell-crystallisation-deferred' ORDER BY date DESC LIMIT 1;")[0];
+  r.check('the deferral is recorded in the governance log',
+    deferred && /quorum not met \(2\/6\)/.test(deferred.text || ''), deferred && deferred.text);
 
   r.save();
   process.exit(r.failures.length ? 1 : 0);

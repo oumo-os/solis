@@ -98,8 +98,9 @@ var SolisApi = (function() {
   function syncDrafts(cellId, drafts) {
     return Promise.all(drafts.map(function(d) {
       return req('POST', 'cells/' + cellId + '/draft-resolutions', {
-        res_id: d.id, title: d.title, text: d.text, action: d.action, votes_nullified: !!d.votesNullified
-      }).then(function(created) {
+      res_id: d.id, title: d.title, text: d.text, action: d.action, votes_nullified: !!d.votesNullified,
+      domain_shares: d.domainShares && Object.keys(d.domainShares).length ? JSON.stringify(d.domainShares) : null
+    }).then(function(created) {
         var rowId = created && created.id != null ? created.id : null;
         if (rowId == null) return;
         return Promise.all([
@@ -150,6 +151,11 @@ var SolisApi = (function() {
 
   // Persist a resolution draft: find-or-create the row, PATCH its fields,
   // then append the newest version (and implementing circles).
+  // Redraft confirmations are persisted on the draft.
+  function confirmRedraft(cellId, draftId) {
+    return req('POST', 'cells/' + cellId + '/draft-resolutions/' + draftId + '/confirm');
+  }
+
   function saveDraftVersion(cellId, draft) {
     if (!draft) return Promise.resolve(null);
     return req('GET', 'cells/' + cellId + '/draft-resolutions').then(function(rows) {
@@ -159,12 +165,13 @@ var SolisApi = (function() {
           if (rows[i].res_id != null && String(rows[i].res_id) === String(draft.id)) { row = rows[i]; break; }
         }
       }
-      var patch = {
-        title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null
-      };
+    var patch = {
+      title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null,
+      domain_shares: draft.domainShares && Object.keys(draft.domainShares).length ? JSON.stringify(draft.domainShares) : null
+    };
       var save = row
         ? req('PATCH', 'cells/' + cellId + '/draft-resolutions/' + row.id, patch)
-        : req('POST', 'cells/' + cellId + '/draft-resolutions', { res_id: draft.id, title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null });
+        : req('POST', 'cells/' + cellId + '/draft-resolutions', { res_id: draft.id, title: draft.title, text: draft.text, action: draft.action, votes_nullified: draft.votesNullified ? 1 : 0, supersedes: draft.supersedes || null, domain_shares: draft.domainShares && Object.keys(draft.domainShares).length ? JSON.stringify(draft.domainShares) : null });
       return save.then(function(res) {
         var rowId = row ? row.id : (res && res.id != null ? res.id : null);
         if (rowId == null) return res;
@@ -515,6 +522,7 @@ var SolisApi = (function() {
     updateTask: updateTask,
     deleteTask: deleteTask,
     saveDraftVersion: saveDraftVersion,
+    confirmRedraft: confirmRedraft,
     saveCircle: saveCircle,
     addThread: addThread,
     addCellMessage: addCellMessage,

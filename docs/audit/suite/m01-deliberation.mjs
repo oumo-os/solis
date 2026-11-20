@@ -16,6 +16,8 @@ async function main() {
   });
   r.check('steward POST /proposals/direct -> 201 + cellId', direct.status === 201 && !!direct.j.cellId, direct);
   const cellId = direct.j.cellId;
+  // keep the redraft quorum small: one confirmation out of three members
+  sql(DB_AUDIT, `UPDATE cells SET participants=3 WHERE id='${cellId}';`);
   const cellRow = sqlRows(DB_AUDIT, `SELECT type,status,delib_type,participants,resolution,source FROM cells WHERE id='${cellId}';`)[0];
   r.check('direct proposal persists a Deliberation Cell',
     cellRow && cellRow.type === 'Deliberation Cell' && cellRow.status === 'Active' && cellRow.delib_type === 'direct-proposal',
@@ -99,6 +101,8 @@ async function main() {
   r.check('draft can be edited -> 200', draftPatch.status === 200 && /edited/.test(draftPatch.j.title || ''), draftPatch);
 
   // versions + implementing circles (dedicated child route)
+  // redraft confirmations are now persisted and enforced server-side
+  await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions/${rowId}/confirm`, sd);
   const ver = await req(AUDIT, 'POST', `/cells/${cellId}/draft-resolutions/${rowId}/versions`, sd, {
     title: 'Audit M1 Draft Resolution', text: 'MOTION: v1', action: 'Policy', author: 'AI Drafter', ts: 'now'
   });

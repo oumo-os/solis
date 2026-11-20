@@ -109,6 +109,9 @@ appears anywhere in the rendered DOM.
 | **F18** | Major | M17 | ✅ **fixed** | The deliberation, project-cell and circle-cell composers had no handler — members could read a cell's record but never write to it |
 | **F19** | Minor | M17 | ✅ **fixed** | The circle-cell copy claimed messages were "restricted to circle members" while every steward may speak there |
 | **F7** | Info | M4 | ⏳ open (by design) | A restricted steward target is frozen (`Suspended`) rather than `Restricted` — verified consistent |
+| **F-D** | Major | S6 | **fixed** | Redraft cap, cooldown and confirmation quorum now persist and are enforced by the server |
+| **F-E** | Major | S7 | **fixed** | Crystallisation now honours the two-thirds quorum and returns pending below it |
+| **F-F** | Major | S7 | **fixed** | Effective vote weights are computed once on the server; the panel and the decision read the same numbers |
 
 ## Waves
 
@@ -120,3 +123,4 @@ appears anywhere in the rendered DOM.
 The suites that produced these results are in [`suite/`](suite/) — see
 [`suite/README.md`](suite/README.md) for how to recreate the isolated audit
 environment and re-run them.
+

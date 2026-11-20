@@ -258,7 +258,7 @@ $TABLES = [
         `id` INT AUTO_INCREMENT PRIMARY KEY, `cell_id` VARCHAR(255) NOT NULL,
         `res_id` INT, `title` TEXT, `text` TEXT, `action` TEXT,
         `votes_nullified` INT DEFAULT 0, `status` TEXT DEFAULT 'draft',
-        `supersedes` TEXT DEFAULT NULL,
+        `supersedes` TEXT DEFAULT NULL, `domain_shares` TEXT DEFAULT NULL,
         UNIQUE(`cell_id`, `res_id`)
     )",
 
