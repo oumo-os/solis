@@ -126,8 +126,9 @@ check('no static org settings summary', !html.includes('Amateur and professional
 check('member card filled by currentUser', html.includes("document.getElementById('member-name').textContent = MOCK.currentUser.name;"));
 check('dm-sub derived from MOCK.domains', html.includes("dmSub.textContent = 'Membership constellation across ' + dmK"));
 
-// profile view: static mock block replaced, renderProfileView rebuilds from currentUser
-check('profile view static block removed', html.includes('<div class="view" id="view-profile">') && html.includes('<div class="page-sub">Your competence declarations and standing</div>\n  </div>'));
+// profile: the two views were merged into one user-derived renderer
+check('old profile view shell removed', !html.includes('id="view-profile"') && !html.includes('renderProfileView('));
+check('unified personal view is JS-rendered', /<div class="view active" id="view-personal">\s*<\/div>/.test(html) && html.includes('function renderPersonalView()'));
 check('no static profile name', !html.includes('<h1>Oumo Samuel</h1>'));
 check('no static profile standing', !html.includes('<div class="val">847</div>'));
 check('no static profile decl rows', !html.includes('<td class="m">1,800</td><td class="m">1,200</td>'));

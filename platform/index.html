@@ -53,7 +53,6 @@
       <div class="nav-item" data-v="stf" onclick="nav('stf')"><span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> STF Dash <span class="nav-badge" id="stf-badge" style="display:none"></span></div>
       <div class="nav-item" data-v="participants" onclick="nav('participants')"><span class="nav-icon"><i class="fa-solid fa-users"></i></span> Participants</div>
       <div class="nav-item" data-v="organisations" onclick="nav('organisations')"><span class="nav-icon"><i class="fa-solid fa-building"></i></span> Organisations</div>
-      <div class="nav-item" data-v="profile" onclick="nav('profile')"><span class="nav-icon"><i class="fa-solid fa-id-card"></i></span> Profile</div>
     </div>
     <div class="nav-section" id="nav-settings-section">
       <div class="nav-item" data-v="settings" onclick="openSettingsModal()"><span class="nav-icon"><i class="fa-solid fa-gear"></i></span> Settings <span class="tag tag-gold" style="font-size:7px;padding:1px 5px">Stewards</span></div>
@@ -1041,11 +1040,6 @@
   </div>
 
   <!-- ═══ PROFILE ═══ -->
-  <div class="view" id="view-profile">
-    <div class="page-title">Profile</div>
-    <div class="page-sub">Your competence declarations and standing</div>
-  </div>
-
   <!-- ═══ REGISTRATION ═══ -->
 
   <!-- ═══ PARTICIPANT DETAIL ═══ -->
@@ -2311,7 +2305,6 @@ var views = {
   'stf-pastf':      ['STF Dash', 'p-aSTF — Circle Health'],
   participants:     ['Participants'],
   organisations:    ['Organisations'],
-  profile:          ['Profile'],
   'thread-detail':  ['Discussions', 'Thread'],
   'domain-map':     ['Domain Map'],
   'resolutions':    ['Governance'],
@@ -2328,12 +2321,13 @@ var navMap = {
   circles:'circles', 'circle-detail':'circles',
   cells:'cells', 'cell-undertaking':'cells', 'cell-circle':'cells', 'cell-delib':'cells',
   stf:'stf', 'stf-vstf-steward':'stf', 'stf-vstf-competence':'stf', 'stf-astf-motion':'stf', 'stf-astf-judicial':'stf', 'stf-jstf':'stf', 'stf-xstf':'stf', 'stf-pastf':'stf',
-  participants:'participants', organisations:'organisations', profile:'profile', guides:'guides',
+  participants:'participants', organisations:'organisations', guides:'guides',
   'domain-map':'domain-map'
 };
 
 function nav(key) {
-  if (key === 'registration') { openRegModal(); return; }
+  if (key === 'profile') key = 'personal';   // the unified page owns the profile
+  if (key === 'registration') { openRegModal(MOCK && MOCK.currentUser ? true : false); return; }
   if (!views[key]) return;
   currentNav = key;
   document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active') });
@@ -7272,7 +7266,10 @@ function updateNavBadges() {
   }
   var stfBadge = document.getElementById('stf-badge');
   if (stfBadge) {
-    var inv = ((MOCK && MOCK.stfCandidates) || []).filter(function(c) { return c.status === 'invited'; }).length;
+    var me = (MOCK && MOCK.currentUser) || {};
+    var inv = ((MOCK && MOCK.stfCandidates) || []).filter(function(c) {
+      return c.status === 'invited' && ((c.userId && c.userId === me.id) || (!c.userId && c.initials === me.initials));
+    }).length;
     stfBadge.textContent = inv || '';
     stfBadge.style.display = inv ? '' : 'none';
   }
@@ -8163,6 +8160,33 @@ function regPrefill(){
   if(l) l.value=profile.location||'';
   if(b) b.value=profile.bio||'';
   if(e) e.value=profile.essay||'';
+  // Edit mode: restore the declared competences and interests into step 3,
+  // otherwise regAutofillCompetences() replaces them with empty rows.
+  var compBox=document.getElementById('reg-competences');
+  var intBox=document.getElementById('reg-interests');
+  var doms=Object.keys(profile.domains||{});
+  if(compBox) {
+    compBox.innerHTML='';
+    doms.forEach(function(key) {
+      var d=profile.domains[key]||{};
+      var wh=d.wh!=null?d.wh:(d.ws||0);
+      var row=document.createElement('div');
+      row.className='reg-comp-row has-proof';
+      row.dataset.domain=key;
+      row.innerHTML='<div class="reg-comp-domain">'+escapeHtml(key)+'</div><div class="reg-comp-input"><input type="range" min="0" max="3000" value="'+wh+'" class="reg-slider"> <span class="reg-comp-val">'+Number(wh).toLocaleString()+'</span></div><div class="reg-comp-proof"><input class="form-input" placeholder="Proof (optional)" style="font-size:11px;width:120px" value="'+escapeHtml(d.evidence||'')+'"></div><div><span class="badge b-pending">'+(d.verified?'Verified':'Pending vSTF')+'</span></div>';
+      compBox.appendChild(row);
+    });
+  }
+  if(intBox) {
+    intBox.innerHTML='';
+    doms.slice().sort(function(a,b){return (profile.domains[a].interest||99)-(profile.domains[b].interest||99);}).forEach(function(key,i) {
+      var row=document.createElement('div');
+      row.className='reg-interest-row';
+      row.dataset.domain=key;
+      row.innerHTML='<input type="checkbox" checked> <span>'+escapeHtml(key)+'</span><div class="reg-rank"><span class="reg-rank-num">'+(i+1)+'</span></div>';
+      intBox.appendChild(row);
+    });
+  }
 }
 document.getElementById('reg-modal').addEventListener('click',function(e){
   if(e.target===this) closeRegModal();
@@ -12331,7 +12355,6 @@ function renderAuthSidebar() {
 
   // Update personal view page if visible
   updatePersonalView();
-  renderProfileView();
 }
 
 function renderPersonalView() {
@@ -12340,98 +12363,142 @@ function renderPersonalView() {
   if (!view || !u) return;
   var domainMeta = (MOCK && MOCK.domains) ? MOCK.domains : {};
   var parts = [];
-  parts.push('<div class="page-title">' + (u.name || 'Participant') + '</div>');
-  parts.push('<div class="page-sub">Participant' + (u.location ? ' · ' + u.location : '') + (u.joined ? ' · Member since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>');
+  var nameWords = (u.name || 'Participant').split(/\s+/).filter(Boolean);
+  var initials = nameWords.length >= 2 ? (nameWords[0].charAt(0) + nameWords[1].charAt(0)).toUpperCase() : (u.name || '?').slice(0, 2).toUpperCase();
 
-  var activeCells = ((MOCK && MOCK.cells) || []).filter(function(c) { return c.status === 'Active'; }).length;
-  var openMotions = 0;
-  ((MOCK && MOCK.circles) || []).forEach(function(c) {
-    openMotions += (typeof c.motions === 'number') ? c.motions : ((c.motions || []).length || 0);
-  });
-  if (activeCells + openMotions > 0) {
-    var insight = 'Insight Engine: ' + activeCells + ' active deliberation' + (activeCells !== 1 ? 's' : '') + ' across the commons';
-    if (openMotions) insight += ' · ' + openMotions + ' open motion' + (openMotions !== 1 ? 's' : '') + ' in your circles';
-    parts.push('<div class="insight"><div class="iicon"><i class="fa-solid fa-bolt"></i></div><div class="itext"><strong>Insight Engine:</strong> ' + insight + '.</div></div>');
-  }
-
-  function driftClass(s) {
-    if (!s) return 'mc-flat';
-    if (s.indexOf('+') === 0) return 'mc-up';
-    if (s.indexOf('-') === 0) return 'mc-down';
-    return 'mc-flat';
-  }
-  function driftText(s, fb) { return s ? escapeHtml(s) : (fb || '—'); }
-
-  var standing = u.standing != null ? fmt(u.standing) : '—';
-  var comp = u.competence != null ? fmt(u.competence) : '—';
-  var interest = u.interestScore != null ? fmt(u.interestScore) : '—';
-  var roles = u.activeRoles != null ? fmt(u.activeRoles) : '—';
-  parts.push('<div class="g4">' +
-    '<div class="card metric-card"><div class="mc-label">Total W<sub>s</sub></div><div class="mc-val">' + standing + '</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift ' + driftClass(u.standingDrift) + '">' + driftText(u.standingDrift) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">' + comp + '</div><div class="mc-sub">' + (u.competence != null ? 'Declared + verified' : 'Not yet declared') + '</div><div class="mc-drift ' + driftClass(u.competenceNote) + '">' + driftText(u.competenceNote) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">' + interest + '</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift ' + driftClass(u.interestDrift) + '">' + driftText(u.interestDrift) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">' + roles + '</div><div class="mc-sub">' + escapeHtml(u.rolesBreakdown || 'No active roles') + '</div><div class="mc-drift mc-flat">' + driftText(u.joined ? ('Since ' + u.joined) : null) + '</div></div>' +
-  '</div>');
-
+  // ── header ─────────────────────────────────────────────────────────────
+  var tagColors = ['tag-purple', 'tag-amber', 'tag-green', 'tag-blue'];
   var domainKeys = Object.keys(u.domains || {});
   domainKeys.sort(function(a, b) { return (u.domains[a].interest != null ? u.domains[a].interest : 99) - (u.domains[b].interest != null ? u.domains[b].interest : 99); });
-  var domainRows = '';
-  domainKeys.forEach(function(key) {
+  var tagHtml = domainKeys.length ? domainKeys.map(function(k, i) {
+    return '<span class="tag ' + tagColors[i % tagColors.length] + '">' + escapeHtml((domainMeta[k] || {}).label || k) + '</span>';
+  }).join(' ') : '<span style="font-size:11px;color:var(--text-tertiary)">No domains declared.</span>';
+  parts.push('<div class="page-title">' + (u.name || 'Participant') + '</div>');
+  parts.push('<div class="page-sub">Participant' + (u.location ? ' · ' + u.location : '') + (u.joined ? ' · Member since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>');
+  parts.push('<div class="profile-header">' +
+    '<div class="avatar avatar-gold avatar-xl">' + initials + '</div>' +
+    '<div class="profile-info"><h1>' + escapeHtml(u.name || 'Participant') + '</h1>' +
+    '<div class="meta">' + (u.location || '') + (u.joined ? ' · Participant since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>' +
+    '<div class="flex gap-1">' + tagHtml + '</div></div>' +
+    '<div class="profile-standing"><div class="val">' + (u.standing != null ? fmt(u.standing) : '—') + '</div><div class="lbl">Total Ws</div>' +
+    '<div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">Sum of per-domain Ws</div></div>' +
+  '</div>');
+  parts.push('<div class="profile-bio">' + (u.bio ? escapeHtml(u.bio) : 'No bio yet.') + ' <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>');
+
+  function driftClass(s) { if (!s) return 'mc-flat'; if (s.indexOf('+') === 0) return 'mc-up'; if (s.indexOf('-') === 0) return 'mc-down'; return 'mc-flat'; }
+  function driftText(s, fb) { return s ? escapeHtml(s) : (fb || '—'); }
+  parts.push('<div class="g4">' +
+    '<div class="card metric-card"><div class="mc-label">Total W<sub>s</sub></div><div class="mc-val">' + (u.standing != null ? fmt(u.standing) : '—') + '</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift ' + driftClass(u.standingDrift) + '">' + driftText(u.standingDrift) + '</div></div>' +
+    '<div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">' + (u.competence != null ? fmt(u.competence) : '—') + '</div><div class="mc-sub">' + (u.competence != null ? 'Declared + verified' : 'Not yet declared') + '</div><div class="mc-drift ' + driftClass(u.competenceNote) + '">' + driftText(u.competenceNote) + '</div></div>' +
+    '<div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">' + (u.interestScore != null ? fmt(u.interestScore) : '—') + '</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift ' + driftClass(u.interestDrift) + '">' + driftText(u.interestDrift) + '</div></div>' +
+    '<div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">' + (u.activeRoles != null ? fmt(u.activeRoles) : '—') + '</div><div class="mc-sub">' + escapeHtml(u.rolesBreakdown || 'No active roles') + '</div><div class="mc-drift mc-flat">' + driftText(u.joined ? ('Since ' + u.joined) : null) + '</div></div>' +
+  '</div>');
+
+  // ── notification teaser ────────────────────────────────────────────────
+  var unread = ((MOCK && MOCK.inbox) || []).filter(function(it) { return !!it.unread; });
+  if (unread.length) {
+    var teasers = unread.slice(0, 3).map(function(it) {
+      return '<div class="hrow" style="cursor:pointer" onclick="nav(\'inbox\')"><div class="ai-dot" style="background:var(--blue)"></div><div style="flex:1;font-size:12px">' + escapeHtml(it.title || 'Notification') + '</div><span style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml(it.time || '') + '</span></div>';
+    }).join('');
+    parts.push('<div class="card" style="margin-bottom:20px"><div class="sec flex justify-between items-center"><span>' + unread.length + ' unread notification' + (unread.length === 1 ? '' : 's') + '</span><span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="nav(\'inbox\')">Open inbox →</span></div>' + teasers + '</div>');
+  }
+
+  // ── directed action centres ────────────────────────────────────────────
+  var meId = u.id;
+  var myCircles = ((MOCK && MOCK.circles) || []).filter(function(c) {
+    if (!c || !c.name) return false;
+    var roster = (c.roster && (c.roster.active || [])) || [];
+    return roster.some(function(m) { return m.id === meId; }) || (u.circles || []).some(function(mine) { return (typeof mine === 'string' ? mine : mine.name) === c.name; });
+  });
+  var myStfs = ((MOCK && MOCK.stfCandidates) || []).filter(function(c) {
+    return (c.userId && c.userId === meId) || (!c.userId && c.initials === u.initials);
+  });
+  var myCells = ((MOCK && MOCK.cells) || []).filter(function(c) {
+    return ((c.team || []).some(function(t) { return !!t.self; })) || c.lead === u.name;
+  });
+  var myThreads = ((MOCK && MOCK.threads) || []).filter(function(t) {
+    if (t.authorId && t.authorId === meId) return true;
+    if (t.author === u.name || t.initials === u.initials) return true;
+    return ((t.repliesList || []).some(function(r) { return (r.authorId && r.authorId === meId) || r.initials === u.initials; }));
+  });
+  var engaged = (function() {
+    var ids = {};
+    var me = (MOCK && MOCK.myEngagements) || [];
+    me.forEach(function(e) { if (e.threadId) ids[e.threadId] = true; });
+    return Object.keys(ids);
+  })();
+  engaged.forEach(function(id) {
+    var t = ((MOCK && MOCK.threads) || []).find(function(x) { return x.id === id; });
+    if (t && myThreads.indexOf(t) === -1) myThreads.push(t);
+  });
+
+  function centre(title, rows, empty, count) {
+    return '<div class="card"><div class="sec flex justify-between items-center"><span>' + title + '</span><span class="badge b-active" style="font-size:8px">' + count + '</span></div>' + (rows || '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">' + empty + '</div>') + '</div>';
+  }
+  var circleLinks = myCircles.slice(0, 5).map(function(c) {
+    var ini = (c.name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function(w) { return w.charAt(0); }).join('').toUpperCase();
+    return '<div class="hrow" style="cursor:pointer" onclick="openCircleDetail(\'' + escapeHtml(c.id || '') + '\')"><div class="hav" style="background:var(--purple)">' + ini + '</div><div style="flex:1;font-size:12px">' + escapeHtml(c.name || '') + '</div><span class="badge ' + (c.status === 'Active' ? 'b-active' : 'b-pending') + '" style="font-size:8px">' + escapeHtml(c.status || '') + '</span></div>';
+  }).join('');
+  var stfLinks = myStfs.slice(0, 5).map(function(c) {
+    var key = (typeof stfNavKey === 'function') ? stfNavKey(c.stfId) : 'stf';
+    return '<div class="hrow" style="cursor:pointer" onclick="navStf(\'' + escapeHtml(c.stfId || '') + '\')"><div class="avatar avatar-md" style="background:var(--purple-soft);color:var(--purple);width:28px;height:28px;font-size:10px">◆</div><div style="flex:1;font-size:12px">' + escapeHtml(String(c.stfId || 'assignment').replace(/^stf-/, '')) + '</div><span class="badge ' + (c.status === 'invited' ? 'b-pending' : 'b-active') + '" style="font-size:8px">' + escapeHtml(c.status || '') + '</span></div>';
+  }).join('');
+  var threadLinks = myThreads.slice(0, 5).map(function(t) {
+    return '<div class="hrow" style="cursor:pointer" onclick="openThreadDetail(\'' + escapeHtml(t.id || '') + '\')"><div class="avatar avatar-md" style="background:var(--blue-soft);color:var(--blue);width:28px;height:28px;font-size:10px">#{t.replies || 0}</div><div style="flex:1;font-size:12px">' + escapeHtml(t.title || '') + '</div><span style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml(t.time || '') + '</span></div>';
+  }).join('');
+  var cellLinks = myCells.slice(0, 5).map(function(c) {
+    var onclick = (typeof cellOnclick === 'function') ? cellOnclick(c) : 'nav(\'cells\')';
+    return '<div class="hrow" style="cursor:pointer" onclick="' + onclick + '"><div class="avatar avatar-md" style="background:var(--teal-soft);color:var(--teal);width:28px;height:28px;font-size:10px">▣</div><div style="flex:1;font-size:12px">' + escapeHtml(c.title || '') + '</div><span class="badge b-active" style="font-size:8px">' + escapeHtml(c.status || '') + '</span></div>';
+  }).join('');
+  parts.push('<div class="g2" style="margin-bottom:20px">' +
+    centre('My Circles', circleLinks, 'No circle seats yet.', myCircles.length) +
+    centre('My STFs', stfLinks, 'No STF assignments yet.', myStfs.length) +
+  '</div>');
+  parts.push('<div class="g2" style="margin-bottom:20px">' +
+    centre('My Discussions', threadLinks, 'No discussions yet.', myThreads.length) +
+    centre('My Cells', cellLinks, 'No cells yet.', myCells.length) +
+  '</div>');
+
+  // ── competence declarations / interests ───────────────────────────────
+  var declRows = domainKeys.map(function(key) {
     var d = u.domains[key];
-    var meta = domainMeta[key] || {};
-    var label = meta.label || key;
-    var rankBadge = d.interest != null
-      ? '<span class="badge ' + (d.interest <= 2 ? 'b-active' : 'b-pending') + '" style="font-size:8px;padding:1px 5px">Interest #' + d.interest + '</span>' : '';
-    var whTxt = d.wh != null ? fmt(d.wh) : '—';
-    var wsTxt = d.ws != null ? fmt(d.ws) : '—';
+    var ws = d.ws != null ? fmt(d.ws) : '—';
+    var wh = d.wh != null ? fmt(d.wh) : '—';
+    var status = d.wh != null ? '<span class="badge b-active">Verified</span>' : '<span class="badge b-pending">Pending</span>';
+    return '<tr><td class="s">' + escapeHtml((domainMeta[key] || {}).label || key) + '</td><td class="m">' + (d.interest != null ? '#' + d.interest : '—') + '</td><td class="m">' + ws + '</td><td class="m">' + wh + '</td><td>' + status + '</td></tr>';
+  }).join('');
+  if (!declRows) declRows = '<tr><td colspan="5" style="color:var(--text-tertiary)">No competence declarations yet.</td></tr>';
+  var rankRows = domainKeys.map(function(key, i) {
+    var d = u.domains[key];
+    var w = d.barWh != null ? d.barWh : 10;
+    return '<div class="hrow"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">' + (i + 1) + '</div><div style="flex:1;font-size:13px">' + escapeHtml((domainMeta[key] || {}).label || key) + '</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:' + w + '%"></div></div></div>';
+  }).join('');
+  if (!rankRows) rankRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No interests ranked yet.</div>';
+  parts.push('<div class="g2" style="margin-bottom:20px">' +
+    '<div class="card"><div class="sec flex justify-between items-center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>' +
+      '<table class="tbl"><tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>' + declRows + '</table></div>' +
+    '<div class="card"><div class="sec flex justify-between items-center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>' + rankRows +
+      '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">#1 = 10 pts. Interest drift tracked against activity.</div></div>' +
+  '</div>');
+
+  // ── domain metrics / activity ──────────────────────────────────────────
+  var domainRows = domainKeys.map(function(key) {
+    var d = u.domains[key];
+    var label = (domainMeta[key] || {}).label || key;
     var fill = d.barWs != null ? '<div class="bar-fill" style="width:' + d.barWs + '%"></div><div class="drift-marker" style="left:' + Math.max(0, d.barWs - 4) + '%"></div>' : '<div class="drift-marker" style="left:4%"></div>';
     var interestFill = d.barWh != null ? '<div class="bar-fill-interest" style="width:' + d.barWh + '%"></div>' : '';
     var members = d.members != null ? '<div class="member-count"><span class="dot"></span>' + fmt(d.members) + ' members with competence &amp; interest</div>' : '';
-    domainRows += '<div class="bar-row-multi">' +
-      '<div class="bar-lbl"><span>' + escapeHtml(label) + ' ' + rankBadge + '</span><span class="v">Ws ' + wsTxt + ' · Wh ' + whTxt + '</span></div>' +
-      '<div class="bar-dual"><div class="bar-trk">' + fill + '</div><div class="bar-trk-interest">' + interestFill + '</div></div>' +
-      members + '</div>';
-  });
+    return '<div class="bar-row-multi"><div class="bar-lbl"><span>' + escapeHtml(label) + '</span><span class="v">Ws ' + (d.ws != null ? fmt(d.ws) : '—') + ' · Wh ' + (d.wh != null ? fmt(d.wh) : '—') + '</span></div><div class="bar-dual"><div class="bar-trk">' + fill + '</div><div class="bar-trk-interest">' + interestFill + '</div></div>' + members + '</div>';
+  }).join('');
   if (!domainRows) domainRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No domains declared yet.</div>';
-
-  var circleGrads = [
-    'linear-gradient(135deg,var(--purple),#3a1860)',
-    'linear-gradient(135deg,var(--teal),#0d4040)',
-    'linear-gradient(135deg,var(--amber),#5a3a00)',
-    'linear-gradient(135deg,var(--blue),#1a2a4a)',
-    'linear-gradient(135deg,var(--green),#0d4020)',
-    'linear-gradient(135deg,var(--red),#4a1010)'
-  ];
-  var circleRows = '';
-  (u.circles || []).forEach(function(c, i) {
-    var words = (c.name || '').split(/\s+/).filter(Boolean);
-    var ini = words.length >= 2 ? (words[0].charAt(0) + words[1].charAt(0)).toUpperCase() : (c.name || '?').slice(0, 2).toUpperCase();
-    circleRows += '<div class="hrow">' +
-      '<div class="hav" style="background:' + circleGrads[i % circleGrads.length] + '">' + ini + '</div>' +
-      '<div style="flex:1"><div style="font-size:13px;color:var(--text);font-weight:500">' + escapeHtml(c.name || '—') + '</div><div style="font-size:11px;color:var(--text-tertiary)">' + escapeHtml(c.status || '') + (c.since ? ' · Since ' + c.since : '') + '</div></div>' +
-      '<span class="badge b-active">' + escapeHtml(c.status || 'Active') + '</span></div>';
-  });
-  if (!circleRows) circleRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">Not yet a member of any circle.</div>';
-
   var actColors = { stf: 'var(--purple)', discussion: 'var(--blue)', project: 'var(--teal)', endorsed: 'var(--green)', circle: 'var(--gold)' };
-  var activityRows = '';
-  (u.activity || []).forEach(function(a) {
-    var color = actColors[a.type] || 'var(--green)';
-    activityRows += '<div class="activity-item"><div class="ai-dot" style="background:' + color + '"></div>' + escapeHtml(a.text || '') + '<div class="ai-when">' + escapeHtml(a.time || '') + '</div></div>';
-  });
+  var activityRows = (u.activity || []).map(function(a) {
+    return '<div class="activity-item"><div class="ai-dot" style="background:' + (actColors[a.type] || 'var(--green)') + '"></div>' + escapeHtml(a.text || '') + '<div class="ai-when">' + escapeHtml(a.time || '') + '</div></div>';
+  }).join('');
   if (!activityRows) activityRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No recent activity.</div>';
-
   parts.push('<div class="g2">' +
-    '<div class="card">' +
-      '<div class="sec">Domain Metrics</div>' +
-      '<div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Interest</span><span><span class="lgd-dot" style="background:var(--green);width:6px;height:6px"></span>Activity drift</span></div>' +
-      domainRows +
-      '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Teal bar = Competence (Ws). Gold bar = Interest rank. Green dot = Activity drift. Ordered by interest priority.</div>' +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="sec">Circle Membership</div>' + circleRows +
-      '<div class="sec" style="margin-top:20px">Recent Activity</div>' + activityRows +
-    '</div>' +
+    '<div class="card"><div class="sec">Domain Metrics</div><div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Interest</span><span><span class="lgd-dot" style="background:var(--green);width:6px;height:6px"></span>Drift</span></div>' + domainRows + '</div>' +
+    '<div class="card"><div class="sec">Recent Activity</div>' + activityRows + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Activity influences Ws drift.</div></div>' +
   '</div>');
   view.innerHTML = parts.join('');
 }
@@ -12444,115 +12511,6 @@ function updatePersonalView() {
   } else {
     renderPersonalView();
   }
-}
-
-function renderProfileView() {
-  var view = document.getElementById('view-profile');
-  if (!view) return;
-  var u = (MOCK && MOCK.currentUser) ? MOCK.currentUser : null;
-  if (!u) {
-    view.innerHTML = '<div class="page-title">Profile</div><div class="page-sub">Your competence declarations and standing</div><div class="empty-state" style="padding:40px;text-align:center"><div style="font-size:40px;color:var(--gold);margin-bottom:16px"><i class="fa-solid fa-id-card"></i></div><h2 style="margin:0 0 8px;color:var(--text)">No profile yet</h2><p style="color:var(--text-tertiary);font-size:13px;max-width:400px;margin:0 auto 20px">Sign in to declare your competence and standing.</p><button class="btn btn-primary" onclick="showLogin()">Login</button></div>';
-    return;
-  }
-  var domainMeta = (MOCK && MOCK.domains) ? MOCK.domains : {};
-  var parts = [];
-  parts.push('<div class="page-title">Profile</div>');
-  parts.push('<div class="page-sub">Your competence declarations and standing</div>');
-
-  var nameWords = (u.name || '?').split(/\s+/).filter(Boolean);
-  var initials = nameWords.length >= 2 ? (nameWords[0].charAt(0) + nameWords[1].charAt(0)).toUpperCase() : (u.name || '?').slice(0, 2).toUpperCase();
-  var tagColors = ['tag-purple', 'tag-amber', 'tag-green', 'tag-blue'];
-  var domainKeys = Object.keys(u.domains || {});
-  domainKeys.sort(function(a, b) { return (u.domains[a].interest != null ? u.domains[a].interest : 99) - (u.domains[b].interest != null ? u.domains[b].interest : 99); });
-  var tagHtml = domainKeys.length ? domainKeys.map(function(key, i) {
-    var meta = domainMeta[key] || {};
-    return '<span class="tag ' + tagColors[i % tagColors.length] + '">' + escapeHtml(meta.label || key) + '</span>';
-  }).join(' ') : '<span style="font-size:11px;color:var(--text-tertiary)">No domains declared.</span>';
-  var standing = u.standing != null ? fmt(u.standing) : '—';
-  var pct = u.standing != null ? Math.min(100, Math.round(u.standing / 10)) : 0;
-  parts.push('<div class="profile-header">' +
-    '<div class="avatar avatar-gold avatar-xl">' + initials + '</div>' +
-    '<div class="profile-info"><h1>' + escapeHtml(u.name || 'Participant') + '</h1>' +
-    '<div class="meta">' + (u.location || '') + (u.joined ? ' · Participant since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>' +
-    '<div class="flex gap-1">' + tagHtml + '</div></div>' +
-    '<div class="profile-standing"><div class="val">' + standing + '</div><div class="lbl">Ws</div>' +
-    '<div class="progress mt-4" style="width:120px"><div class="progress-fill" style="width:' + pct + '%"></div></div></div>' +
-  '</div>');
-  parts.push('<div class="profile-bio">' + (u.bio ? escapeHtml(u.bio) : 'No bio yet.') + ' <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>');
-  var circleChips = (u.circles || []).map(function(c) {
-    return '<span class="tag ' + (c.status === 'Active' ? 'tag-green' : 'tag-default') + '">' + escapeHtml(c.name || c) + (c.status && c.status !== 'Active' ? ' · ' + escapeHtml(c.status) : '') + '</span>';
-  }).join(' ');
-  parts.push('<div style="margin:0 0 20px;font-size:12px;color:var(--text-secondary)">' + (circleChips || '<span style="color:var(--text-tertiary)">No circle seats.</span>') + (u.rolesBreakdown ? ' <span style="color:var(--text-tertiary)">· ' + escapeHtml(u.rolesBreakdown) + '</span>' : '') + '</div>');
-
-  var declRows = '';
-  domainKeys.forEach(function(key) {
-    var d = u.domains[key];
-    var label = (domainMeta[key] || {}).label || key;
-    var ws = d.ws != null ? fmt(d.ws) : '—';
-    var wh = d.wh != null ? fmt(d.wh) : '—';
-    var status = d.wh != null ? '<span class="badge b-active">Verified</span>' : '<span class="badge b-pending">Pending</span>';
-    declRows += '<tr><td class="s">' + escapeHtml(label) + '</td><td class="m">' + (d.interest != null ? '#' + d.interest : '—') + '</td><td class="m">' + ws + '</td><td class="m">' + wh + '</td><td>' + status + '</td></tr>';
-  });
-  if (!declRows) declRows = '<tr><td colspan="5" style="color:var(--text-tertiary)">No competence declarations yet.</td></tr>';
-
-  var rankRows = '';
-  domainKeys.forEach(function(key, i) {
-    var d = u.domains[key];
-    var label = (domainMeta[key] || {}).label || key;
-    var w = d.barWh != null ? d.barWh : 10;
-    rankRows += '<div class="hrow" style="cursor:grab"><div style="font-family:var(--mono);font-size:11px;color:var(--text-tertiary);width:20px">' + (i + 1) + '</div><div style="flex:1;font-size:13px;color:var(--text);font-weight:500">' + escapeHtml(label) + '</div><div class="bar-trk-interest" style="width:60px"><div class="bar-fill-interest" style="width:' + w + '%"></div></div></div>';
-  });
-  if (!rankRows) rankRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No interests ranked yet.</div>';
-
-  var domainRows = '';
-  domainKeys.forEach(function(key) {
-    var d = u.domains[key];
-    var meta = domainMeta[key] || {};
-    var label = meta.label || key;
-    var whTxt = d.wh != null ? fmt(d.wh) : '—';
-    var wsTxt = d.ws != null ? fmt(d.ws) : '—';
-    var fill = d.barWs != null ? '<div class="bar-fill" style="width:' + d.barWs + '%"></div><div class="drift-marker" style="left:' + Math.max(0, d.barWs - 4) + '%"></div>' : '<div class="drift-marker" style="left:4%"></div>';
-    var interestFill = d.barWh != null ? '<div class="bar-fill-interest" style="width:' + d.barWh + '%"></div>' : '';
-    var members = d.members != null ? '<div class="member-count"><span class="dot"></span>' + fmt(d.members) + ' members with competence &amp; interest</div>' : '';
-    domainRows += '<div class="bar-row-multi">' +
-      '<div class="bar-lbl"><span>' + escapeHtml(label) + '</span><span class="v">Ws ' + wsTxt + ' · Wh ' + whTxt + '</span></div>' +
-      '<div class="bar-dual"><div class="bar-trk">' + fill + '</div><div class="bar-trk-interest">' + interestFill + '</div></div>' +
-      members + '</div>';
-  });
-  if (!domainRows) domainRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No domains declared yet.</div>';
-
-  var actColors = { stf: 'var(--purple)', discussion: 'var(--blue)', project: 'var(--teal)', endorsed: 'var(--green)', circle: 'var(--gold)' };
-  var activityRows = '';
-  (u.activity || []).forEach(function(a) {
-    var color = actColors[a.type] || 'var(--green)';
-    activityRows += '<div class="activity-item"><div class="ai-dot" style="background:' + color + '"></div>' + escapeHtml(a.text || '') + '<div class="ai-when">' + escapeHtml(a.time || '') + '</div></div>';
-  });
-  if (!activityRows) activityRows = '<div style="font-size:11px;color:var(--text-tertiary);padding:8px 0">No recent activity.</div>';
-
-  parts.push('<div class="g2" style="margin-bottom:20px">' +
-    '<div class="card">' +
-      '<div class="sec flex justify-between items-center">Competence Declarations <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>' +
-      '<table class="tbl"><tr><th>Domain</th><th>Interest</th><th>Ws</th><th>Wh</th><th>Status</th></tr>' + declRows + '</table>' +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="sec flex justify-between items-center">Interest Ranking <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true);setTimeout(function(){regNext(3)},100)">✎ Edit</span></div>' +
-      '<div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Your declared interests, ordered by priority. Drag to reorder.</div>' +
-      rankRows +
-      '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">#1 = 10 pts, #' + Math.max(domainKeys.length, 1) + ' = 4 pts. Interest drift tracked against activity.</div>' +
-    '</div>' +
-  '</div>');
-  parts.push('<div class="g2">' +
-    '<div class="card">' +
-      '<div class="sec">Domain Metrics</div>' +
-      '<div class="bar-lgd"><span><span class="lgd-dot" style="background:var(--teal)"></span>Competence</span><span><span class="lgd-line"></span>Interest</span><span><span class="lgd-dot" style="background:var(--green);width:6px;height:6px"></span>Drift</span></div>' +
-      domainRows +
-    '</div>' +
-    '<div class="card">' +
-      '<div class="sec">Tracked Activity</div>' + activityRows +
-      '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Activity influences Ws drift. Interest drift = gap between declared interest and actual engagement.</div>' +
-    '</div>' +
-  '</div>');
-  view.innerHTML = parts.join('');
 }
 
 function emptyMock() {

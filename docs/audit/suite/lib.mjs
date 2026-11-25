@@ -235,5 +235,10 @@ export function bootApp(token, base = AUDIT) {
     try { vm.runInContext(code, sandbox, { filename: 'spa-inline-' + i + '.js' }); }
     catch (e) { errs.push('script ' + i + ': ' + e.message); }
   });
+  // The real escapeHtml writes to a real DOM node and reads innerHTML; the stub
+  // does not mirror those, so use a plain escaping function in the harness.
+  sandbox.escapeHtml = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  sandbox.esc = sandbox.escapeHtml;
   return { sandbox, els, errs, spa };
 }

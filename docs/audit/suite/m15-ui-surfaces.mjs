@@ -156,7 +156,7 @@ async function main() {
     ['cells-grid', 'the cells grid'],
     ['stf-body', 'the STF table'],
     ['resolutions-list', 'the governance tab'],
-    ['view-profile', 'the profile'],
+    ['view-personal', 'the unified personal/profile view'],
     ['inbox-list', 'the inbox'],
     ['td-title', 'the thread detail title'],
     ['pub-title', 'the publication detail title'],
