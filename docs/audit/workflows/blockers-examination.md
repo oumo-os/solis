@@ -1,5 +1,10 @@
 # The three governance blockers — examination
 
+> **RESOLVED (2026-11-25).** F-D, F-E and F-F were all fixed and re-probed. See
+> [`s06-drafter.md`](s06-drafter.md) (14/14), [`s07-vote-weight.md`](s07-vote-weight.md)
+> (15/15) and the authoritative status register in `../../to_prod.md`. The examination
+> below is kept as the pre-fix evidence and rationale.
+
 An evidence-backed examination of F-D, F-E and F-F before deciding on fixes. All three
 are the same shape: **a governance decision is computed in the browser, while the server
 records a different one**.

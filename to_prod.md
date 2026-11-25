@@ -1,40 +1,117 @@
-# Solis Platform — From Current State to Production Ready
+# Solis — Execution Tracker
 
-**Last updated:** 24 July 2026
+This is the single status document for the project. The phase-by-phase roadmap that used
+to introduce this file is retained below as a **dated design appendix** (written
+2026-07-24); it describes intent, not current state. The register here is authoritative.
+
+## Current state (2026-11-25)
+
+- **Platform**: a no-build SPA at `platform/index.html` (~12.6k lines) served with the PHP API
+  at `platform/api.php` and MySQL (`solis`); auth/tokens, persistence, bootstrap payload and
+  all governance workflows are live. Public site: root HTML files.
+- **Verification**: 27 audit/section suites in `docs/audit/suite/` (18 module checks M0–M17
+  plus section probes S1–S13), all green; b4/b5/static checks green; live page and API 200.
+- **Audit**: 13 sections walked, 19+ findings found; all functional divergences fixed. See
+  `docs/audit/README.md` (finding index) and `docs/audit/workflows/` (per-section cards).
+- **Personal area**: one unified profile page (`view-personal`) with four directed action
+  centres (circles, STFs, discussions, cells) and an unread-inbox teaser. `#profile` is an
+  alias; `authorId` is now in the bootstrap for threads and replies.
+- **Next intended work**: improve the inbox (per-user data, empty states, unified renderer),
+  then CI and the remaining roadmap items below.
+
+## Status register
+
+Legend: **✅ done / verified** · **⏳ open** · **ℹ️ by design / documented limit**.
+Severity: **B** blocker · **M** major · **m** minor · **i** info.
+
+### Functional findings (audit)
+
+| ID | Sev | Status | Item | Next action | Source |
+|---|---|---|---|---|---|
+| F1 | B | ✅ | Vote aggregates were never written; crystallisation always "passed" | — | `docs/audit/wave-1-governance-chain.md` |
+| F2 | B | ✅ | Invalid `ON DUPLICATE KEY UPDATE 1=1` broke implementing circles and endorse/bookmark | — | same |
+| F3 | M | ℹ️ | Steward gate = any circle member (confirmed model); participation is domain-separated | none | `docs/audit/wave-6-participation.md` |
+| F4 | m | ✅ | Child-item GET answered 405 | — | `docs/audit/README.md` |
+| F5 | m | ✅ | `GET /bootstrap` ran the integrity engine; now explicit `POST /engine/poll` | — | same |
+| F6 | m | ✅ | Dead shadowed vote route and static verify-wh endpoint | — | same |
+| F7 | i | ℹ️ | A restricted steward target is `Suspended` (frozen), not `Restricted` | none | `docs/audit/wave-2-3-circles-and-content.md` |
+| F8 | B | ✅ | New circle could never be staffed; founder now seated | — | same |
+| F9 | M | ✅ | `circle.members` drifted from the roster | — | same |
+| F10 | M | ✅ | Publication submission skipped `assertActiveMember` | — | same |
+| F11 | m | ✅ | Project applications client-authoritative + hardcoded date | — | same |
+| F12 | B | ✅ | Any member could rewrite any member's record | — | `docs/audit/wave-4-5-account-and-security.md` |
+| F13 | m | ✅ | Org member counts client-writable; now derived from affiliations | — | same |
+| F14 | m | ✅ | Same-name registration 500s | — | same |
+| F15 | B | ✅ | Three unauthenticated write paths | — | same |
+| F16 | B | ✅ | Generic CRUD had no ownership/role gate | — | same |
+| F17 | m | ✅ | Seeded `stats` fixture published; now derived from live tables | — | same |
+| F-A | M | ✅ | Circle founding applied twice (browser + server) | — | `docs/audit/workflows/s04-circles-organisations.md` |
+| F-B | M | ✅ | Organisation founding never reached the server | — | same |
+| F-C | M | ✅ | Organisation settings lost on reload | — | same |
+| F-D | M | ✅ | Redraft cap/cooldown/quorum browser-only; now persisted and enforced | — | `docs/audit/workflows/s06-drafter.md` |
+| F-E | M | ✅ | Crystallisation ignored the quorum | — | `docs/audit/workflows/s07-vote-weight.md` |
+| F-F | M | ✅ | Panel effective weights vs server raw Ws | — | same |
+| F18 | M | ✅ | Cell composers were decorative; now post through the SPA | — | `docs/audit/wave-6-participation.md` |
+| F19 | m | ✅ | Circle-cell copy contradicted the model | — | same |
+
+### Untracked work found during the audit
+
+| ID | Sev | Status | Item | Next action | Source |
+|---|---|---|---|---|---|
+| U1 | B | ⏳ | `stfs.circle` overloaded — judicial rows store target names | Decide canonical field and migrate | `.opencode/plans/user-id-migration.md` §B F1 |
+| U2 | B | ⏳ | `cells.commissioned_by` overloaded (id vs display name) | Same | §B F2 |
+| U3 | B | ⏳ | Manual `spawn-pastf` does not dedupe against an open review | Add guard | §B F3 |
+| U4 | M | ⏳ | STF pools not circle-scoped (optional) | Product decision | §B F4 |
+| U5 | M | ⏳ | Circle-name validation/normalisation missing | Add normalisation | §B F5 |
+| U6 | m | ⏳ | `stf-astf-debris` broken legacy id and hardcoded UI map | Clean up | §B F6 |
+| U7 | M | ⏳ | `backfillStfCandidateIds()` for NULL vSTF candidate ids | Implement + run | §A tail |
+| U8 | M | ⏳ | `ensureStfCandidateId()` helper | Implement | §A tail |
+| U9 | M | ⏳ | Seed DDL/backfill for `stfs` candidate columns and `circle_applications.user_id` | Implement | §A tail |
+| U10 | M | ⏳ | Backfill on reseed | Wire into seeder | §A tail |
+
+### Roadmap items still open (from the dated appendix)
+
+| ID | Sev | Status | Item | Next action | Source |
+|---|---|---|---|---|---|
+| R0 | M | ⏳ | Phase 0 items 0.1–0.3/0.5 not marked done in the roadmap (code appears fixed) | Reconcile and close | `to_prod.md` Phase 0 |
+| R1 | M | ⏳ | Magic-link login flow | Implement or drop | Phase 1.2 |
+| R2 | M | ⏳ | Password reset flow | Implement or drop | Phase 1.2 |
+| R3 | m | ⏳ | "Approved → opens xSTF" still marked 🔄 (audit M5 verified it works) | Mark done | Phase 2.7 |
+| R4 | M | ⏳ | "Publish to Observatory if approved" marked 🔄 — unconfirmed | Verify and close | Phase 2.8 |
+| R5 | M | ⏳ | Responsive improvements (Phase 5.2), animation additions (5.4) | Scope and implement | Phase 5 |
+| R6 | B | ⏳ | Unit + integration + accessibility + performance testing (Phase 6) | Only integration audits exist today | Phase 6 |
+| R7 | B | ⏳ | Hosting, domain/SSL, CI/CD, monitoring, backup (Phase 7) | Plan infrastructure | Phase 7 |
+| R8 | M | ⏳ | Content seeding, founding stewards, documentation, soft/public launch (Phase 8) | Product planning | Phase 8 |
+| R9 | i | ⏳ | Seven open questions (backend choice, domain count, file storage, email, legal terms, initial jSTF moderation, pre-circle domains) | Decide | `to_prod.md` Open Questions |
+
+### Known limits and backlogs
+
+| ID | Sev | Status | Item | Next action | Source |
+|---|---|---|---|---|---|
+| K1 | M | ⏳ | Judicial deferred limits: no AI verdict drafting, audit-refresh reseats directly, stalled audits have no expiry transition | Decide product intent | `docs_v2/judicial-loop.md` §Deferred |
+| K2 | m | ⏳ | Visual backlog: 7 still-open + 4 new findings + original 5 items | Prioritise UX pass | `docs_v2/ui-audit-visual.md` §6–7 |
+| K3 | i | ℹ️ | `POST /engine/poll` `acted` excludes ripple C (health reviews) | Leave; documented | `docs/audit/workflows/s10-s11-engine-and-health.md` |
+| K4 | i | ℹ️ | Seed occupies every engine ripple; engine inert on a fresh install | Leave; documented | same |
+| K5 | M | ⏳ | Inbox is not per-user (no `user_id` column, no API filter, two renderers, no empty state in one) | **Next work item** | S2 workflow + `platform/api.php` |
+| K6 | m | ⏳ | Logged-out composer author falls back to literal `"Member"` | Guard or accept | `docs/audit/workflows/s03-s05-commons-cells.md` |
+| K7 | m | ⏳ | `updateNavBadges()` refreshes only at init and after inbox selection | Refresh after mutations/nav | `platform/index.html` |
+| K8 | i | ℹ️ | Five "known-static" areas declared intentional in the hardcoded audit | No owner/disposition needed | `documents/11-hardcoded-audit.md` |
+
+### Documentation consistency
+
+| ID | Status | Item | Next action |
+|---|---|---|---|
+| D1 | ✅ | `blockers-examination.md` describes F-D/E/F as open | Mark resolved with a pointer to this register |
+| D2 | ✅ | `docs/audit/README.md` summary vs F7 status inconsistency | Aligned |
+| D3 | ✅ | This file's stale preamble | Replaced by this register; appendix dated |
 
 ---
 
-## Current State
+## Dated design appendix — original roadmap (2026-07-24)
 
-The platform is a plain HTML/CSS/JS single-page application with no build step, no backend, and no data persistence. It is a comprehensive UI shell with all major views, routing, modals, and static mock data. The architecture is intentionally lightweight — Solis runs on simple hosting, with no framework dependencies.
-
-**What exists:**
-- Full SPA routing with hash-based navigation
-- 30+ views covering all platform sections
-- Registration flow (3-step), profile editing
-- Circle home, deliberation cells, STF views (vSTF, aSTF, p-aSTF, jSTF, xSTF)
-- Resolution modal with version history, voting, and vote breakdown
-- Members modal with active/former stewards, departure reasons, competence bars
-- Domain map (SVG constellation)
-- Observatory (news, calendar, library, publications)
-- Settings modal with 4 tabs (Circle, STF, Quorum, Deliberation)
-- System settings with mandate domains (primary/secondary) and desired competence values
-- Circle health (p-aSTF results), competence map, domain activity bars
-- Design system: tokens, typography (Inter, Playfair, IBM Plex), component library
-
-**What does not exist:**
-- Backend / API / database
-- Authentication
-- Data persistence
-- Real-time updates
-- Production build process
-- Testing of any kind
-- Accessibility compliance
-- Error handling or loading states
-- Browser history integration
-- Mobile-optimised touch interactions beyond basic
-
----
+The remainder of this file is the original phase-by-phase plan. It was written when the
+platform was a UI shell with no backend; items marked ✅ therein were true at the time of
+writing. **The status register above is authoritative for what is done today.**
 
 ## Phase 0: Critical Fixes (Week 1)
 
