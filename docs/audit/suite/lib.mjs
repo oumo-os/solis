@@ -240,5 +240,15 @@ export function bootApp(token, base = AUDIT) {
   sandbox.escapeHtml = s => String(s == null ? '' : s)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   sandbox.esc = sandbox.escapeHtml;
+  // Some renderers use these as globals; pin them so later assignments in the
+  // SPA cannot replace them with non-functions under the stub DOM.
+  const pinned = {
+    setText: (id, v) => { if (!els.has(id)) els.set(id, makeEl(id)); const el = els.get(id); if (el) el.textContent = String(v); },
+    setHtml: (id, v) => { const el = els.get(id); if (el) el.innerHTML = String(v); },
+    fmt: n => String(n)
+  };
+  Object.keys(pinned).forEach(k => {
+    Object.defineProperty(sandbox, k, { value: pinned[k], writable: false, configurable: false });
+  });
   return { sandbox, els, errs, spa };
 }

@@ -488,7 +488,11 @@ if ($cleanPath === '/bootstrap' && $method === 'GET') {
     $threads = array_values(array_filter($threads, function($t) use ($currentRow) { return jstfCanSeeThread($currentRow, $t); }));
     $actByInbox = groupBy(dbAll('SELECT * FROM inbox_actions'), 'inbox_id');
     $metaByInbox = groupBy(dbAll('SELECT * FROM inbox_meta'), 'inbox_id');
-    $inbox = array_map(function($i) use ($actByInbox, $metaByInbox) { return ['id' => $i['id'], 'type' => $i['type'], 'title' => $i['title'], 'desc' => $i['desc'], 'time' => $i['time'], 'badge' => $i['badge'], 'unread' => (bool)$i['unread'], 'detail' => $i['detail'], 'nav' => $i['nav'], 'actions' => array_map(function($a) { return ['label' => $a['label'], 'style' => $a['style'], 'action' => $a['action']]; }, $actByInbox[$i['id']] ?? []), 'meta' => array_map(function($m) { return ['label' => $m['label'], 'value' => $m['value']]; }, $metaByInbox[$i['id']] ?? [])]; }, dbAll('SELECT * FROM inbox'));
+    // Inbox items are personal: anonymous callers get none, signed-in members
+    // only their own. `detail` is stored JSON-encoded by the seeder; decode it
+    // once so the UI never shows the quoted form.
+    $inboxRows = $cuid ? dbAll('SELECT * FROM inbox WHERE user_id = ?', [$cuid]) : [];
+    $inbox = array_map(function($i) use ($actByInbox, $metaByInbox) { return ['id' => $i['id'], 'type' => $i['type'], 'title' => $i['title'], 'desc' => $i['desc'], 'time' => $i['time'], 'badge' => $i['badge'], 'unread' => (bool)$i['unread'], 'detail' => pJson($i['detail'] ?? null) ?? $i['detail'], 'nav' => $i['nav'], 'userId' => $i['user_id'] ?? null, 'actions' => array_map(function($a) { return ['label' => $a['label'], 'style' => $a['style'], 'action' => $a['action']]; }, $actByInbox[$i['id']] ?? []), 'meta' => array_map(function($m) { return ['label' => $m['label'], 'value' => $m['value']]; }, $metaByInbox[$i['id']] ?? [])]; }, $inboxRows);
     $authorByPub = groupBy(dbAll('SELECT * FROM publication_authors'), 'publication_id');
     $publications = array_map(function($p) use ($authorByPub) { return ['id' => $p['id'], 'title' => $p['title'], 'journal' => $p['journal'], 'date' => $p['date'], 'views' => $p['views'], 'downloads' => $p['downloads'], 'type' => $p['type'], 'abstract' => $p['abstract'], 'tags' => pJson($p['tags'] ?? null) ?: [], 'authors' => array_values(array_map(function($a) { return $a['author']; }, $authorByPub[$p['id']] ?? []))]; }, dbAll('SELECT * FROM publications'));
     $news = array_map(function($n) { return ['title' => $n['title'], 'time' => $n['time'], 'source' => $n['source']]; }, dbAll('SELECT * FROM news'));
@@ -719,8 +723,8 @@ function resourceWriteGuard($table, $method, $id, $user, $body = null) {
         if ($method !== 'PATCH' && $method !== 'PUT') send(403, ['error' => 'Inbox items are delivered by the platform']);
         if ($id !== null) {
             $own = dbGet('SELECT * FROM inbox WHERE id = ?', [$id]);
-            if ($own && isset($own['user_id']) && (string)$own['user_id'] !== (string)$user['id'])
-                send(403, ['error' => 'Not your inbox item']);
+            if (!$own || (string)($own['user_id'] ?? '') !== (string)$user['id'])
+                send(404, ['error' => 'Not found']);
         }
     }
     if ($table === 'organisations' && $body !== null && is_object($body)) {
@@ -880,6 +884,8 @@ $childDefs = [
     ['child' => 'stf_candidates', 'parentKey' => 'stf_id', 'path' => '/stfs/:id/candidates'],
     ['child' => 'thread_replies', 'parentKey' => 'thread_id', 'path' => '/threads/:id/replies'],
     ['child' => 'circle_application_domains', 'parentKey' => 'app_id', 'path' => '/circle-applications/:id/domains'],
+    ['child' => 'inbox_actions', 'parentKey' => 'inbox_id', 'path' => '/inbox/:id/actions'],
+    ['child' => 'inbox_meta', 'parentKey' => 'inbox_id', 'path' => '/inbox/:id/meta'],
 ];
 $handled = false;
 foreach ($childDefs as $d) {
@@ -888,6 +894,11 @@ foreach ($childDefs as $d) {
     $childIdRe = '#^' . $pattern . '/([^/]+)$#';
     if (preg_match($re, $cleanPath, $m) || preg_match($childIdRe, $cleanPath, $cm)) {
         $parentId = urldecode($cm ? $cm[1] : $m[1]);
+        if (in_array($d['child'], ['inbox_actions', 'inbox_meta'], true)) {
+            $cu = authUser(); if (!$cu) send(401, ['error' => 'Unauthorized']);
+            $own = dbGet('SELECT user_id FROM inbox WHERE id = ?', [$parentId]);
+            if (!$own || (string)($own['user_id'] ?? '') !== (string)$cu['id']) send(404, ['error' => 'Not found']);
+        }
         if ($method === 'GET' && $d['child'] === 'thread_replies') { $tvRow = dbGet('SELECT * FROM threads WHERE id = ?', [$parentId]); if ($tvRow && ($tvRow['visibility'] ?: 'public') === 'stewards-only') { $rvUser = authUser(); if (!jstfCanSeeThread($rvUser, $tvRow)) send(404, ['error' => 'Not found']); } }
         if ($method === 'GET') {
             if (in_array($d['child'], ['cell_team','cell_messages','vote_records','cell_votes','draft_resolutions','cell_objectives','cell_tasks','stf_candidates'])) {
@@ -941,7 +952,7 @@ foreach ($childDefs as $d) {
                     if ($p0 === 'target' || $p0 === 'submitter') $skipAssert = true;
                 }
             }
-            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks','circle_roster','circle_domains','circle_activity','cell_domains','cell_circles','draft_resolutions','stf_candidates','circle_application_domains'])) assertActiveMember($wuser);
+            if (!$skipAssert && in_array($d['child'], ['thread_replies','vote_records','cell_votes','circle_proposals','cell_messages','circle_resolutions','cell_objectives','cell_team','cell_tasks','circle_roster','circle_domains','circle_activity','cell_domains','cell_circles','draft_resolutions','stf_candidates','circle_application_domains','inbox_actions','inbox_meta'])) assertActiveMember($wuser);
             // Archived circles take no writes at all: every circle child
             // (roster, domains, proposals, resolutions, activity) stops at
             // archive. (Departures and the archive sweep run through

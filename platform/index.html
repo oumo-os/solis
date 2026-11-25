@@ -7264,6 +7264,9 @@ function updateNavBadges() {
     inboxBadge.textContent = unread || '';
     inboxBadge.style.display = unread ? '' : 'none';
   }
+  // The personal page's notification teaser is the same unread set — refresh
+  // it whenever the badge is refreshed (reads, nav, filter and init).
+  if (typeof updateInboxTeaser === 'function') updateInboxTeaser();
   var stfBadge = document.getElementById('stf-badge');
   if (stfBadge) {
     var me = (MOCK && MOCK.currentUser) || {};
@@ -7956,8 +7959,7 @@ function initApp() {
 
   var participantsGrid = document.getElementById('participants-grid');
   if (participantsGrid) participantsGrid.innerHTML = renderParticipantCards();
-  var inboxList = document.getElementById('inbox-list');
-  if (inboxList) inboxList.innerHTML = renderInboxItems();
+  renderInboxList('all');
   var threadsFeed = document.getElementById('threads-feed');
   if (threadsFeed) renderCommonsFeed();
   document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f) { f.classList.toggle('active', f.getAttribute('data-filter') === _commonsFilter); });
@@ -10311,13 +10313,18 @@ function renderInboxList(filter) {
 
   var el = document.getElementById('inbox-list');
   if (!el) return;
+  if (!items.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:24px;text-align:center"><div style="font-size:12px;color:var(--text-tertiary)">No notifications here yet.</div></div>';
+    return;
+  }
+  function jsStr(v) { return String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
   el.innerHTML = items.map(function(item) {
     var icon = typeIcons[item.type] || '<i class="fa-solid fa-circle"></i>';
     var color = typeColors[item.type] || 'var(--text-secondary)';
     var badge = badgeClasses[item.badge] || 'b-review';
     var unread = item.unread ? ' unread' : '';
     var selected = _inboxSelected === item.id ? ' selected' : '';
-    return '<div class="inbox-item' + unread + selected + '" onclick="selectInboxItem(\'' + item.id + '\')">'
+    return '<div class="inbox-item' + unread + selected + '" onclick="selectInboxItem(\'' + jsStr(item.id) + '\')">'
       + '<div class="inbox-item-icon" style="color:' + color + '">' + icon + '</div>'
       + '<div class="ibody">'
       + '<div class="ititle">' + esc(item.title) + '</div>'
@@ -10380,8 +10387,12 @@ function selectInboxItem(itemId) {
   if (item.actions && item.actions.length) {
     html += '<div class="inbox-action">';
     item.actions.forEach(function(a) {
-      var onclick = a.action === 'nav' ? 'nav(\'' + item.nav + '\')' : 'handleInboxAction(\'' + item.id + '\',\'' + a.action + '\')';
-      html += '<button class="btn ' + a.style + '" onclick="' + onclick + '">' + esc(a.label) + '</button>';
+      // Keep action/nav strings inside JS string literals; escape quotes and
+      // backslashes so a stored value cannot break the inline handler.
+      function jsStr(v) { return String(v == null ? '' : v).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+      var onclick = a.action === 'nav' ? 'nav(\'' + jsStr(item.nav) + '\')' : 'handleInboxAction(\'' + jsStr(item.id) + '\',\'' + jsStr(a.action) + '\')';
+      var style = ['btn', 'btn-primary', 'btn-secondary', 'btn-danger', 'btn-ghost'].indexOf(a.style) !== -1 ? a.style : 'btn-secondary';
+      html += '<button class="btn ' + style + '" onclick="' + onclick + '">' + esc(a.label) + '</button>';
     });
     html += '</div>';
   }
@@ -11674,6 +11685,8 @@ function renderCircleCell(cellId) {
   var cell = cellsById[cellId];
   if (!cell) return;
   currentCircleCellId = cellId;
+  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
+  var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };
   if (typeof circleCellReadable === 'function' && !circleCellReadable(cell)) {
     setText('circlecell-title', cell.title || 'Circle Cell');
     setHtml('circlecell-proposals', '<div class="card" style="text-align:center;padding:24px"><div style="font-size:12px;color:var(--text-tertiary)">Restricted to circle members. Join the circle to read its cell.</div></div>');
@@ -11684,9 +11697,6 @@ function renderCircleCell(cellId) {
     return;
   }
   var circle = findCircleByCell(cell);
-  var setText = function(id, t) { var el = document.getElementById(id); if (el) el.textContent = t; };
-  var setHtml = function(id, h) { var el = document.getElementById(id); if (el) el.innerHTML = h; };
-
   setText('circlecell-title', cell.title || 'Circle Cell');
   var ini = (circle && circle.name) ? circle.name.split(/\s+/).map(function(w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase() : 'SL';
   setText('circlecell-hero-icon', ini);
@@ -12199,7 +12209,13 @@ var _origNav=nav;
   } else {
     renderStfViews();
   }
-  if(key==='inbox'){_inboxSelected=null;_inboxFilter='all';renderInboxList('all');}
+  if(key==='inbox'){
+    _inboxSelected=null;_inboxFilter='all';
+    var detail=document.getElementById('inbox-detail');
+    if(detail) detail.innerHTML='<div style="padding:40px;text-align:center;color:var(--text-tertiary);font-size:12px">Select a message to view details.</div>';
+    renderInboxList('all');
+    updateNavBadges();
+  }
   if(key==='guides'&&typeof renderGuides==='function'){renderGuides();}
   if(key==='commons'){renderCommonsFeed();document.querySelectorAll('#view-commons .feed-filters .feed-filter').forEach(function(f){f.classList.toggle('active',f.getAttribute('data-filter')===_commonsFilter);});}
  };
@@ -12380,28 +12396,13 @@ function renderPersonalView() {
     '<div class="profile-info"><h1>' + escapeHtml(u.name || 'Participant') + '</h1>' +
     '<div class="meta">' + (u.location || '') + (u.joined ? ' · Participant since ' + u.joined : '') + (u.status ? ' · ' + u.status : '') + '</div>' +
     '<div class="flex gap-1">' + tagHtml + '</div></div>' +
-    '<div class="profile-standing"><div class="val">' + (u.standing != null ? fmt(u.standing) : '—') + '</div><div class="lbl">Total Ws</div>' +
-    '<div style="font-size:10px;color:var(--text-tertiary);margin-top:6px">Sum of per-domain Ws</div></div>' +
   '</div>');
   parts.push('<div class="profile-bio">' + (u.bio ? escapeHtml(u.bio) : 'No bio yet.') + ' <span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="openRegModal(true)">Edit</span></div>');
+  // Notification teaser — refreshed in place by updateInboxTeaser() after reads.
+  parts.push('<div id="inbox-teaser"></div>');
 
-  function driftClass(s) { if (!s) return 'mc-flat'; if (s.indexOf('+') === 0) return 'mc-up'; if (s.indexOf('-') === 0) return 'mc-down'; return 'mc-flat'; }
-  function driftText(s, fb) { return s ? escapeHtml(s) : (fb || '—'); }
-  parts.push('<div class="g4">' +
-    '<div class="card metric-card"><div class="mc-label">Total W<sub>s</sub></div><div class="mc-val">' + (u.standing != null ? fmt(u.standing) : '—') + '</div><div class="mc-sub">Sum of W<sub>s</sub> across domains</div><div class="mc-drift ' + driftClass(u.standingDrift) + '">' + driftText(u.standingDrift) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Competence W<sub>h</sub></div><div class="mc-val">' + (u.competence != null ? fmt(u.competence) : '—') + '</div><div class="mc-sub">' + (u.competence != null ? 'Declared + verified' : 'Not yet declared') + '</div><div class="mc-drift ' + driftClass(u.competenceNote) + '">' + driftText(u.competenceNote) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Interest Score</div><div class="mc-val">' + (u.interestScore != null ? fmt(u.interestScore) : '—') + '</div><div class="mc-sub">Ranked priority total</div><div class="mc-drift ' + driftClass(u.interestDrift) + '">' + driftText(u.interestDrift) + '</div></div>' +
-    '<div class="card metric-card"><div class="mc-label">Active Roles</div><div class="mc-val">' + (u.activeRoles != null ? fmt(u.activeRoles) : '—') + '</div><div class="mc-sub">' + escapeHtml(u.rolesBreakdown || 'No active roles') + '</div><div class="mc-drift mc-flat">' + driftText(u.joined ? ('Since ' + u.joined) : null) + '</div></div>' +
-  '</div>');
 
-  // ── notification teaser ────────────────────────────────────────────────
-  var unread = ((MOCK && MOCK.inbox) || []).filter(function(it) { return !!it.unread; });
-  if (unread.length) {
-    var teasers = unread.slice(0, 3).map(function(it) {
-      return '<div class="hrow" style="cursor:pointer" onclick="nav(\'inbox\')"><div class="ai-dot" style="background:var(--blue)"></div><div style="flex:1;font-size:12px">' + escapeHtml(it.title || 'Notification') + '</div><span style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml(it.time || '') + '</span></div>';
-    }).join('');
-    parts.push('<div class="card" style="margin-bottom:20px"><div class="sec flex justify-between items-center"><span>' + unread.length + ' unread notification' + (unread.length === 1 ? '' : 's') + '</span><span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="nav(\'inbox\')">Open inbox →</span></div>' + teasers + '</div>');
-  }
+
 
   // ── directed action centres ────────────────────────────────────────────
   var meId = u.id;
@@ -12501,6 +12502,18 @@ function renderPersonalView() {
     '<div class="card"><div class="sec">Recent Activity</div>' + activityRows + '<div style="font-size:10px;color:var(--text-tertiary);margin-top:10px">Activity influences Ws drift.</div></div>' +
   '</div>');
   view.innerHTML = parts.join('');
+  updateInboxTeaser();
+}
+
+function updateInboxTeaser() {
+  var box = document.getElementById('inbox-teaser');
+  if (!box) return;
+  var unread = ((MOCK && MOCK.inbox) || []).filter(function(i) { return !!i.unread; });
+  if (!unread.length) { box.innerHTML = ''; return; }
+  var rows = unread.slice(0, 3).map(function(i) {
+    return '<div class="hrow" style="cursor:pointer" onclick="nav(\'inbox\')"><div class="ai-dot" style="background:var(--blue)"></div><div style="flex:1;font-size:12px">' + escapeHtml(i.title || 'Notification') + '</div><span style="font-size:10px;color:var(--text-tertiary)">' + escapeHtml(i.time || '') + '</span></div>';
+  }).join('');
+  box.innerHTML = '<div class="card" style="margin-bottom:20px"><div class="sec flex justify-between items-center"><span>' + unread.length + ' unread notification' + (unread.length === 1 ? '' : 's') + '</span><span style="color:var(--gold);cursor:pointer;font-size:11px" onclick="nav(\'inbox\')">Open inbox →</span></div>' + rows + '</div>';
 }
 
 function updatePersonalView() {

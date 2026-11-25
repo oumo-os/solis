@@ -1,10 +1,12 @@
 // S02 — the unified Personal/Profile page with directed action centres.
-import { AUDIT, DB_AUDIT, req, login, Report, bootApp } from './lib.mjs';
+import { AUDIT, DB_AUDIT, req, login, sql, Report, bootApp } from './lib.mjs';
 
 const r = new Report('s02-unified-profile');
 
 async function main() {
-  const tok = await login(AUDIT, 'sd@solis.local');
+  const tok = await login(AUDIT, 'os@solis.local');
+  // the live seed has all items read; make a couple unread for the teaser
+  sql(DB_AUDIT, "UPDATE inbox SET unread=1 WHERE user_id='os' AND id IN ('ib-1','ib-2');");
   const bs = await req(AUDIT, 'GET', '/bootstrap', tok);
   const { sandbox, els, errs } = bootApp(tok, AUDIT);
   await new Promise(res => setTimeout(res, 900));
@@ -16,6 +18,7 @@ async function main() {
   r.check('the app boots without errors', errs.length === 0, errs.slice(0, 3));
   r.check('the unified view is rendered', html.length > 1000, html.length);
   r.check('the old profile view is gone', !els.has('view-profile'), [...els.keys()].filter(k => k.includes('profile')));
+  r.check('no aggregate Ws/Wh metric cards', !/metric-card|profile-standing|Total W<sub>s<\/sub>|Competence W<sub>h<\/sub>/.test(html), 'aggregate card found');
   r.check('the single header shows the member', html.includes(me.name), me.name);
   r.check('there is no meaningless standing progress bar', !/progress-fill[^>]*width:\d+%/.test(html), 'bar found');
   r.check('no duplicated static Profile title', (html.match(/Your competence declarations and standing/g) || []).length === 0);
@@ -35,9 +38,10 @@ async function main() {
 
   // teaser
   const unread = (bs.j.inbox || []).filter(i => i.unread);
+  const teaserHtml = (els.get('inbox-teaser') && els.get('inbox-teaser').innerHTML) || '';
   if (unread.length) {
-    r.check('the inbox teaser shows the unread count', html.includes(String(unread.length) + ' unread notification'), unread.length);
-    r.check('the teaser links to the inbox', html.includes('Open inbox'), 'link missing');
+    r.check('the inbox teaser shows the unread count', teaserHtml.includes(String(unread.length) + ' unread notification'), teaserHtml.slice(0, 120));
+    r.check('the teaser links to the inbox', teaserHtml.includes('Open inbox'), 'link missing');
   } else {
     r.note('no unread items in the seed — teaser not rendered (expected empty state)');
   }

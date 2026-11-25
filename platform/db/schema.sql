@@ -468,10 +468,12 @@ CREATE TABLE IF NOT EXISTS inbox (
   desc   TEXT,
   time   TEXT,
   badge  TEXT,
-  unread INTEGER DEFAULT 1,
-  detail TEXT,
-  nav    TEXT
-);
+    unread INTEGER DEFAULT 1,
+    detail TEXT,
+    nav    TEXT,
+    user_id TEXT,
+    KEY (user_id)
+  );
 
 CREATE TABLE IF NOT EXISTS inbox_actions (
   id       INTEGER PRIMARY KEY AUTOINCREMENT,

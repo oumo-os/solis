@@ -89,19 +89,6 @@ function renderSTFRows() {
   }).join('');
 }
 
-function renderInboxItems() {
-  if (!MOCK) return '';
-  var items = MOCK.inbox || [];
-  return items.map(function(item) {
-    return '<div class="inbox-item">'
-      + '<div class="inbox-icon">' + (item.type === 'vSTF' ? '◆' : item.type === 'aSTF' ? '◆' : item.type === 'Deliberation' ? '◎' : item.type === 'xSTF' ? '◆' : item.type === 'Cell' ? '⬡' : '✓') + '</div>'
-      + '<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--text)">' + item.title + '</div>'
-      + '<div style="font-size:10px;color:var(--text-tertiary)">' + item.desc + '</div></div>'
-      + '<div style="text-align:right;flex-shrink:0"><div class="badge ' + (item.badge === 'Invitation' ? 'b-pending' : item.badge === 'Active' ? 'b-active' : 'b-review') + '" style="font-size:7px">' + item.badge + '</div>'
-      + '<div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">' + item.time + '</div></div></div>';
-  }).join('');
-}
-
 function renderDiscussionThreads(list, emptyMsg) {
   if (!MOCK) return '';
   var items = list || MOCK.threads || [];

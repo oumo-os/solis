@@ -342,8 +342,9 @@ $TABLES = [
 
     "CREATE TABLE IF NOT EXISTS `inbox` (
         `id` VARCHAR(255) PRIMARY KEY, `type` TEXT, `title` TEXT, `desc` TEXT,
-        `time` TEXT, `badge` TEXT, `unread` INT DEFAULT 1, `detail` TEXT, `nav` TEXT
-    )",
+          `time` TEXT, `badge` TEXT, `unread` INT DEFAULT 1, `detail` TEXT, `nav` TEXT,
+          `user_id` VARCHAR(255), KEY `user_id` (`user_id`)
+      )",
 
     "CREATE TABLE IF NOT EXISTS `inbox_actions` (
         `id` INT AUTO_INCREMENT PRIMARY KEY, `inbox_id` VARCHAR(255) NOT NULL,
@@ -933,9 +934,10 @@ $inboxRows = array_map(fn($i) => [
     'id' => $i['id'], 'type' => $i['type'] ?? null, 'title' => $i['title'] ?? null,
     'desc' => $i['desc'] ?? null, 'time' => $i['time'] ?? null, 'badge' => $i['badge'] ?? null,
     'unread' => ($i['unread'] ?? true) ? 1 : 0, 'detail' => j($i['detail'] ?? null),
-    'nav' => $i['nav'] ?? null,
-], $inbox);
-upsert($db, 'inbox', $inboxRows, ['id','type','title','desc','time','badge','unread','detail','nav']);
+     'nav' => $i['nav'] ?? null,
+     'user_id' => $i['userId'] ?? ($i['user_id'] ?? 'os'),
+ ], $inbox);
+upsert($db, 'inbox', $inboxRows, ['id','type','title','desc','time','badge','unread','detail','nav','user_id']);
 
 // Inbox actions / meta
 $iaRows = []; $imRows = [];
